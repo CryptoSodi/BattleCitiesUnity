@@ -1,0 +1,12 @@
+{
+  "name": "Tracked Upgrade Tank",
+  "role": "Player progression slot 2 (simulation tier 1)",
+  "source": "Authored procedurally in Blender using build_tracked_upgrade.py and the shared build_image_tank.py geometry pipeline",
+  "references": ["codex-clipboard-7b61d0f1-5ecd-46a9-8ca8-962860f7cfc9.png", "codex-clipboard-73467b7a-edaf-4d2c-bb36-f0c47fff3edc.png", "codex-clipboard-b8e488a1-d578-431a-b5bb-056e254ed87e.png"],
+  "artDirection": "Golden yellow riveted armor, charcoal tracked chassis, long single cannon with ventilated muzzle, twin ammunition drums, ivory chevrons and amber beacons",
+  "frame": "3D, top-down gameplay and angled camera; width normalized to one Unity unit, local +Z forward; runtime scale 0.86",
+  "animation": ["TurretPivot", "BarrelPivot", "WheelLeft/Right rotors", "TreadAdvance blendshape"],
+  "collision": "Uses existing simulation tank bounds; no new mesh colliders",
+  "outputs": ["tank.blend", "tank.glb", "renders/three-quarter.png", "renders/overhead.png"],
+  "provenance": "User-provided reference images; new procedural geometry with existing project-owned tank construction helpers. No external model downloaded."
+}

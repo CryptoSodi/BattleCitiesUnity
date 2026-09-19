@@ -1,0 +1,1 @@
+The current dynamically lit eagle states are in ../eagle-pbr/. The scatter variant has been removed. See ../eagle-pbr/README.md. Older photo GLBs in this folder are historical unlit comparisons, not the current game assets.

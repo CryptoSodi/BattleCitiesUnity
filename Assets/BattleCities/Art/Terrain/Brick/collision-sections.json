@@ -1,0 +1,454 @@
+{
+  "schema": 1,
+  "cellSize": 1,
+  "height": 0.7909496307373046,
+  "tankHeight": 0.6877822875976562,
+  "heightRatio": 1.15,
+  "upAxis": "Y",
+  "origin": "horizontal center at ground",
+  "sectionSize": 0.25,
+  "playerCollisionWidth": 0.68,
+  "breachWidth": 0.75,
+  "sections": [
+    {
+      "id": "section_0_0",
+      "column": 0,
+      "row": 0,
+      "center": [
+        -0.375,
+        0.3954748153686523,
+        0.375
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_001",
+        "Brick_002",
+        "Brick_003"
+      ],
+      "mortar": [
+        "Mortar_0_0_0",
+        "Mortar_0_0_1"
+      ]
+    },
+    {
+      "id": "section_1_0",
+      "column": 1,
+      "row": 0,
+      "center": [
+        -0.125,
+        0.3954748153686523,
+        0.375
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_004",
+        "Brick_005",
+        "Brick_006"
+      ],
+      "mortar": [
+        "Mortar_1_0_0",
+        "Mortar_1_0_1"
+      ]
+    },
+    {
+      "id": "section_2_0",
+      "column": 2,
+      "row": 0,
+      "center": [
+        0.125,
+        0.3954748153686523,
+        0.375
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_007",
+        "Brick_008",
+        "Brick_009"
+      ],
+      "mortar": [
+        "Mortar_2_0_0",
+        "Mortar_2_0_1"
+      ]
+    },
+    {
+      "id": "section_3_0",
+      "column": 3,
+      "row": 0,
+      "center": [
+        0.375,
+        0.3954748153686523,
+        0.375
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_010",
+        "Brick_011",
+        "Brick_012"
+      ],
+      "mortar": [
+        "Mortar_3_0_0",
+        "Mortar_3_0_1"
+      ]
+    },
+    {
+      "id": "section_0_1",
+      "column": 0,
+      "row": 1,
+      "center": [
+        -0.375,
+        0.3954748153686523,
+        0.125
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_013",
+        "Brick_014",
+        "Brick_015"
+      ],
+      "mortar": [
+        "Mortar_0_1_0",
+        "Mortar_0_1_1"
+      ]
+    },
+    {
+      "id": "section_1_1",
+      "column": 1,
+      "row": 1,
+      "center": [
+        -0.125,
+        0.3954748153686523,
+        0.125
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_016",
+        "Brick_017",
+        "Brick_018"
+      ],
+      "mortar": [
+        "Mortar_1_1_0",
+        "Mortar_1_1_1"
+      ]
+    },
+    {
+      "id": "section_2_1",
+      "column": 2,
+      "row": 1,
+      "center": [
+        0.125,
+        0.3954748153686523,
+        0.125
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_019",
+        "Brick_020",
+        "Brick_021"
+      ],
+      "mortar": [
+        "Mortar_2_1_0",
+        "Mortar_2_1_1"
+      ]
+    },
+    {
+      "id": "section_3_1",
+      "column": 3,
+      "row": 1,
+      "center": [
+        0.375,
+        0.3954748153686523,
+        0.125
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_022",
+        "Brick_023",
+        "Brick_024"
+      ],
+      "mortar": [
+        "Mortar_3_1_0",
+        "Mortar_3_1_1"
+      ]
+    },
+    {
+      "id": "section_0_2",
+      "column": 0,
+      "row": 2,
+      "center": [
+        -0.375,
+        0.3954748153686523,
+        -0.125
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_025",
+        "Brick_026",
+        "Brick_027"
+      ],
+      "mortar": [
+        "Mortar_0_2_0",
+        "Mortar_0_2_1"
+      ]
+    },
+    {
+      "id": "section_1_2",
+      "column": 1,
+      "row": 2,
+      "center": [
+        -0.125,
+        0.3954748153686523,
+        -0.125
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_028",
+        "Brick_029",
+        "Brick_030"
+      ],
+      "mortar": [
+        "Mortar_1_2_0",
+        "Mortar_1_2_1"
+      ]
+    },
+    {
+      "id": "section_2_2",
+      "column": 2,
+      "row": 2,
+      "center": [
+        0.125,
+        0.3954748153686523,
+        -0.125
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_031",
+        "Brick_032",
+        "Brick_033"
+      ],
+      "mortar": [
+        "Mortar_2_2_0",
+        "Mortar_2_2_1"
+      ]
+    },
+    {
+      "id": "section_3_2",
+      "column": 3,
+      "row": 2,
+      "center": [
+        0.375,
+        0.3954748153686523,
+        -0.125
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_034",
+        "Brick_035",
+        "Brick_036"
+      ],
+      "mortar": [
+        "Mortar_3_2_0",
+        "Mortar_3_2_1"
+      ]
+    },
+    {
+      "id": "section_0_3",
+      "column": 0,
+      "row": 3,
+      "center": [
+        -0.375,
+        0.3954748153686523,
+        -0.375
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_037",
+        "Brick_038",
+        "Brick_039"
+      ],
+      "mortar": [
+        "Mortar_0_3_0",
+        "Mortar_0_3_1"
+      ]
+    },
+    {
+      "id": "section_1_3",
+      "column": 1,
+      "row": 3,
+      "center": [
+        -0.125,
+        0.3954748153686523,
+        -0.375
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_040",
+        "Brick_041",
+        "Brick_042"
+      ],
+      "mortar": [
+        "Mortar_1_3_0",
+        "Mortar_1_3_1"
+      ]
+    },
+    {
+      "id": "section_2_3",
+      "column": 2,
+      "row": 3,
+      "center": [
+        0.125,
+        0.3954748153686523,
+        -0.375
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_043",
+        "Brick_044",
+        "Brick_045"
+      ],
+      "mortar": [
+        "Mortar_2_3_0",
+        "Mortar_2_3_1"
+      ]
+    },
+    {
+      "id": "section_3_3",
+      "column": 3,
+      "row": 3,
+      "center": [
+        0.375,
+        0.3954748153686523,
+        -0.375
+      ],
+      "size": [
+        0.25,
+        0.7909496307373046,
+        0.25
+      ],
+      "bricks": [
+        "Brick_046",
+        "Brick_047",
+        "Brick_048"
+      ],
+      "mortar": [
+        "Mortar_3_3_0",
+        "Mortar_3_3_1"
+      ]
+    }
+  ],
+  "states": {
+    "intact": [],
+    "damaged": [
+      "section_0_0",
+      "section_0_1"
+    ],
+    "breached": [
+      "section_0_0",
+      "section_0_1",
+      "section_0_2",
+      "section_0_3",
+      "section_1_0",
+      "section_1_1",
+      "section_1_2",
+      "section_1_3",
+      "section_2_0",
+      "section_2_1",
+      "section_2_2",
+      "section_2_3"
+    ],
+    "destroyed": [
+      "section_0_0",
+      "section_1_0",
+      "section_2_0",
+      "section_3_0",
+      "section_0_1",
+      "section_1_1",
+      "section_2_1",
+      "section_3_1",
+      "section_0_2",
+      "section_1_2",
+      "section_2_2",
+      "section_3_2",
+      "section_0_3",
+      "section_1_3",
+      "section_2_3",
+      "section_3_3"
+    ]
+  },
+  "debris": [
+    "Debris_Whole",
+    "Debris_Half",
+    "Debris_Fragment_A",
+    "Debris_Fragment_B",
+    "Debris_Fragment_C"
+  ],
+  "debrisCollision": false,
+  "triangles": 3232,
+  "uniqueGeometries": 13,
+  "materials": [
+    "Terracotta",
+    "Terracotta_Light",
+    "Terracotta_Dark",
+    "Mortar",
+    "Fracture"
+  ]
+}

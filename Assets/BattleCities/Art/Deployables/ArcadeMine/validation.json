@@ -1,0 +1,28 @@
+{
+  "mine.glb": {
+    "triangles": 10984,
+    "bytes": 575912,
+    "materials": 8,
+    "animations": [
+      "Blink",
+      "Press"
+    ],
+    "errors": 0,
+    "warnings": 0
+  },
+  "ground-patch.glb": {
+    "triangles": 2964,
+    "bytes": 254832,
+    "materials": 3,
+    "animations": [],
+    "errors": 0,
+    "warnings": 0
+  },
+  "preview": {
+    "errors": [],
+    "clips": [
+      "Blink",
+      "Press"
+    ]
+  }
+}
