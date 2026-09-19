@@ -163,16 +163,16 @@ namespace BattleCities
         {
             var sim=Sim(view);Check(sim.UseSecondary(),"proximity placement");
             var gun=sim.Turrets.Single();var player=sim.Player;
-            player.X=gun.X+150;
+            player.X=gun.X+80;
             Step(sim,600);Check(gun.Phase==TurretPhase.Stowed,"stationary player in radius keeps stowed");
-            player.X=gun.X+210;Step(sim,240);Check(gun.Active,"deploy after leaving radius");
-            player.X=gun.X+190;Step(sim,1);Check(gun.Phase==TurretPhase.Retracting,"entry retracts without movement input");
+            player.X=gun.X+120;Step(sim,240);Check(gun.Active,"deploy after leaving radius");
+            player.X=gun.X+96;Step(sim,1);Check(gun.Phase==TurretPhase.Retracting,"entry retracts without movement input");
             Step(sim,600);Check(gun.Phase==TurretPhase.Stowed&&gun.FireSequence==0,"no repeated deployment near player");
-            player.X=gun.X+196;Step(sim,300);Check(gun.Phase==TurretPhase.Stowed,"boundary exit margin prevents cycling");
-            player.X=gun.X+210;Step(sim,50);Check(gun.Phase==TurretPhase.Deploying,"deployment starts outside margin");
-            player.X=gun.X+150;Step(sim,1);Check(!gun.Active&&gun.Phase!=TurretPhase.Deploying,"entry interrupts deployment");
+            player.X=gun.X+100;Step(sim,300);Check(gun.Phase==TurretPhase.Stowed,"boundary exit margin prevents cycling");
+            player.X=gun.X+120;Step(sim,50);Check(gun.Phase==TurretPhase.Deploying,"deployment starts outside margin");
+            player.X=gun.X+80;Step(sim,1);Check(!gun.Active&&gun.Phase!=TurretPhase.Deploying,"entry interrupts deployment");
             Step(sim,600);Check(gun.Phase==TurretPhase.Stowed,"interrupted deployment remains stowed");
-            player.X=gun.X+210;Step(sim,240);Check(gun.Active,"redeploy after player leaves again");
+            player.X=gun.X+120;Step(sim,240);Check(gun.Active,"redeploy after player leaves again");
         }
         static void Step(BattleSimulation sim,int ticks){for(int i=0;i<ticks;i++)sim.Step(default);}
         static Transform Find(GameObject root,string name)=>root.GetComponentsInChildren<Transform>(true).First(t=>t.name==name);

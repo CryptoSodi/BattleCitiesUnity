@@ -14,7 +14,7 @@ namespace BattleCities.Core
     [Serializable] public sealed class Point { public float x, y; }
     [Serializable] public sealed class BaseData { public float x, y; }
     public enum Facing { Up, Right, Down, Left }
-    public enum SecondaryAttack { None, Mine, PatrolDrone, GroundTurret }
+    public enum SecondaryAttack { None, Mine, PatrolDrone, GroundTurret, LandDrone }
     public sealed class DroneState
     {
         public int Id, TargetId;
@@ -87,7 +87,7 @@ namespace BattleCities.Core
         public Facing Direction;
         public Box Bounds => Direction == Facing.Up || Direction == Facing.Down ? new Box(X-6,Y-8,12,16) : new Box(X-8,Y-6,16,12);
     }
-    public sealed class BattleSimulation
+    public sealed partial class BattleSimulation
     {
         public const float StepSeconds = 1f / 60f;
         public readonly List<Wall> Terrain = new List<Wall>();
@@ -105,8 +105,8 @@ namespace BattleCities.Core
         public event Action<TurretState> TurretFired;
         public event Action<TurretState> TurretHit;
         public event Action<TurretState> TurretDestroyed;
-        public int SecondaryCount => EquippedSecondary==SecondaryAttack.PatrolDrone?Drones.Count:EquippedSecondary==SecondaryAttack.GroundTurret?Turrets.Count:Mines.Count;
-        public int SecondaryLimit => EquippedSecondary==SecondaryAttack.PatrolDrone?MaximumDrones:EquippedSecondary==SecondaryAttack.GroundTurret?MaximumTurrets:MaximumMines;
+        public int SecondaryCount => EquippedSecondary==SecondaryAttack.LandDrone?LandDrones.Count(d=>d.Alive):EquippedSecondary==SecondaryAttack.PatrolDrone?Drones.Count:EquippedSecondary==SecondaryAttack.GroundTurret?Turrets.Count:Mines.Count;
+        public int SecondaryLimit => EquippedSecondary==SecondaryAttack.LandDrone?1:EquippedSecondary==SecondaryAttack.PatrolDrone?MaximumDrones:EquippedSecondary==SecondaryAttack.GroundTurret?MaximumTurrets:MaximumMines;
         public const float MineArmSeconds = .8f, SecondaryCooldownSeconds = 2f;
         public const int MaximumMines = 5;
         public SecondaryAttack EquippedSecondary = SecondaryAttack.Mine;
@@ -237,6 +237,7 @@ namespace BattleCities.Core
             UpdateMines(dt);
             UpdateTurrets(dt);
             UpdateDrones(dt);
+            UpdateLandDrones(dt);
             foreach(var shot in Shots.ToArray()) if(shot.Alive) MoveShot(shot);
             Shots.RemoveAll(s=>!s.Alive); Tanks.RemoveAll(t=>!t.Alive); Turrets.RemoveAll(t=>!t.Alive);
             if(spawned==wave.Length&&!Tanks.Any(t=>!t.Player&&t.Alive)) Won=true;
@@ -245,6 +246,7 @@ namespace BattleCities.Core
         {
             if(!CanUseSecondary)return false;
             var player=Player;
+            if(EquippedSecondary==SecondaryAttack.LandDrone)return PlaceLandDrone(player);
             if(EquippedSecondary==SecondaryAttack.GroundTurret)
             {
                 var turret=new TurretState{X=player.X,Y=player.Y,Health=turretHealth,Damage=turretDamage};
@@ -297,8 +299,9 @@ namespace BattleCities.Core
                 // A small exit margin prevents toggling at the radius boundary.
                 float playerDistance=player!=null&&player.Alive
                     ?DistanceSquared(player.X,player.Y,turret.X,turret.Y):float.MaxValue;
-                bool playerNearby=playerDistance<=turretAttackRange*turretAttackRange;
-                float releaseRadius=turretAttackRange+8;
+                const float playerSafetyRadius=1.5f*64;
+                bool playerNearby=playerDistance<=playerSafetyRadius*playerSafetyRadius;
+                float releaseRadius=playerSafetyRadius+8;
                 if((turret.Phase==TurretPhase.Deployed||turret.Phase==TurretPhase.Deploying)&&playerNearby)
                 {
                     float retractTime=turret.Phase==TurretPhase.Deploying
@@ -440,6 +443,7 @@ namespace BattleCities.Core
             if(b.X<0||b.Y<0||b.Right>Width||b.Bottom>Height||b.Overlaps(BaseBounds))return false;
             foreach(var wall in Terrain) if(wall.Alive&&wall.Solid&&b.Overlaps(wall.Bounds))return false;
             if(Turrets.Any(t=>t.BlocksPath&&b.Overlaps(t.BlockingBounds)))return false;
+            if(self.Player&&LandDrones.Any(d=>d.Alive&&b.Overlaps(d.Bounds)))return false;
             return !Tanks.Any(t=>t!=self&&t.Alive&&b.Overlaps(t.MovementBounds));
         }
         private static float OverlapArea(Box a,Box b)
@@ -456,6 +460,7 @@ namespace BattleCities.Core
             foreach(var wall in Terrain)if(wall.Alive&&wall.Solid)area+=OverlapArea(b,wall.Bounds);
             foreach(var turret in Turrets)if(turret.BlocksPath)area+=OverlapArea(b,turret.BlockingBounds);
             foreach(var tank in Tanks)if(tank!=self&&tank.Alive)area+=OverlapArea(b,tank.MovementBounds);
+            if(self.Player)foreach(var drone in LandDrones)if(drone.Alive)area+=OverlapArea(b,drone.Bounds);
             return area;
         }
         public bool CanTankOccupy(TankState tank,float x,float y) => Free(TankState.MovementBox(x,y),tank);
@@ -549,6 +554,13 @@ namespace BattleCities.Core
                 if(BaseAlive&&box.Overlaps(BaseBounds)){BaseAlive=false;Lost=true;s.Alive=false;ShotImpact?.Invoke(s);BaseDestroyed?.Invoke();break;}
                 var other=Shots.Find(b=>b!=s&&b.Alive&&b.Player!=s.Player&&box.Overlaps(b.Bounds));
                 if(other!=null){s.Alive=false;other.Alive=false;ShotImpact?.Invoke(s);break;}
+                var landDrone=LandDrones.Find(d=>d.Alive&&!s.Player&&box.Overlaps(d.Bounds));
+                if(landDrone!=null)
+                {
+                    s.Alive=false;ShotImpact?.Invoke(s);landDrone.Health-=Math.Max(1,s.Damage);
+                    if(landDrone.Health<=0){landDrone.Alive=false;LandDroneExploded?.Invoke(landDrone);}
+                    break;
+                }
                 var turret=Turrets.Find(t=>t.BlocksPath&&!s.Player&&box.Overlaps(t.Bounds));
                 if(turret!=null)
                 {

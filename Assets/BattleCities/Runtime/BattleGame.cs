@@ -11,7 +11,7 @@ namespace BattleCities
 {
     [Serializable] public sealed class BrickSections { public BrickSection[] sections; }
     [Serializable] public sealed class BrickSection { public float[] center; public string[] bricks, mortar; }
-    public sealed class BattleGame : MonoBehaviour
+    public sealed partial class BattleGame : MonoBehaviour
     {
         public GameObject[] TankModels;
         public GameObject BrickModel, SteelModel, BushModel, EagleModel, RuinedEagleModel, MineModel, DroneModel, GroundTurretPrefab;
@@ -149,6 +149,8 @@ namespace BattleCities
             var turretSettings=GroundTurretPrefab.GetComponent<GroundTurret>();
             if(!turretSettings)throw new InvalidOperationException("GroundTurret prefab is missing its runtime component");
             Simulation.ConfigureTurrets(turretSettings.AttackRange*64,turretSettings.Damage,turretSettings.FireCooldown,turretSettings.ReloadDuration,turretSettings.CardinalTurnDuration,turretSettings.MuzzleDistance*64,turretSettings.Health,turretSettings.DeployDuration);
+            Simulation.LandDroneSettings=LandDroneSettings;landDroneViews.Clear();
+            Simulation.LandDroneExploded+=d=>{PlayLandDroneExplosion();effects.Burst(World(d.X,d.Y,.2f),1.6f);if(CameraShake)trauma=Mathf.Max(trauma,.35f);};
             if(stageRoot)Destroy(stageRoot.gameObject);if(actorsRoot)Destroy(actorsRoot.gameObject);
             stageRoot=new GameObject("Stage "+stage).transform;stageRoot.SetParent(transform);
             actorsRoot=new GameObject("Actors").transform;actorsRoot.SetParent(transform);
@@ -240,6 +242,7 @@ namespace BattleCities
             SyncMines();
             SyncTurrets(paused||consumePending?0:dt);
             SyncDrones();
+            SyncLandDrones();
             if(terrainDirty)RebuildTerrain();
             foreach(var batch in batches)Graphics.DrawMeshInstanced(batch.Part.Mesh,batch.Part.Submesh,batch.Part.Material,batch.Matrices,batch.Matrices.Length,null,ShadowCastingMode.On,true);
             SyncActors(paused||consumePending?0:dt);effects.Tick(paused||consumePending?0:dt,gameCamera);debris.Tick(paused||consumePending?0:dt);UpdateLighting(dt);UpdateCamera(dt);
@@ -373,6 +376,7 @@ namespace BattleCities
             {
                 case SecondaryAttack.Mine:Simulation.EquippedSecondary=SecondaryAttack.PatrolDrone;break;
                 case SecondaryAttack.PatrolDrone:Simulation.EquippedSecondary=SecondaryAttack.GroundTurret;break;
+                case SecondaryAttack.GroundTurret:Simulation.EquippedSecondary=SecondaryAttack.LandDrone;break;
                 default:Simulation.EquippedSecondary=SecondaryAttack.Mine;break;
             }
         }
@@ -416,7 +420,7 @@ namespace BattleCities
             hud.Draw(Simulation,economy,PowerupAtlas,consumePending);
             var secondaryRect=new Rect(12,Screen.height-96,156,58);
             string secondaryStatus=Simulation.SecondaryCooldown>0?Simulation.SecondaryCooldown.ToString("0.0")+"s":Simulation.SecondaryCount>=Simulation.SecondaryLimit?"LIMIT":"READY";
-            string secondaryName=Simulation.EquippedSecondary==SecondaryAttack.PatrolDrone?"DRONE":Simulation.EquippedSecondary==SecondaryAttack.GroundTurret?"TURRET":"MINE";
+            string secondaryName=Simulation.EquippedSecondary==SecondaryAttack.LandDrone?"LAND DRONE":Simulation.EquippedSecondary==SecondaryAttack.PatrolDrone?"DRONE":Simulation.EquippedSecondary==SecondaryAttack.GroundTurret?"TURRET":"MINE";
             if(GUI.Button(new Rect(12,Screen.height-126,156,26),"[Q] Switch: "+secondaryName))CycleSecondary();
             bool previousEnabled=GUI.enabled;GUI.enabled=!paused&&!consumePending&&Simulation.CanUseSecondary;
             if(GUI.Button(secondaryRect,secondaryName+"  [E / RMB]\n"+secondaryStatus+"   "+Simulation.SecondaryCount+"/"+Simulation.SecondaryLimit+" deployed"))secondaryQueued=true;
@@ -442,6 +446,9 @@ namespace BattleCities
             if(GUILayout.Button("Equip drone"))Simulation.EquippedSecondary=SecondaryAttack.PatrolDrone;
             if(GUILayout.Button("Equip turret"))Simulation.EquippedSecondary=SecondaryAttack.GroundTurret;
             GUILayout.EndHorizontal();
+            if(GUILayout.Button("Equip land attack drone"))Simulation.EquippedSecondary=SecondaryAttack.LandDrone;
+            if(GUILayout.Button("Deploy land drone for testing")){Simulation.EquippedSecondary=SecondaryAttack.LandDrone;Simulation.UseSecondary();}
+            GUILayout.Label("Land drone: 1 active / 9 tiles / 60 seconds");
             GUILayout.Label("Drone: 2-tile radius / 45 seconds");
             GUILayout.Label("Turret: mine-sized / move away to deploy");
             if(GUILayout.Button("Place turret for testing")){Simulation.EquippedSecondary=SecondaryAttack.GroundTurret;Simulation.UseSecondary();}
