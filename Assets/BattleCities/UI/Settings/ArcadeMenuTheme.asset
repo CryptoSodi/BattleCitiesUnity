@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0be3ce81a9ecfef4da31d1356e971e2c, type: 3}
+  m_Name: ArcadeMenuTheme
+  m_EditorClassIdentifier: Assembly-CSharp::BattleCities.UI.MenuTheme
+  HeadingFont: {fileID: 12800000, guid: f894bb9cd367f8e4e85f9c7f7c858c47, type: 3}
+  BodyFont: {fileID: 12800000, guid: d74221d7359be1b4f8bfb1406b1967dc, type: 3}
+  Battlefield: {fileID: 21300000, guid: 452e18e7b5eec2347b9eb5837a8b960c, type: 3}
+  Background: {fileID: 21300000, guid: f0639ea63e528a3408bf9062c6129e46, type: 3}
+  RewardGarden: {fileID: 21300000, guid: 57d8ce86232c6814bb82eae84e689d71, type: 3}
+  Logo: {fileID: 21300000, guid: 74b5b14f951b53b4d959a1628cfb69e9, type: 3}
+  PlayButton: {fileID: 21300000, guid: f6f61377dec1f054fbc26e7854120401, type: 3}
+  BlueFrame: {fileID: 21300000, guid: 088ac5a238542ca4b9163c669b7797d4, type: 3}
+  CreamPanel: {fileID: 21300000, guid: 41a79c8e7de7c9649a16dabdeb223770, type: 3}
+  GoldPanel: {fileID: 21300000, guid: b6e79ba1179c4e1469e25044311f286d, type: 3}
+  SelectedPanel: {fileID: 21300000, guid: 900d8f33e8221be408657b149ea6f7a2, type: 3}
+  DarkPanel: {fileID: 21300000, guid: 6bfcf82deac17364996066ff5476685a, type: 3}
+  SilverFrame: {fileID: 21300000, guid: 5071c2cc5d6e3604d90ab1d5030fc403, type: 3}
+  FocusRing: {fileID: 21300000, guid: 5de3744116f97414aa7d3ff85aff21cf, type: 3}
+  Rounded: {fileID: 21300000, guid: dfd7008fbd659524eb0168fee05d93e1, type: 3}
+  NavigationIcons:
+  - {fileID: 21300000, guid: ceef9531171428344bcf56e527bfc0a5, type: 3}
+  - {fileID: 21300000, guid: 171035bf3cd924244851eb401ea64761, type: 3}
+  - {fileID: 21300000, guid: f918b6757a18e43498a725750f7a70c7, type: 3}
+  - {fileID: 21300000, guid: f70342f29962a8844a64ecd0daa20f46, type: 3}
+  - {fileID: 21300000, guid: fe31d6130f8b47547a2ef962084c2785, type: 3}
+  SettingsIcon: {fileID: 21300000, guid: ce466a145b2815143818156c8cc7983f, type: 3}
+  ScoreIcon: {fileID: 21300000, guid: 20a96ad9b2e8eca47a233780ac4daa59, type: 3}
+  HighScoreIcon: {fileID: 21300000, guid: e60c9f98b6d1d834cb353c906d7b87ab, type: 3}
+  TrophyIcon: {fileID: 21300000, guid: 56b558210a1524642ba8c468427bc159, type: 3}
+  RewardIcons:
+  - {fileID: 21300000, guid: aa945f6353190a14cb8a60885d7b572e, type: 3}
+  - {fileID: 21300000, guid: 17d405c96b00ebb41bde254064c2be39, type: 3}
+  - {fileID: 21300000, guid: e9de9b080674a6b46874ae457cca7fb3, type: 3}
+  - {fileID: 21300000, guid: de98a54b3a9ad3a44a175c4091ace01e, type: 3}
+  Navy: {r: 0.023529412, g: 0.11372549, b: 0.21176471, a: 1}
+  Gold: {r: 1, g: 0.8627451, b: 0.2509804, a: 1}
+  Cream: {r: 1, g: 0.9647059, b: 0.87058824, a: 1}
