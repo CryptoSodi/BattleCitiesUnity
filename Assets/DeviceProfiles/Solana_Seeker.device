@@ -1,0 +1,14 @@
+{
+  "friendlyName": "Solana Seeker (layout only)",
+  "version": 1,
+  "screens": [
+    {
+      "width": 1200,
+      "height": 2670,
+      "dpi": 460.0
+    }
+  ],
+  "systemInfo": {
+    "operatingSystem": "Android"
+  }
+}

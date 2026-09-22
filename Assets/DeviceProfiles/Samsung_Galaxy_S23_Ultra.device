@@ -1,0 +1,14 @@
+{
+  "friendlyName": "Samsung Galaxy S23 Ultra (QHD+, layout only)",
+  "version": 1,
+  "screens": [
+    {
+      "width": 1440,
+      "height": 3088,
+      "dpi": 501.1
+    }
+  ],
+  "systemInfo": {
+    "operatingSystem": "Android"
+  }
+}

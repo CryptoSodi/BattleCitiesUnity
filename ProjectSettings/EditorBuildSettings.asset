@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/BattleCities/Scenes/Login.unity
+    guid: b129c2b3fad62314f8a5127e4d6a3e43
+  - enabled: 1
     path: Assets/BattleCities/Scenes/MainMenu.unity
     guid: 7c6c08d9b6eabee4789c08657244b19d
   - enabled: 1

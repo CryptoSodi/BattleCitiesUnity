@@ -11,7 +11,9 @@ namespace BattleCities.Editor
         {
             var inactive=AssetDatabase.LoadAssetAtPath<Sprite>(MainMenuBuilder.Root+"Art/reference-style-v2/shared/buttons/inactive.png");
             var active=AssetDatabase.LoadAssetAtPath<Sprite>(MainMenuBuilder.Root+"Art/reference-style-v2/shared/buttons/active.png");
-            var container=AssetDatabase.LoadAssetAtPath<Sprite>(MainMenuBuilder.Root+"Art/shared/panels/blue-frame.png");
+            var containerPath=MainMenuBuilder.Root+"Art/reference-style-v2/shared/panels/navigation-container.png";
+            ConfigureContainerImporter(containerPath);
+            var container=AssetDatabase.LoadAssetAtPath<Sprite>(containerPath);
             if(!inactive||!active||!container)throw new InvalidOperationException("Import navigation artwork first.");
             var containerImage=navigation.GetComponent<Image>();
             containerImage.sprite=container;
@@ -37,6 +39,24 @@ namespace BattleCities.Editor
                 if(i==1)PrefabUtility.SaveAsPrefabAsset(copy,MainMenuBuilder.Root+"Prefabs/Shared/NavigationTile.prefab");
                 UnityEngine.Object.DestroyImmediate(copy);
             }
+        }
+
+        private static void ConfigureContainerImporter(string path)
+        {
+            var importer=AssetImporter.GetAtPath(path) as TextureImporter;
+            if(importer==null)return;
+            importer.textureType=TextureImporterType.Sprite;
+            importer.spriteImportMode=SpriteImportMode.Single;
+            importer.alphaIsTransparency=true;
+            importer.mipmapEnabled=false;
+            importer.filterMode=FilterMode.Bilinear;
+            importer.textureCompression=TextureImporterCompression.Uncompressed;
+            var settings=new TextureImporterSettings();
+            importer.ReadTextureSettings(settings);
+            settings.spriteMeshType=SpriteMeshType.FullRect;
+            settings.spriteBorder=new Vector4(36,36,36,36);
+            importer.SetTextureSettings(settings);
+            importer.SaveAndReimport();
         }
     }
 }

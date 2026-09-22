@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BattleCities.UI.MenuTheme
   HeadingFont: {fileID: 12800000, guid: f894bb9cd367f8e4e85f9c7f7c858c47, type: 3}
   BodyFont: {fileID: 12800000, guid: d74221d7359be1b4f8bfb1406b1967dc, type: 3}
-  Battlefield: {fileID: 21300000, guid: 452e18e7b5eec2347b9eb5837a8b960c, type: 3}
+  Battlefield: {fileID: 21300000, guid: 3661f192fdbf5864f8ced055116aad43, type: 3}
+  PsgBattlefield: {fileID: 21300000, guid: 00490868303a6364591fef1cb89a0453, type: 3}
   Background: {fileID: 21300000, guid: f0639ea63e528a3408bf9062c6129e46, type: 3}
   RewardGarden: {fileID: 21300000, guid: 57d8ce86232c6814bb82eae84e689d71, type: 3}
   Logo: {fileID: 21300000, guid: 74b5b14f951b53b4d959a1628cfb69e9, type: 3}

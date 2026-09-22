@@ -13,18 +13,46 @@ namespace BattleCities.UI
         [SerializeField] private Sprite inactiveSkin, activeSkin;
         [SerializeField] private bool activePage;
         private bool selected, hovered;
+        private Vector3 artworkRestScale = Vector3.one;
+        private bool artworkScaleCaptured;
 
-        public void Configure(Image ring, RectTransform art) { focusRing = ring; artwork = art; Refresh(); }
+        public void Configure(Image ring, RectTransform art)
+        {
+            focusRing = ring;
+            artwork = art;
+            CaptureArtworkScale();
+            Refresh();
+        }
         public void ConfigureSkins(Image image,Sprite inactive,Sprite active,bool isActivePage)
-        { stateImage=image;inactiveSkin=inactive;activeSkin=active;activePage=isActivePage;ResetScale();Refresh(); }
+        {
+            stateImage=image;inactiveSkin=inactive;activeSkin=active;activePage=isActivePage;
+            CaptureArtworkScale();
+            Refresh();
+        }
+        private void Awake() { CaptureArtworkScale(); }
+        private void OnEnable() { CaptureArtworkScale(); Refresh(); }
         public void OnSelect(BaseEventData e) { selected = true; Refresh(); }
         public void OnDeselect(BaseEventData e) { selected = false; Refresh(); }
         public void OnPointerEnter(PointerEventData e) { hovered = true; Refresh(); }
         public void OnPointerExit(PointerEventData e) { hovered = false; ResetScale(); Refresh(); }
-        public void OnPointerDown(PointerEventData e) { if (artwork && !stateImage) artwork.localScale = Vector3.one * .97f; }
+        public void OnPointerDown(PointerEventData e)
+        {
+            if (artwork && !stateImage)
+                artwork.localScale = artworkRestScale * .97f;
+        }
         public void OnPointerUp(PointerEventData e) { ResetScale(); }
         private void OnDisable() { selected = hovered = false; ResetScale(); Refresh(); }
-        private void ResetScale() { if (artwork) artwork.localScale = Vector3.one; }
+        private void CaptureArtworkScale()
+        {
+            if (!artwork || artworkScaleCaptured) return;
+            artworkRestScale = artwork.localScale;
+            artworkScaleCaptured = true;
+        }
+        private void ResetScale()
+        {
+            if (artwork && artworkScaleCaptured)
+                artwork.localScale = artworkRestScale;
+        }
         private void Refresh()
         {
             if (focusRing) focusRing.enabled = selected || hovered;

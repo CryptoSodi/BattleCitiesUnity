@@ -56,10 +56,23 @@ namespace BattleCities.Editor
                 if(i==0){player=title;settings=MakeButton(tile);AddFocus(tile,settings);}
                 else if(i==1)score=value;else hi=value;
             }
-            var frame=Panel("Main Display",content,theme.BlueFrame);
-            var hero=Panel("Battlefield Hero",frame,theme.SilverFrame);
-            var viewport=MaskPanel("Artwork viewport",hero,12);
-            var field=Img("Battlefield",viewport,theme.Battlefield);Stretch(field.rectTransform);
+            var frame=Panel("Main Display",content,Art("reference-style-v2/shared/panels/navigation-container"));
+            var television=Panel("TV Frame",frame,theme.SilverFrame);
+            var televisionViewport=Panel("TV Background Viewport",frame,theme.Rounded);
+            var televisionViewportImage=televisionViewport.GetComponent<UnityEngine.UI.Image>();
+            televisionViewportImage.type=UnityEngine.UI.Image.Type.Sliced;
+            televisionViewportImage.preserveAspect=false;
+            televisionViewportImage.raycastTarget=false;
+            var televisionMask=televisionViewport.gameObject.AddComponent<UnityEngine.UI.Mask>();
+            televisionMask.showMaskGraphic=false;
+            var televisionBackground=Img("TV Background",televisionViewport,theme.Battlefield);
+            televisionBackground.preserveAspect=false;
+
+
+
+            var hero=Panel("Battlefield Hero",frame,null,new Color(1,1,1,0));
+
+
             var logo=Img("Battle Cities logo",hero,theme.Logo);logo.preserveAspect=true;
             var start=Img("Start Battle",hero,theme.PlayButton);start.preserveAspect=true;
             var startButton=MakeButton(start.rectTransform);AddFocus(start.rectTransform,startButton);
@@ -117,6 +130,7 @@ namespace BattleCities.Editor
             ExportTemplate(rewards.Find("Garden/Reward 1").gameObject,"Shared/RewardPodium");
             ExportTemplate(how.gameObject,"MainMenu/HowItWorks");
             ExportTemplate(board.gameObject,"MainMenu/LeaderboardPanel");
+            ExportTemplate(frame.gameObject,"MainMenu/MainDisplay");
             ExportTemplate(hero.gameObject,"MainMenu/BattlefieldHero");
             view.RefreshLayout();
             EditorSceneManager.SaveScene(scene,ScenePath);
@@ -132,7 +146,7 @@ namespace BattleCities.Editor
             var t=ScriptableObject.CreateInstance<MenuTheme>();
             t.HeadingFont=AssetDatabase.LoadAssetAtPath<Font>(Root+"Art/shared/fonts/BarlowCondensed-Bold.ttf");
             t.BodyFont=AssetDatabase.LoadAssetAtPath<Font>(Root+"Art/shared/fonts/BarlowCondensed-SemiBold.ttf");
-            t.Battlefield=Art("main-menu/backgrounds/battlefield");t.Background=Art("shared/backgrounds/soft-battlefield");t.RewardGarden=Art("main-menu/backgrounds/reward-garden");
+            t.Battlefield=Art("reference-style-v2/main-menu/backgrounds/tv-arena");t.PsgBattlefield=Art("reference-style-v2/main-menu/backgrounds/psg1/tv-arena-psg1");t.Background=Art("shared/backgrounds/soft-battlefield");t.RewardGarden=Art("main-menu/backgrounds/reward-garden");
             t.Logo=Art("main-menu/branding/battle-cities-logo");t.PlayButton=Art("shared/buttons/play-gold");
             t.BlueFrame=Art("shared/panels/blue-frame");t.CreamPanel=Art("shared/panels/nav-cream");t.GoldPanel=Art("shared/panels/gold-panel");
             t.SelectedPanel=Art("shared/panels/nav-gold");t.DarkPanel=Art("shared/panels/dark-inset");t.SilverFrame=Art("shared/panels/silver-frame");t.FocusRing=Art("shared/panels/focus-ring");t.Rounded=Art("shared/panels/round-white");
@@ -177,10 +191,12 @@ namespace BattleCities.Editor
         }
         private static RectTransform BuildRewards(Transform parent)
         {
-            var root=Panel("Rewards",parent,theme.DarkPanel);
-            var trophy=Img("Trophy",root,theme.TrophyIcon);trophy.preserveAspect=true;Box(trophy.rectTransform,.025f,0,.07f,.17f);
-            var title=Label("Title",root,"TOP 10 EVERY 30 MINUTES",34,Gold);title.alignment=TextAnchor.MiddleLeft;Box(title.rectTransform,.105f,.005f,.87f,.165f);
-            var garden=MaskPanel("Garden",root,0);Box(garden,0,.18f,1,.82f);
+            var root=Panel("Rewards",parent,null,new Color(1,1,1,0));
+            var headerBar=Panel("Header Bar",root,theme.DarkPanel);Box(headerBar,0,0,1,.16f);
+            var trophy=Img("Trophy",headerBar,theme.TrophyIcon);trophy.preserveAspect=true;Box(trophy.rectTransform,.025f,.04f,.07f,.92f);
+            var title=Label("Title",headerBar,"TOP 10 EVERY 30 MINUTES",34,Gold);title.alignment=TextAnchor.MiddleLeft;Box(title.rectTransform,.105f,.02f,.87f,.96f);
+
+            var garden=MaskPanel("Garden",root,0);Box(garden,0,.16f,1,.84f);
             var backdrop=Img("Backdrop",garden,theme.RewardGarden);Stretch(backdrop.rectTransform);
             string[] ranks={"2ND","1ST","3RD","4TH–10TH"};string[] values={"750 $BATC","1,000 $BATC","500 $BATC","250 $BATC"};
             Color[] colors={new Color(.35f,.57f,.82f),new Color(1,.74f,.1f),new Color(.9f,.38f,.13f),new Color(.08f,.66f,1)};
@@ -196,7 +212,7 @@ namespace BattleCities.Editor
         }
         private static RectTransform BuildLeaderboard(Transform parent,out Button retry,out Text message,out Text detail)
         {
-            var root=Panel("Leaderboard",parent,theme.BlueFrame);
+            var root=Panel("Leaderboard",parent,Art("reference-style-v2/shared/panels/navigation-container"));
             var heading=Panel("Heading",root,theme.DarkPanel);Box(heading,.04f,.025f,.92f,.10f);
             var trophy=Img("Trophy",heading,theme.TrophyIcon);trophy.preserveAspect=true;Box(trophy.rectTransform,.015f,.08f,.19f,.84f);
             var title=Label("Title",heading,"REWARDS LEADERBOARD",27,Gold);Box(title.rectTransform,.21f,.02f,.77f,.57f);
@@ -216,7 +232,7 @@ namespace BattleCities.Editor
         }
         private static RectTransform BuildHowItWorks(Transform parent)
         {
-            var root=Panel("How It Works",parent,theme.BlueFrame);
+            var root=Panel("How It Works",parent,Art("reference-style-v2/shared/panels/navigation-container"));
             var paper=Panel("Paper",root,theme.CreamPanel);Box(paper,.012f,.10f,.976f,.80f);
             var label=Panel("Heading",root,theme.GoldPanel);Box(label,.025f,.015f,.24f,.27f);
             var title=Label("Title",label,"HOW IT WORKS",28,Navy,false);Stretch(title.rectTransform);

@@ -7,7 +7,7 @@ namespace BattleCities.UI
     {
         public Font HeadingFont;
         public Font BodyFont;
-        public Sprite Battlefield, Background, RewardGarden, Logo, PlayButton;
+        public Sprite Battlefield, PsgBattlefield, Background, RewardGarden, Logo, PlayButton;
         public Sprite BlueFrame, CreamPanel, GoldPanel, SelectedPanel, DarkPanel, SilverFrame, FocusRing, Rounded;
         public Sprite[] NavigationIcons;
         public Sprite SettingsIcon, ScoreIcon, HighScoreIcon, TrophyIcon;
