@@ -41,7 +41,7 @@ namespace BattleCities
                     detour|=Math.Abs(drone.Y-600)>80;
                 }
                 Check(detour&&!target.Alive&&detonations==1,"replan around "+terrain+" and detonate once");
-                Check(sim.Player.Health==1&&sim.BaseAlive,"no friendly/base damage");
+                Check(sim.Player.Health==sim.Player.MaxHealth&&sim.BaseAlive,"no friendly/base damage");
             }
             sim=Sim();Check(sim.UseSecondary(),"player obstacle placement");drone=sim.LandDrones.Single();
             drone.X=500;drone.Y=600;sim.Player.X=620;sim.Player.Y=600;

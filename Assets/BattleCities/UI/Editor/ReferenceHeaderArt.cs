@@ -58,7 +58,7 @@ namespace BattleCities.Editor
             }
         }
 
-        public static void ApplyHeader(Transform header,MenuTheme theme)
+        public static void ApplyHeader(Transform header,MenuTheme theme,bool commanderOnly=false,int onlyCard=-1)
         {
             theme.SettingsIcon=Art("shared/icons/settings");
             theme.ScoreIcon=Art("shared/icons/score-coin");
@@ -67,16 +67,32 @@ namespace BattleCities.Editor
             var icons=new[]{theme.SettingsIcon,theme.ScoreIcon,theme.HighScoreIcon};
             for(int i=0;i<3;i++)
             {
+                if((commanderOnly && i!=0)||(onlyCard>=0 && i!=onlyCard))continue;
                 var card=header.GetChild(i);
                 var image=card.GetComponent<Image>();
-                image.sprite=Art(i==0?"shared/header/player-card":"shared/header/score-card");
+                image.sprite=Art(i==1?"shared/header/score-center":"shared/header/high-score-center");
                 image.type=Image.Type.Simple;image.preserveAspect=true;image.color=Color.white;
+                FrameStrip(card,"Frame Left",image.sprite,new Rect(0,0,.06f,1),0,.06f);
+                FrameStrip(card,"Frame Middle",image.sprite,new Rect(.23f,0,.71f,1),.06f,.88f);
+                FrameStrip(card,"Frame Right",image.sprite,new Rect(.94f,0,.06f,1),.94f,.06f);
+                card.Find("Frame Left").gameObject.SetActive(false);
+                card.Find("Frame Middle").gameObject.SetActive(false);
+                card.Find("Frame Right").gameObject.SetActive(false);
+                var cardRect=(RectTransform)card;
+                cardRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,((RectTransform)header).rect.height);
+                var cardPosition=cardRect.anchoredPosition;cardPosition.y=0;cardRect.anchoredPosition=cardPosition;
                 var socket=card.Find("Icon tile");
-                socket.GetComponent<Image>().enabled=false; // The new frame already includes its cream socket.
-                MainMenuBuilder.Box((RectTransform)socket,i==0?.066f:.066f,.14f,.169f,.71f);
+                var socketImage=socket.GetComponent<Image>();
+                socketImage.sprite=Art("shared/panels/cream-card");
+                socketImage.type=Image.Type.Simple;
+                socketImage.preserveAspect=true;
+                socketImage.color=Color.white;
+                socketImage.enabled=i!=1;
+                socket.gameObject.SetActive(i!=1);
+                MainMenuBuilder.Box((RectTransform)socket,.055f,.17f,.165f,.50f);
                 var icon=socket.Find("Icon").GetComponent<Image>();
                 icon.sprite=icons[i];icon.preserveAspect=true;
-                MainMenuBuilder.Box(icon.rectTransform,.075f,.04f,.85f,.92f);
+                MainMenuBuilder.Box(icon.rectTransform,.09f,.08f,.82f,.84f);
                 var readout=card.Find("Readout");
                 readout.GetComponent<Image>().enabled=false;
                 MainMenuBuilder.Stretch((RectTransform)readout);
@@ -84,25 +100,79 @@ namespace BattleCities.Editor
                 var value=readout.Find("Value").GetComponent<Text>();
                 if(i==0)
                 {
-                    MainMenuBuilder.Box(title.rectTransform,.27f,.16f,.64f,.38f);
-                    MainMenuBuilder.Box(value.rectTransform,.772f,.585f,.142f,.235f);
+                    var nameBackdrop=readout.Find("Name Backdrop");
+                    if(nameBackdrop)UnityEngine.Object.DestroyImmediate(nameBackdrop.gameObject);
+                    MainMenuBuilder.Box(title.rectTransform,.275f,.165f,.65f,.35f);
+                    title.alignment=TextAnchor.MiddleLeft;
+                    title.resizeTextMinSize=16;
+                    var nameShadow=title.GetComponent<Shadow>();
+                    if(!nameShadow)nameShadow=title.gameObject.AddComponent<Shadow>();
+                    nameShadow.effectColor=new Color(0,.02f,.06f,.85f);nameShadow.effectDistance=new Vector2(1,-2);
+                    MainMenuBuilder.Box(value.rectTransform,.75f,.41f,.15f,.23f);
                     value.color=Color.white;value.fontSize=20;value.resizeTextMaxSize=20;value.resizeTextMinSize=12;
+                    var oldBadge=readout.Find("Level Badge");
+                    if(oldBadge)oldBadge.gameObject.SetActive(false);
+                    var levelBadge=EnsureTexture("Level Pill",readout,Art("shared/header/player-card"),new Rect(.765f,.18f,.158f,.275f));
+                    MainMenuBuilder.Box(levelBadge.rectTransform,.735f,.40f,.18f,.24f);
+                    levelBadge.transform.SetAsFirstSibling();
+                    var track=EnsureImage("Progress",readout,theme.Rounded,new Color(.10f,.64f,.93f));
+                    MainMenuBuilder.Box(track.rectTransform,.275f,.44f,.44f,.15f);
+                    track.pixelsPerUnitMultiplier=10;
+                    var recess=EnsureImage("Recess",track.transform,theme.Rounded,new Color(.015f,.10f,.23f));
+                    MainMenuBuilder.Stretch(recess.rectTransform,1.5f);recess.pixelsPerUnitMultiplier=12;
+                    recess.transform.SetAsFirstSibling();
+                    var fill=EnsureImage("Fill",track.transform,theme.Rounded,new Color(.08f,.86f,1));
+                    MainMenuBuilder.Stretch(fill.rectTransform,2);
+                    fill.type=Image.Type.Filled;fill.fillMethod=Image.FillMethod.Horizontal;fill.fillOrigin=0;
+                    value.transform.SetAsLastSibling();title.transform.SetAsLastSibling();
                 }
                 else
                 {
-                    MainMenuBuilder.Box(title.rectTransform,.26f,.12f,.67f,.31f);
-                    MainMenuBuilder.Box(value.rectTransform,.26f,.42f,.67f,.41f);
+                    float left=i==1?.08f:.265f,width=i==1?.84f:.66f;
+                    MainMenuBuilder.Box(title.rectTransform,left,.16f,width,.26f);
+                    MainMenuBuilder.Box(value.rectTransform,left,.42f,width,.24f);
+                    title.alignment=value.alignment=TextAnchor.MiddleCenter;
                     value.fontSize=38;value.resizeTextMaxSize=38;value.resizeTextMinSize=12;
+                    value.color=i==1?new Color(1,.83f,.14f):Color.white;
+                    if(i==1)
+                    {
+                        var well=readout.Find("Score Well");
+                        if(well)well.gameObject.SetActive(false);
+                    }
                 }
             }
-            Export(header.GetChild(0).gameObject,"PlayerStatusCard");
-            Export(header.GetChild(1).gameObject,"StatusCard");
-            Export(header.GetChild(2).gameObject,"HighScoreStatusCard");
+            if(onlyCard<0 || onlyCard==0)Export(header.GetChild(0).gameObject,"PlayerStatusCard");
+            if(onlyCard<0 || onlyCard==1)Export(header.GetChild(1).gameObject,"StatusCard");
+            if(onlyCard<0 || onlyCard==2)Export(header.GetChild(2).gameObject,"HighScoreStatusCard");
             Standalone("IconSocket",Art("shared/panels/cream-card"),new Vector2(110,110));
             Standalone("LevelBadge",Art("shared/panels/blue-card"),new Vector2(120,30));
             Standalone("SettingsIcon",icons[0],new Vector2(80,80));
             Standalone("ScoreIcon",icons[1],new Vector2(80,80));
             Standalone("HighScoreIcon",icons[2],new Vector2(80,80));
+        }
+        private static RawImage EnsureTexture(string name,Transform parent,Sprite source,Rect uv)
+        {
+            var child=parent.Find(name);
+            var image=child?child.GetComponent<RawImage>():new GameObject(name,typeof(RectTransform),typeof(RawImage)).GetComponent<RawImage>();
+            image.transform.SetParent(parent,false);image.texture=source.texture;image.uvRect=uv;
+            image.raycastTarget=false;image.color=Color.white;return image;
+        }
+        private static void FrameStrip(Transform card,string name,Sprite source,Rect uv,float x,float width)
+        {
+            var child=card.Find(name);
+            var image=child?child.GetComponent<RawImage>():new GameObject(name,typeof(RectTransform),typeof(RawImage)).GetComponent<RawImage>();
+            image.transform.SetParent(card,false);image.texture=source.texture;image.uvRect=uv;
+            image.raycastTarget=false;image.color=Color.white;
+            MainMenuBuilder.Box(image.rectTransform,x,0,width,1);
+            image.transform.SetAsFirstSibling();
+        }
+        private static Image EnsureImage(string name,Transform parent,Sprite sprite,Color color)
+        {
+            var child=parent.Find(name);
+            var image=child?child.GetComponent<Image>():new GameObject(name,typeof(RectTransform),typeof(Image)).GetComponent<Image>();
+            image.transform.SetParent(parent,false);image.sprite=sprite;image.color=color;
+            if(!child && name=="Fill")image.fillAmount=0;
+            image.type=Image.Type.Sliced;image.raycastTarget=false;return image;
         }
         private static void Export(GameObject source,string name)
         {
@@ -113,7 +183,7 @@ namespace BattleCities.Editor
                 var rect=(RectTransform)copy.transform;
                 rect.anchorMin=rect.anchorMax=rect.pivot=new Vector2(.5f,.5f);
                 rect.anchoredPosition=Vector2.zero;
-                rect.sizeDelta=new Vector2(380,380*cardImage.sprite.rect.height/cardImage.sprite.rect.width);
+                rect.sizeDelta=new Vector2(name=="StatusCard"?250:327,100);
             }
             foreach(var b in copy.GetComponentsInChildren<Button>(true))
             {b.onClick=new Button.ButtonClickedEvent();b.navigation=new Navigation{mode=Navigation.Mode.Automatic};}

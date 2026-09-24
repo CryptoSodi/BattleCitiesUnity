@@ -71,7 +71,7 @@ namespace BattleCities
         private bool consumePending;
         private InputAction[] slots;
         public bool Paused {get=>paused;set=>paused=value;}
-        private sealed class Actor { public GameObject Root,Model; public Transform Turret; public ParticleSystem Dust; public Light[] Lights; public int Tier; public bool Drop; public TankAnimation Animation; public TankShield Shield; }
+        private sealed class Actor { public GameObject Root,Model; public Transform Turret; public Transform[] Muzzles; public ParticleSystem Dust; public Light[] Lights; public int Tier; public bool Drop; public Color Color; public TankAnimation Animation; public TankShield Shield; }
         private sealed class Part { public Mesh Mesh;public Material Material;public int Submesh;public Matrix4x4 Local; }
         private sealed class Batch { public Part Part;public Matrix4x4[] Matrices; }
 
@@ -144,7 +144,8 @@ namespace BattleCities
         public void LoadStage(int stage)
         {
             var asset=Resources.Load<TextAsset>("Maps/"+stage.ToString("00"));if(asset==null)throw new InvalidOperationException("Missing stage "+stage);
-            Stage=requestedStage=stage;Simulation=new BattleSimulation(JsonConvert.DeserializeObject<MapData>(asset.text),stage);accumulator=0;paused=false;
+            var shootingSettings=SelectedTankShootingSettings;
+            ResetPrimaryFire();Stage=requestedStage=stage;Simulation=new BattleSimulation(JsonConvert.DeserializeObject<MapData>(asset.text),stage,shootingSettings?shootingSettings.NormalReloadSeconds:.12f,shootingSettings?shootingSettings.UpgradedNormalReloadSeconds:.08f);accumulator=0;paused=false;
             if(!GroundTurretPrefab)throw new InvalidOperationException("GroundTurret prefab is not assigned");
             var turretSettings=GroundTurretPrefab.GetComponent<GroundTurret>();
             if(!turretSettings)throw new InvalidOperationException("GroundTurret prefab is missing its runtime component");
@@ -154,10 +155,10 @@ namespace BattleCities
             if(stageRoot)Destroy(stageRoot.gameObject);if(actorsRoot)Destroy(actorsRoot.gameObject);
             stageRoot=new GameObject("Stage "+stage).transform;stageRoot.SetParent(transform);
             actorsRoot=new GameObject("Actors").transform;actorsRoot.SetParent(transform);
-            actors.Clear();shots.Clear();mines.Clear();drones.Clear();turrets.Clear();secondaryQueued=false;batches.Clear();effects.Clear();debris.Clear();
+            actors.Clear();shots.Clear();shotPresentation.Clear();mines.Clear();drones.Clear();turrets.Clear();secondaryQueued=false;batches.Clear();effects.Clear();debris.Clear();
             Simulation.DroneDetonated+=d=>{effects.Burst(World(d.X,d.Y,.4f),1.6f);if(CameraShake)trauma=Mathf.Max(trauma,.35f);};
             Simulation.MineDetonated+=m=>{effects.Burst(World(m.X,m.Y,.08f),1.5f);if(CameraShake)trauma=Mathf.Max(trauma,.35f);};
-            Simulation.TurretFired+=t=>{if(turrets.TryGetValue(t.Id,out var view))effects.Burst(view.MuzzlePosition,.3f);};
+            Simulation.TurretFired+=t=>{if(turrets.TryGetValue(t.Id,out var view))effects.MuzzleFlash(view.MuzzlePosition,Quaternion.Euler(0,(int)t.Heading*90,0)*Vector3.forward,new Color(.95f,.75f,.2f));};
             Simulation.TurretHit+=t=>{effects.Impact(World(t.X,t.Y,.5f),Vector3.up,false);if(CameraShake)trauma=Mathf.Max(trauma,.08f);};
             Simulation.TurretDestroyed+=t=>{effects.Burst(World(t.X,t.Y,.5f),1.6f);if(CameraShake)trauma=Mathf.Max(trauma,.4f);};
             Simulation.WallDestroyed+=w=>{debris.Wall(World(w.Bounds.X+w.Bounds.W/2,w.Bounds.Y+w.Bounds.H/2,.25f),!w.Brick);terrainDirty=true;if(CameraShake)trauma=Mathf.Max(trauma,.08f);};
@@ -165,8 +166,8 @@ namespace BattleCities
             var current=Simulation;
             Simulation.DropRequested+=()=>RollDrop(current);
             Simulation.CurrencyClaimed+=id=>{if(economy) _=economy.Claim(id);};
-            Simulation.ShotImpact+=s=>{var direction=Quaternion.Euler(0,(int)s.Direction*90,0)*Vector3.forward;effects.Impact(World(s.X,s.Y,.48f)+direction*.1f,direction,s.WallDamage==2);};
-            Simulation.ShotFired+=s=>{if(actors.TryGetValue(s.Owner,out var a))a.Animation.Fire();effects.Burst(World(s.X,s.Y,.48f),.22f);};
+            Simulation.ShotImpact+=OnShotImpact;
+            Simulation.ShotFired+=OnShotFired;
             Simulation.TankDestroyed+=t=>{if(actors.TryGetValue(t.Id,out var dead))debris.Tank(dead.Model,World(t.X,t.Y,.3f));effects.Burst(World(t.X,t.Y,.35f),1.3f);if(CameraShake)trauma=.3f;};
             Simulation.BaseDestroyed+=()=>{effects.Burst(World(Simulation.BaseBounds.X+32,Simulation.BaseBounds.Y+32,.35f),1.7f);if(CameraShake)trauma=.6f;Destroy(eagle);eagle=Instantiate(RuinedEagleModel,World(Simulation.BaseBounds.X+32,Simulation.BaseBounds.Y+32,.1f),Quaternion.Euler(0,180,0),stageRoot);eagleTint=eagle.AddComponent<EagleNightTint>();eagleTint.SetDarkness(weather.Darkness);Shadows(eagle);};
             BuildGround();RebuildTerrain();
@@ -230,13 +231,14 @@ namespace BattleCities
             if(Simulation==null)return;float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);fps=Mathf.Lerp(fps,1/Mathf.Max(.0001f,Time.unscaledDeltaTime),.05f);
             if(pause.WasPressedThisFrame())paused=!paused;if(debug.WasPressedThisFrame())showDebug=!showDebug;if(restart.WasPressedThisFrame())LoadStage(Stage);if(overhead.WasPressedThisFrame())CameraElevation=CameraElevation>85?70:90;
             for(int i=0;i<slots.Length;i++)if(slots[i].WasPressedThisFrame()&&!paused)UsePowerupSlot(i);
+            SamplePrimaryFire(dt);
             if(!paused&&!consumePending)
             {
                 secondaryQueued|=secondaryFire.WasPressedThisFrame();
                 if(secondarySelect.WasPressedThisFrame())CycleSecondary();
-                accumulator+=dt;var cmd=new Command{Move=Latest(moveKeys,moveOrder),Aim=Latest(aimKeys,aimOrder),Fire=fire.IsPressed()};
+                accumulator+=dt;var cmd=new Command{Move=Latest(moveKeys,moveOrder),Aim=Latest(aimKeys,aimOrder)};
                 Simulation.DisableEnemyFire=!EnemyFire;
-                while(accumulator>=BattleSimulation.StepSeconds){cmd.SecondaryFire=secondaryQueued;secondaryQueued=false;Simulation.Step(cmd);accumulator-=BattleSimulation.StepSeconds;}
+                while(accumulator>=BattleSimulation.StepSeconds){QueuePrimaryCommand(ref cmd);cmd.SecondaryFire=secondaryQueued;secondaryQueued=false;Simulation.Step(cmd);accumulator-=BattleSimulation.StepSeconds;}
             }
             else secondaryQueued=false;
             SyncMines();
@@ -283,7 +285,8 @@ namespace BattleCities
         {
             var a=new Actor{Root=new GameObject((t.Player?"Player":"Enemy")+" "+t.Id),Tier=t.Tier,Drop=t.Drop};a.Root.transform.SetParent(actorsRoot);
             a.Model=Instantiate(TankModels[t.Tier],a.Root.transform);a.Model.transform.localScale=Vector3.one*.86f;Shadows(a.Model);
-            string tint=t.Player?"#f3bf32":t.Drop?"#f0d7c0":new[]{"#c55343","#769995","#9296b5","#736d82"}[t.Tier];
+            string tint=TankTint(t);
+            ColorUtility.TryParseHtmlString(tint,out a.Color);
             foreach(var renderer in a.Model.GetComponentsInChildren<Renderer>())
             {
                 renderer.sharedMaterials=renderer.sharedMaterials.Select(source=>{
@@ -294,6 +297,9 @@ namespace BattleCities
                 }).ToArray();
             }
             a.Turret=a.Model.GetComponentsInChildren<Transform>(true).FirstOrDefault(n=>n.name=="TurretPivot");
+            var muzzleNodes=a.Model.GetComponentsInChildren<Transform>(true);
+            a.Muzzles=muzzleNodes.Where(n=>n.name=="MuzzleLeft"||n.name=="MuzzleRight").ToArray();
+            if(a.Muzzles.Length==0)a.Muzzles=muzzleNodes.Where(n=>n.name=="Muzzle").ToArray();
             a.Lights=new Light[2];for(int i=0;i<2;i++){var l=new GameObject("Headlight",typeof(Light)).GetComponent<Light>();l.transform.SetParent(a.Model.transform);l.transform.localPosition=new Vector3(i==0?-.27f:.27f,.3f,.62f);l.transform.localRotation=Quaternion.Euler(12,0,0);l.type=LightType.Spot;l.range=6;l.spotAngle=55;l.innerSpotAngle=28;l.color=new Color(1,.92f,.65f);l.shadows=LightShadows.Soft;l.shadowStrength=1;l.shadowBias=.02f;l.shadowNormalBias=.1f;l.shadowNearPlane=.05f;a.Lights[i]=l;}
             var dustGo=new GameObject("Tank trail dust",typeof(ParticleSystem));dustGo.transform.SetParent(a.Root.transform);dustGo.transform.localPosition=new Vector3(0,.06f,-.52f);a.Dust=dustGo.GetComponent<ParticleSystem>();a.Dust.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
             var main=a.Dust.main;main.duration=2.5f;main.loop=true;main.startLifetime=new ParticleSystem.MinMaxCurve(.8f,1.4f);main.startSpeed=new ParticleSystem.MinMaxCurve(.03f,.12f);main.startSize=new ParticleSystem.MinMaxCurve(.24f,.5f);main.startRotation=new ParticleSystem.MinMaxCurve(-Mathf.PI,Mathf.PI);main.startColor=new ParticleSystem.MinMaxGradient(new Color(.67f,.53f,.34f,.46f),new Color(.82f,.72f,.52f,.34f));main.maxParticles=140;main.simulationSpace=ParticleSystemSimulationSpace.World;
@@ -314,11 +320,12 @@ namespace BattleCities
                 a.Root.transform.position=World(t.X,t.Y);a.Model.transform.rotation=Quaternion.Slerp(a.Model.transform.rotation,Quaternion.Euler(0,(int)t.Direction*90,0),1-Mathf.Exp(-dt*22));
                 if(a.Turret)a.Turret.rotation=Quaternion.Slerp(a.Turret.rotation,Quaternion.Euler(0,(int)t.Aim*90,0),1-Mathf.Exp(-dt*16));
                 a.Animation.Tick(t,dt);a.Shield.Tick(t.Shield,dt);
+                effects.HealthBar(World(t.X,t.Y,.4f)+gameCamera.transform.up*.64f,t.Health,t.MaxHealth,a.Color,gameCamera);
+                if(t.Player&&primaryCharge.IsCharging)foreach(var muzzle in a.Muzzles)effects.ProjectileGlow(muzzle.position,a.Color,true,gameCamera,.35f+primaryCharge.Progress*.65f);
                 var travel=Quaternion.Euler(0,(int)t.Direction*90,0)*Vector3.forward;a.Dust.transform.localPosition=-travel*.52f+Vector3.up*.06f;a.Dust.transform.localRotation=Quaternion.Euler(0,(int)t.Direction*90,0);var emission=a.Dust.emission;emission.rateOverTime=Dust&&t.Moving?45:0;
             }
             foreach(var id in actors.Keys.Where(id=>!living.Contains(id)).ToArray()){Destroy(actors[id].Root);actors.Remove(id);}
-            living.Clear();foreach(var s in Simulation.Shots.Where(s=>s.Alive)){living.Add(s.Id);if(!shots.TryGetValue(s.Id,out var g)){g=Instantiate(BulletModels[s.WallDamage==2?2:s.Speed>600?1:0],actorsRoot);shots.Add(s.Id,g);}g.transform.position=World(s.X,s.Y,.48f);g.transform.rotation=Quaternion.Euler(0,(int)s.Direction*90,0);if(dt>0)effects.Flame(g.transform.position-g.transform.forward*.12f,-g.transform.forward,s.WallDamage==2);}
-            foreach(var id in shots.Keys.Where(id=>!living.Contains(id)).ToArray()){Destroy(shots[id]);shots.Remove(id);}
+            SyncProjectiles(dt);
         }
         private Transform MinePart(Transform parent,PrimitiveType primitive,string label,Vector3 position,Vector3 scale,Material material)
         {
@@ -426,17 +433,17 @@ namespace BattleCities
             if(GUI.Button(secondaryRect,secondaryName+"  [E / RMB]\n"+secondaryStatus+"   "+Simulation.SecondaryCount+"/"+Simulation.SecondaryLimit+" deployed"))secondaryQueued=true;
             GUI.enabled=previousEnabled;
             if(!string.IsNullOrEmpty(Simulation.SecondaryStatus))GUI.Label(new Rect(180,Screen.height-94,Screen.width-200,44),Simulation.SecondaryStatus);
-            if(economy&&showDebug)GUI.Label(new Rect(12,Screen.height-84,650,24),consumePending?"Confirming power-upâ€¦":economy.Status);
+            if(economy&&showDebug)GUI.Label(new Rect(12,Screen.height-84,650,24),consumePending?"Confirming power-upÃ¢â‚¬Â¦":economy.Status);
             if(Simulation.PickupType!=null){var screen=gameCamera.WorldToScreenPoint(World(Simulation.PickupX,Simulation.PickupY,.7f));float size=Mathf.Clamp(Vector3.Distance(gameCamera.WorldToScreenPoint(World(Simulation.PickupX+67,Simulation.PickupY,.7f)),screen),96,144);var r=new Rect(screen.x-size/2,Screen.height-screen.y-size/2,size,size);if(PowerupAtlas&&BattleHud.TryPowerupUv(Simulation.PickupType,out var uv))GUI.DrawTextureWithTexCoords(r,PowerupAtlas,uv);else GUI.Box(r,Simulation.PickupType);pickupSparkles.Draw(r,Simulation.Tick*BattleSimulation.StepSeconds);}
-            GUI.Label(new Rect(12,Screen.height-28,Screen.width-24,24),"WASD drive   â€¢   Arrows aim   â€¢   Space fire   â€¢   P pause   â€¢   R restart   â€¢   C camera");
+            GUI.Label(new Rect(12,Screen.height-28,Screen.width-24,24),"WASD drive   Ã¢â‚¬Â¢   Arrows aim   Ã¢â‚¬Â¢   Space: tap / hold + release   Ã¢â‚¬Â¢   P pause   Ã¢â‚¬Â¢   R restart   Ã¢â‚¬Â¢   C camera");
             if(paused||Simulation.Lost||Simulation.Won){GUI.Box(new Rect(Screen.width/2-130,Screen.height/2-35,260,70),(paused?"PAUSED":Simulation.Won?"STAGE CLEAR":"GAME OVER")+"\nR: Restart");if(Simulation.Won&&Stage<35&&GUI.Button(new Rect(Screen.width/2-65,Screen.height/2+45,130,30),"Next stage"))LoadStage(Stage+1);}
             if(!showDebug)return;
-            GUILayout.BeginArea(new Rect(Mathf.Max(8,Screen.width-282),92,270,Mathf.Max(120,Screen.height-132)),"Battle Cities â€¢ Debug",GUI.skin.window);
+            GUILayout.BeginArea(new Rect(Mathf.Max(8,Screen.width-282),92,270,Mathf.Max(120,Screen.height-132)),"Battle Cities Ã¢â‚¬Â¢ Debug",GUI.skin.window);
             debugScroll=GUILayout.BeginScrollView(debugScroll);
             GUILayout.Label("Stage "+requestedStage);requestedStage=Mathf.RoundToInt(GUILayout.HorizontalSlider(requestedStage,1,35));if(GUILayout.Button("Load stage "+requestedStage))LoadStage(requestedStage);
             weather.Cycle=GUILayout.Toggle(weather.Cycle,"Day/night cycle");weather.Rain=GUILayout.Toggle(weather.Rain,"Rain");weather.Clouds=GUILayout.Toggle(weather.Clouds,"Drifting clouds");GUILayout.Label("Time of day");weather.TimeOfDay=GUILayout.HorizontalSlider(weather.TimeOfDay,0,1);GUILayout.Label("Rain intensity");weather.RainIntensity=GUILayout.HorizontalSlider(weather.RainIntensity,0,1);Headlights=GUILayout.Toggle(Headlights,"Tank headlights");Dust=GUILayout.Toggle(Dust,"Tank trail dust");EnemyFire=GUILayout.Toggle(EnemyFire,"Enemy shooting");
-            AutomaticCamera=GUILayout.Toggle(AutomaticCamera,"Automatic camera");CameraShake=GUILayout.Toggle(CameraShake,"Camera shake");GUILayout.Label("Elevation "+CameraElevation.ToString("F0")+"Â°");CameraElevation=GUILayout.HorizontalSlider(CameraElevation,40,89.9f);GUILayout.Label("Zoom");Zoom=GUILayout.HorizontalSlider(Zoom,.7f,2);
-            GUILayout.Label("FPS "+fps.ToString("F0")+" â€¢ Terrain batches "+batches.Count);GUILayout.Label("Manual camera: middle-drag / wheel");DrawDebugPowerups();GUILayout.EndScrollView();GUILayout.EndArea();
+            AutomaticCamera=GUILayout.Toggle(AutomaticCamera,"Automatic camera");CameraShake=GUILayout.Toggle(CameraShake,"Camera shake");GUILayout.Label("Elevation "+CameraElevation.ToString("F0")+"Ã‚Â°");CameraElevation=GUILayout.HorizontalSlider(CameraElevation,40,89.9f);GUILayout.Label("Zoom");Zoom=GUILayout.HorizontalSlider(Zoom,.7f,2);
+            GUILayout.Label("FPS "+fps.ToString("F0")+" Ã¢â‚¬Â¢ Terrain batches "+batches.Count);GUILayout.Label("Manual camera: middle-drag / wheel");DrawDebugPowerups();GUILayout.EndScrollView();GUILayout.EndArea();
         }
         private void DrawDebugPowerups()
         {
@@ -475,7 +482,7 @@ namespace BattleCities
             Simulation.ApplyPowerup(type);
             debugPowerupStatus="Applied: "+debugPowerupNames[index]+(paused?" (paused)":"");
         }
-        private void OnApplicationFocus(bool focus){if(!focus)paused=true;}
+        private void OnApplicationFocus(bool focus){if(!focus){paused=true;ResetPrimaryFire();}}
         private async void RollDrop(BattleSimulation current)
         {var drop=economy?await economy.Roll(Stage):null;if(this&&Simulation==current)current.SpawnPickup(drop?.Type,drop?.ClaimId);}
         public void UsePowerupSlot(int index)
@@ -490,15 +497,3 @@ namespace BattleCities
         private void OnDestroy(){hud.Dispose();pickupSparkles?.Dispose();input?.Dispose();if(particleMaterial&&particleMaterial.mainTexture)Destroy(particleMaterial.mainTexture);foreach(var m in ownedMaterials)if(m)Destroy(m);foreach(var m in ownedMeshes)if(m)Destroy(m);}
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

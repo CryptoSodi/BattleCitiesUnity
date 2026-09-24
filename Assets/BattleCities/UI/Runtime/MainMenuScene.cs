@@ -20,6 +20,18 @@ namespace BattleCities.UI
         public Vector2 positionOffset;
         [Tooltip("Uniform size multiplier. 1 keeps the automatically fitted size and aspect ratio.")]
         [Range(.25f, 2f)] public float sizeScale = 1;
+
+        [Header("Podium Text")]
+        [Tooltip("Moves both text lines inside this podium. Positive Y moves them upward.")]
+        public Vector2 podiumTextOffset;
+        [Tooltip("Additional offset for the placement label (1ST, 2ND, 3RD, or 4TH-10TH). Positive Y moves it upward.")]
+        public Vector2 rankTextOffset;
+        [Tooltip("Maximum placement-label font size. Best Fit can reduce it when necessary to prevent clipping.")]
+        [Min(1)] public int rankFontSize = 38;
+        [Tooltip("Additional offset for the reward amount. Positive Y moves it upward.")]
+        public Vector2 amountTextOffset;
+        [Tooltip("Maximum reward-amount font size. Best Fit can reduce it when necessary to prevent clipping.")]
+        [Min(1)] public int amountFontSize = 30;
     }
 
     [Serializable]
@@ -67,6 +79,19 @@ namespace BattleCities.UI
         public RewardItemLayoutSettings firstPlaceReward = new RewardItemLayoutSettings();
         public RewardItemLayoutSettings thirdPlaceReward = new RewardItemLayoutSettings();
         public RewardItemLayoutSettings fourthToTenthReward = new RewardItemLayoutSettings();
+
+        [Header("Reward Text")]
+        [Tooltip("Top edge of the shared reward text panel, normalized against an unscaled reward cell.")]
+        [Range(0, 1)] public float rewardTextPanelTop = .635f;
+        [Range(.05f, .5f)] public float rewardTextPanelHeight = .27f;
+        [Range(0, .5f)] public float rewardRankTop = .04f;
+        [Range(.1f, .7f)] public float rewardRankHeight = .40f;
+        [Range(0, .8f)] public float rewardAmountTop = .48f;
+        [Range(.1f, .7f)] public float rewardAmountHeight = .40f;
+        [Min(1)] public int rewardRankMinSize = 18;
+        [Min(1)] public int rewardRankMaxSize = 38;
+        [Min(1)] public int rewardAmountMinSize = 16;
+        [Min(1)] public int rewardAmountMaxSize = 30;
 
         public RewardItemLayoutSettings GetRewardItem(int index)
         {
@@ -162,14 +187,14 @@ namespace BattleCities.UI
 
     /// <summary>Shared live UI with platform composition; art and labels are independent assets.</summary>
     [ExecuteAlways]
-    public sealed class MainMenuScene : MonoBehaviour
+    public sealed partial class MainMenuScene : MonoBehaviour
     {
         [SerializeField] private MainMenuPlatform platform = MainMenuPlatform.Auto;
         [SerializeField] private string gameplayScene = "BattleCity";
         [SerializeField] private string quartersScene, shopScene, socialsScene;
         [SerializeField] private MenuTheme theme;
 
-        [Header("Platform Layouts — edit these instead of RectTransforms")]
+        [Header("Automatic Layout Defaults (used to initialize new platform layouts)")]
         [SerializeField] private MainMenuLayoutSettings webLayout = MainMenuLayoutSettings.Web();
         [SerializeField] private MainMenuLayoutSettings psg1Layout = MainMenuLayoutSettings.Psg1();
         [SerializeField] private MainMenuLayoutSettings androidLayout = MainMenuLayoutSettings.Android();
@@ -320,6 +345,11 @@ namespace BattleCities.UI
         /// <summary>Also used by the editor preview and layout checks at exact platform resolutions.</summary>
         public void ApplyLayout(MainMenuPlatform target, Vector2 available)
         {
+            if(editLayoutInScene && !generatingLayout)
+            {
+                ApplyAuthoredLayout(target,available);
+                return;
+            }
             bool psg=target==MainMenuPlatform.Psg1;
             bool portrait=target==MainMenuPlatform.Android && available.y>available.x;
             bool compact=psg || target==MainMenuPlatform.Android;
@@ -453,9 +483,9 @@ namespace BattleCities.UI
                 var card=(RectTransform)statusBar.GetChild(i);
                 var image=card.GetComponent<Image>();
                 if(!image||!image.sprite)continue;
-                float aspect=image.sprite.rect.width/image.sprite.rect.height;
-                float width=Mathf.Min(cell-12,statusBar.sizeDelta.y*aspect);
-                float height=width/aspect;
+                float width=(cell-12)*(i==1?.8f:.86f);
+                if(i==1)width=Mathf.Min(width,statusBar.sizeDelta.y*image.sprite.rect.width/image.sprite.rect.height);
+                float height=statusBar.sizeDelta.y;
                 image.preserveAspect=true;
                 card.localScale=Vector3.one;
                 Place(card,i*cell+(cell-width)/2,(statusBar.sizeDelta.y-height)/2,width,height);
@@ -473,11 +503,12 @@ namespace BattleCities.UI
             bool bannerAtBottom=layout.rewardBannerAtBottom;
             if(banner)
             {
-                banner.anchorMin=new Vector2(0,bannerAtBottom?0:.84f);
-                banner.anchorMax=new Vector2(1,bannerAtBottom?.16f:1);
+                banner.anchorMin=new Vector2(0,bannerAtBottom?-.016f:.824f);
+                banner.anchorMax=new Vector2(1,bannerAtBottom?.176f:1.016f);
                 banner.pivot=new Vector2(.5f,.5f);
                 banner.sizeDelta=new Vector2(-width*.06812f,0);
                 banner.anchoredPosition=new Vector2(width*.00208f,bannerAtBottom?0:-verticalNudge)+layout.rewardBannerOffset;
+                ConfigureRewardHeaderIcons(banner);
             }
             garden.anchorMin=new Vector2(0,bannerAtBottom?.16f:0);
             garden.anchorMax=new Vector2(1,bannerAtBottom?1:.84f);
@@ -508,7 +539,80 @@ namespace BattleCities.UI
                 if(fitter)fitter.enabled=false;
                 art.anchorMin=Vector2.zero;art.anchorMax=Vector2.one;
                 art.offsetMin=art.offsetMax=Vector2.zero;art.localScale=Vector3.one;
+
+                var podium=art.Find("Podium") as RectTransform;
+                if(!podium)continue;
+                float panelTop=layout.rewardTextPanelTop>.01f?layout.rewardTextPanelTop:.635f;
+                float panelHeight=layout.rewardTextPanelHeight>.01f?layout.rewardTextPanelHeight:.27f;
+                podium.anchorMin=new Vector2(.12f,1-panelTop-panelHeight);
+                podium.anchorMax=new Vector2(.88f,1-panelTop);
+                podium.pivot=new Vector2(.5f,.5f);
+                podium.offsetMin=podium.offsetMax=itemLayout.podiumTextOffset;
+
+                int rankMax=itemLayout.rankFontSize>0?itemLayout.rankFontSize:Mathf.Max(1,layout.rewardRankMaxSize);
+                int rankMin=Mathf.Clamp(layout.rewardRankMinSize,1,rankMax);
+                int amountMax=itemLayout.amountFontSize>0?itemLayout.amountFontSize:Mathf.Max(1,layout.rewardAmountMaxSize);
+                int amountMin=Mathf.Clamp(layout.rewardAmountMinSize,1,amountMax);
+                ConfigureRewardText(podium.Find("Rank")?.GetComponent<Text>(),layout.rewardRankTop,layout.rewardRankHeight,itemLayout.rankTextOffset,rankMin,rankMax);
+                ConfigureRewardText(podium.Find("Reward")?.GetComponent<Text>(),layout.rewardAmountTop,layout.rewardAmountHeight,itemLayout.amountTextOffset,amountMin,amountMax);
             }
+        }
+        private void ConfigureRewardHeaderIcons(RectTransform banner)
+        {
+            if(!banner||!theme)return;
+            var trophyRect=banner.Find("Trophy") as RectTransform;
+            var trophyImage=trophyRect?trophyRect.GetComponent<UnityEngine.UI.Image>():null;
+            if(trophyImage&&theme.TrophyIcon)
+            {
+                trophyImage.sprite=theme.TrophyIcon;
+                trophyImage.preserveAspect=true;
+            }
+
+            var timerRect=banner.Find("Timer") as RectTransform;
+            if(!theme.TimerIcon)
+            {
+                if(timerRect)timerRect.gameObject.SetActive(false);
+                return;
+            }
+            if(!timerRect)
+            {
+                var timerObject=new GameObject("Timer",typeof(RectTransform),typeof(CanvasRenderer),typeof(UnityEngine.UI.Image));
+                timerRect=timerObject.GetComponent<RectTransform>();
+                timerRect.SetParent(banner,false);
+            }
+            timerRect.gameObject.SetActive(true);
+            timerRect.anchorMin=new Vector2(.925f,.08f);
+            timerRect.anchorMax=new Vector2(.98f,.92f);
+            timerRect.pivot=new Vector2(.5f,.5f);
+            timerRect.offsetMin=timerRect.offsetMax=Vector2.zero;
+            timerRect.SetAsLastSibling();
+            var timerImage=timerRect.GetComponent<UnityEngine.UI.Image>();
+            timerImage.sprite=theme.TimerIcon;
+            timerImage.preserveAspect=true;
+            timerImage.raycastTarget=false;
+
+            var title=banner.Find("Title") as RectTransform;
+            if(title)
+            {
+                title.anchorMin=new Vector2(.105f,.02f);
+                title.anchorMax=new Vector2(.905f,.98f);
+                title.offsetMin=title.offsetMax=Vector2.zero;
+            }
+        }
+        private static void ConfigureRewardText(Text label,float top,float height,Vector2 offset,int minSize,int maxSize)
+        {
+            if(!label)return;
+            var rect=label.rectTransform;
+            top=Mathf.Clamp01(top);height=Mathf.Clamp(height,.1f,1-top);
+            rect.anchorMin=new Vector2(.02f,1-top-height);
+            rect.anchorMax=new Vector2(.98f,1-top);
+            rect.pivot=new Vector2(.5f,.5f);
+            rect.offsetMin=rect.offsetMax=offset;
+            label.fontSize=maxSize;label.resizeTextForBestFit=true;
+            label.resizeTextMinSize=minSize;label.resizeTextMaxSize=maxSize;
+            label.alignment=TextAnchor.MiddleCenter;label.alignByGeometry=true;label.fontStyle=FontStyle.Bold;
+            var shadow=label.GetComponent<Shadow>();
+            if(shadow){shadow.effectColor=new Color(0,0,.02f,.85f);shadow.effectDistance=new Vector2(2,-2);}
         }
         private static void Link(Button b,Selectable up,Selectable down,Selectable left,Selectable right)
         { b.navigation=new Navigation{mode=Navigation.Mode.Explicit,selectOnUp=up,selectOnDown=down,selectOnLeft=left,selectOnRight=right}; }
@@ -632,6 +736,14 @@ namespace BattleCities.UI
             PlayerPrefs.SetInt("battlecities.highScore",highScore);
             PlayerPrefs.Save();
             SetPlayer(player.displayName,lastScore,highScore);
+            var commander=statusBar?statusBar.Find("Player/Readout"):null;
+            if(commander)
+            {
+                var level=commander.Find("Value");
+                if(level)level.GetComponent<Text>().text="LVL "+Mathf.Max(1,player.level);
+                var progress=commander.Find("Progress/Fill");
+                if(progress)progress.GetComponent<Image>().fillAmount=Mathf.Clamp01((float)player.levelPoints/Mathf.Max(1,player.levelPointsRequired));
+            }
         }
 
         private void OnApiLeaderboardLoaded(string[] formattedRows)

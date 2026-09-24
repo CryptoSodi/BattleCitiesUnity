@@ -38,7 +38,7 @@ namespace BattleCities.Core
         public Box BlockingBounds => Phase==TurretPhase.Deployed?Bounds:Clearance;
         public Box Bounds => new Box(X-32*ModelScale,Y-32*ModelScale,64*ModelScale,64*ModelScale);
     }
-    public struct Command { public Facing? Move, Aim; public bool Fire, SecondaryFire; }
+    public struct Command { public Facing? Move, Aim; public bool Fire, PowerShot, SecondaryFire; }
     public sealed class MineState
     {
         public int Id;
@@ -68,7 +68,9 @@ namespace BattleCities.Core
     public sealed class TankState
     {
         public const float MovementHalfSize = 30;
-        public int Id, Tier, Health = 1;
+        public int Id, Tier, Health = 3;
+        public static int StartingHealth(int tier,bool player) => player?5:tier==3?6:tier==2?4:3;
+        public int MaxHealth => StartingHealth(Tier,Player);
         public bool Player, Drop, Alive = true, Moving;
         public float X, Y, Shield, Cooldown, Think, FireDelay, Slide, SpeedBoost;
         public int AiState;
@@ -81,7 +83,7 @@ namespace BattleCities.Core
     public sealed class ShotState
     {
         public int Id, Owner;
-        public bool Player, Alive = true;
+        public bool Player, Alive = true, PowerShot;
         public int WallDamage, Damage = 1;
         public float X, Y, Speed;
         public Facing Direction;
@@ -135,6 +137,7 @@ namespace BattleCities.Core
         public event Action TerrainChanged;
         public Box BaseBounds { get; private set; }
         public TankState Player => Tanks.Find(t => t.Player && t.Alive);
+        public bool CanAcceptPlayerFire => !Lost&&!Won&&intro<=0&&Player!=null;
         public int Remaining => wave.Length - spawned + Tanks.Count(t => !t.Player && t.Alive);
         public int TotalEnemies => wave.Length;
         public event Action<Wall> WallDestroyed;
@@ -149,9 +152,13 @@ namespace BattleCities.Core
         private int spawned, nextId, spawnIndex;
         private float spawnTimer = .16f, respawnTimer, intro = 2;
         private uint random = 12345;
+        public float PlayerNormalReloadSeconds { get; }
+        public float PlayerUpgradedNormalReloadSeconds { get; }
 
-        public BattleSimulation(MapData map, int stage = 1)
+        public BattleSimulation(MapData map, int stage = 1, float normalReloadSeconds = .12f, float upgradedNormalReloadSeconds = .08f)
         {
+            PlayerNormalReloadSeconds=ValidReloadSeconds(normalReloadSeconds,.12f);
+            PlayerUpgradedNormalReloadSeconds=ValidReloadSeconds(upgradedNormalReloadSeconds,.08f);
             Stage=stage; Width=(map.field?.widthTiles ?? 13)*64; Height=(map.field?.heightTiles ?? 13)*64;
             foreach (var r in map.terrain?.regions ?? Array.Empty<Region>()) AddRegion(r.type, r.x,r.y,r.width,r.height);
             float bx=map.@base?.x ?? Width/2-64, by=map.@base?.y ?? Height-96;
@@ -187,7 +194,7 @@ namespace BattleCities.Core
             unchecked { random+=0x6d2b79f5;uint t=random;t=(t^(t>>15))*(t|1);t^=t+(t^(t>>7))*(t|61);return min+(int)(((t^(t>>14))/4294967296.0)*(max-min)); }
         }
         public static void Vector(Facing d,out float x,out float y) { x=d==Facing.Right?1:d==Facing.Left?-1:0; y=d==Facing.Down?1:d==Facing.Up?-1:0; }
-        private void SpawnPlayer() { Tanks.Add(new TankState{Id=++nextId,Player=true,X=playerSpawn.x+32,Y=playerSpawn.y+32,Shield=3.5f}); }
+        private void SpawnPlayer() { Tanks.Add(new TankState{Id=++nextId,Player=true,Health=TankState.StartingHealth(0,true),X=playerSpawn.x+32,Y=playerSpawn.y+32,Shield=3.5f}); }
         public void Step(Command command)
         {
             if(Lost || Won) return;
@@ -215,7 +222,7 @@ namespace BattleCities.Core
                 if(command.Move.HasValue) { Rotate(p,command.Move.Value);Move(p);p.Slide=icy?.5f:0; }
                 else if(p.Slide>0) {p.Slide-=dt;Move(p);}
                 p.Aim=command.Aim ?? p.Direction;
-                if(command.Fire) Fire(p);
+                if(command.Fire) Fire(p,command.PowerShot);
                 if(command.SecondaryFire) UseSecondary();
                 if(PickupType!=null&&p.Bounds.Overlaps(new Box(PickupX-32,PickupY-32,64,64))){ApplyPowerup(PickupType);Score+=500;if(PickupClaim!=null)CurrencyClaimed?.Invoke(PickupClaim);PickupType=null;PickupClaim=null;}
             }
@@ -229,7 +236,7 @@ namespace BattleCities.Core
                 if(!Tanks.Any(t=>t.Alive&&box.Overlaps(t.Bounds))&&!Turrets.Any(t=>t.BlocksPath&&box.Overlaps(t.BlockingBounds)))
                 {
                     var spec=wave[spawned++];int tier=Math.Max(0,"abcd".IndexOf(spec.tier ?? "a"));
-                    Tanks.Add(new TankState{Id=++nextId,Tier=tier,Health=tier==3?4:1,Drop=spec.drop,X=point.x+32,Y=point.y+32,Direction=Facing.Down,Aim=Facing.Down});
+                    Tanks.Add(new TankState{Id=++nextId,Tier=tier,Health=TankState.StartingHealth(tier,false),Drop=spec.drop,X=point.x+32,Y=point.y+32,Direction=Facing.Down,Aim=Facing.Down});
                     spawnIndex++;spawnTimer=3;if(spec.drop)PickupType=null;
                 }
             }
@@ -535,12 +542,18 @@ namespace BattleCities.Core
             t.X+=sx*sign*correction;t.Y+=sy*sign*correction;moved=correction;
             return true;
         }
-        public bool Fire(TankState tank)
+        public bool CanFire(TankState tank)
+        {return !Lost&&!Won&&intro<=0&&tank!=null&&tank.Alive&&tank.Cooldown<=0&&Shots.Count(s=>s.Alive&&s.Owner==tank.Id)<(tank.Player?16:1);}
+        private static float ValidReloadSeconds(float seconds,float fallback)
+        {return float.IsNaN(seconds)||float.IsInfinity(seconds)?fallback:Math.Max(StepSeconds,seconds);}
+        public float NormalReloadSeconds(TankState tank)
+        {return tank.Player?(tank.Tier>=2?PlayerUpgradedNormalReloadSeconds:PlayerNormalReloadSeconds):.16f;}
+        public bool Fire(TankState tank,bool powerShot=false)
         {
-            if(!tank.Alive||tank.Cooldown>0||Shots.Count(s=>s.Alive&&s.Owner==tank.Id)>=(tank.Player&&tank.Tier>=2?2:1))return false;
+            if(!CanFire(tank))return false;
             Vector(tank.Aim,out var x,out var y);
-            var s=new ShotState{Id=++nextId,Owner=tank.Id,Player=tank.Player,X=tank.X+x*32,Y=tank.Y+y*32,Direction=tank.Aim,Speed=(tank.Player?tank.Tier>=1:tank.Tier==2)?900:600,WallDamage=tank.Player&&tank.Tier==3?2:1};
-            Shots.Add(s);tank.Cooldown=tank.Player&&tank.Tier>=2?.04f:.16f;ShotFired?.Invoke(s);return true;
+            var s=new ShotState{Id=++nextId,Owner=tank.Id,Player=tank.Player,PowerShot=powerShot,Damage=powerShot?3:1,X=tank.X+x*32,Y=tank.Y+y*32,Direction=tank.Aim,Speed=powerShot||(tank.Player?tank.Tier>=1:tank.Tier==2)?900:600,WallDamage=powerShot?2:1};
+            Shots.Add(s);tank.Cooldown=powerShot?.25f:NormalReloadSeconds(tank);ShotFired?.Invoke(s);return true;
         }
         private void MoveShot(ShotState s)
         {
@@ -548,50 +561,125 @@ namespace BattleCities.Core
             while(left>0&&s.Alive)
             {
                 float step=Math.Min(1,left);s.X+=dx*step;s.Y+=dy*step;left-=step;var box=s.Bounds;
-                if(box.X<0||box.Y<0||box.Right>Width||box.Bottom>Height){s.Alive=false;ShotImpact?.Invoke(s);break;}
+                if(box.X<0||box.Y<0||box.Right>Width||box.Bottom>Height){ImpactShot(s);break;}
                 var wall=Terrain.FirstOrDefault(w=>w.Alive&&w.StopsBullet&&box.Overlaps(w.Bounds));
-                if(wall!=null){if(wall.Brick||s.WallDamage==2)DestroyWall(wall,s);s.Alive=false;ShotImpact?.Invoke(s);break;}
-                if(BaseAlive&&box.Overlaps(BaseBounds)){BaseAlive=false;Lost=true;s.Alive=false;ShotImpact?.Invoke(s);BaseDestroyed?.Invoke();break;}
+                if(wall!=null){if(!s.PowerShot&&(wall.Brick||s.WallDamage==2))DestroyWall(wall,s);ImpactShot(s,null,wall);break;}
+                if(BaseAlive&&box.Overlaps(BaseBounds)){BaseAlive=false;Lost=true;ImpactShot(s);BaseDestroyed?.Invoke();break;}
                 var other=Shots.Find(b=>b!=s&&b.Alive&&b.Player!=s.Player&&box.Overlaps(b.Bounds));
-                if(other!=null){s.Alive=false;other.Alive=false;ShotImpact?.Invoke(s);break;}
+                if(other!=null)
+                {
+                    // Resolve the charged projectile whichever shot moves first.
+                    // Only one explosion is emitted for the interception.
+                    if(other.PowerShot&&!s.PowerShot){s.Alive=false;ImpactShot(other);}
+                    else{other.Alive=false;ImpactShot(s);}
+                    break;
+                }
                 var landDrone=LandDrones.Find(d=>d.Alive&&!s.Player&&box.Overlaps(d.Bounds));
                 if(landDrone!=null)
                 {
-                    s.Alive=false;ShotImpact?.Invoke(s);landDrone.Health-=Math.Max(1,s.Damage);
+                    ImpactShot(s);landDrone.Health-=Math.Max(1,s.Damage);
                     if(landDrone.Health<=0){landDrone.Alive=false;LandDroneExploded?.Invoke(landDrone);}
                     break;
                 }
                 var turret=Turrets.Find(t=>t.BlocksPath&&!s.Player&&box.Overlaps(t.Bounds));
                 if(turret!=null)
                 {
-                    s.Alive=false;ShotImpact?.Invoke(s);turret.Health-=Math.Max(1,s.Damage);TurretHit?.Invoke(turret);
+                    ImpactShot(s);turret.Health-=Math.Max(1,s.Damage);TurretHit?.Invoke(turret);
                     if(turret.Health<=0){turret.Alive=false;TurretDestroyed?.Invoke(turret);}break;
                 }
                 var tank=Tanks.Find(t=>t.Alive&&t.Player!=s.Player&&box.Overlaps(t.Bounds));
-                if(tank!=null){s.Alive=false;ShotImpact?.Invoke(s);if(tank.Shield<=0){tank.Health-=Math.Max(1,s.Damage);if(tank.Drop){tank.Drop=false;DropRequested?.Invoke();}if(tank.Health<=0)Kill(tank);}}
+                if(tank!=null){ImpactShot(s,tank);DamageTank(tank,Math.Max(1,s.Damage));}
             }
+        }
+        private void ImpactShot(ShotState shot,TankState directHit=null,Wall wall=null)
+        {
+            if(!shot.Alive)return;
+            shot.Alive=false;
+            ShotImpact?.Invoke(shot);
+            if(!shot.PowerShot)return;
+            float x=shot.X,y=shot.Y,radius=PowerShotBlastRadius;
+            if(wall!=null)
+            {
+                WallImpactPoint(wall,shot,out x,out y);
+                if(!wall.Brick)radius=PowerShotSteelBlastRadius;
+            }
+            // Every power-shot explosion damages nearby walls, even when the
+            // projectile collided with a tank, another bullet or the map edge.
+            DestroyWallsInBlast(shot,x,y,radius);
+            if(!shot.Player)return;
+            // Include a tank when any part of its footprint enters the circle.
+            // Direct hits retain their existing damage; splash never hits twice.
+            foreach(var tank in Tanks.Where(t=>t.Alive&&!t.Player&&t!=directHit).ToArray())
+            {
+                var bounds=tank.Bounds;
+                float nearestX=Math.Max(bounds.X,Math.Min(bounds.Right,x));
+                float nearestY=Math.Max(bounds.Y,Math.Min(bounds.Bottom,y));
+                if(DistanceSquared(x,y,nearestX,nearestY)<=radius*radius)DamageTank(tank,1);
+            }
+        }
+        private void DamageTank(TankState tank,int damage)
+        {
+            if(!tank.Alive||tank.Shield>0)return;
+            tank.Health-=damage;
+            if(tank.Drop){tank.Drop=false;DropRequested?.Invoke();}
+            if(tank.Health<=0)Kill(tank);
         }
         public void Kill(TankState t)
         {
             if(!t.Alive)return;t.Alive=false;TankDestroyed?.Invoke(t);
             if(t.Player){Lives--;respawnTimer=1.5f;}else Score+=(t.Tier+1)*100;
         }
-        // Port of TerrainTileDestroyer: snap the 64x16 impact band, select exposed
-        // contacts on the front face, flood only touching cells, then cap damage.
+        public const float PowerShotBlastRadius=56; // Slightly smaller than one map tile (64).
+        public const float PowerShotSteelBlastRadius=32; // Steel absorbs half the original blast reach.
+        // Normal rounds remove a connected front strip. Power shots use a circle
+        // centered on the wall contact, independent of the direction of travel.
         public void DestroyWall(Wall hit,ShotState shot)
         {
+            if(shot.PowerShot){DestroyPowerShotRadius(hit,shot);return;}
             bool vertical=shot.Direction==Facing.Up||shot.Direction==Facing.Down;
             float axis=vertical?shot.X:shot.Y;
-            float min=(float)Math.Floor((axis-32)/16+.5)*16;
+            float bandWidth=64;
+            float min=(float)Math.Floor((axis-bandWidth/2)/16+.5)*16;
             float face=Face(hit.Bounds,shot.Direction);
-            var candidates=Terrain.Where(w=>w.Alive&&w.StopsBullet&&Math.Abs(Face(w.Bounds,shot.Direction)-face)<.01f&&(vertical?w.Bounds.X:w.Bounds.Y)<min+64&&(vertical?w.Bounds.Right:w.Bounds.Bottom)>min&&!Covered(w,shot.Direction)).ToList();
+            var candidates=Terrain.Where(w=>w.Alive&&w.StopsBullet&&Math.Abs(Face(w.Bounds,shot.Direction)-face)<.01f&&(vertical?w.Bounds.X:w.Bounds.Y)<min+bandWidth&&(vertical?w.Bounds.Right:w.Bounds.Bottom)>min&&!Covered(w,shot.Direction)).ToList();
             if(candidates.Count==0)return;
             var seed=candidates.OrderBy(w=>Math.Abs((vertical?w.Bounds.X+w.Bounds.W/2:w.Bounds.Y+w.Bounds.H/2)-axis)).First();
             var group=new List<Wall>{seed};candidates.Remove(seed);
             bool added=true;
             while(added){added=false;for(int i=candidates.Count-1;i>=0;i--){var w=candidates[i];if(group.Any(g=>vertical?(g.Bounds.Right==w.Bounds.X||w.Bounds.Right==g.Bounds.X):(g.Bounds.Bottom==w.Bounds.Y||w.Bounds.Bottom==g.Bounds.Y))){group.Add(w);candidates.RemoveAt(i);added=true;}}}
             foreach(var w in group.OrderBy(w=>Math.Abs((vertical?w.Bounds.X+w.Bounds.W/2:w.Bounds.Y+w.Bounds.H/2)-axis)).Take(Math.Min(shot.WallDamage,2)*4))
-                if(w.Brick||shot.WallDamage==2){w.Alive=false;WallDestroyed?.Invoke(w);}
+                if(w.Brick||shot.WallDamage==2)
+                {
+                    w.Alive=false;
+                    WallDestroyed?.Invoke(w);
+                }
+        }
+        private void DestroyPowerShotRadius(Wall hit,ShotState shot)
+        {
+            // Project the projectile center onto the contacted face so the circle
+            // starts at the wall surface, rather than short of it or on a grid snap.
+            WallImpactPoint(hit,shot,out var x,out var y);
+            float radius=hit.Brick?PowerShotBlastRadius:PowerShotSteelBlastRadius;
+            DestroyWallsInBlast(shot,x,y,radius);
+        }
+        private void DestroyWallsInBlast(ShotState shot,float x,float y,float radius)
+        {
+            float radiusSquared=radius*radius;
+            float steelRadiusSquared=PowerShotSteelBlastRadius*PowerShotSteelBlastRadius;
+            // Cell-center inclusion approximates a circle on the destructible grid
+            // without removing a whole block for a tiny overlap at the outer edge.
+            var affected=Terrain.Where(w=>w.Alive&&w.StopsBullet
+                &&(w.Brick||shot.WallDamage==2)
+                // A steel impact shrinks the whole blast; steel caught in a brick
+                // impact also resists destruction outside its smaller inner radius.
+                &&DistanceSquared(x,y,w.Bounds.X+w.Bounds.W/2,w.Bounds.Y+w.Bounds.H/2)<=(w.Brick?radiusSquared:steelRadiusSquared)).ToArray();
+            foreach(var wall in affected){wall.Alive=false;WallDestroyed?.Invoke(wall);}
+        }
+        private static void WallImpactPoint(Wall hit,ShotState shot,out float x,out float y)
+        {
+            bool vertical=shot.Direction==Facing.Up||shot.Direction==Facing.Down;
+            x=vertical?Math.Max(hit.Bounds.X,Math.Min(hit.Bounds.Right,shot.X)):Face(hit.Bounds,shot.Direction);
+            y=vertical?Face(hit.Bounds,shot.Direction):Math.Max(hit.Bounds.Y,Math.Min(hit.Bounds.Bottom,shot.Y));
         }
         private static float Face(Box b,Facing d) => d==Facing.Up?b.Bottom:d==Facing.Down?b.Y:d==Facing.Left?b.Right:b.X;
         private bool Covered(Wall w,Facing d)

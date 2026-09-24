@@ -38,6 +38,7 @@ MonoBehaviour:
   ScoreIcon: {fileID: 21300000, guid: 20a96ad9b2e8eca47a233780ac4daa59, type: 3}
   HighScoreIcon: {fileID: 21300000, guid: e60c9f98b6d1d834cb353c906d7b87ab, type: 3}
   TrophyIcon: {fileID: 21300000, guid: 56b558210a1524642ba8c468427bc159, type: 3}
+  TimerIcon: {fileID: 21300000, guid: cbe806c7c391a664eac0275210d217a0, type: 3}
   RewardIcons:
   - {fileID: 21300000, guid: aa945f6353190a14cb8a60885d7b572e, type: 3}
   - {fileID: 21300000, guid: 17d405c96b00ebb41bde254064c2be39, type: 3}

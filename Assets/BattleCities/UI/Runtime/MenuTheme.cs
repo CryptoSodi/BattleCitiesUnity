@@ -10,7 +10,7 @@ namespace BattleCities.UI
         public Sprite Battlefield, PsgBattlefield, Background, RewardGarden, Logo, PlayButton;
         public Sprite BlueFrame, CreamPanel, GoldPanel, SelectedPanel, DarkPanel, SilverFrame, FocusRing, Rounded;
         public Sprite[] NavigationIcons;
-        public Sprite SettingsIcon, ScoreIcon, HighScoreIcon, TrophyIcon;
+        public Sprite SettingsIcon, ScoreIcon, HighScoreIcon, TrophyIcon, TimerIcon;
         public Sprite[] RewardIcons;
         public Color Navy = new Color32(6, 29, 54, 255);
         public Color Gold = new Color32(255, 220, 64, 255);

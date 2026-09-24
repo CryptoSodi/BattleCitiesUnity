@@ -52,9 +52,14 @@ namespace BattleCities.Editor
                 MainMenuBuilder.Box((RectTransform)podium,.12f,.635f,.76f,.27f);
                 var rank=podium.Find("Rank").GetComponent<Text>();
                 var amount=podium.Find("Reward").GetComponent<Text>();
-                MainMenuBuilder.Box(rank.rectTransform,0,.02f,1,.42f);
-                MainMenuBuilder.Box(amount.rectTransform,0,.46f,1,.48f);
-                rank.resizeTextMinSize=12;amount.resizeTextMinSize=12;
+                MainMenuBuilder.Box(rank.rectTransform,.02f,.04f,.96f,.40f);
+                MainMenuBuilder.Box(amount.rectTransform,.02f,.48f,.96f,.40f);
+                rank.fontSize=38;rank.resizeTextMinSize=18;rank.resizeTextMaxSize=38;
+                amount.fontSize=30;amount.resizeTextMinSize=16;amount.resizeTextMaxSize=30;
+                rank.fontStyle=FontStyle.Bold;amount.fontStyle=FontStyle.Bold;
+                rank.alignment=TextAnchor.MiddleCenter;amount.alignment=TextAnchor.MiddleCenter;
+                rank.alignByGeometry=true;amount.alignByGeometry=true;
+                ConfigureShadow(rank);ConfigureShadow(amount);
                 amount.color=i==1?new Color32(255,224,62,255):Color.white;
                 var copy=UnityEngine.Object.Instantiate(item.gameObject);
                 copy.name="RewardPodium-"+names[i];
@@ -62,6 +67,13 @@ namespace BattleCities.Editor
                 if(i==1)PrefabUtility.SaveAsPrefabAsset(copy,MainMenuBuilder.Root+"Prefabs/Shared/RewardPodium.prefab");
                 UnityEngine.Object.DestroyImmediate(copy);
             }
+        }
+        private static void ConfigureShadow(Text label)
+        {
+            var shadow=label.GetComponent<Shadow>();
+            if(!shadow)return;
+            shadow.effectColor=new Color(0,0,.02f,.85f);
+            shadow.effectDistance=new Vector2(2,-2);
         }
     }
 }
