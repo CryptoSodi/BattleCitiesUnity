@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using BattleCities.Core;
 using UnityEngine;
 
@@ -24,13 +23,11 @@ namespace BattleCities
         }
 
         private readonly ChargedFireInput primaryCharge = new ChargedFireInput();
-        private readonly Queue<bool> primaryShots = new Queue<bool>();
         private int chargingTankId;
 
         private void ResetPrimaryFire()
         {
             primaryCharge.Reset();
-            primaryShots.Clear();
             chargingTankId = 0;
         }
 
@@ -43,9 +40,7 @@ namespace BattleCities
                 return;
             }
             if (chargingTankId != player.Id) { ResetPrimaryFire(); chargingTankId = player.Id; }
-            var shot = primaryCharge.Tick(fire.WasPressedThisFrame(), fire.WasReleasedThisFrame(), fire.IsPressed(), dt);
-            // Preserve short taps between fixed steps; cap the buffer to avoid long backlogs.
-            if (shot.HasValue && primaryShots.Count < 4) primaryShots.Enqueue(shot.Value);
+            primaryCharge.Sample(fire.WasPressedThisFrame(), fire.WasReleasedThisFrame(), fire.IsPressed(), dt, Simulation.CanFire(player));
         }
 
         private void QueuePrimaryCommand(ref Command command)
@@ -54,9 +49,9 @@ namespace BattleCities
             command.PowerShot = false;
             var player = Simulation.Player;
             if (player == null || player.Id != chargingTankId) { ResetPrimaryFire(); return; }
-            if (primaryShots.Count == 0 || !Simulation.CanFire(player)) return;
+            if (!primaryCharge.TryTakeShot(Simulation.CanFire(player), out var powerShot)) return;
             command.Fire = true;
-            command.PowerShot = primaryShots.Dequeue();
+            command.PowerShot = powerShot;
         }
     }
 }

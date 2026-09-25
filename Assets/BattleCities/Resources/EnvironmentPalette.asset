@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89a7dbc218a4d344d833f7baf11bf7a1, type: 3}
+  m_Name: EnvironmentPalette
+  m_EditorClassIdentifier: Assembly-CSharp::BattleCities.EnvironmentPalette
+  Prefabs:
+  - {fileID: 572021017345896252, guid: def1d0b6d0bcc9943a756183b2f3154b, type: 3}
+  - {fileID: 9137855415864845743, guid: eb9680cf81e94c846b8d64b1390d90f6, type: 3}
+  - {fileID: 2668426983653817528, guid: f8f04c1f45041d04e932b068d8fdfbc8, type: 3}
+  - {fileID: 1344608620052058205, guid: c607c9f2fa7ccdf41bd3939b61c60d68, type: 3}
+  - {fileID: 2707682891011778218, guid: 43400f310ef897c4798ce165fa940c20, type: 3}
+  - {fileID: 634722757410812759, guid: a27dee06533f4054284a2be35e2feb16, type: 3}
+  - {fileID: 371377208204540234, guid: b878c6410b57cb94ab788fb6ce5ef2a7, type: 3}
+  - {fileID: 6056509317736305182, guid: af8420ff4a78fe0438f530afdba77c40, type: 3}
+  - {fileID: 4730856574729597974, guid: 5e15b3372455f944ca678ec3f4939b9a, type: 3}
+  - {fileID: 776761154093946001, guid: 8d5386a8a67d1634cbf920af93e4be0b, type: 3}
+  - {fileID: 7453689238352783614, guid: 65861f42908fc0d42abb683ab7bdacae, type: 3}
+  - {fileID: 8630813772360471925, guid: e0f45979e6301d647baf1c4e1924e6f8, type: 3}

@@ -158,6 +158,17 @@ namespace BattleCities
                 Graphics.DrawMesh(quad,Matrix4x4.TRS(p,rotation,new Vector3(step-.014f,.035f,1)),solid,0,camera,0,properties,false,false,false);
             }
         }
+        public void CooldownBar(Vector3 position,float progress,Camera camera,bool charging=false)
+        {
+            var rotation=camera.transform.rotation;
+            properties.SetColor("_BaseColor",new Color(.015f,.025f,.04f,.92f));
+            Graphics.DrawMesh(quad,Matrix4x4.TRS(position,rotation,new Vector3(.76f,.045f,1)),solid,0,camera,0,properties,false,false,false);
+            float width=.69f*Mathf.Clamp01(progress);
+            if(width<=0)return;
+            properties.SetColor("_BaseColor",charging?new Color(1f,.2f,.16f,.95f):new Color(.25f,.82f,1f,.95f));
+            var fill=position+camera.transform.right*(-.345f+width*.5f)-camera.transform.forward*.005f;
+            Graphics.DrawMesh(quad,Matrix4x4.TRS(fill,rotation,new Vector3(width,.021f,1)),solid,0,camera,0,properties,false,false,false);
+        }
         void Draw(Vector3 position,Quaternion rotation,float size,Color color,Material material,Camera camera)
         {
             properties.SetColor("_BaseColor",color);

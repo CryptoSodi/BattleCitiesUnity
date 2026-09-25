@@ -1,0 +1,163 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5057318018766790771
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1855812449865878729}
+  m_Layer: 0
+  m_Name: Intact
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1855812449865878729
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5057318018766790771}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 855757168899303006}
+  m_Father: {fileID: 6484384374353908811}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6820044651394755762
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6484384374353908811}
+  - component: {fileID: 7453689238352783614}
+  m_Layer: 0
+  m_Name: forest_bush
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6484384374353908811
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6820044651394755762}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1855812449865878729}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7453689238352783614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6820044651394755762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17d62a983d7e59b40963db131f8d9c2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BattleCities.EnvironmentPiece
+  Key: forest_bush
+  Role: passableCover
+  FootprintWidth: 21
+  FootprintHeight: 21
+  IntactVisual: {fileID: 5057318018766790771}
+  DestroyedVisual: {fileID: 0}
+--- !u!1001 &894804419982508469
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1855812449865878729}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.41786343
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.30984566
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.4178634
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.000000024906601
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.0038284585
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.00000000622665
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 556b0f342f3405449832cd2ed1bd4873, type: 2}
+    - target: {fileID: 919132149155446097, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+      propertyPath: m_Name
+      value: Bush_1_B_Color1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+--- !u!4 &855757168899303006 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 59b778601888a78459e1b21e6c8f199b, type: 3}
+  m_PrefabInstance: {fileID: 894804419982508469}
+  m_PrefabAsset: {fileID: 0}

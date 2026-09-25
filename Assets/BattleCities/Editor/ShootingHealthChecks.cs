@@ -81,11 +81,65 @@ namespace BattleCities
             PowerShotRadiusChecks();
             PowerShotSplashChecks();
             IndirectWallBlastChecks();
+            PowerBulletInterceptionChecks();
             NormalReloadChecks();
+            FireBufferChecks();
             Debug.Log("SHOOTING/HEALTH PASS: tap/hold/release, cancellation, threshold, cooldown, rapid rounds, tier upgrades, health, shields, kills, respawn and wall destruction.");
+        }
+        static void FireBufferChecks()
+        {
+            var input=new ChargedFireInput();var sim=Ready(.3f,.2f);
+            input.Sample(true,true,false,.01f,sim.CanFire(sim.Player));
+            Check(input.TryTakeShot(sim.CanFire(sim.Player),out var power)&&!power&&sim.Fire(sim.Player,power),"ready tap fires one normal shot");
+            for(int i=0;i<5;i++)
+            {
+                Step(sim,2);input.Sample(true,true,false,.01f,sim.CanFire(sim.Player));
+                Check(!input.TryTakeShot(sim.CanFire(sim.Player),out power),"rapid tap during reload is ignored");
+            }
+            Step(sim,20);Check(!input.TryTakeShot(true,out power),"reload completion cannot drain old rapid taps");
+            input.Sample(true,true,false,.01f,true);
+            input.Sample(true,false,true,.01f,true);
+            Check(!input.TryTakeShot(true,out power),"new hold cancels unconsumed normal tap between fixed steps");
+            for(int i=0;i<Math.Ceiling(ChargedFireInput.ChargeDuration/BattleSimulation.StepSeconds)+2;i++)
+            {
+                input.Sample(false,false,true,BattleSimulation.StepSeconds,sim.CanFire(sim.Player));
+                Check(!input.TryTakeShot(sim.CanFire(sim.Player),out power),"no shots while charging even after reload finishes");
+                Step(sim,1);
+            }
+            Check(input.Ready,"hold still reaches full power");
+            input.Sample(false,true,false,.01f,sim.CanFire(sim.Player));
+            Check(input.TryTakeShot(sim.CanFire(sim.Player),out power)&&power&&sim.Fire(sim.Player,power),"charged release fires power shot");
+            Check(!input.TryTakeShot(true,out power),"charged release fires only once across fixed steps");
+            input.Sample(true,true,true,.01f,true);
+            Check(input.IsCharging&&!input.TryTakeShot(true,out power),"release and repress in one render frame stays charging");
+            input.Reset();input.Sample(true,true,false,.01f,true);input.Reset();
+            Check(!input.TryTakeShot(true,out power),"reset cancels a pending shot");
+            foreach(float interval in new[]{.3f,.2f})
+            {
+                sim=Ready(interval,interval);input.Reset();int shots=0,lastTick=-1000;
+                sim.ShotFired+=shot=>{Check((sim.Tick-lastTick)*BattleSimulation.StepSeconds+.00001f>=interval,"rapid taps respect configured minimum shot interval");lastTick=sim.Tick;shots++;};
+                for(int i=0;i<120;i++)
+                {
+                    input.Sample(true,true,false,BattleSimulation.StepSeconds,sim.CanFire(sim.Player));
+                    var command=new Command();command.Fire=input.TryTakeShot(sim.CanFire(sim.Player),out power);command.PowerShot=power;sim.Step(command);
+                }
+                Check(shots>=5&&shots<=11,"continuous taps produce reload-limited shots");
+            }
+            Debug.Log("FIRE BUFFER PASS: rapid taps respect reload, no queued bursts, charging suppresses normal shots, one power shot on release, same-frame input and reset.");
         }
         static void NormalReloadChecks()
         {
+            var charge=new ChargedFireInput();charge.Tick(true,false,true,0);
+            charge.Tick(false,false,true,.99f);
+            Check(!charge.Ready&&Math.Abs(charge.Progress-.99f)<.00001f,"power shot is not charged before one second");
+            Check(charge.Tick(false,true,false,.01f)==true,"one-second charge releases power shot");
+            var progressSim=Ready(.5f,.35f);
+            Check(progressSim.Player.ReloadProgress==1,"cooldown bar starts full");
+            progressSim.Fire(progressSim.Player);Check(progressSim.Player.ReloadProgress==0,"normal shot empties cooldown bar");
+            Step(progressSim,15);Check(Math.Abs(progressSim.Player.ReloadProgress-.5f)<.001f,"cooldown bar half full halfway through reload");
+            Step(progressSim,16);Check(progressSim.Player.ReloadProgress==1,"cooldown bar full when ready");
+            progressSim.Fire(progressSim.Player,true);Check(progressSim.Player.ReloadProgress==0,"power-shot recovery empties cooldown bar");
+            Step(progressSim,8);Check(progressSim.Player.ReloadProgress>.5f&&progressSim.Player.ReloadProgress<.6f,"power-shot bar uses its own recovery duration");
             var sim=Ready(.31f,.11f);
             Check(sim.Fire(sim.Player)&&Math.Abs(sim.Player.Cooldown-.31f)<.00001f,"selected tank normal reload applied");
             Step(sim,18);Check(!sim.Fire(sim.Player),"normal shot blocked until selected reload completes");
@@ -134,7 +188,8 @@ namespace BattleCities
                 var normal=new ShotState{Id=99611,Player=false,Damage=1,WallDamage=1,X=400,Y=300,Speed=600,Direction=Facing.Down};
                 sim.Shots.Add(powerMovesFirst?power:normal);sim.Shots.Add(powerMovesFirst?normal:power);
                 int events=0;sim.WallDestroyed+=w=>events++;Step(sim,3);
-                Check(!brick.Alive&&!innerSteel.Alive&&outerSteel.Alive&&events==2,"bullet interception destroys nearby walls with steel resistance in either update order");
+                Check(power.Alive&&power.Damage==2&&!normal.Alive,"power shot survives a bullet interception in either update order");
+                Check(brick.Alive&&innerSteel.Alive&&outerSteel.Alive&&events==0,"bullet interception does not detonate the power shot near walls");
             }
             {
                 var sim=Ready();sim.AddRegion("brick",432,0,16,16);var brick=sim.Terrain.Last();
@@ -146,7 +201,7 @@ namespace BattleCities
                 sim.WallDestroyed+=w=>events++;sim.Fire(sim.Player,true);Step(sim,15);
                 Check(events==4&&sim.Terrain.All(w=>!w.Alive),"direct wall impact applies radial damage exactly once");
             }
-            Debug.Log("INDIRECT WALL BLAST PASS: tank impacts in all four directions, interception update orders, boundary impacts, steel resistance, outside walls, normal shots and single destruction events.");
+            Debug.Log("INDIRECT WALL BLAST PASS: tank impacts in all four directions, boundary impacts, steel resistance, outside walls, normal shots and single destruction events.");
         }
         static void PowerShotSplashChecks()
         {
@@ -202,9 +257,37 @@ namespace BattleCities
                 sim.Shots.Add(powerMovesFirst?power:normal);sim.Shots.Add(powerMovesFirst?normal:power);
                 int impacts=0;sim.ShotImpact+=s=>impacts++;
                 Step(sim,3);
-                Check(!power.Alive&&!normal.Alive&&nearby.Health==2&&impacts==1,"intercepted power shot splashes once regardless of update order");
+                Check(power.Alive&&power.Damage==2&&!normal.Alive&&nearby.Health==3&&impacts==1,"intercepted power shot continues without splash in either update order");
             }
-            Debug.Log("POWER SHOT SPLASH PASS: wall/tank/projectile impacts, 1 damage, direct-hit exclusion, shields, steel absorption, bounds, player safety, normal shots and kill/drop/score uniqueness.");
+            Debug.Log("POWER SHOT SPLASH PASS: wall/tank impacts, 1 damage, direct-hit exclusion, shields, steel absorption, bounds, player safety, normal shots and kill/drop/score uniqueness.");
+        }
+        static void PowerBulletInterceptionChecks()
+        {
+            foreach(bool powerMovesFirst in new[]{false,true})
+            {
+                var sim=Ready();var target=new TankState{Id=99750,Tier=3,Health=6,X=400,Y=225};
+                sim.Tanks.Add(target);
+                var power=new ShotState{Id=99751,Player=true,PowerShot=true,Damage=3,WallDamage=2,X=400,Y=320,Speed=600,Direction=Facing.Up};
+                var normal=new ShotState{Id=99752,Player=false,Damage=1,WallDamage=1,X=400,Y=300,Speed=600,Direction=Facing.Down};
+                sim.Shots.Add(powerMovesFirst?power:normal);sim.Shots.Add(powerMovesFirst?normal:power);
+                int powerImpacts=0;sim.ShotImpact+=shot=>{if(shot==power)powerImpacts++;};
+                Step(sim,3);
+                Check(power.Alive&&power.Damage==2&&!normal.Alive&&powerImpacts==0,"one opposing bullet costs one attack power without consuming or detonating the power shot");
+                Step(sim,12);
+                Check(!power.Alive&&target.Health==4&&powerImpacts==1,"weakened power shot continues to its target and deals two direct damage");
+            }
+            {
+                var sim=Ready();
+                var power=new ShotState{Id=99760,Player=true,PowerShot=true,Damage=3,WallDamage=2,X=600,Y=500,Speed=600,Direction=Facing.Up};
+                sim.Shots.Add(power);
+                for(int i=0;i<3;i++)sim.Shots.Add(new ShotState{Id=99761+i,Player=false,Damage=1,WallDamage=1,X=600,Y=470-i*50,Speed=0,Direction=Facing.Down});
+                int powerImpacts=0;sim.ShotImpact+=shot=>{if(shot==power)powerImpacts++;};
+                for(int i=0;i<20&&power.Damage>1;i++)sim.Step(default);
+                Check(power.Alive&&power.Damage==1&&sim.Shots.Count(s=>!s.Player)==1&&powerImpacts==0,"two interceptions reduce power from three to one without detonating it");
+                for(int i=0;i<20&&power.Alive;i++)sim.Step(default);
+                Check(!power.Alive&&sim.Shots.All(s=>s.Player)&&powerImpacts==1,"third interception spends the last attack point and ends the power shot once");
+            }
+            Debug.Log("POWER BULLET INTERCEPTION PASS: both update orders, retained travel, reduced target damage, no early explosion and depletion after three hits.");
         }
         static void PowerShotRadiusChecks()
         {

@@ -4,7 +4,10 @@ using System.Linq;
 
 namespace BattleCities.Core
 {
-    [Serializable] public sealed class MapData { public FieldData field; public TerrainData terrain; public SpawnData spawn; public BaseData @base; }
+    [Serializable] public sealed class MapData { public FieldData field; public TerrainData terrain; public GroundData ground; public MapObjectData[] objects; public MapLightData[] lights; public SpawnData spawn; public BaseData @base; }
+    [Serializable] public sealed class GroundData { public Region[] regions; }
+    [Serializable] public sealed class MapObjectData { public string type, role; public float x, y, width, height, rotation; }
+    [Serializable] public sealed class MapLightData { public float x, y, height, r, g, b, range, intensity; }
     [Serializable] public sealed class FieldData { public int widthTiles = 13, heightTiles = 13; }
     [Serializable] public sealed class TerrainData { public Region[] regions; }
     [Serializable] public sealed class Region { public string type; public float x, y, width, height; }
@@ -61,18 +64,25 @@ namespace BattleCities.Core
         public string Type;
         public Box Bounds;
         public bool Alive = true;
+        public string PropKey, PropRole;
+        public float PropRotation;
         public bool Brick => Type.Contains("brick");
-        public bool Solid => Brick || Type == "steel" || Type == "water";
-        public bool StopsBullet => Brick || Type == "steel";
+        public bool DestructibleProp => PropKey != null && PropRole == "destructibleObstacle";
+        public bool Solid => Brick || Type == "steel" || Type == "water" ||
+            (PropKey != null && (PropRole == "solidCover" || PropRole == "destructibleObstacle"));
+        public bool StopsBullet => Brick || Type == "steel" ||
+            (PropKey != null && (PropRole == "solidCover" || PropRole == "destructibleObstacle" || PropRole == "bulletBlocker"));
     }
     public sealed class TankState
     {
-        public const float MovementHalfSize = 30;
+        public const float MovementHalfSize = 32;
         public int Id, Tier, Health = 3;
         public static int StartingHealth(int tier,bool player) => player?5:tier==3?6:tier==2?4:3;
         public int MaxHealth => StartingHealth(Tier,Player);
         public bool Player, Drop, Alive = true, Moving;
         public float X, Y, Shield, Cooldown, Think, FireDelay, Slide, SpeedBoost;
+        public float ReloadDuration { get; internal set; }
+        public float ReloadProgress => Cooldown<=0?1:ReloadDuration>0?Math.Max(0,Math.Min(1,1-Cooldown/ReloadDuration)):0;
         public int AiState;
         public Facing Direction, Aim;
         public Box Bounds => new Box(X-32, Y-32, 64, 64);
@@ -161,6 +171,7 @@ namespace BattleCities.Core
             PlayerUpgradedNormalReloadSeconds=ValidReloadSeconds(upgradedNormalReloadSeconds,.08f);
             Stage=stage; Width=(map.field?.widthTiles ?? 13)*64; Height=(map.field?.heightTiles ?? 13)*64;
             foreach (var r in map.terrain?.regions ?? Array.Empty<Region>()) AddRegion(r.type, r.x,r.y,r.width,r.height);
+            foreach (var item in map.objects ?? Array.Empty<MapObjectData>()) AddEnvironmentObject(item);
             float bx=map.@base?.x ?? Width/2-64, by=map.@base?.y ?? Height-96;
             BaseBounds = new Box(bx+32,by+32,64,64);
             AddRegion("brick",bx,by,128,32); AddRegion("brick",bx,by+32,32,64); AddRegion("brick",bx+96,by+32,32,64);
@@ -187,6 +198,19 @@ namespace BattleCities.Core
                 if(Terrain.Any(existing=>existing.Type==type&&existing.Bounds.X==bounds.X&&existing.Bounds.Y==bounds.Y&&existing.Bounds.W==bounds.W&&existing.Bounds.H==bounds.H))continue;
                 Terrain.Add(new Wall{Id=++nextId,Type=type,Bounds=bounds});
             }
+        }
+        private void AddEnvironmentObject(MapObjectData item)
+        {
+            if (item == null || string.IsNullOrEmpty(item.type) ||
+                !(item.role == "solidCover" || item.role == "destructibleObstacle" ||
+                  item.role == "bulletBlocker" || item.role == "passableCover" || item.role == "groundDetail"))
+                throw new ArgumentException("Invalid map environment object or role");
+            if (item.width <= 0 || item.height <= 0 || item.x < 0 || item.y < 0 ||
+                item.x + item.width > Width || item.y + item.height > Height)
+                throw new ArgumentException("Environment object outside the map: " + item.type);
+            Terrain.Add(new Wall { Id = ++nextId, Type = "environment", PropKey = item.type,
+                PropRole = item.role, PropRotation = item.rotation,
+                Bounds = new Box(item.x, item.y, item.width, item.height) });
         }
         private int Next(int min,int max)
         {
@@ -515,19 +539,44 @@ namespace BattleCities.Core
                 // Lane offsets are world-axis differences, independent of facing.
                 // A rotated perpendicular reverses them for Left and Down.
                 float sx=dx!=0?0:1,sy=dx!=0?1:0;
-                float cross=dx!=0?t.Y:t.X;
-                float snap=(float)Math.Floor(cross/32+.5)*32-cross;
-                if(!TryLaneShift(t,dx,dy,sx,sy,snap,ref moved))
+                if(!TryOpeningShift(t,dx,dy,sx,sy,ref moved))
                 {
-                    float near=snap>0?snap-32:snap+32;
-                    if(!TryLaneShift(t,dx,dy,sx,sy,near,ref moved))
+                    float cross=dx!=0?t.Y:t.X;
+                    float snap=(float)Math.Floor(cross/32+.5)*32-cross;
+                    if(!TryLaneShift(t,dx,dy,sx,sy,snap,ref moved))
                     {
-                        float far=snap>0?snap+32:snap-32;
-                        TryLaneShift(t,dx,dy,sx,sy,far,ref moved);
+                        float near=snap>0?snap-32:snap+32;
+                        if(!TryLaneShift(t,dx,dy,sx,sy,near,ref moved))
+                        {
+                            float far=snap>0?snap+32:snap-32;
+                            TryLaneShift(t,dx,dy,sx,sy,far,ref moved);
+                        }
                     }
                 }
             }
             t.Moving=moved>0;return t.Moving;
+        }
+        private bool TryOpeningShift(TankState t,float dx,float dy,float sx,float sy,ref float moved)
+        {
+            // An exact 64-unit gap may be centered between 32-unit grid lines.
+            // Assist only from close to the opening so contact farther away
+            // cannot drag the player sideways across a street.
+            var from=t.MovementBounds;
+            var ahead=TankState.MovementBox(t.X+dx*8,t.Y+dy*8);
+            var sweep=Sweep(from,ahead);
+            float cross=dx!=0?t.Y:t.X;
+            var offsets=new List<float>();
+            foreach(var wall in Terrain)
+            {
+                if(!wall.Alive||!wall.Solid||!wall.Bounds.Overlaps(sweep))continue;
+                float near=(dx!=0?wall.Bounds.Bottom:wall.Bounds.Right)+32-cross;
+                float far=(dx!=0?wall.Bounds.Y:wall.Bounds.X)-32-cross;
+                if(Math.Abs(near)<=16)offsets.Add(near);
+                if(Math.Abs(far)<=16)offsets.Add(far);
+            }
+            foreach(var offset in offsets.OrderBy(Math.Abs))
+                if(TryLaneShift(t,dx,dy,sx,sy,offset,ref moved))return true;
+            return false;
         }
         private bool TryLaneShift(TankState t,float dx,float dy,float sx,float sy,float shift,ref float moved)
         {
@@ -538,7 +587,7 @@ namespace BattleCities.Core
             if(!Free(Sweep(from,aligned),t))return false;
             var ahead=TankState.MovementBox(t.X+sx*shift+dx*8,t.Y+sy*shift+dy*8);
             if(!Free(Sweep(aligned,ahead),t))return false;
-            float correction=Math.Min(offset,t.Speed*StepSeconds),sign=Math.Sign(shift);
+            float correction=offset<=t.Speed*StepSeconds+1?offset:Math.Min(offset,t.Speed*StepSeconds),sign=Math.Sign(shift);
             t.X+=sx*sign*correction;t.Y+=sy*sign*correction;moved=correction;
             return true;
         }
@@ -553,7 +602,7 @@ namespace BattleCities.Core
             if(!CanFire(tank))return false;
             Vector(tank.Aim,out var x,out var y);
             var s=new ShotState{Id=++nextId,Owner=tank.Id,Player=tank.Player,PowerShot=powerShot,Damage=powerShot?3:1,X=tank.X+x*32,Y=tank.Y+y*32,Direction=tank.Aim,Speed=powerShot||(tank.Player?tank.Tier>=1:tank.Tier==2)?900:600,WallDamage=powerShot?2:1};
-            Shots.Add(s);tank.Cooldown=powerShot?.25f:NormalReloadSeconds(tank);ShotFired?.Invoke(s);return true;
+            Shots.Add(s);tank.Cooldown=tank.ReloadDuration=powerShot?.25f:NormalReloadSeconds(tank);ShotFired?.Invoke(s);return true;
         }
         private void MoveShot(ShotState s)
         {
@@ -563,15 +612,24 @@ namespace BattleCities.Core
                 float step=Math.Min(1,left);s.X+=dx*step;s.Y+=dy*step;left-=step;var box=s.Bounds;
                 if(box.X<0||box.Y<0||box.Right>Width||box.Bottom>Height){ImpactShot(s);break;}
                 var wall=Terrain.FirstOrDefault(w=>w.Alive&&w.StopsBullet&&box.Overlaps(w.Bounds));
-                if(wall!=null){if(!s.PowerShot&&(wall.Brick||s.WallDamage==2))DestroyWall(wall,s);ImpactShot(s,null,wall);break;}
+                if(wall!=null){if(!s.PowerShot&&(wall.Brick||wall.DestructibleProp||s.WallDamage==2))DestroyWall(wall,s);ImpactShot(s,null,wall);break;}
                 if(BaseAlive&&box.Overlaps(BaseBounds)){BaseAlive=false;Lost=true;ImpactShot(s);BaseDestroyed?.Invoke();break;}
                 var other=Shots.Find(b=>b!=s&&b.Alive&&b.Player!=s.Player&&box.Overlaps(b.Bounds));
                 if(other!=null)
                 {
-                    // Resolve the charged projectile whichever shot moves first.
-                    // Only one explosion is emitted for the interception.
-                    if(other.PowerShot&&!s.PowerShot){s.Alive=false;ImpactShot(other);}
-                    else{other.Alive=false;ImpactShot(s);}
+                    if(s.PowerShot!=other.PowerShot)
+                    {
+                        // A charged shot absorbs an opposing normal bullet and
+                        // keeps traveling. Resolve identically whichever shot
+                        // happened to move first this simulation step.
+                        var power=s.PowerShot?s:other;
+                        ImpactShot(s.PowerShot?other:s);
+                        power.Damage--;
+                        if(power.Damage<=0)ImpactShot(power);
+                        if(s.PowerShot&&s.Alive)continue;
+                        break;
+                    }
+                    other.Alive=false;ImpactShot(s);
                     break;
                 }
                 var landDrone=LandDrones.Find(d=>d.Alive&&!s.Player&&box.Overlaps(d.Bounds));
@@ -601,7 +659,7 @@ namespace BattleCities.Core
             if(wall!=null)
             {
                 WallImpactPoint(wall,shot,out x,out y);
-                if(!wall.Brick)radius=PowerShotSteelBlastRadius;
+                if(wall.Type=="steel")radius=PowerShotSteelBlastRadius;
             }
             // Every power-shot explosion damages nearby walls, even when the
             // projectile collided with a tank, another bullet or the map edge.
@@ -636,12 +694,13 @@ namespace BattleCities.Core
         public void DestroyWall(Wall hit,ShotState shot)
         {
             if(shot.PowerShot){DestroyPowerShotRadius(hit,shot);return;}
+            if(hit.DestructibleProp){hit.Alive=false;WallDestroyed?.Invoke(hit);return;}
             bool vertical=shot.Direction==Facing.Up||shot.Direction==Facing.Down;
             float axis=vertical?shot.X:shot.Y;
             float bandWidth=64;
             float min=(float)Math.Floor((axis-bandWidth/2)/16+.5)*16;
             float face=Face(hit.Bounds,shot.Direction);
-            var candidates=Terrain.Where(w=>w.Alive&&w.StopsBullet&&Math.Abs(Face(w.Bounds,shot.Direction)-face)<.01f&&(vertical?w.Bounds.X:w.Bounds.Y)<min+bandWidth&&(vertical?w.Bounds.Right:w.Bounds.Bottom)>min&&!Covered(w,shot.Direction)).ToList();
+            var candidates=Terrain.Where(w=>w.Alive&&(w.Brick||w.Type=="steel")&&Math.Abs(Face(w.Bounds,shot.Direction)-face)<.01f&&(vertical?w.Bounds.X:w.Bounds.Y)<min+bandWidth&&(vertical?w.Bounds.Right:w.Bounds.Bottom)>min&&!Covered(w,shot.Direction)).ToList();
             if(candidates.Count==0)return;
             var seed=candidates.OrderBy(w=>Math.Abs((vertical?w.Bounds.X+w.Bounds.W/2:w.Bounds.Y+w.Bounds.H/2)-axis)).First();
             var group=new List<Wall>{seed};candidates.Remove(seed);
@@ -659,7 +718,7 @@ namespace BattleCities.Core
             // Project the projectile center onto the contacted face so the circle
             // starts at the wall surface, rather than short of it or on a grid snap.
             WallImpactPoint(hit,shot,out var x,out var y);
-            float radius=hit.Brick?PowerShotBlastRadius:PowerShotSteelBlastRadius;
+            float radius=hit.Type=="steel"?PowerShotSteelBlastRadius:PowerShotBlastRadius;
             DestroyWallsInBlast(shot,x,y,radius);
         }
         private void DestroyWallsInBlast(ShotState shot,float x,float y,float radius)
@@ -669,10 +728,10 @@ namespace BattleCities.Core
             // Cell-center inclusion approximates a circle on the destructible grid
             // without removing a whole block for a tiny overlap at the outer edge.
             var affected=Terrain.Where(w=>w.Alive&&w.StopsBullet
-                &&(w.Brick||shot.WallDamage==2)
+                &&(w.Brick||w.DestructibleProp||(w.Type=="steel"&&shot.WallDamage==2))
                 // A steel impact shrinks the whole blast; steel caught in a brick
                 // impact also resists destruction outside its smaller inner radius.
-                &&DistanceSquared(x,y,w.Bounds.X+w.Bounds.W/2,w.Bounds.Y+w.Bounds.H/2)<=(w.Brick?radiusSquared:steelRadiusSquared)).ToArray();
+                &&DistanceSquared(x,y,w.Bounds.X+w.Bounds.W/2,w.Bounds.Y+w.Bounds.H/2)<=(w.Type=="steel"?steelRadiusSquared:radiusSquared)).ToArray();
             foreach(var wall in affected){wall.Alive=false;WallDestroyed?.Invoke(wall);}
         }
         private static void WallImpactPoint(Wall hit,ShotState shot,out float x,out float y)
@@ -701,7 +760,7 @@ namespace BattleCities.Core
             {
                 var box=new Box(x-32,y-32,64,64);
                 if(box.Overlaps(new Box(BaseBounds.X-32,BaseBounds.Y-32,128,96)))continue;
-                if(Terrain.Any(w=>w.Alive&&(w.Type=="steel"||w.Type=="water")&&box.Overlaps(w.Bounds)))continue;
+                if(Terrain.Any(w=>w.Alive&&(w.Type=="steel"||w.Type=="water"||(w.PropKey!=null&&w.Solid))&&box.Overlaps(w.Bounds)))continue;
                 if(Tanks.Any(t=>t.Player&&box.Overlaps(new Box(t.X-96,t.Y-96,192,192))))continue;
                 if(enemySpawns.Any(s=>box.Overlaps(new Box(s.x,s.y,64,64)))||box.Overlaps(new Box(playerSpawn.x,playerSpawn.y,64,64)))continue;
                 positions.Add(new Point{x=x,y=y});

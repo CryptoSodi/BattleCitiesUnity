@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20819fc30d04b554cb6c93770d0f8bb0, type: 3}
   m_Name: DefaultTankShooting
   m_EditorClassIdentifier: Assembly-CSharp::BattleCities.TankShootingSettings
-  normalReloadSeconds: 0.3
-  upgradedNormalReloadSeconds: 0.2
+  normalReloadSeconds: 0.5
+  upgradedNormalReloadSeconds: 0.35
