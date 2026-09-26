@@ -205,7 +205,7 @@ namespace BattleCities
             scroll.content = content;
 
             RowLabel(content, "STAGE");
-            SliderRow(content, "Stage", () => requestedStage, v => requestedStage = Mathf.RoundToInt(v), 0, 35, null, "0");
+            SliderRow(content, "Stage", () => requestedStage, v => requestedStage = Mathf.RoundToInt(v), 1, 35, null, "1");
             RowButton(content, "Load selected stage", () => LoadStage(requestedStage));
             RowLabel(content, "WEATHER & CAMERA");
             ToggleRow(content, "Day/night cycle", () => weather.Cycle, v => weather.Cycle = v);
@@ -217,6 +217,9 @@ namespace BattleCities
             ToggleRow(content, "Tank trail dust", () => Dust, v => Dust = v);
             ToggleRow(content, "Enemy shooting", () => EnemyFire, v => EnemyFire = v);
             ToggleRow(content, "Automatic camera", () => AutomaticCamera, v => AutomaticCamera = v);
+            ToggleRow(content, "Chase shooting camera", () => ChaseCamera, v => ChaseCamera = v);
+            SliderRow(content, "Chase camera height", () => ChaseCameraHeight, v => ChaseCameraHeight = v, .9f, 2.4f);
+            SliderRow(content, "Chase camera distance", () => ChaseCameraDistance, v => ChaseCameraDistance = v, 1.2f, 4f);
             ToggleRow(content, "Camera shake", () => CameraShake, v => CameraShake = v);
             SliderRow(content, "Elevation", () => CameraElevation, v => CameraElevation = v, 40, 89.9f, null, "0");
             SliderRow(content, "Zoom", () => Zoom, v => Zoom = v, .5f, 2, () => Stage == 0 ? .5f : .7f);

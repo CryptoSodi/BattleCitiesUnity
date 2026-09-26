@@ -20,7 +20,7 @@ namespace BattleCities.Core
     public enum SecondaryAttack { None, Mine, PatrolDrone, GroundTurret, LandDrone }
     public sealed class DroneState
     {
-        public int Id, TargetId;
+        public int Id, TargetId, OwnerSlot = -1;
         public float X,Y,AnchorX,AnchorY,Age;
         public bool Alive=true;
         public bool Armed => Age>=1;
@@ -28,6 +28,7 @@ namespace BattleCities.Core
     public enum TurretPhase { Stowed, Deploying, Deployed, Retracting }
     public sealed class TurretState
     {
+        public int OwnerSlot = -1;
         public int Id, TargetId, Health = 4, Damage = 1, FireSequence;
         public float X, Y, Deployment, FireCooldownRemaining, ReloadRemaining, TurnRemaining;
         public Facing Heading = Facing.Up;
@@ -44,7 +45,7 @@ namespace BattleCities.Core
     public struct Command { public Facing? Move, Aim; public bool Fire, PowerShot, SecondaryFire; }
     public sealed class MineState
     {
-        public int Id;
+        public int Id, OwnerSlot = -1;
         public float X, Y, Age;
         public bool Alive = true;
         public bool Armed => Age >= BattleSimulation.MineArmSeconds;
@@ -76,6 +77,7 @@ namespace BattleCities.Core
     public sealed class TankState
     {
         public const float MovementHalfSize = 32;
+        public int Slot = -1;
         public int Id, Tier, Health = 3;
         public static int StartingHealth(int tier,bool player) => player?5:tier==3?6:tier==2?4:3;
         public int MaxHealth => StartingHealth(Tier,Player);
@@ -92,7 +94,7 @@ namespace BattleCities.Core
     }
     public sealed class ShotState
     {
-        public int Id, Owner;
+        public int Id, Owner, OwnerSlot = -1;
         public bool Player, Alive = true, PowerShot;
         public int WallDamage, Damage = 1;
         public float X, Y, Speed;
@@ -117,12 +119,14 @@ namespace BattleCities.Core
         public event Action<TurretState> TurretFired;
         public event Action<TurretState> TurretHit;
         public event Action<TurretState> TurretDestroyed;
-        public int SecondaryCount => EquippedSecondary==SecondaryAttack.LandDrone?LandDrones.Count(d=>d.Alive):EquippedSecondary==SecondaryAttack.PatrolDrone?Drones.Count:EquippedSecondary==SecondaryAttack.GroundTurret?Turrets.Count:Mines.Count;
+        public int SecondaryCount => EquippedSecondary==SecondaryAttack.LandDrone?LandDrones.Count(d=>d.Alive&&OwnedSecondary(d.OwnerSlot)):EquippedSecondary==SecondaryAttack.PatrolDrone?Drones.Count(d=>OwnedSecondary(d.OwnerSlot)):EquippedSecondary==SecondaryAttack.GroundTurret?Turrets.Count(t=>OwnedSecondary(t.OwnerSlot)):Mines.Count(m=>OwnedSecondary(m.OwnerSlot));
         public int SecondaryLimit => EquippedSecondary==SecondaryAttack.LandDrone?1:EquippedSecondary==SecondaryAttack.PatrolDrone?MaximumDrones:EquippedSecondary==SecondaryAttack.GroundTurret?MaximumTurrets:MaximumMines;
         public const float MineArmSeconds = .8f, SecondaryCooldownSeconds = 2f;
         public const int MaximumMines = 5;
-        public SecondaryAttack EquippedSecondary = SecondaryAttack.Mine;
-        public float SecondaryCooldown { get; private set; }
+        private SecondaryAttack offlineSecondary = SecondaryAttack.Mine;
+        public SecondaryAttack EquippedSecondary { get => IsMultiplayer ? Participants[actingSlot >= 0 ? actingSlot : LocalPlayerSlot].Secondary : offlineSecondary; set { if(IsMultiplayer) Participants[actingSlot >= 0 ? actingSlot : LocalPlayerSlot].Secondary=value; else offlineSecondary=value; } }
+        private float offlineSecondaryCooldown;
+        public float SecondaryCooldown { get => IsMultiplayer ? Participants[actingSlot >= 0 ? actingSlot : LocalPlayerSlot].SecondaryCooldown : offlineSecondaryCooldown; private set { if(IsMultiplayer) Participants[actingSlot >= 0 ? actingSlot : LocalPlayerSlot].SecondaryCooldown=value; else offlineSecondaryCooldown=value; } }
         public string SecondaryStatus { get; private set; } = "";
         private Facing? playerMoveIntent;
         public bool CanUseSecondary => !Lost && !Won && intro<=0 && Player!=null && EquippedSecondary!=SecondaryAttack.None && SecondaryCooldown<=0 && SecondaryCount<SecondaryLimit;
@@ -132,7 +136,8 @@ namespace BattleCities.Core
         public int Stage { get; private set; }
         public int Tick { get; private set; }
         public int Score { get; private set; }
-        public int Lives { get; private set; } = 3;
+        private int offlineLives = 3;
+        public int Lives { get => IsMultiplayer ? Participants[actingSlot >= 0 ? actingSlot : LocalPlayerSlot].Lives : offlineLives; private set { if(IsMultiplayer) Participants[actingSlot >= 0 ? actingSlot : LocalPlayerSlot].Lives=value; else offlineLives=value; } }
         public bool BaseAlive { get; private set; } = true;
         public bool Lost { get; private set; }
         public bool Won { get; private set; }
@@ -146,7 +151,7 @@ namespace BattleCities.Core
         public event Action<string> CurrencyClaimed;
         public event Action TerrainChanged;
         public Box BaseBounds { get; private set; }
-        public TankState Player => Tanks.Find(t => t.Player && t.Alive);
+        public TankState Player => Tanks.Find(t => t.Player && t.Alive && (!IsMultiplayer || t.Slot == (actingSlot >= 0 ? actingSlot : LocalPlayerSlot)));
         public bool CanAcceptPlayerFire => !Lost&&!Won&&intro<=0&&Player!=null;
         public int Remaining => wave.Length - spawned + Tanks.Count(t => !t.Player && t.Alive);
         public int TotalEnemies => wave.Length;
@@ -165,8 +170,10 @@ namespace BattleCities.Core
         public float PlayerNormalReloadSeconds { get; }
         public float PlayerUpgradedNormalReloadSeconds { get; }
 
-        public BattleSimulation(MapData map, int stage = 1, float normalReloadSeconds = .12f, float upgradedNormalReloadSeconds = .08f)
+        private readonly int initialPlayerTier;
+        public BattleSimulation(MapData map, int stage = 1, float normalReloadSeconds = .12f, float upgradedNormalReloadSeconds = .08f, int playerTier = 0)
         {
+            initialPlayerTier=Math.Max(0,Math.Min(3,playerTier));
             PlayerNormalReloadSeconds=ValidReloadSeconds(normalReloadSeconds,.12f);
             PlayerUpgradedNormalReloadSeconds=ValidReloadSeconds(upgradedNormalReloadSeconds,.08f);
             Stage=stage; Width=(map.field?.widthTiles ?? 13)*64; Height=(map.field?.heightTiles ?? 13)*64;
@@ -218,14 +225,14 @@ namespace BattleCities.Core
             unchecked { random+=0x6d2b79f5;uint t=random;t=(t^(t>>15))*(t|1);t^=t+(t^(t>>7))*(t|61);return min+(int)(((t^(t>>14))/4294967296.0)*(max-min)); }
         }
         public static void Vector(Facing d,out float x,out float y) { x=d==Facing.Right?1:d==Facing.Left?-1:0; y=d==Facing.Down?1:d==Facing.Up?-1:0; }
-        private void SpawnPlayer() { Tanks.Add(new TankState{Id=++nextId,Player=true,Health=TankState.StartingHealth(0,true),X=playerSpawn.x+32,Y=playerSpawn.y+32,Shield=3.5f}); }
+        private void SpawnPlayer() { Tanks.Add(new TankState{Id=++nextId,Player=true,Tier=initialPlayerTier,Health=TankState.StartingHealth(initialPlayerTier,true),X=playerSpawn.x+32,Y=playerSpawn.y+32,Shield=3.5f}); }
         public void Step(Command command)
         {
             if(Lost || Won) return;
             Tick++; const float dt=StepSeconds;
             playerMoveIntent=command.Move;
             if(intro>0) {intro-=dt;return;}
-            SecondaryCooldown=Math.Max(0,SecondaryCooldown-dt);
+            if(!IsMultiplayer)SecondaryCooldown=Math.Max(0,SecondaryCooldown-dt);
             Freeze=Math.Max(0,Freeze-dt);ZoomOut=Math.Max(0,ZoomOut-dt);
             if(defenceTimer>0)
             {
@@ -239,6 +246,9 @@ namespace BattleCities.Core
             }
             if(PickupType!=null){PickupTime-=dt;if(PickupTime<=0)PickupType=null;}
             foreach(var t in Tanks) { t.Shield=Math.Max(0,t.Shield-dt);t.Cooldown=Math.Max(0,t.Cooldown-dt);t.SpeedBoost=Math.Max(0,t.SpeedBoost-dt);t.Moving=false; }
+            if(IsMultiplayer) UpdateParticipants(dt);
+            else
+            {
             var p=Player;
             if(p != null)
             {
@@ -252,8 +262,9 @@ namespace BattleCities.Core
             }
             else if(Lives>0) {respawnTimer-=dt;if(respawnTimer<=0) SpawnPlayer();}
             else Lost=true;
+            }
             spawnTimer-=dt;
-            if(spawnTimer<=0 && spawned<wave.Length && Tanks.Count(t=>!t.Player&&t.Alive)<4)
+            if(!IsPvp && spawnTimer<=0 && spawned<wave.Length && Tanks.Count(t=>!t.Player&&t.Alive)<4)
             {
                 var point=enemySpawns[spawnIndex%enemySpawns.Length];
                 var box=new Box(point.x,point.y,64,64);
@@ -271,7 +282,8 @@ namespace BattleCities.Core
             UpdateLandDrones(dt);
             foreach(var shot in Shots.ToArray()) if(shot.Alive) MoveShot(shot);
             Shots.RemoveAll(s=>!s.Alive); Tanks.RemoveAll(t=>!t.Alive); Turrets.RemoveAll(t=>!t.Alive);
-            if(spawned==wave.Length&&!Tanks.Any(t=>!t.Player&&t.Alive)) Won=true;
+            if(!IsPvp&&spawned==wave.Length&&!Tanks.Any(t=>!t.Player&&t.Alive)) Won=true;
+            if(IsMultiplayer) UpdateMatchResult();
         }
         public bool UseSecondary()
         {
@@ -280,7 +292,7 @@ namespace BattleCities.Core
             if(EquippedSecondary==SecondaryAttack.LandDrone)return PlaceLandDrone(player);
             if(EquippedSecondary==SecondaryAttack.GroundTurret)
             {
-                var turret=new TurretState{X=player.X,Y=player.Y,Health=turretHealth,Damage=turretDamage};
+                var turret=new TurretState{OwnerSlot=player.Slot,X=player.X,Y=player.Y,Health=turretHealth,Damage=turretDamage};
                 var area=turret.Clearance;
                 if(area.X<0||area.Y<0||area.Right>Width||area.Bottom>Height||area.Overlaps(BaseBounds)
                     ||Terrain.Any(w=>w.Alive&&w.Solid&&w.Bounds.Overlaps(area))
@@ -294,12 +306,12 @@ namespace BattleCities.Core
                 SecondaryStatus="Turret placed under tank. Move away to deploy.";
                 return true;
             }
-            var mine=new MineState{Id=++nextId,X=player.X,Y=player.Y};
+            var mine=new MineState{OwnerSlot=player.Slot,Id=++nextId,X=player.X,Y=player.Y};
             if(mine.Bounds.X<0||mine.Bounds.Y<0||mine.Bounds.Right>Width||mine.Bounds.Bottom>Height||mine.Bounds.Overlaps(BaseBounds))return false;
             if(Terrain.Any(w=>w.Alive&&w.Solid&&w.Bounds.Overlaps(mine.Bounds)))return false;
             if(EquippedSecondary==SecondaryAttack.PatrolDrone)
             {
-                Drones.Add(new DroneState{Id=mine.Id,X=player.X,Y=player.Y,AnchorX=player.X,AnchorY=player.Y});
+                Drones.Add(new DroneState{OwnerSlot=player.Slot,Id=mine.Id,X=player.X,Y=player.Y,AnchorX=player.X,AnchorY=player.Y});
                 SecondaryCooldown=4;return true;
             }
             if(Mines.Any(m=>m.Alive&&m.Bounds.Overlaps(mine.Bounds)))return false;
@@ -310,7 +322,7 @@ namespace BattleCities.Core
             {
                 mine.Age+=dt;
                 if(!mine.Armed)continue;
-                var victim=Tanks.Find(t=>t.Alive&&!t.Player&&t.MovementBounds.Overlaps(mine.Bounds));
+                var victim=Tanks.Find(t=>t.Alive&&IsSecondaryTarget(t,mine.OwnerSlot)&&t.MovementBounds.Overlaps(mine.Bounds));
                 if(victim==null)continue;
                 mine.Alive=false;MineDetonated?.Invoke(mine);
                 if(victim.Drop){victim.Drop=false;DropRequested?.Invoke();}
@@ -325,7 +337,7 @@ namespace BattleCities.Core
                 turret.FireCooldownRemaining=Math.Max(0,turret.FireCooldownRemaining-dt);
                 turret.ReloadRemaining=Math.Max(0,turret.ReloadRemaining-dt);
                 turret.ShotAge+=dt;
-                var player=Player;
+                var player=IsMultiplayer ? Tanks.Where(t=>t.Player&&t.Alive&&(!IsPvp||t.Slot==turret.OwnerSlot)).OrderBy(t=>DistanceSquared(t.X,t.Y,turret.X,turret.Y)).FirstOrDefault() : Player;
                 // Keep the entire player safety radius stowed, even when stationary.
                 // A small exit margin prevents toggling at the radius boundary.
                 float playerDistance=player!=null&&player.Alive
@@ -356,13 +368,13 @@ namespace BattleCities.Core
                 }
                 if(!turret.Active){turret.TargetId=0;continue;}
                 turret.TurnRemaining=Math.Max(0,turret.TurnRemaining-dt);
-                var target=turret.TargetId==0?null:Tanks.Find(t=>t.Id==turret.TargetId&&t.Alive&&!t.Player&&HasTurretClearShot(turret,t));
+                var target=turret.TargetId==0?null:Tanks.Find(t=>t.Id==turret.TargetId&&t.Alive&&IsSecondaryTarget(t,turret.OwnerSlot)&&HasTurretClearShot(turret,t));
                 if(target==null)
                 {
                     turret.TargetId=0;float closest=turretAttackRange*turretAttackRange;
                     foreach(var tank in Tanks)
                     {
-                        if(!tank.Alive||tank.Player)continue;
+                        if(!tank.Alive||!IsSecondaryTarget(tank,turret.OwnerSlot))continue;
                         float distance=DistanceSquared(tank.X,tank.Y,turret.X,turret.Y);
                         if(distance<=closest&&HasTurretClearShot(turret,tank)){target=tank;closest=distance;}
                     }
@@ -415,7 +427,7 @@ namespace BattleCities.Core
         private void FireTurret(TurretState turret)
         {
             Vector(turret.Heading,out var dx,out var dy);
-            var shot=new ShotState{Id=++nextId,Owner=turret.Id,Player=true,X=turret.X+dx*turretMuzzleDistance,Y=turret.Y+dy*turretMuzzleDistance,Direction=turret.Heading,Speed=900,WallDamage=1,Damage=turret.Damage};
+            var shot=new ShotState{Id=++nextId,Owner=turret.Id,OwnerSlot=turret.OwnerSlot,Player=true,X=turret.X+dx*turretMuzzleDistance,Y=turret.Y+dy*turretMuzzleDistance,Direction=turret.Heading,Speed=900,WallDamage=1,Damage=turret.Damage};
             Shots.Add(shot);turret.ShotAge=0;turret.FireCooldownRemaining=turretFireCooldown;turret.ReloadRemaining=turretReloadDuration;turret.FireSequence++;TurretFired?.Invoke(turret);
         }        private static float DistanceSquared(float x,float y,float tx,float ty){float dx=x-tx,dy=y-ty;return dx*dx+dy*dy;}
         private void UpdateDrones(float dt)
@@ -424,13 +436,13 @@ namespace BattleCities.Core
             {
                 drone.Age+=dt;
                 if(!drone.Armed)continue;
-                var target=drone.TargetId==0?null:Tanks.Find(t=>t.Id==drone.TargetId&&t.Alive&&!t.Player);
+                var target=drone.TargetId==0?null:Tanks.Find(t=>t.Id==drone.TargetId&&t.Alive&&IsSecondaryTarget(t,drone.OwnerSlot));
                 if(target==null)
                 {
                     drone.TargetId=0;float closest=float.MaxValue;
                     foreach(var tank in Tanks)
                     {
-                        if(!tank.Alive||tank.Player||DistanceSquared(tank.X,tank.Y,drone.AnchorX,drone.AnchorY)>DronePatrolRadius*DronePatrolRadius)continue;
+                        if(!tank.Alive||!IsSecondaryTarget(tank,drone.OwnerSlot)||DistanceSquared(tank.X,tank.Y,drone.AnchorX,drone.AnchorY)>DronePatrolRadius*DronePatrolRadius)continue;
                         float distance=DistanceSquared(tank.X,tank.Y,drone.X,drone.Y);
                         if(distance<closest){target=tank;closest=distance;}
                     }
@@ -601,7 +613,7 @@ namespace BattleCities.Core
         {
             if(!CanFire(tank))return false;
             Vector(tank.Aim,out var x,out var y);
-            var s=new ShotState{Id=++nextId,Owner=tank.Id,Player=tank.Player,PowerShot=powerShot,Damage=powerShot?3:1,X=tank.X+x*32,Y=tank.Y+y*32,Direction=tank.Aim,Speed=powerShot||(tank.Player?tank.Tier>=1:tank.Tier==2)?900:600,WallDamage=powerShot?2:1};
+            var s=new ShotState{Id=++nextId,Owner=tank.Id,OwnerSlot=tank.Slot,Player=tank.Player,PowerShot=powerShot,Damage=powerShot?3:1,X=tank.X+x*32,Y=tank.Y+y*32,Direction=tank.Aim,Speed=powerShot||(tank.Player?tank.Tier>=1:tank.Tier==2)?900:600,WallDamage=powerShot?2:1};
             Shots.Add(s);tank.Cooldown=tank.ReloadDuration=powerShot?.25f:NormalReloadSeconds(tank);ShotFired?.Invoke(s);return true;
         }
         private void MoveShot(ShotState s)
@@ -613,8 +625,8 @@ namespace BattleCities.Core
                 if(box.X<0||box.Y<0||box.Right>Width||box.Bottom>Height){ImpactShot(s);break;}
                 var wall=Terrain.FirstOrDefault(w=>w.Alive&&w.StopsBullet&&box.Overlaps(w.Bounds));
                 if(wall!=null){if(!s.PowerShot&&(wall.Brick||wall.DestructibleProp||s.WallDamage==2))DestroyWall(wall,s);ImpactShot(s,null,wall);break;}
-                if(BaseAlive&&box.Overlaps(BaseBounds)){BaseAlive=false;Lost=true;ImpactShot(s);BaseDestroyed?.Invoke();break;}
-                var other=Shots.Find(b=>b!=s&&b.Alive&&b.Player!=s.Player&&box.Overlaps(b.Bounds));
+                if(!IsPvp&&BaseAlive&&box.Overlaps(BaseBounds)){BaseAlive=false;Lost=true;ImpactShot(s);BaseDestroyed?.Invoke();break;}
+                var other=Shots.Find(b=>b!=s&&b.Alive&&ShotsOppose(s,b)&&box.Overlaps(b.Bounds));
                 if(other!=null)
                 {
                     if(s.PowerShot!=other.PowerShot)
@@ -632,20 +644,20 @@ namespace BattleCities.Core
                     other.Alive=false;ImpactShot(s);
                     break;
                 }
-                var landDrone=LandDrones.Find(d=>d.Alive&&!s.Player&&box.Overlaps(d.Bounds));
+                var landDrone=LandDrones.Find(d=>d.Alive&&ShotTargetsSecondary(s,d.OwnerSlot)&&box.Overlaps(d.Bounds));
                 if(landDrone!=null)
                 {
                     ImpactShot(s);landDrone.Health-=Math.Max(1,s.Damage);
                     if(landDrone.Health<=0){landDrone.Alive=false;LandDroneExploded?.Invoke(landDrone);}
                     break;
                 }
-                var turret=Turrets.Find(t=>t.BlocksPath&&!s.Player&&box.Overlaps(t.Bounds));
+                var turret=Turrets.Find(t=>t.BlocksPath&&ShotTargetsSecondary(s,t.OwnerSlot)&&box.Overlaps(t.Bounds));
                 if(turret!=null)
                 {
                     ImpactShot(s);turret.Health-=Math.Max(1,s.Damage);TurretHit?.Invoke(turret);
                     if(turret.Health<=0){turret.Alive=false;TurretDestroyed?.Invoke(turret);}break;
                 }
-                var tank=Tanks.Find(t=>t.Alive&&t.Player!=s.Player&&box.Overlaps(t.Bounds));
+                var tank=Tanks.Find(t=>t.Alive&&ShotTargetsTank(s,t)&&box.Overlaps(t.Bounds));
                 if(tank!=null){ImpactShot(s,tank);DamageTank(tank,Math.Max(1,s.Damage));}
             }
         }
@@ -667,7 +679,7 @@ namespace BattleCities.Core
             if(!shot.Player)return;
             // Include a tank when any part of its footprint enters the circle.
             // Direct hits retain their existing damage; splash never hits twice.
-            foreach(var tank in Tanks.Where(t=>t.Alive&&!t.Player&&t!=directHit).ToArray())
+            foreach(var tank in Tanks.Where(t=>t.Alive&&ShotTargetsTank(shot,t)&&t!=directHit).ToArray())
             {
                 var bounds=tank.Bounds;
                 float nearestX=Math.Max(bounds.X,Math.Min(bounds.Right,x));
@@ -685,7 +697,7 @@ namespace BattleCities.Core
         public void Kill(TankState t)
         {
             if(!t.Alive)return;t.Alive=false;TankDestroyed?.Invoke(t);
-            if(t.Player){Lives--;respawnTimer=1.5f;}else Score+=(t.Tier+1)*100;
+            if(t.Player){if(IsMultiplayer){var participant=Participants[t.Slot];participant.Lives=Math.Max(0,participant.Lives-1);participant.Respawn=1.5f;}else {Lives--;respawnTimer=1.5f;}}else Score+=(t.Tier+1)*100;
         }
         public const float PowerShotBlastRadius=56; // Slightly smaller than one map tile (64).
         public const float PowerShotSteelBlastRadius=32; // Steel absorbs half the original blast reach.

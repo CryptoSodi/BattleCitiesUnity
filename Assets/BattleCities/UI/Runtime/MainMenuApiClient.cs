@@ -14,6 +14,8 @@ namespace BattleCities.UI
     /// </summary>
     public sealed class MainMenuApiClient : MonoBehaviour
     {
+        public const string DefaultApiBaseUrl = "https://api.battlecities.com";
+
         [Serializable]
         public sealed class PlayerSnapshot
         {
@@ -28,8 +30,30 @@ namespace BattleCities.UI
             public int levelPointsRequired = 1000;
         }
 
+        public sealed class RankingRow
+        {
+            public string playerId, displayName;
+            public int rank, totalPoints, matches;
+        }
+
+        public sealed class RankingsSnapshot
+        {
+            public string seasonName;
+            public RankingRow[] rows;
+            public RankingRow me;
+        }
+
+        public sealed class RoundSnapshot
+        {
+            public bool payoutsEnabled;
+            public string startsAt, endsAt;
+            public int intervalMinutes;
+            public RankingRow[] rows;
+            public RankingRow currentPlayer;
+        }
+
         [Header("Battle Cities API")]
-        [SerializeField] private string baseUrl = "http://localhost:3001";
+        [SerializeField] private string baseUrl = DefaultApiBaseUrl;
         [SerializeField] private bool loginAsGuestWhenAnonymous = true;
         [SerializeField] private bool automaticRefresh = true;
         [SerializeField, Min(5)] private float leaderboardRefreshSeconds = 30;
@@ -37,6 +61,8 @@ namespace BattleCities.UI
 
         public event Action<PlayerSnapshot> PlayerLoaded;
         public event Action<string[]> LeaderboardLoaded;
+        public event Action<RankingsSnapshot> RankingsLoaded;
+        public event Action<RoundSnapshot> RoundLoaded;
         public event Action<string, string> StatusChanged;
 
         public bool IsAuthenticated { get; private set; }
@@ -45,8 +71,12 @@ namespace BattleCities.UI
         public string BaseUrl => baseUrl;
         public string LastStatusTitle { get; private set; }
         public string LastStatusDetail { get; private set; }
+        public RankingsSnapshot LastRankings { get; private set; }
+        public RoundSnapshot LastRound { get; private set; }
 
         private static string sessionCookie;
+        public static string CurrentGuestId { get; private set; }
+        private static string currentGuestName;
         private readonly System.Collections.Generic.Dictionary<string, JObject> browserResponses = new System.Collections.Generic.Dictionary<string, JObject>();
         private Coroutine refreshRoutine;
         private bool requestInFlight;
@@ -103,8 +133,25 @@ namespace BattleCities.UI
         public void ContinueAsGuest()
         {
             if (!isActiveAndEnabled) return;
+            BeginGuestLogin();
             PlayerPrefs.SetString("battlecities.loginMode", "guest");
             UseLocalGuest();
+        }
+
+        private static void BeginGuestLogin()
+        {
+            CurrentGuestId = "guest-" + Guid.NewGuid().ToString("N");
+            currentGuestName = "GUEST-" + CurrentGuestId.Substring(CurrentGuestId.Length - 4).ToUpperInvariant();
+            PlayerPrefs.SetString("battlecities.guestId", CurrentGuestId);
+            PlayerPrefs.SetString("battlecities.guestName", currentGuestName);
+            PlayerPrefs.Save();
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetGuestLogin()
+        {
+            CurrentGuestId = null;
+            currentGuestName = null;
         }
 
         public void OnWalletLoginResult(string json)
@@ -149,7 +196,8 @@ namespace BattleCities.UI
             if (loginAsGuestWhenAnonymous && PlayerPrefs.GetString("battlecities.loginMode") == "guest")
             {
                 yield return CreateGuestSession();
-                yield return LoadLeaderboard();
+                yield return LoadRound();
+                yield return LoadRankings();
                 requestInFlight = false;
                 yield break;
             }
@@ -179,7 +227,8 @@ namespace BattleCities.UI
                 NotifyStatus("API OFFLINE", sessionError);
             }
 
-            yield return LoadLeaderboard();
+            yield return LoadRound();
+            yield return LoadRankings();
             requestInFlight = false;
         }
 
@@ -199,7 +248,7 @@ namespace BattleCities.UI
             var guestName = GetOrCreateGuestName();
             PlayerLoaded?.Invoke(new PlayerSnapshot
             {
-                id = PlayerPrefs.GetString("battlecities.guestId"),
+                id = CurrentGuestId,
                 provider = "guest",
                 displayName = guestName,
                 highscorePrimary = PlayerPrefs.GetInt("battlecities.guestHighScore", 0)
@@ -216,7 +265,7 @@ namespace BattleCities.UI
             if (player != null) PlayerLoaded?.Invoke(player);
         }
 
-        private IEnumerator LoadLeaderboard()
+        private IEnumerator LoadRound()
         {
             JObject body = null;
             string error = null;
@@ -227,31 +276,70 @@ namespace BattleCities.UI
             });
 
             var values = body?["rows"] as JArray;
-            if (values == null)
+            var endsAt = (string)body?["nextRewardAt"];
+            if (values == null || string.IsNullOrWhiteSpace(endsAt))
             {
-                LeaderboardLoaded?.Invoke(Array.Empty<string>());
-                NotifyStatus("LIVE BOARD UNAVAILABLE", string.IsNullOrWhiteSpace(error) ? "The rewards API returned an invalid response." : error);
+                LastRound = null;
+                RoundLoaded?.Invoke(null);
+                NotifyStatus("ROUND UNAVAILABLE", string.IsNullOrWhiteSpace(error) ? "The live round response was invalid." : error);
                 yield break;
             }
 
-            var formatted = new string[Math.Min(10, values.Count)];
-            for (var index = 0; index < formatted.Length; index++)
+            var roundRows = new RankingRow[Math.Min(10, values.Count)];
+            for (var index = 0; index < roundRows.Length; index++)
+                roundRows[index] = ParseRankingRow(values[index] as JObject, index + 1);
+            LastRound = new RoundSnapshot
             {
-                var row = values[index] as JObject;
-                var rank = Math.Max(1, (int?)row?["rank"] ?? index + 1);
-                var name = ((string)row?["displayName"] ?? "PLAYER").ToUpperInvariant();
-                var points = Math.Max(0, (int?)row?["totalPoints"] ?? 0);
-                formatted[index] = string.Format("{0,2}.  {1,-18}  {2:N0}", rank, Trim(name, 18), points);
-            }
-
-            LeaderboardLoaded?.Invoke(formatted.Length == 0 ? new[] { "NO SCORES YET — PLAY TO RANK" } : formatted);
-            var enabled = (bool?)body["enabled"] == true;
-            var nextRewardAt = (string)body["nextRewardAt"];
-            NotifyStatus(enabled ? "LIVE REWARD ROUND" : "LIVE SCORE ROUND",
-                string.IsNullOrWhiteSpace(nextRewardAt) ? "Top 10 standings loaded." : "Next round: " + nextRewardAt);
+                payoutsEnabled = (bool?)body["enabled"] == true,
+                startsAt = (string)body["intervalStartedAt"],
+                endsAt = endsAt,
+                intervalMinutes = Math.Max(1, (int?)body["rewardIntervalMinutes"] ?? 30),
+                rows = roundRows,
+                currentPlayer = ParseRankingRow(body["currentPlayer"] as JObject)
+            };
+            RoundLoaded?.Invoke(LastRound);
         }
 
-        private IEnumerator Request(string method, string path, JObject payload, Action<long, JObject, string> completed)
+        private IEnumerator LoadRankings()
+        {
+            JObject body = null;
+            string error = null;
+            yield return Request("GET", "/api/rankings?scope=gaming", null, (_, json, requestError) =>
+            {
+                body = json;
+                error = requestError;
+            });
+
+            var values = body?["rows"] as JArray;
+            if (values == null)
+            {
+                LastRankings = null;
+                RankingsLoaded?.Invoke(null);
+                LeaderboardLoaded?.Invoke(Array.Empty<string>());
+                NotifyStatus("RANKINGS UNAVAILABLE", string.IsNullOrWhiteSpace(error) ? "The player rankings response was invalid." : error);
+                yield break;
+            }
+
+            var rows = new RankingRow[Math.Min(10, values.Count)];
+            var formatted = new string[rows.Length];
+            for (var index = 0; index < rows.Length; index++)
+            {
+                rows[index] = ParseRankingRow(values[index] as JObject, index + 1);
+                formatted[index] = string.Format("{0}. {1}: {2:N0} points", rows[index].rank, Trim(rows[index].displayName, 18), rows[index].totalPoints);
+            }
+            var season = body["currentSeason"] as JObject;
+            LastRankings = new RankingsSnapshot
+            {
+                seasonName = (string)season?["name"] ?? "CURRENT SEASON",
+                rows = rows,
+                me = ParseRankingRow(body["me"] as JObject)
+            };
+            RankingsLoaded?.Invoke(LastRankings);
+            LeaderboardLoaded?.Invoke(formatted);
+            NotifyStatus("LIVE RANKINGS", LastRankings.seasonName + " standings loaded.");
+        }
+
+        public IEnumerator Request(string method, string path, JObject payload, Action<long, JObject, string> completed)
         {
             var url = new Uri(new Uri(baseUrl.TrimEnd('/') + "/"), path.TrimStart('/')).ToString();
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -322,6 +410,19 @@ namespace BattleCities.UI
             StatusChanged?.Invoke(LastStatusTitle, LastStatusDetail);
         }
 
+        private static RankingRow ParseRankingRow(JObject source, int fallbackRank = 0)
+        {
+            if (source == null) return null;
+            return new RankingRow
+            {
+                playerId = (string)source["playerId"],
+                displayName = (string)source["displayName"] ?? "PLAYER",
+                rank = Math.Max(0, (int?)source["rank"] ?? fallbackRank),
+                totalPoints = Math.Max(0, (int?)source["totalPoints"] ?? 0),
+                matches = Math.Max(0, (int?)source["matches"] ?? 0)
+            };
+        }
+
         private static PlayerSnapshot ParsePlayer(JObject source)
         {
             if (source == null || string.IsNullOrWhiteSpace((string)source["displayName"])) return null;
@@ -355,20 +456,8 @@ namespace BattleCities.UI
 
         private static string GetOrCreateGuestName()
         {
-            var id = PlayerPrefs.GetString("battlecities.guestId", "");
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                id = "guest-" + Guid.NewGuid().ToString("N");
-                PlayerPrefs.SetString("battlecities.guestId", id);
-            }
-            var name = PlayerPrefs.GetString("battlecities.guestName", "");
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                name = "GUEST-" + id.Substring(id.Length - 4).ToUpperInvariant();
-                PlayerPrefs.SetString("battlecities.guestName", name);
-            }
-            PlayerPrefs.Save();
-            return name;
+            if (string.IsNullOrEmpty(CurrentGuestId)) BeginGuestLogin();
+            return currentGuestName;
         }
     }
 

@@ -1,0 +1,29 @@
+{
+  "date": "2026-09-25",
+  "build": "Windows development, 0 errors",
+  "environment": "Four standalone processes on one Windows machine using Photon Asia",
+  "modes": {
+    "coop": {
+      "bothJoinedSameRoom": true,
+      "playersPerReport": [
+        2,
+        2
+      ],
+      "autoStarted": true,
+      "photonIdentityMatched": true
+    },
+    "pvp": {
+      "bothJoinedSameRoom": true,
+      "playersPerReport": [
+        2,
+        2
+      ],
+      "autoStarted": true,
+      "photonIdentityMatched": true
+    }
+  },
+  "modeQueuesSeparated": true,
+  "roomCodesEntered": false,
+  "manualRoomCreated": false,
+  "hostStartClicked": false
+}

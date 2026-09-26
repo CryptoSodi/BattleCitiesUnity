@@ -18,17 +18,35 @@ namespace BattleCities
         public string Status {get;private set;}="Inventory API not configured";
         public bool Authenticated {get;private set;}
         private JObject account=new JObject();
+        private BattleCities.UI.MainMenuApiClient requestBridge;
         private readonly Dictionary<string,string> uncertain=new Dictionary<string,string>();
         private readonly HashSet<string> claiming=new HashSet<string>();
         private readonly string[] slots={"active-one","active-two","active-three","active-four"};
         private static readonly Dictionary<string,string> Types=new Dictionary<string,string>{{"shield","shield"},{"base-defence","defence"},{"freeze","freeze"},{"speed","speed"},{"upgrade","upgrade"},{"zoom-out","zoomout"},{"wipeout","wipeout"}};
         public sealed class Drop { public string Type,ClaimId; }
         private sealed class Response { public long Code;public JObject Body; }
-        private async void Start(){if(!string.IsNullOrWhiteSpace(baseUrl))await Refresh();}
+        private async void Start()
+        {
+            if(BattlePreparation.Ready)
+            {
+                baseUrl=BattlePreparation.ApiUrl;
+                var host=new GameObject("Battle inventory transport");host.SetActive(false);host.transform.SetParent(transform);
+                requestBridge=host.AddComponent<BattleCities.UI.MainMenuApiClient>();
+                requestBridge.ConfigureAutomaticRefresh(false);requestBridge.ConfigureGuestFallback(false);requestBridge.Configure(baseUrl);host.SetActive(true);
+            }
+            if(!string.IsNullOrWhiteSpace(baseUrl))await Refresh();
+        }
         public async Task Configure(string url,string cookie=null)
         {if(!Uri.TryCreate(url,UriKind.Absolute,out var parsed)||(parsed.Scheme!="http"&&parsed.Scheme!="https"))throw new ArgumentException("Economy URL must be HTTP or HTTPS");baseUrl=url;sessionCookie=cookie;await Refresh();}
         private async Task<Response> Api(string path,JObject body=null)
         {
+            if(requestBridge)
+            {
+                var completion=new TaskCompletionSource<Response>();
+                requestBridge.StartCoroutine(requestBridge.Request(body==null?"GET":"POST",path,body,(code,json,error)=>
+                {if(code==0||json==null)completion.TrySetException(new InvalidOperationException("Economy connection failed"));else completion.TrySetResult(new Response{Code=code,Body=json});}));
+                return await completion.Task;
+            }
             using(var request=new UnityWebRequest(new Uri(new Uri(baseUrl),path),body==null?"GET":"POST"))
             {
                 request.downloadHandler=new DownloadHandlerBuffer();request.timeout=10;

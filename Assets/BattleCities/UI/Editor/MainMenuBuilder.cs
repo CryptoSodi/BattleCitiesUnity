@@ -93,8 +93,7 @@ namespace BattleCities.Editor
             var scaler=canvasObject.GetComponent<CanvasScaler>();scaler.uiScaleMode=CanvasScaler.ScaleMode.ConstantPixelSize;
             var view=canvasObject.GetComponent<MainMenuScene>();
             var root=(RectTransform)canvasObject.transform;
-            var background=Img("World backdrop",root,theme.Background);Stretch(background.rectTransform);
-            var tint=Img("Backdrop shade",root,null,new Color(0,.14f,.22f,.18f));Stretch(tint.rectTransform);
+            var background=Img("World backdrop",root,theme.Battlefield);Stretch(background.rectTransform);
             var safe=Rect("Safe Area",root);Stretch(safe);
             var content=Rect("Content",safe);
             var header=Panel("Status Bar",content,null);
@@ -110,20 +109,7 @@ namespace BattleCities.Editor
                 if(i==0){player=title;settings=MakeButton(tile);AddFocus(tile,settings);}
                 else if(i==1)score=value;else hi=value;
             }
-            var frame=Panel("Main Display",content,Art("reference-style-v2/shared/panels/navigation-container"));
-            var television=Panel("TV Frame",frame,theme.SilverFrame);
-            var televisionViewport=Panel("TV Background Viewport",frame,theme.Rounded);
-            var televisionViewportImage=televisionViewport.GetComponent<UnityEngine.UI.Image>();
-            televisionViewportImage.type=UnityEngine.UI.Image.Type.Sliced;
-            televisionViewportImage.preserveAspect=false;
-            televisionViewportImage.raycastTarget=false;
-            var televisionMask=televisionViewport.gameObject.AddComponent<UnityEngine.UI.Mask>();
-            televisionMask.showMaskGraphic=false;
-            var televisionBackground=Img("TV Background",televisionViewport,theme.Battlefield);
-            televisionBackground.preserveAspect=false;
-
-
-
+            var frame=Panel("Main Display",content,null,new Color(1,1,1,0));
             var hero=Panel("Battlefield Hero",frame,null,new Color(1,1,1,0));
 
 
@@ -134,7 +120,7 @@ namespace BattleCities.Editor
             var hint=Panel("A Select hint",hero,theme.DarkPanel);
             var hintLabel=Label("Label",hint,"A   SELECT",25,Color.white);Stretch(hintLabel.rectTransform);
             var rewards=BuildRewards(frame);
-            var nav=Panel("Navigation",content,theme.BlueFrame);
+            var nav=Panel("Navigation",content,Art("reference-style-v2/shared/panels/button-leaderboard-container"));
             var tabs=new Button[5];string[] names={"PLAY","QUARTERS","SHOP","RANKING","SOCIALS"};
             for(int i=0;i<5;i++)
             {
@@ -188,7 +174,12 @@ namespace BattleCities.Editor
             ExportTemplate(hero.gameObject,"MainMenu/BattlefieldHero");
             view.RefreshLayout();
             EditorSceneManager.SaveScene(scene,ScenePath);
-            EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene(ScenePath,true)}.Concat(EditorBuildSettings.scenes.Where(s=>s.path!=ScenePath)).ToArray();
+            const string loginPath="Assets/BattleCities/Scenes/Login.unity";
+            var ordered=new System.Collections.Generic.List<EditorBuildSettingsScene>();
+            if(AssetDatabase.LoadAssetAtPath<SceneAsset>(loginPath))ordered.Add(new EditorBuildSettingsScene(loginPath,true));
+            ordered.Add(new EditorBuildSettingsScene(ScenePath,true));
+            ordered.AddRange(EditorBuildSettings.scenes.Where(s=>s.path!=ScenePath&&s.path!=loginPath));
+            EditorBuildSettings.scenes=ordered.ToArray();
             AssetDatabase.SaveAssets();Selection.activeGameObject=canvasObject;
             Debug.Log("[MainMenu] Created scene, theme, seven reusable UI prefabs, input maps, and platform layouts.");
         }
@@ -200,7 +191,9 @@ namespace BattleCities.Editor
             var t=ScriptableObject.CreateInstance<MenuTheme>();
             t.HeadingFont=AssetDatabase.LoadAssetAtPath<Font>(Root+"Art/shared/fonts/BarlowCondensed-Bold.ttf");
             t.BodyFont=AssetDatabase.LoadAssetAtPath<Font>(Root+"Art/shared/fonts/BarlowCondensed-SemiBold.ttf");
-            t.Battlefield=Art("reference-style-v2/main-menu/backgrounds/tv-arena");t.PsgBattlefield=Art("reference-style-v2/main-menu/backgrounds/psg1/tv-arena-psg1");t.Background=Art("shared/backgrounds/soft-battlefield");t.RewardGarden=Art("main-menu/backgrounds/reward-garden");
+            t.Battlefield=Art("main-menu/backgrounds/arena-web");t.PsgBattlefield=Art("main-menu/backgrounds/arena-psg1");
+            t.AndroidLandscapeBattlefield=Art("main-menu/backgrounds/arena-android-landscape");t.AndroidPortraitBattlefield=Art("main-menu/backgrounds/arena-android-portrait");
+            t.Background=Art("shared/backgrounds/soft-battlefield");t.RewardGarden=Art("main-menu/backgrounds/reward-garden");
             t.Logo=Art("main-menu/branding/battle-cities-logo");t.PlayButton=Art("shared/buttons/play-gold");
             t.BlueFrame=Art("shared/panels/blue-frame");t.CreamPanel=Art("shared/panels/nav-cream");t.GoldPanel=Art("shared/panels/gold-panel");
             t.SelectedPanel=Art("shared/panels/nav-gold");t.DarkPanel=Art("shared/panels/dark-inset");t.SilverFrame=Art("shared/panels/silver-frame");t.FocusRing=Art("shared/panels/focus-ring");t.Rounded=Art("shared/panels/round-white");
@@ -217,11 +210,11 @@ namespace BattleCities.Editor
             foreach(var path in Directory.GetFiles(Root+"Art","*.png",SearchOption.AllDirectories))
             {
                 string p=path.Replace('\\','/');var imp=AssetImporter.GetAtPath(p) as TextureImporter;if(imp==null)continue;
-                imp.textureType=TextureImporterType.Sprite;imp.spriteImportMode=SpriteImportMode.Single;imp.spritePixelsPerUnit=100;
+                imp.textureType=TextureImporterType.Sprite;imp.spriteImportMode=SpriteImportMode.Single;imp.spritePixelsPerUnit=(p.EndsWith("/shared/panels/blue-frame.png")||p.EndsWith("/shared/panels/navigation-container.png")||p.EndsWith("/shared/panels/button-leaderboard-container.png"))?700:100;
                 imp.alphaIsTransparency=true;imp.mipmapEnabled=false;imp.isReadable=false;imp.filterMode=FilterMode.Bilinear;imp.wrapMode=TextureWrapMode.Clamp;
                 imp.maxTextureSize=2048;imp.textureCompression=TextureImporterCompression.Uncompressed;
                 var settings=new TextureImporterSettings();imp.ReadTextureSettings(settings);settings.spriteMeshType=SpriteMeshType.FullRect;imp.SetTextureSettings(settings);
-                imp.spriteBorder=p.Contains("/panels/")?new Vector4(32,32,32,32):Vector4.zero;
+                imp.spriteBorder=(p.EndsWith("/shared/panels/blue-frame.png")||p.EndsWith("/shared/panels/navigation-container.png")||p.EndsWith("/shared/panels/button-leaderboard-container.png"))?new Vector4(160,160,160,160):p.Contains("/panels/")?new Vector4(32,32,32,32):Vector4.zero;
                 var android=imp.GetPlatformTextureSettings("Android");android.overridden=true;android.maxTextureSize=2048;android.format=TextureImporterFormat.ASTC_6x6;imp.SetPlatformTextureSettings(android);
                 imp.SaveAndReimport();
             }
@@ -251,6 +244,7 @@ namespace BattleCities.Editor
             var trophy=Img("Trophy",headerBar,theme.TrophyIcon);trophy.preserveAspect=true;Box(trophy.rectTransform,.025f,.04f,.07f,.92f);
             var title=Label("Title",headerBar,"TOP 10 EVERY 30 MINUTES",34,Gold);title.alignment=TextAnchor.MiddleLeft;Box(title.rectTransform,.105f,.02f,.80f,.96f);
             var timer=Img("Timer",headerBar,theme.TimerIcon);timer.preserveAspect=true;Box(timer.rectTransform,.925f,.08f,.055f,.84f);
+            headerBar.gameObject.SetActive(false);
 
             var garden=MaskPanel("Garden",root,0);Box(garden,0,.16f,1,.84f);
             var backdrop=Img("Backdrop",garden,theme.RewardGarden);Stretch(backdrop.rectTransform);
@@ -274,29 +268,29 @@ namespace BattleCities.Editor
             trophy.rectTransform.anchorMin=trophy.rectTransform.anchorMax=new Vector2(0,.5f);
             trophy.rectTransform.pivot=new Vector2(0,.5f);trophy.rectTransform.anchoredPosition=new Vector2(10,0);
             trophy.rectTransform.sizeDelta=new Vector2(70,72);
-            var title=Label("Title",heading,"REWARDS LEADERBOARD",32,Gold);
+            var title=Label("Title",heading,"PLAYER RANKINGS",32,Gold);
             title.alignment=TextAnchor.MiddleLeft;title.resizeTextForBestFit=false;title.horizontalOverflow=HorizontalWrapMode.Overflow;
             title.rectTransform.anchorMin=new Vector2(0,1);title.rectTransform.anchorMax=new Vector2(1,1);
             title.rectTransform.pivot=new Vector2(0,1);title.rectTransform.offsetMin=new Vector2(100,-51);title.rectTransform.offsetMax=new Vector2(-10,-10);
-            var subtitle=Label("Availability",heading,"LIVE BOARD UNAVAILABLE",21,Color.white);
+            var subtitle=Label("Availability",heading,"LOADING RANKINGS",21,Color.white);
             subtitle.alignment=TextAnchor.MiddleLeft;subtitle.resizeTextForBestFit=false;subtitle.horizontalOverflow=HorizontalWrapMode.Overflow;
             subtitle.rectTransform.anchorMin=new Vector2(0,1);subtitle.rectTransform.anchorMax=new Vector2(1,1);
             subtitle.rectTransform.pivot=new Vector2(0,1);subtitle.rectTransform.offsetMin=new Vector2(100,-84);subtitle.rectTransform.offsetMax=new Vector2(-10,-52);
             var round=Panel("Round status",root,theme.GoldPanel);Box(round,.05f,.14f,.9f,.105f);
             var roundWatch=Img("Watch",round,theme.TimerIcon);roundWatch.preserveAspect=true;Box(roundWatch.rectTransform,.035f,.20f,.145f,.60f);
-            var roundHeading=Label("Heading",round,"ROUND STATUS",20,Navy,false);roundHeading.alignment=TextAnchor.MiddleLeft;Box(roundHeading.rectTransform,.22f,.10f,.75f,.28f);
+            var roundHeading=Label("Heading",round,"TOP 10 EVERY 30 MINUTES",20,Navy,false);roundHeading.alignment=TextAnchor.MiddleLeft;Box(roundHeading.rectTransform,.22f,.10f,.75f,.28f);
             var roundText=Label("Label",round,"ROUND UNAVAILABLE",32,Navy,false);roundText.alignment=TextAnchor.MiddleLeft;Box(roundText.rectTransform,.22f,.40f,.75f,.47f);
             var columns=Panel("Columns",root,theme.DarkPanel);Box(columns,.05f,.245f,.9f,.085f);
             ConfigureLeaderboardColumns(columns,theme);
             var list=Panel("Scores",root,theme.CreamPanel);Box(list,.05f,.3f,.9f,.56f);
             var bigTrophy=Img("Empty state trophy",list,theme.TrophyIcon);bigTrophy.preserveAspect=true;Box(bigTrophy.rectTransform,.31f,.20f,.38f,.27f);
-            message=Label("Message",list,"LIVE SCORES UNAVAILABLE",26,Navy,false);Box(message.rectTransform,.04f,.52f,.92f,.09f);
-            detail=Label("Detail",list,"Leaderboard service not connected.",21,Navy,false);detail.font=theme.BodyFont;Box(detail.rectTransform,.05f,.61f,.9f,.07f);
+            message=Label("Message",list,"LOADING RANKINGS",26,Navy,false);Box(message.rectTransform,.04f,.52f,.92f,.09f);
+            detail=Label("Detail",list,"Fetching live player standings.",21,Navy,false);detail.font=theme.BodyFont;Box(detail.rectTransform,.05f,.61f,.9f,.07f);
             var retryRect=Panel("Retry",list,Art("shared/buttons/retry-blue"));Box(retryRect,.27f,.7375f,.46f,.13f);
             retryRect.GetComponent<Image>().pixelsPerUnitMultiplier=2;
             var retryText=Label("Label",retryRect,"RETRY",30,Color.white);retryText.resizeTextMinSize=20;Stretch(retryText.rectTransform);retryText.rectTransform.anchoredPosition=new Vector2(0,2);retry=MakeButton(retryRect);AddFocus(retryRect,retry);
             var footer=Panel("Footer",root,theme.DarkPanel);Box(footer,.04f,.88f,.92f,.095f);
-            var footerText=Label("Label",footer,"BATC REWARDS",25,new Color(1f,.878f,.43f));
+            var footerText=Label("Label",footer,"SEASON STANDINGS",25,new Color(1f,.878f,.43f));
             footerText.resizeTextForBestFit=false;footerText.alignment=TextAnchor.MiddleLeft;
             footerText.rectTransform.anchorMin=new Vector2(0,1);footerText.rectTransform.anchorMax=new Vector2(1,1);
             footerText.rectTransform.pivot=new Vector2(0,1);
@@ -305,7 +299,7 @@ namespace BattleCities.Editor
             coin.rectTransform.anchorMin=coin.rectTransform.anchorMax=new Vector2(0,.5f);
             coin.rectTransform.pivot=new Vector2(0,.5f);coin.rectTransform.anchoredPosition=new Vector2(14,0);
             coin.rectTransform.sizeDelta=new Vector2(78,78);
-            var footerSubtitle=Label("Subtitle",footer,"Play. Earn. Climb the leaderboard.",21,new Color(.96f,.97f,1f));
+            var footerSubtitle=Label("Subtitle",footer,"Loading round status...",21,new Color(.96f,.97f,1f));
             footerSubtitle.font=theme.BodyFont;footerSubtitle.resizeTextForBestFit=false;footerSubtitle.alignment=TextAnchor.MiddleLeft;
             footerSubtitle.rectTransform.anchorMin=Vector2.zero;footerSubtitle.rectTransform.anchorMax=new Vector2(1,0);
             footerSubtitle.rectTransform.pivot=Vector2.zero;
@@ -354,7 +348,7 @@ namespace BattleCities.Editor
             background.pixelsPerUnitMultiplier=2;background.raycastTarget=false;
             Box(columns,.05f,.245f,.9f,.085f);
             string[] names={"Rank","Player","Score","Reward"};
-            string[] titles={"#","PLAYER","SCORE","REWARD"};
+            string[] titles={"#","PLAYER","SCORE","MATCHES"};
             float[] left={.025f,.15f,.53f,.77f};
             float[] widths={.10f,.36f,.22f,.21f};
             for(int i=0;i<names.Length;i++)

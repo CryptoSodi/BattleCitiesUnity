@@ -1,0 +1,20 @@
+{
+  "build": "Windows development build; Login first; 0 errors",
+  "runs": [
+    {
+      "mode": "Coop",
+      "scene": "BattleCity",
+      "loginGuestIdGenerated": true,
+      "photonIdMatched": true,
+      "success": true
+    },
+    {
+      "mode": "Versus",
+      "scene": "BattleCity",
+      "loginGuestIdGenerated": true,
+      "photonIdMatched": true,
+      "success": true
+    }
+  ],
+  "guestIdsDistinctAcrossRuns": true
+}

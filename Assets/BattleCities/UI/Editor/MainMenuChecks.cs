@@ -21,7 +21,8 @@ namespace BattleCities.Editor
             Directory.CreateDirectory(PreviewDir);
             Capture(MainMenuPlatform.Web,1600,1067,"web");
             Capture(MainMenuPlatform.Psg1,1240,1080,"psg1");
-            Capture(MainMenuPlatform.Android,940,1672,"android");
+            Capture(MainMenuPlatform.Android,940,1672,"android-portrait");
+            Capture(MainMenuPlatform.AndroidLandscape,844,390,"android-landscape");
             Debug.Log("[MainMenu] Captured platform previews at "+PreviewDir);
         }
         public static void Capture(MainMenuPlatform platform,int width,int height,string name)
@@ -52,7 +53,7 @@ namespace BattleCities.Editor
             var view=UnityEngine.Object.FindFirstObjectByType<MainMenuScene>();if(!view)throw new InvalidOperationException("Open MainMenu first.");
             int count=0;
             void Check(bool ok,string what){if(!ok)throw new InvalidOperationException("[MainMenu] FAIL: "+what);count++;}
-            Check(EditorBuildSettings.scenes[0].path==MainMenuBuilder.ScenePath,"main menu is startup scene");
+            Check(EditorBuildSettings.scenes[0].path=="Assets/BattleCities/Scenes/Login.unity","login is startup scene");
             Check(EditorBuildSettings.scenes.Any(s=>s.enabled&&s.path.EndsWith("BattleCity.unity")),"gameplay scene remains included");
             Check(view.StartButton.onClick.GetPersistentEventCount()==1,"Start has a persistent action");
             Check(view.Tabs.Length==5,"five navigation destinations");
@@ -61,10 +62,53 @@ namespace BattleCities.Editor
             Check(inputs.FindAction("PSG1/Submit").bindings.Any(b=>b.path=="<Gamepad>/buttonEast"),"PSG1 A is east");
             Check(inputs.FindAction("PSG1/Cancel").bindings.Any(b=>b.path=="<Gamepad>/buttonSouth"),"PSG1 B is south");
             Check(!inputs.actionMaps.SelectMany(m=>m.actions).SelectMany(a=>a.bindings).Any(b=>b.path.Contains("Trigger")),"no unavailable PSG1 triggers");
-            var variants=new[]{(MainMenuPlatform.Web,new Vector2(1600,1067)),(MainMenuPlatform.Web,new Vector2(1920,1080)),(MainMenuPlatform.Psg1,new Vector2(1240,1080)),(MainMenuPlatform.Android,new Vector2(940,1672)),(MainMenuPlatform.Android,new Vector2(390,844)),(MainMenuPlatform.Android,new Vector2(844,390))};
+            var variants=new[]{(MainMenuPlatform.Web,new Vector2(1600,1067)),(MainMenuPlatform.Web,new Vector2(1920,1080)),(MainMenuPlatform.Psg1,new Vector2(1240,1080)),(MainMenuPlatform.Android,new Vector2(940,1672)),(MainMenuPlatform.Android,new Vector2(390,844)),(MainMenuPlatform.AndroidLandscape,new Vector2(844,390))};
+            var theme=AssetDatabase.LoadAssetAtPath<MenuTheme>(MainMenuBuilder.Root+"Settings/ArcadeMenuTheme.asset");
+            Check(theme && theme.Battlefield && theme.PsgBattlefield && theme.AndroidLandscapeBattlefield && theme.AndroidPortraitBattlefield,"four arena backgrounds are assigned");
+            var suppliedContainer=AssetDatabase.LoadAssetAtPath<Sprite>(MainMenuBuilder.Root+"Art/reference-style-v2/shared/panels/button-leaderboard-container.png");
+            var originalContainer=AssetDatabase.LoadAssetAtPath<Sprite>(MainMenuBuilder.Root+"Art/reference-style-v2/shared/panels/navigation-container.png");
+            Check(suppliedContainer && suppliedContainer.border.x>0,"supplied button container imports as a sliced sprite");
+            Check(view.Content.Find("Navigation").GetComponent<Image>().sprite==suppliedContainer,
+                "navigation uses the supplied button container");
+            Check(view.Content.Find("Leaderboard").GetComponent<Image>().sprite==originalContainer,
+                "leaderboard keeps its original container");
+            var blurMaterial=AssetDatabase.LoadAssetAtPath<Material>(MainMenuBuilder.Root+"Art/shared/panels/TVBackdropBlur.mat");
+            Check(blurMaterial && blurMaterial.shader && blurMaterial.shader.name=="BattleCities/UI/TVBackdropBlur",
+                "TV blur material and shader are available");
+            Check(blurMaterial && blurMaterial.GetFloat("_BlurRadius")>=10f,
+                "TV background uses a strong blur");
+            var roundHeading=view.Content.Find("Leaderboard/Round status/Heading")?.GetComponent<Text>();
+            Check(roundHeading && roundHeading.text=="TOP 10 EVERY 30 MINUTES","ranking round heading explains the 30 minute cycle");
             foreach(var v in variants)
             {
                 view.ApplyLayout(v.Item1,v.Item2);Canvas.ForceUpdateCanvases();
+                var backdrop=view.transform.Find("World backdrop").GetComponent<Image>();
+                var expected=v.Item1==MainMenuPlatform.Psg1?theme.PsgBattlefield:
+                    v.Item1==MainMenuPlatform.AndroidLandscape?theme.AndroidLandscapeBattlefield:
+                    v.Item1==MainMenuPlatform.Android?theme.AndroidPortraitBattlefield:theme.Battlefield;
+                Check(backdrop.sprite==expected,v.Item1+" uses its supplied arena background");
+                var tv=view.Content.Find("Main Display/TV Frame");
+                var viewport=view.Content.Find("Main Display/TV Background Viewport");
+                var tvImage=tv?tv.GetComponent<Image>():null;
+                Check(tv && tv.gameObject.activeSelf && tvImage && tvImage.type==Image.Type.Sliced && !tvImage.fillCenter,
+                    v.Item1+" TV border shows the arena through its screen");
+                var blurred=viewport?viewport.Find("TV Background") as RectTransform:null;
+                var blurredImage=blurred?blurred.GetComponent<Image>():null;
+                Check(viewport && viewport.gameObject.activeSelf && blurredImage && blurredImage.sprite==expected &&
+                    blurredImage.material==blurMaterial && viewport.GetSiblingIndex()<tv.GetSiblingIndex(),
+                    v.Item1+" masked blur uses the matching arena under the TV frame");
+                var fog=viewport?viewport.Find("TV White Fog") as RectTransform:null;
+                var fogImage=fog?fog.GetComponent<Image>():null;
+                Check(fogImage && blurred && fogImage.color.a>=.58f && !fogImage.raycastTarget &&
+                    fog.GetSiblingIndex()>blurred.GetSiblingIndex(),
+                    v.Item1+" white fog covers only the masked TV background");
+                var backdropCorners=new Vector3[4];var blurCorners=new Vector3[4];
+                backdrop.rectTransform.GetWorldCorners(backdropCorners);blurred.GetWorldCorners(blurCorners);
+                Check(Vector3.Distance(backdropCorners[0],blurCorners[0])<1 &&
+                    Vector3.Distance(backdropCorners[2],blurCorners[2])<1,
+                    v.Item1+" blur artwork aligns with the world backdrop");
+                var rewardHeader=view.Content.Find("Main Display/Rewards/Header Bar");
+                Check(rewardHeader && !rewardHeader.gameObject.activeSelf,v.Item1+" reward stripe is hidden");
                 foreach(var button in view.Tabs)
                 {
                     Check(button.navigation.mode==Navigation.Mode.Explicit,v.Item1+" explicit focus "+button.name);

@@ -2001,7 +2001,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ROUND STATUS
+  m_Text: TOP 10 EVERY 30 MINUTES
 --- !u!1 &8506836323339060415
 GameObject:
   m_ObjectHideFlags: 0

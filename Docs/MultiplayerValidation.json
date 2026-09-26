@@ -1,0 +1,48 @@
+{
+  "date": "2026-09-25",
+  "sdk": "Photon Fusion 2.1.3 Build 2390",
+  "build": "Succeeded errors=0",
+  "environment": "Two standalone processes per mode on one Windows machine; Photon Asia; MainMenu entry; controlled arena",
+  "reports": [
+    {
+      "role": "client",
+      "mode": "coop",
+      "message": "received tanks, terrain destruction, events and advancing simulation",
+      "success": true,
+      "tick": 422,
+      "players": 2,
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "role": "host",
+      "mode": "coop",
+      "message": "remote travel=291, remote shots=6",
+      "success": true,
+      "tick": 421,
+      "players": 2,
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "role": "client",
+      "mode": "pvp",
+      "message": "received tanks, terrain destruction, events and advancing simulation",
+      "success": true,
+      "tick": 422,
+      "players": 2,
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "role": "host",
+      "mode": "pvp",
+      "message": "remote travel=294, remote shots=6",
+      "success": true,
+      "tick": 421,
+      "players": 2,
+      "x": 0.0,
+      "y": 0.0
+    }
+  ]
+}

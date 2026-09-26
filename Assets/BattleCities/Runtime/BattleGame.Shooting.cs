@@ -1,5 +1,6 @@
 using BattleCities.Core;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace BattleCities
 {
@@ -25,6 +26,26 @@ namespace BattleCities
         private readonly ChargedFireInput primaryCharge = new ChargedFireInput();
         private int chargingTankId;
 
+        private Facing? PlayerAim()
+        {
+            var keyboardAim = Latest(aimKeys, aimOrder);
+            if (!ChaseCamera || IsOnline)
+            {
+                chaseAim = null;
+                chaseAimTankId = 0;
+                return keyboardAim;
+            }
+            var player = Simulation.Player;
+            if (player == null) return keyboardAim;
+            if (chaseAimTankId != player.Id)
+            {
+                chaseAimTankId = player.Id;
+                chaseAim = player.Aim;
+            }
+            if (keyboardAim.HasValue) chaseAim = keyboardAim;
+            return chaseAim;
+        }
+
         private void ResetPrimaryFire()
         {
             primaryCharge.Reset();
@@ -40,7 +61,14 @@ namespace BattleCities
                 return;
             }
             if (chargingTankId != player.Id) { ResetPrimaryFire(); chargingTankId = player.Id; }
-            primaryCharge.Sample(fire.WasPressedThisFrame(), fire.WasReleasedThisFrame(), fire.IsPressed(), dt, Simulation.CanFire(player));
+            bool mouseEnabled = ChaseCamera && !IsOnline && !showDebug && Mouse.current != null &&
+                Mouse.current.position.ReadValue().y >= 150 &&
+                Mouse.current.position.ReadValue().y <= Screen.height - BattleHud.TopHeightPixels;
+            primaryCharge.Sample(
+                fire.WasPressedThisFrame() || (mouseEnabled && chaseFire.WasPressedThisFrame()),
+                fire.WasReleasedThisFrame() || (mouseEnabled && chaseFire.WasReleasedThisFrame()),
+                fire.IsPressed() || (mouseEnabled && chaseFire.IsPressed()),
+                dt, Simulation.CanFire(player));
         }
 
         private void QueuePrimaryCommand(ref Command command)

@@ -19,12 +19,13 @@ namespace BattleCities.Editor
             containerImage.sprite=container;
             containerImage.type=Image.Type.Sliced;
             containerImage.preserveAspect=false;
+            containerImage.pixelsPerUnitMultiplier=2;
             containerImage.color=Color.white;
             for(int i=0;i<5;i++)
             {
                 var tile=navigation.GetChild(i);
                 var image=tile.GetComponent<Image>();
-                image.type=Image.Type.Simple;image.preserveAspect=true;image.color=Color.white;
+                image.type=Image.Type.Simple;image.preserveAspect=false;image.color=Color.white;
                 tile.GetComponent<MenuButtonVisual>().ConfigureSkins(image,inactive,active,i==0);
                 MainMenuBuilder.Box((RectTransform)tile.Find("Icon"),.12f,.08f,.76f,.62f);
                 MainMenuBuilder.Box((RectTransform)tile.Find("Label"),.06f,.73f,.88f,.18f);
@@ -32,7 +33,7 @@ namespace BattleCities.Editor
                 copy.name="Navigation"+tile.name;
                 var rt=(RectTransform)copy.transform;
                 rt.anchorMin=rt.anchorMax=rt.pivot=new Vector2(.5f,.5f);
-                rt.sizeDelta=new Vector2(200,200*inactive.rect.height/inactive.rect.width);rt.localScale=Vector3.one;
+                rt.sizeDelta=new Vector2(200,200*8f/9f);rt.localScale=Vector3.one;
                 var button=copy.GetComponent<Button>();button.onClick=new Button.ButtonClickedEvent();
                 button.navigation=new Navigation{mode=Navigation.Mode.Automatic};
                 PrefabUtility.SaveAsPrefabAsset(copy,MainMenuBuilder.Root+"Prefabs/Shared/"+copy.name+".prefab");
@@ -54,7 +55,7 @@ namespace BattleCities.Editor
             var settings=new TextureImporterSettings();
             importer.ReadTextureSettings(settings);
             settings.spriteMeshType=SpriteMeshType.FullRect;
-            settings.spriteBorder=new Vector4(36,36,36,36);
+            importer.spritePixelsPerUnit=700;settings.spriteBorder=new Vector4(160,160,160,160);
             importer.SetTextureSettings(settings);
             importer.SaveAndReimport();
         }

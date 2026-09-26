@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BattleCities.Core;
+using BattleCities.Multiplayer;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -23,7 +24,7 @@ namespace BattleCities
         private BattleGame game;
         private BattleSimulation simulation;
         private int voiceIndex, lastScore, lastLives;
-        private bool lastPaused, lastWon, lastLost, lastSliding, highScorePlayed;
+        private bool lastPaused, lastWon, lastLost, lastSliding, highScorePlayed, introPlayed;
         private int savedHighScore;
         private string lastPickup;
         private float introUntil, nextSearch, nextButtons, lastFire, lastImpact;
@@ -55,7 +56,6 @@ namespace BattleCities
             blastClip = MakeBlast();
             music.clip = musicClip;
             music.volume = 0;
-            music.Play();
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
@@ -93,9 +93,18 @@ namespace BattleCities
                     if (wiredButtons.Add(button)) button.onClick.AddListener(PlayMenuClick);
             }
 
-            bool playing = game && simulation != null && !game.Paused && !simulation.Won && !simulation.Lost;
+            var session=BattleSession.Instance;
+            bool matchReady=game&&simulation!=null&&
+                (simulation.Mode==BattleMode.Offline?!(session&&(session.Busy||session.QuickMatching)):simulation.MatchStarted);
+            bool playing=matchReady&&!game.Paused&&!simulation.Won&&!simulation.Lost;
+            if(playing&&!introPlayed)
+            {
+                introPlayed=true;introUntil=Time.unscaledTime+2;
+                Play("level-intro",.65f);
+                music.Play();
+            }
             if (game && simulation != null) TrackState();
-            float targetMusic = (!game || playing) && Time.unscaledTime >= introUntil ? MusicVolume : 0;
+            float targetMusic = playing && Time.unscaledTime >= introUntil ? MusicVolume : 0;
             music.volume = Mathf.MoveTowards(music.volume, targetMusic, Time.unscaledDeltaTime * .35f);
             UpdateEngine(playing);
         }
@@ -118,6 +127,7 @@ namespace BattleCities
             }
             simulation = next;
             engine.Stop();
+            music.Stop();music.volume=0;introPlayed=false;
             if (next == null) return;
             next.ShotFired += OnShotFired;
             next.ShotImpact += OnShotImpact;
@@ -139,8 +149,6 @@ namespace BattleCities
             lastSliding = next.Player != null && next.Player.Slide > 0;
             savedHighScore = PlayerPrefs.GetInt("battlecities.highScore", 0);
             highScorePlayed = false;
-            introUntil = Time.unscaledTime + 2;
-            Play("level-intro", .65f);
         }
 
         private void TrackState()

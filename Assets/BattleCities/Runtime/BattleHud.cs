@@ -43,7 +43,17 @@ namespace BattleCities
         T Element<T>(Rect rect) where T:Graphic
         {
             T element;
-            if(cursor==elements.Count){var go=new GameObject(typeof(T).Name,typeof(RectTransform));go.transform.SetParent(canvas.transform,false);element=go.AddComponent<T>();element.raycastTarget=false;elements.Add(element);}else element=(T)elements[cursor];
+            // The economy panel and responsive layout can change the element order.
+            // Reuse only a matching graphic type; an Image cannot be cast to Text.
+            if(cursor<elements.Count&&!(elements[cursor] is T))
+            {Object.Destroy(elements[cursor].gameObject);elements[cursor]=null;}
+            if(cursor==elements.Count||!elements[cursor])
+            {
+                var go=new GameObject(typeof(T).Name,typeof(RectTransform));go.transform.SetParent(canvas.transform,false);
+                element=go.AddComponent<T>();element.raycastTarget=false;
+                if(cursor==elements.Count)elements.Add(element);else elements[cursor]=element;
+            }
+            else element=(T)elements[cursor];
             cursor++;element.gameObject.SetActive(true);var rt=element.rectTransform;rt.anchorMin=rt.anchorMax=new Vector2(0,1);rt.pivot=new Vector2(0,1);rt.anchoredPosition=new Vector2(rect.x,-rect.y);rt.sizeDelta=rect.size;return element;
         }
         void Fill(Rect rect,Color color){var image=Element<RawImage>(rect);image.texture=Texture2D.whiteTexture;image.uvRect=new Rect(0,0,1,1);image.color=color;}
@@ -185,8 +195,10 @@ namespace BattleCities
             for(int i=0;i<3;i++)Icon(new Rect(x+32+i*30,18,28,25),player,i>=state.Lives);
             float enemyX=narrow?12:metricWidth*3+4,enemyY=narrow?46:4;
             Fill(new Rect(enemyX-11,9,1,narrow?0:28),gold);
-            Text(new Rect(enemyX,enemyY,100,19),"ENEMIES",cream);
-            Text(new Rect(enemyX,enemyY+18,100,23),state.Remaining.ToString()+" LEFT",new Color(1,.42f,.32f));
+            int opponents=0;
+            if(state.IsPvp)for(int i=0;i<BattleSimulation.MaxPlayers;i++)if(i!=state.LocalPlayerSlot&&state.Participants[i].Connected&&state.Participants[i].Lives>0)opponents++;
+            Text(new Rect(enemyX,enemyY,100,19),state.IsPvp?"RIVALS":"ENEMIES",cream);
+            Text(new Rect(enemyX,enemyY+18,100,23),(state.IsPvp?opponents:state.Remaining).ToString()+" LEFT",new Color(1,.42f,.32f));
             float start=enemyX+100,reserved=psg1?Psg1PowerupWidth(narrow):0,available=Mathf.Max(1,Screen.width-start-10-reserved);
             int total=state.TotalEnemies,deadCount=total-state.Remaining;
             float step=Mathf.Min(34,available/Mathf.Max(1,total));
@@ -197,9 +209,12 @@ namespace BattleCities
                 Icon(slot,enemy,i<deadCount);
             }
             Minimap(state);
-            if(psg1)Psg1Powerups(economy,powerupAtlas,consumePending,narrow);
-            else if(powerupUi==PowerupUiMode.WebTopLeft)PowerupBar(economy,powerupAtlas,consumePending,true);
-            else if(powerupUi==PowerupUiMode.GameOverlay)PowerupBar(economy,powerupAtlas,consumePending,false);
+            if(!state.IsMultiplayer)
+            {
+                if(psg1)Psg1Powerups(economy,powerupAtlas,consumePending,narrow);
+                else if(powerupUi==PowerupUiMode.WebTopLeft)PowerupBar(economy,powerupAtlas,consumePending,true);
+                else if(powerupUi==PowerupUiMode.GameOverlay)PowerupBar(economy,powerupAtlas,consumePending,false);
+            }
             while(cursor<elements.Count)elements[cursor++].gameObject.SetActive(false);
         }
         public void Dispose(){if(canvas)Object.Destroy(canvas.gameObject);if(font)Object.Destroy(font);if(roundedSprite)Object.Destroy(roundedSprite);if(roundedTexture)Object.Destroy(roundedTexture);if(minimapTexture)Object.Destroy(minimapTexture);}

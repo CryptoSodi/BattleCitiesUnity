@@ -12,7 +12,6 @@ namespace BattleCities.UI
         [SerializeField, HideInInspector] private MainMenuPlatform authoredPlatform;
         [SerializeField, HideInInspector] private List<AuthoredMenuLayout> authoredLayouts = new List<AuthoredMenuLayout>();
         private bool generatingLayout;
-        private float authoredLegendShift;
 
         [Serializable]
         private sealed class AuthoredMenuLayout
@@ -114,7 +113,6 @@ namespace BattleCities.UI
             }
             else if(switching)
                 foreach(var element in profile.elements)element.Restore();
-            if(switching)authoredLegendShift=0;
             authoredPlatform=target;
             Vector2 design=profile.designSize;
             if(design.x<=0 || design.y<=0)design=GetLayout(target).referenceResolution;
@@ -130,12 +128,9 @@ namespace BattleCities.UI
 
             if(Application.isPlaying && target==MainMenuPlatform.Psg1 && controls && navigation)
             {
-                float shift=controllerLegendHidden?controls.rect.height+GetLayout(target).navigationToLegendGap:0;
-                navigation.anchoredPosition+=Vector2.down*(shift-authoredLegendShift);
-                authoredLegendShift=shift;
                 controls.gameObject.SetActive(!controllerLegendHidden);
             }
-            ConfigureNavigation(target!=MainMenuPlatform.Web);
+            ConfigureNavigation(target!=MainMenuPlatform.Web,target==MainMenuPlatform.Psg1);
             if(Application.isPlaying && inputModule && (target!=lastPlatform || inputModule.actionsAsset!=liveInput))
                 ConfigureInput(target==MainMenuPlatform.Psg1);
             lastPlatform=target;

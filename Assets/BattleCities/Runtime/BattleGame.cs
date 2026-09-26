@@ -19,8 +19,11 @@ namespace BattleCities
         public TextAsset BrickSectionData;
         public Texture2D[] GroundTextures;
         public Texture2D PowerupAtlas;
-        [Range(0,35)] public int Stage=1;
+        [Range(1,35)] public int Stage=1;
         public bool DayCycle=true, Night, Dust=true, Headlights=true, AutomaticCamera=true, CameraShake=true;
+        public bool ChaseCamera;
+        [Range(.9f,2.4f)] public float ChaseCameraHeight=1.65f;
+        [Range(1.2f,4f)] public float ChaseCameraDistance=2.1f;
         public bool EnemyFire=false;
         [Range(40,90)] public float CameraElevation=70;
         [Range(.7f,2f)] public float Zoom=1;
@@ -50,7 +53,7 @@ namespace BattleCities
         private EagleNightTint eagleTint;
         private InputActionMap input;
         private InputAction[] moveKeys,aimKeys;
-        private InputAction fire,secondaryFire,secondarySelect,pause,restart,debug,overhead;
+        private InputAction fire,chaseFire,secondaryFire,secondarySelect,pause,restart,debug,overhead;
         private readonly long[] moveOrder=new long[4],aimOrder=new long[4];
         private long order;
         private float accumulator,trauma,dayTime;
@@ -61,6 +64,8 @@ namespace BattleCities
         private static readonly string[] debugPowerupNames={"Tank shield","Base steel shield","Freeze enemies","Extra life","Upgrade tank","Destroy enemies","Speed boost","Zoom out"};
         private int requestedStage=1;
         private Vector3 cameraTarget;
+        private Facing? chaseAim;
+        private int chaseAimTankId;
         private float fps;
         private EconomyClient economy;
         private BattleAnimations effects;
@@ -83,6 +88,7 @@ namespace BattleCities
             moveKeys=Keys("Drive",new[]{"w","d","s","a"},moveOrder);
             aimKeys=Keys("Turret",new[]{"upArrow","rightArrow","downArrow","leftArrow"},aimOrder);
             fire=input.AddAction("Fire",InputActionType.Button,"<Keyboard>/space");
+            chaseFire=input.AddAction("ChaseFire",InputActionType.Button,"<Mouse>/leftButton");
             secondaryFire=input.AddAction("SecondaryFire",InputActionType.Button,"<Keyboard>/e");
             secondaryFire.AddBinding("<Mouse>/rightButton");
             secondarySelect=input.AddAction("SelectSecondary",InputActionType.Button,"<Keyboard>/q");
@@ -98,7 +104,7 @@ namespace BattleCities
             water=Material(new Color(.03f,.53f,.72f));water.SetFloat("_Smoothness",.85f);
             mineMetal=Material(new Color(.16f,.21f,.13f));mineDirt=Material(new Color(.32f,.23f,.12f));mineReady=Material(new Color(.95f,.57f,.04f));
             dronePaint=Material(new Color(.95f,.58f,.025f));
-            droneRange=new Material(Shader.Find("Sprites/Default"));ownedMaterials.Add(droneRange);droneRange.color=new Color(.15f,.8f,1,.2f);
+            droneRange=new Material(Shader.Find("Sprites/Default"));ownedMaterials.Add(droneRange);droneRange.color=new Color(1,1,1,.2f);
             var psShader=Shader.Find("Universal Render Pipeline/Particles/Unlit");
             particleMaterial=new Material(psShader);ownedMaterials.Add(particleMaterial);
             particleMaterial.SetColor("_BaseColor",Color.white);
@@ -124,7 +130,10 @@ namespace BattleCities
                 var renderer=mesh.GetComponent<MeshRenderer>();if(renderer==null)continue;
                 for(int i=0;i<mesh.sharedMesh.subMeshCount;i++)
                 {
-                    var mat=renderer.sharedMaterials[Math.Min(i,renderer.sharedMaterials.Length-1)];mat.enableInstancing=true;
+                    var source=renderer.sharedMaterials[Math.Min(i,renderer.sharedMaterials.Length-1)];
+                    var mat=Resources.Load<Material>("RuntimeShaders/Terrain/"+source.name);
+                    if(!mat)mat=source;
+                    mat.enableInstancing=true;
                     parts.Add(new Part{Mesh=mesh.sharedMesh,Material=mat,Submesh=i,Local=root.transform.worldToLocalMatrix*mesh.transform.localToWorldMatrix});
                 }
             }return parts;
@@ -144,10 +153,12 @@ namespace BattleCities
         }
         public void LoadStage(int stage)
         {
+            if(IsOnline&&!loadingOnline)return;
+            if(stage<1||stage>35)throw new ArgumentOutOfRangeException(nameof(stage),"Select a stage from 01 to 35.");
             var asset=Resources.Load<TextAsset>("Maps/"+stage.ToString("00"));if(asset==null)throw new InvalidOperationException("Missing stage "+stage);
             var shootingSettings=SelectedTankShootingSettings;
             var map=JsonConvert.DeserializeObject<MapData>(asset.text);
-            ResetPrimaryFire();SetStageLighting(stage);Stage=requestedStage=stage;Simulation=new BattleSimulation(map,stage,shootingSettings?shootingSettings.NormalReloadSeconds:.12f,shootingSettings?shootingSettings.UpgradedNormalReloadSeconds:.08f);accumulator=0;paused=false;
+            ResetPrimaryFire();chaseAim=null;chaseAimTankId=0;Stage=requestedStage=stage;Simulation=new BattleSimulation(map,stage,shootingSettings?shootingSettings.NormalReloadSeconds:.12f,shootingSettings?shootingSettings.UpgradedNormalReloadSeconds:.08f,BattlePreparation.TankTier);accumulator=0;paused=false;
             if(!GroundTurretPrefab)throw new InvalidOperationException("GroundTurret prefab is not assigned");
             var turretSettings=GroundTurretPrefab.GetComponent<GroundTurret>();
             if(!turretSettings)throw new InvalidOperationException("GroundTurret prefab is missing its runtime component");
@@ -167,7 +178,7 @@ namespace BattleCities
             Simulation.TerrainChanged+=()=>terrainDirty=true;
             var current=Simulation;
             Simulation.DropRequested+=()=>RollDrop(current);
-            Simulation.CurrencyClaimed+=id=>{if(economy) _=economy.Claim(id);};
+            Simulation.CurrencyClaimed+=id=>{if(!IsOnline&&economy) _=economy.Claim(id);};
             Simulation.ShotImpact+=OnShotImpact;
             Simulation.ShotFired+=OnShotFired;
             Simulation.TankDestroyed+=t=>{if(actors.TryGetValue(t.Id,out var dead))debris.Tank(dead.Model,World(t.X,t.Y,.3f));effects.Burst(World(t.X,t.Y,.35f),1.3f);if(CameraShake)trauma=.3f;};
@@ -185,7 +196,7 @@ namespace BattleCities
             float w=Simulation.Width/64f,h=Simulation.Height/64f;
             var ground=GameObject.CreatePrimitive(PrimitiveType.Plane);ground.name="Ground";ground.transform.SetParent(stageRoot);ground.transform.position=new Vector3(w/2,-.025f,-h/2);ground.transform.localScale=new Vector3(w/10,1,h/10);Destroy(ground.GetComponent<Collider>());
             Material groundMat=street;
-            if(Stage!=1){groundMat=Material(Color.white);groundMat.mainTexture=GroundTextures[Stage==0?3:(Stage-1)%4];groundMat.mainTextureScale=new Vector2(w/2,h/2);}
+            if(Stage!=1){groundMat=Material(Color.white);groundMat.mainTexture=GroundTextures[(Stage-1)%4];groundMat.mainTextureScale=new Vector2(w/2,h/2);}
             ground.GetComponent<Renderer>().sharedMaterial=groundMat;
             Cube("North curb",new Vector3(w/2,.02f,.14f),new Vector3(w+.56f,.13f,.28f),pavement);
             Cube("South curb",new Vector3(w/2,.02f,-h-.14f),new Vector3(w+.56f,.13f,.28f),pavement);
@@ -231,7 +242,8 @@ namespace BattleCities
         private void Update()
         {
             if(Simulation==null)return;float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);fps=Mathf.Lerp(fps,1/Mathf.Max(.0001f,Time.unscaledDeltaTime),.05f);
-            if(pause.WasPressedThisFrame())paused=!paused;if(debug.WasPressedThisFrame())showDebug=!showDebug;if(restart.WasPressedThisFrame())LoadStage(Stage);if(overhead.WasPressedThisFrame())CameraElevation=CameraElevation>85?70:90;
+            if(pause.WasPressedThisFrame())paused=!paused;if(debug.WasPressedThisFrame())showDebug=!showDebug;if(restart.WasPressedThisFrame()&&!IsOnline)LoadStage(Stage);if(overhead.WasPressedThisFrame())CameraElevation=CameraElevation>85?70:90;
+            if(Multiplayer.BattleSession.Instance&&Multiplayer.BattleSession.Instance.Lobby.Visible)paused=true;
             UpdateDayNightShortcuts(dt);
             for(int i=0;i<slots.Length;i++)if(slots[i].WasPressedThisFrame()&&!paused)UsePowerupSlot(i);
             SamplePrimaryFire(dt);
@@ -239,23 +251,25 @@ namespace BattleCities
             {
                 secondaryQueued|=secondaryFire.WasPressedThisFrame();
                 if(secondarySelect.WasPressedThisFrame())CycleSecondary();
-                accumulator+=dt;var cmd=new Command{Move=Latest(moveKeys,moveOrder),Aim=Latest(aimKeys,aimOrder)};
+                accumulator+=dt;var cmd=new Command{Move=Latest(moveKeys,moveOrder),Aim=PlayerAim()};
                 Simulation.DisableEnemyFire=!EnemyFire;
+                if(IsOnline)accumulator=0;
                 while(accumulator>=BattleSimulation.StepSeconds){QueuePrimaryCommand(ref cmd);cmd.SecondaryFire=secondaryQueued;secondaryQueued=false;Simulation.Step(cmd);accumulator-=BattleSimulation.StepSeconds;}
             }
             else secondaryQueued=false;
+            if(SystemInfo.graphicsDeviceType==GraphicsDeviceType.Null)return;
             SyncMines();
-            SyncTurrets(paused||consumePending?0:dt);
+            SyncTurrets(!IsOnline&&(paused||consumePending)?0:dt);
             SyncDrones();
             SyncLandDrones();
             if(terrainDirty)RebuildTerrain();
             foreach(var batch in batches)Graphics.DrawMeshInstanced(batch.Part.Mesh,batch.Part.Submesh,batch.Part.Material,batch.Matrices,batch.Matrices.Length,null,ShadowCastingMode.On,true);
-            SyncActors(paused||consumePending?0:dt);effects.Tick(paused||consumePending?0:dt,gameCamera);debris.Tick(paused||consumePending?0:dt);UpdateLighting(dt);UpdateCamera(dt);
+            float presentationDt=!IsOnline&&(paused||consumePending)?0:dt;
+            SyncActors(presentationDt);effects.Tick(presentationDt,gameCamera);debris.Tick(presentationDt);UpdateLighting(dt);UpdateCamera(dt);
         }
         private void UpdateLighting(float dt)
         {
             weather.Tick(paused?0:dt,Simulation.Width/64f,Simulation.Height/64f,sun,reflections);
-            if(Stage==0){sun.intensity=Mathf.Min(sun.intensity,1.1f);RenderSettings.ambientSkyColor*=.78f;RenderSettings.ambientEquatorColor*=.82f;}
             if(eagleTint)eagleTint.SetDarkness(weather.Darkness);
             foreach(var actor in actors.Values)foreach(var light in actor.Lights)light.intensity=Headlights?weather.Darkness*9:0;
         }
@@ -264,11 +278,24 @@ namespace BattleCities
             float screenHeight=Mathf.Max(1,Screen.height);
             float gameplayHeight=Mathf.Max(1,screenHeight-BattleHud.TopHeightPixels);
             gameCamera.rect=new Rect(0,0,1,gameplayHeight/screenHeight);
+            var player=Simulation.Player;
+            if(ChaseCamera&&!IsOnline&&player!=null)
+            {
+                var forward=Quaternion.Euler(0,(int)player.Aim*90,0)*Vector3.forward;
+                var position=World(player.X,player.Y,ChaseCameraHeight)-forward*ChaseCameraDistance;
+                var sight=World(player.X,player.Y,.48f)+forward*3.5f;
+                gameCamera.orthographic=false;
+                gameCamera.fieldOfView=65;
+                gameCamera.nearClipPlane=.05f;
+                gameCamera.transform.SetPositionAndRotation(position,Quaternion.LookRotation(sight-position,Vector3.up));
+                return;
+            }
+            gameCamera.orthographic=true;
+            gameCamera.nearClipPlane=.1f;
             if(AutomaticCamera)
             {
                 float w=Simulation.Width/64f,h=Simulation.Height/64f;
                 float span=Mathf.Min(w+.9f,(h+.9f)*gameCamera.aspect*Mathf.Sin(CameraElevation*Mathf.Deg2Rad));
-                if(Stage==0)span=Mathf.Min(span,15f);
                 gameCamera.orthographicSize=span/gameCamera.aspect/2/(Simulation.ZoomOut>0?.75f:Zoom);
                 float halfX=gameCamera.orthographicSize*gameCamera.aspect,halfZ=gameCamera.orthographicSize/Mathf.Sin(CameraElevation*Mathf.Deg2Rad);
                 var p=Simulation.Player;Vector3 desired=p!=null?World(p.X,p.Y):World(Simulation.Width/2,Simulation.Height/2);
@@ -278,7 +305,7 @@ namespace BattleCities
             else if(Mouse.current!=null)
             {
                 if(Mouse.current.middleButton.isPressed){var d=Mouse.current.delta.ReadValue();cameraTarget+=new Vector3(-d.x,0,-d.y)*.012f;}
-                Zoom=Mathf.Clamp(Zoom+Mouse.current.scroll.ReadValue().y*.001f,Stage==0?.5f:.7f,2);gameCamera.orthographicSize=7/Zoom;
+                Zoom=Mathf.Clamp(Zoom+Mouse.current.scroll.ReadValue().y*.001f,.7f,2);gameCamera.orthographicSize=7/Zoom;
             }
             trauma=Mathf.Max(0,trauma-dt);Vector3 shake=CameraShake?new Vector3(Mathf.Sin(Time.unscaledTime*71),0,Mathf.Sin(Time.unscaledTime*83))*trauma*.2f:Vector3.zero;
             var angle=CameraElevation*Mathf.Deg2Rad;var target=cameraTarget+shake;
@@ -322,12 +349,16 @@ namespace BattleCities
             foreach(var t in Simulation.Tanks.Where(t=>t.Alive))
             {
                 living.Add(t.Id);if(actors.TryGetValue(t.Id,out var old)&&(old.Tier!=t.Tier||old.Drop!=t.Drop)){Destroy(old.Root);actors.Remove(t.Id);}if(!actors.TryGetValue(t.Id,out var a)){a=CreateTank(t);actors.Add(t.Id,a);}
-                a.Root.transform.position=World(t.X,t.Y);a.Model.transform.rotation=Quaternion.Slerp(a.Model.transform.rotation,Quaternion.Euler(0,(int)t.Direction*90,0),1-Mathf.Exp(-dt*22));
+                var targetPosition=World(t.X,t.Y);
+                a.Root.transform.position=IsOnline&&!NetworkMatch.Object.HasStateAuthority&&Vector3.Distance(a.Root.transform.position,targetPosition)<2?Vector3.Lerp(a.Root.transform.position,targetPosition,1-Mathf.Exp(-dt*24)):targetPosition;a.Model.transform.rotation=Quaternion.Slerp(a.Model.transform.rotation,Quaternion.Euler(0,(int)t.Direction*90,0),1-Mathf.Exp(-dt*22));
                 if(a.Turret)a.Turret.rotation=Quaternion.Slerp(a.Turret.rotation,Quaternion.Euler(0,(int)t.Aim*90,0),1-Mathf.Exp(-dt*16));
+                bool local=t==Simulation.Player;
                 a.Animation.Tick(t,dt);a.Shield.Tick(t.Shield,dt);
                 effects.HealthBar(World(t.X,t.Y,.4f)+gameCamera.transform.up*.64f,t.Health,t.MaxHealth,a.Color,gameCamera);
-                if(t.Player)effects.CooldownBar(World(t.X,t.Y,.4f)+gameCamera.transform.up*.575f,primaryCharge.IsCharging?1-primaryCharge.Progress:t.ReloadProgress,gameCamera,primaryCharge.IsCharging);
-                if(t.Player&&primaryCharge.IsCharging)foreach(var muzzle in a.Muzzles)effects.ProjectileGlow(muzzle.position,a.Color,true,gameCamera,.35f+primaryCharge.Progress*.65f);
+                float charge=IsOnline&&t.Player&&t.Slot>=0&&t.Slot!=NetworkMatch.LocalSlot?
+                    NetworkMatch.ChargeProgress[t.Slot]:primaryCharge.IsCharging&&local?primaryCharge.Progress:0;
+                if(local)effects.CooldownBar(World(t.X,t.Y,.4f)+gameCamera.transform.up*.575f,charge>0?1-charge:t.ReloadProgress,gameCamera,charge>0);
+                if(t.Player&&charge>0)foreach(var muzzle in a.Muzzles)effects.ProjectileGlow(muzzle.position,a.Color,true,gameCamera,.35f+charge*.65f);
                 var travel=Quaternion.Euler(0,(int)t.Direction*90,0)*Vector3.forward;a.Dust.transform.localPosition=-travel*.52f+Vector3.up*.06f;a.Dust.transform.localRotation=Quaternion.Euler(0,(int)t.Direction*90,0);var emission=a.Dust.emission;emission.rateOverTime=Dust&&t.Moving?45:0;
             }
             foreach(var id in actors.Keys.Where(id=>!living.Contains(id)).ToArray()){Destroy(actors[id].Root);actors.Remove(id);}
@@ -347,7 +378,7 @@ namespace BattleCities
                     visual=new MineVisual{Root=new GameObject("Buried mine "+mine.Id),Dirt=new Transform[8]};visual.Root.transform.SetParent(actorsRoot,false);visual.Root.transform.position=World(mine.X,mine.Y);
                     if(!MineModel)throw new InvalidOperationException("Arcade mine GLB is not assigned");
                     visual.Disc=new GameObject("Arcade mine visual").transform;visual.Disc.SetParent(visual.Root.transform,false);
-                    var model=Instantiate(MineModel,visual.Disc);model.name="Arcade mine";model.transform.localPosition=Vector3.zero;model.transform.localRotation=Quaternion.identity;model.transform.localScale=Vector3.one*.62f;Shadows(model);
+                    var model=Instantiate(MineModel,visual.Disc);model.name="Arcade mine";model.transform.localPosition=Vector3.zero;model.transform.localRotation=Quaternion.identity;model.transform.localScale=Vector3.one*.62f;Shadows(model);TintDeployable(model,mine.OwnerSlot);
                     visual.Indicator=model.GetComponentsInChildren<Transform>(true).FirstOrDefault(t=>t.name=="Red blinking indicator");
                     for(int i=0;i<8;i++)visual.Dirt[i]=MinePart(visual.Root.transform,PrimitiveType.Cube,"Excavated earth",Vector3.zero,new Vector3(.07f,.035f,.06f),mineDirt);
                     mines.Add(mine.Id,visual);
@@ -376,7 +407,7 @@ namespace BattleCities
                 if(!turrets.TryGetValue(state.Id,out var view))
                 {
                     var root=Instantiate(GroundTurretPrefab,World(state.X,state.Y),Quaternion.identity,actorsRoot);
-                    root.name="Ground turret "+state.Id;view=root.GetComponent<GroundTurret>();view.Initialize();turrets.Add(state.Id,view);
+                    root.name="Ground turret "+state.Id;view=root.GetComponent<GroundTurret>();view.Initialize();TintDeployable(root,state.OwnerSlot);turrets.Add(state.Id,view);
                 }
                 view.transform.position=World(state.X,state.Y);
                 view.Tick(state,dt);
@@ -385,6 +416,7 @@ namespace BattleCities
         }
         private void CycleSecondary()
         {
+            if(IsOnline){onlineSecondary=(SecondaryAttack)((int)onlineSecondary%(int)SecondaryAttack.LandDrone+1);return;}
             switch(Simulation.EquippedSecondary)
             {
                 case SecondaryAttack.Mine:Simulation.EquippedSecondary=SecondaryAttack.PatrolDrone;break;
@@ -403,11 +435,11 @@ namespace BattleCities
                     visual.Root.transform.SetParent(actorsRoot,false);
                     if(!DroneModel)throw new InvalidOperationException("Wing drone GLB is not assigned");
                     visual.Body=new GameObject("Wing drone visual").transform;visual.Body.SetParent(visual.Root.transform,false);
-                    var model=Instantiate(DroneModel,visual.Body);model.name="Wing drone";model.transform.localPosition=Vector3.zero;model.transform.localRotation=Quaternion.identity;model.transform.localScale=Vector3.one*.48f;Shadows(model);
+                    var model=Instantiate(DroneModel,visual.Body);model.name="Wing drone";model.transform.localPosition=Vector3.zero;model.transform.localRotation=Quaternion.identity;model.transform.localScale=Vector3.one*.48f;Shadows(model);TintDeployable(model,drone.OwnerSlot);
                     visual.Rotors=model.GetComponentsInChildren<Transform>(true).Where(t=>t.name.StartsWith("Rotor_")&&t.parent&&t.parent.name=="HoverBody").OrderBy(t=>t.name).ToArray();
                     if(visual.Rotors.Length!=4)throw new InvalidOperationException("Wing drone must import four HoverBody rotor pivots");
                     var boundary=new GameObject("Patrol boundary",typeof(LineRenderer));boundary.transform.SetParent(visual.Root.transform,false);
-                    var line=boundary.GetComponent<LineRenderer>();line.sharedMaterial=droneRange;line.useWorldSpace=true;line.loop=true;line.positionCount=64;line.startWidth=line.endWidth=.012f;line.shadowCastingMode=ShadowCastingMode.Off;
+                    var line=boundary.GetComponent<LineRenderer>();line.sharedMaterial=droneRange;line.startColor=line.endColor=PlayerColor(drone.OwnerSlot);line.useWorldSpace=true;line.loop=true;line.positionCount=64;line.startWidth=line.endWidth=.012f;line.shadowCastingMode=ShadowCastingMode.Off;
                     for(int i=0;i<64;i++){float angle=i*Mathf.PI*2/64;line.SetPosition(i,World(drone.AnchorX+Mathf.Cos(angle)*BattleSimulation.DronePatrolRadius,drone.AnchorY+Mathf.Sin(angle)*BattleSimulation.DronePatrolRadius,.035f));}
                     drones.Add(drone.Id,visual);
                 }
@@ -430,7 +462,19 @@ namespace BattleCities
         private void OnGUI()
         {
             if(Simulation==null)return;
-            hud.Draw(Simulation,economy,PowerupAtlas,consumePending);
+            hud.Draw(Simulation,IsOnline?null:economy,PowerupAtlas,consumePending);
+            if(Multiplayer.BattleSession.Instance&&Multiplayer.BattleSession.Instance.Lobby.Visible)return;
+            if(ChaseCamera&&!IsOnline&&Simulation.Player!=null&&!paused&&!showDebug)
+            {
+                float centerX=Screen.width*.5f;
+                float centerY=Screen.height-(Screen.height-BattleHud.TopHeightPixels)*.5f;
+                var oldColor=GUI.color;GUI.color=new Color(1,.95f,.72f,.9f);
+                GUI.DrawTexture(new Rect(centerX-9,centerY-1,6,2),Texture2D.whiteTexture);
+                GUI.DrawTexture(new Rect(centerX+3,centerY-1,6,2),Texture2D.whiteTexture);
+                GUI.DrawTexture(new Rect(centerX-1,centerY-9,2,6),Texture2D.whiteTexture);
+                GUI.DrawTexture(new Rect(centerX-1,centerY+3,2,6),Texture2D.whiteTexture);
+                GUI.color=oldColor;
+            }
             var secondaryRect=new Rect(12,Screen.height-96,156,58);
             string secondaryStatus=Simulation.SecondaryCooldown>0?Simulation.SecondaryCooldown.ToString("0.0")+"s":Simulation.SecondaryCount>=Simulation.SecondaryLimit?"LIMIT":"READY";
             string secondaryName=Simulation.EquippedSecondary==SecondaryAttack.LandDrone?"LAND DRONE":Simulation.EquippedSecondary==SecondaryAttack.PatrolDrone?"DRONE":Simulation.EquippedSecondary==SecondaryAttack.GroundTurret?"TURRET":"MINE";
@@ -442,13 +486,19 @@ namespace BattleCities
             if(economy&&showDebug)GUI.Label(new Rect(12,Screen.height-84,650,24),consumePending?"Confirming power-upÃ¢â‚¬Â¦":economy.Status);
             if(Simulation.PickupType!=null){var screen=gameCamera.WorldToScreenPoint(World(Simulation.PickupX,Simulation.PickupY,.7f));float size=Mathf.Clamp(Vector3.Distance(gameCamera.WorldToScreenPoint(World(Simulation.PickupX+67,Simulation.PickupY,.7f)),screen),96,144);var r=new Rect(screen.x-size/2,Screen.height-screen.y-size/2,size,size);if(PowerupAtlas&&BattleHud.TryPowerupUv(Simulation.PickupType,out var uv))GUI.DrawTextureWithTexCoords(r,PowerupAtlas,uv);else GUI.Box(r,Simulation.PickupType);pickupSparkles.Draw(r,Simulation.Tick*BattleSimulation.StepSeconds);}
             GUI.Label(new Rect(12,Screen.height-28,Screen.width-24,24),"WASD drive   Ã¢â‚¬Â¢   Arrows aim   Ã¢â‚¬Â¢   Space: tap / hold + release   Ã¢â‚¬Â¢   P pause   Ã¢â‚¬Â¢   R restart   Ã¢â‚¬Â¢   C camera");
-            if(paused||Simulation.Lost||Simulation.Won){GUI.Box(new Rect(Screen.width/2-130,Screen.height/2-35,260,70),(paused?"PAUSED":Simulation.Won?"STAGE CLEAR":"GAME OVER")+"\nR: Restart");if(Simulation.Won&&Stage<35&&GUI.Button(new Rect(Screen.width/2-65,Screen.height/2+45,130,30),"Next stage"))LoadStage(Stage+1);}
-            if(!showDebug||RuntimePlatformInfo.IsPsg1)return;
+            if(!IsOnline&&(paused||Simulation.Lost||Simulation.Won)){GUI.Box(new Rect(Screen.width/2-130,Screen.height/2-35,260,70),(paused?"PAUSED":Simulation.Won?"STAGE CLEAR":"GAME OVER")+"\nR: Restart");if(Simulation.Won&&Stage<35&&GUI.Button(new Rect(Screen.width/2-65,Screen.height/2+45,130,30),"Next stage"))LoadStage(Stage+1);}
+            if(IsOnline||!showDebug||RuntimePlatformInfo.IsPsg1)return;
             GUILayout.BeginArea(new Rect(Mathf.Max(8,Screen.width-282),92,270,Mathf.Max(120,Screen.height-132)),"Battle Cities Ã¢â‚¬Â¢ Debug",GUI.skin.window);
             debugScroll=GUILayout.BeginScrollView(debugScroll);
-            GUILayout.Label("Stage "+requestedStage);requestedStage=Mathf.RoundToInt(GUILayout.HorizontalSlider(requestedStage,0,35));if(GUILayout.Button("Load stage "+requestedStage))LoadStage(requestedStage);
+            ChaseCamera=GUILayout.Toggle(ChaseCamera,"Chase shooting camera (arrows aim, LMB / Space fire)");
+            if(ChaseCamera)
+            {
+                GUILayout.Label("Camera height "+ChaseCameraHeight.ToString("F2"));ChaseCameraHeight=GUILayout.HorizontalSlider(ChaseCameraHeight,.9f,2.4f);
+                GUILayout.Label("Follow distance "+ChaseCameraDistance.ToString("F2"));ChaseCameraDistance=GUILayout.HorizontalSlider(ChaseCameraDistance,1.2f,4f);
+            }
+            GUILayout.Label("Stage "+requestedStage);requestedStage=Mathf.RoundToInt(GUILayout.HorizontalSlider(requestedStage,1,35));if(GUILayout.Button("Load stage "+requestedStage))LoadStage(requestedStage);
             weather.Cycle=GUILayout.Toggle(weather.Cycle,"Day/night cycle");weather.Rain=GUILayout.Toggle(weather.Rain,"Rain");weather.Clouds=GUILayout.Toggle(weather.Clouds,"Drifting clouds");GUILayout.Label("Time of day");weather.TimeOfDay=GUILayout.HorizontalSlider(weather.TimeOfDay,0,1);GUILayout.Label("Rain intensity");weather.RainIntensity=GUILayout.HorizontalSlider(weather.RainIntensity,0,1);Headlights=GUILayout.Toggle(Headlights,"Tank headlights");Dust=GUILayout.Toggle(Dust,"Tank trail dust");EnemyFire=GUILayout.Toggle(EnemyFire,"Enemy shooting");
-            AutomaticCamera=GUILayout.Toggle(AutomaticCamera,"Automatic camera");CameraShake=GUILayout.Toggle(CameraShake,"Camera shake");GUILayout.Label("Elevation "+CameraElevation.ToString("F0")+"Ã‚Â°");CameraElevation=GUILayout.HorizontalSlider(CameraElevation,40,89.9f);GUILayout.Label("Zoom");Zoom=GUILayout.HorizontalSlider(Zoom,Stage==0?.5f:.7f,2);
+            AutomaticCamera=GUILayout.Toggle(AutomaticCamera,"Automatic camera");CameraShake=GUILayout.Toggle(CameraShake,"Camera shake");GUILayout.Label("Elevation "+CameraElevation.ToString("F0")+"Ã‚Â°");CameraElevation=GUILayout.HorizontalSlider(CameraElevation,40,89.9f);GUILayout.Label("Zoom");Zoom=GUILayout.HorizontalSlider(Zoom,.7f,2);
             GUILayout.Label("FPS "+fps.ToString("F0")+" Ã¢â‚¬Â¢ Terrain batches "+batches.Count);GUILayout.Label("Manual camera: middle-drag / wheel");DrawDebugPowerups();GUILayout.EndScrollView();GUILayout.EndArea();
         }
         private void DrawDebugPowerups()
@@ -483,17 +533,17 @@ namespace BattleCities
         }
         public void DebugConsumePowerup(string type)
         {
-            if(Simulation==null||Simulation.Player==null||Simulation.Lost||Simulation.Won||consumePending)return;
+            if(IsOnline||Simulation==null||Simulation.Player==null||Simulation.Lost||Simulation.Won||consumePending)return;
             int index=Array.IndexOf(debugPowerupTypes,type);if(index<0)return;
             Simulation.ApplyPowerup(type);
             debugPowerupStatus="Applied: "+debugPowerupNames[index]+(paused?" (paused)":"");
         }
-        private void OnApplicationFocus(bool focus){if(!focus){paused=true;ResetPrimaryFire();}}
+        private void OnApplicationFocus(bool focus){if(!focus){if(!IsOnline)paused=true;ResetPrimaryFire();secondaryQueued=false;}}
         private async void RollDrop(BattleSimulation current)
-        {var drop=economy?await economy.Roll(Stage):null;if(this&&Simulation==current)current.SpawnPickup(drop?.Type,drop?.ClaimId);}
+        {if(IsOnline){if(NetworkMatch.Object.HasStateAuthority)current.SpawnPickup();return;}var drop=economy?await economy.Roll(Stage):null;if(this&&Simulation==current)current.SpawnPickup(drop?.Type,drop?.ClaimId);}
         public void UsePowerupSlot(int index)
         {
-            if(index<0||index>=4||consumePending||!economy||Simulation.Player==null||Simulation.Lost||Simulation.Won)return;
+            if(IsOnline||index<0||index>=4||consumePending||!economy||Simulation.Player==null||Simulation.Lost||Simulation.Won)return;
             consumePending=true;_ = ConsumePowerupSlot(index);
         }
         private async System.Threading.Tasks.Task ConsumePowerupSlot(int index)

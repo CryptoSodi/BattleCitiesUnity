@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -10,7 +11,7 @@ using Screen = UnityEngine.Device.Screen;
 
 namespace BattleCities.UI
 {
-    public enum MainMenuPlatform { Auto, Web, Psg1, Android }
+    public enum MainMenuPlatform { Auto, Web, Psg1, Android, AndroidLandscape }
 
 
     [Serializable]
@@ -52,9 +53,9 @@ namespace BattleCities.UI
 
         [Header("Compact Navigation")]
         [Range(.2f, 1f)] public float navigationWidthRatio = 1;
-        [Min(0)] public float navigationSidePadding = 20;
-        [Min(0)] public float navigationButtonGap = 8;
-        [Min(0)] public float navigationVerticalPadding = 20;
+        [Min(0)] public float navigationSidePadding = 10;
+        [Min(0)] public float navigationButtonGap = 4;
+        [Min(0)] public float navigationVerticalPadding = 10;
         [Min(0)] public float controllerLegendHeight;
         [Min(0)] public float controllerLegendAutoHideSeconds;
         [Min(0)] public float navigationToLegendGap;
@@ -137,8 +138,8 @@ namespace BattleCities.UI
                 headerWidthRatio = 1208f / 1240f,
                 headerToBodyGap = 4,
                 navigationWidthRatio = .60f,
-                navigationSidePadding = 16,
-                navigationButtonGap = 12,
+                navigationSidePadding = 10,
+                navigationButtonGap = 4,
                 navigationVerticalPadding = 10,
                 controllerLegendHeight = 48,
                 controllerLegendAutoHideSeconds = 30,
@@ -168,9 +169,9 @@ namespace BattleCities.UI
                 headerWidthRatio = 904f / 940f,
                 headerToBodyGap = 12,
                 navigationWidthRatio = 1,
-                navigationSidePadding = 20,
-                navigationButtonGap = 6,
-                navigationVerticalPadding = 20,
+                navigationSidePadding = 10,
+                navigationButtonGap = 4,
+                navigationVerticalPadding = 10,
                 controllerLegendHeight = 0,
                 navigationToLegendGap = 0,
                 mainToNavigationGap = 12,
@@ -180,6 +181,26 @@ namespace BattleCities.UI
                 mainToPortraitHowGap = 12,
                 rewardsHeightRatio = .30f,
                 startMaxWidth = 560,
+                selectHintHeight = 0
+            };
+        }
+
+        public static MainMenuLayoutSettings AndroidLandscape()
+        {
+            return new MainMenuLayoutSettings
+            {
+                referenceResolution = new Vector2(1871, 841),
+                outerPadding = 12,
+                headerHeight = 80,
+                headerToBodyGap = 6,
+                navigationWidthRatio = .64f,
+                navigationSidePadding = 10,
+                navigationButtonGap = 4,
+                navigationVerticalPadding = 10,
+                mainToNavigationGap = 8,
+                portraitHowItWorksHeight = 0,
+                rewardsHeightRatio = .30f,
+                startMaxWidth = 400,
                 selectHintHeight = 0
             };
         }
@@ -198,6 +219,7 @@ namespace BattleCities.UI
         [SerializeField] private MainMenuLayoutSettings webLayout = MainMenuLayoutSettings.Web();
         [SerializeField] private MainMenuLayoutSettings psg1Layout = MainMenuLayoutSettings.Psg1();
         [SerializeField] private MainMenuLayoutSettings androidLayout = MainMenuLayoutSettings.Android();
+        [SerializeField] private MainMenuLayoutSettings androidLandscapeLayout = MainMenuLayoutSettings.AndroidLandscape();
         [SerializeField] private RectTransform safeArea, content, statusBar, mainFrame, hero, rewards, navigation, leaderboard, howItWorks, controls;
         [SerializeField] private RectTransform logo, startRect, selectHint, modal;
         [SerializeField] private Button startButton, settingsButton, retryButton, closeButton;
@@ -219,6 +241,14 @@ namespace BattleCities.UI
         private float controllerLegendHideAt = -1;
         private bool controllerLegendHidden;
         private string[] rows = Array.Empty<string>();
+        private readonly List<Text[]> rankingCells = new List<Text[]>();
+        private Text roundLabel, roundHeading, rankingAvailability, rankingTitle, matchesColumn, rankingFooter, rankingFooterSubtitle;
+        private RectTransform scoresPanel;
+        private GameObject emptyTrophy;
+        private MainMenuApiClient.RoundSnapshot roundSnapshot;
+        private DateTimeOffset roundEndsAt;
+        private bool hasRoundEnd;
+        private float nextRoundUpdate;
         public MainMenuPlatform Platform { get => platform; set { platform = value; RefreshLayout(); } }
         public Button StartButton => startButton;
         public Button[] Tabs => tabs;
@@ -246,11 +276,13 @@ namespace BattleCities.UI
         public MainMenuLayoutSettings WebLayout => webLayout;
         public MainMenuLayoutSettings Psg1Layout => psg1Layout;
         public MainMenuLayoutSettings AndroidLayout => androidLayout;
+        public MainMenuLayoutSettings AndroidLandscapeLayout => androidLandscapeLayout;
 
         private MainMenuLayoutSettings GetLayout(MainMenuPlatform target)
         {
             if(target==MainMenuPlatform.Psg1)return psg1Layout ?? (psg1Layout=MainMenuLayoutSettings.Psg1());
             if(target==MainMenuPlatform.Android)return androidLayout ?? (androidLayout=MainMenuLayoutSettings.Android());
+            if(target==MainMenuPlatform.AndroidLandscape)return androidLandscapeLayout ?? (androidLandscapeLayout=MainMenuLayoutSettings.AndroidLandscape());
             return webLayout ?? (webLayout=MainMenuLayoutSettings.Web());
         }
 
@@ -313,6 +345,11 @@ namespace BattleCities.UI
         }
         private void Update()
         {
+            if (Application.isPlaying && Time.unscaledTime >= nextRoundUpdate)
+            {
+                nextRoundUpdate = Time.unscaledTime + 1;
+                UpdateRoundCountdown();
+            }
             if (!content || !safeArea) return;
             var size=new Vector2(Screen.width,Screen.height);
             var resolved=Resolve(size);
@@ -325,9 +362,12 @@ namespace BattleCities.UI
         }
         public MainMenuPlatform Resolve(Vector2 size)
         {
-            if(platform!=MainMenuPlatform.Auto)return platform;
+            if(platform!=MainMenuPlatform.Auto)
+                return platform==MainMenuPlatform.Android && size.x>size.y ? MainMenuPlatform.AndroidLandscape : platform;
             if(RuntimePlatformInfo.IsPsg1)return MainMenuPlatform.Psg1;
-            if(RuntimePlatformInfo.Current==GameRuntimePlatform.Android || size.x/Mathf.Max(1,size.y)<.8f)return MainMenuPlatform.Android;
+            if(RuntimePlatformInfo.Current==GameRuntimePlatform.Android)
+                return size.x>size.y ? MainMenuPlatform.AndroidLandscape : MainMenuPlatform.Android;
+            if(size.x/Mathf.Max(1,size.y)<.8f)return MainMenuPlatform.Android;
             return MainMenuPlatform.Web;
         }
         public void RefreshLayout()
@@ -345,14 +385,17 @@ namespace BattleCities.UI
         /// <summary>Also used by the editor preview and layout checks at exact platform resolutions.</summary>
         public void ApplyLayout(MainMenuPlatform target, Vector2 available)
         {
+            if(target==MainMenuPlatform.Android && available.x>available.y)
+                target=MainMenuPlatform.AndroidLandscape;
             if(editLayoutInScene && !generatingLayout)
             {
                 ApplyAuthoredLayout(target,available);
+                ApplyArenaBackdrop(target,available);
                 return;
             }
             bool psg=target==MainMenuPlatform.Psg1;
             bool portrait=target==MainMenuPlatform.Android && available.y>available.x;
-            bool compact=psg || target==MainMenuPlatform.Android;
+            bool compact=psg || target==MainMenuPlatform.Android || target==MainMenuPlatform.AndroidLandscape;
             var layout=GetLayout(target);
             bool hideControllerLegend=psg && controllerLegendHidden;
             Vector2 reference=layout.referenceResolution;
@@ -379,6 +422,18 @@ namespace BattleCities.UI
                 Place(leaderboard,w-pad-boardW,bodyY,boardW,h-bodyY-pad);
                 float leftColumnWidth=mainFrame.anchoredPosition.x+mainFrame.sizeDelta.x-pad;
                 Place(howItWorks,pad,h-pad-footH,leftColumnWidth,footH);
+            }
+            else if(psg)
+            {
+                float hintsH=hideControllerLegend?0:layout.controllerLegendHeight;
+                float hintsGap=hideControllerLegend?0:layout.navigationToLegendGap;
+                float bodyH=h-bodyY-pad-hintsH-hintsGap;
+                float buttonH=(bodyH-2*compactVertical-4*compactGap)/tabs.Length;
+                float navW=buttonH*NavigationAspect+2*compactSide;
+                Place(navigation,pad,bodyY,navW,bodyH);
+                Place(mainFrame,pad+navW+layout.mainToNavigationGap,bodyY,w-2*pad-navW-layout.mainToNavigationGap,bodyH);
+                float controlsInset=layout.controllerLegendSideInset;
+                Place(controls,controlsInset,h-pad-hintsH,w-2*controlsInset,hintsH);
             }
             else
             {
@@ -443,15 +498,15 @@ namespace BattleCities.UI
             for(int i=0;i<tabs.Length;i++)
             {
                 float nw=navigation.sizeDelta.x,nh=navigation.sizeDelta.y;
-                if(compact)
+                if(psg || !compact)
+                {
+                    float buttonH=(nh-2*compactVertical-4*compactGap)/tabs.Length;
+                    Place((RectTransform)tabs[i].transform,compactSide,compactVertical+i*(buttonH+compactGap),nw-2*compactSide,buttonH);
+                }
+                else if(compact)
                 {
                     float buttonW=(nw-compactSide*2-compactGap*4)/5;
                     Place((RectTransform)tabs[i].transform,compactSide+i*(buttonW+compactGap),compactVertical,buttonW,buttonW/NavigationAspect);
-                }
-                else
-                {
-                    float buttonH=(nh-40-4*8)/5;
-                    Place((RectTransform)tabs[i].transform,20,20+i*(buttonH+8),buttonH*NavigationAspect,buttonH);
                 }
                 var tabLabel=tabs[i].GetComponentInChildren<UnityEngine.UI.Text>(true);
                 if(tabLabel!=null)
@@ -468,11 +523,13 @@ namespace BattleCities.UI
             var modalPanel=(RectTransform)modal.Find("Dialog");
             float mw=Mathf.Min(w-70,720),mh=portrait?520:440;
             Place(modalPanel,(w-mw)/2,(h-mh)/2,mw,mh);
-            ConfigureNavigation(compact);
+            ConfigureNavigation(compact,psg);
             if(Application.isPlaying && (target!=lastPlatform || inputModule.actionsAsset!=liveInput))ConfigureInput(psg);
             lastPlatform=target;
+            ApplyArenaBackdrop(target,available);
         }
-        private const float NavigationAspect=794f/759f;
+        // Navigation plates fill their slots; their reference composition is slightly wider than tall.
+        private const float NavigationAspect=9f/8f;
         public static void Place(RectTransform rt,float x,float y,float width,float height)
         { rt.anchorMin=rt.anchorMax=new Vector2(0,1);rt.pivot=new Vector2(0,1);rt.anchoredPosition=new Vector2(x,-y);rt.sizeDelta=new Vector2(width,height); }
         private void LayoutHeaderCards()
@@ -616,8 +673,17 @@ namespace BattleCities.UI
         }
         private static void Link(Button b,Selectable up,Selectable down,Selectable left,Selectable right)
         { b.navigation=new Navigation{mode=Navigation.Mode.Explicit,selectOnUp=up,selectOnDown=down,selectOnLeft=left,selectOnRight=right}; }
-        private void ConfigureNavigation(bool compact)
+        private void ConfigureNavigation(bool compact,bool leftSidebar=false)
         {
+            if(leftSidebar)
+            {
+                Link(startButton,settingsButton,tabs[0],tabs[0],startButton);
+                Link(settingsButton,tabs[0],startButton,tabs[0],startButton);
+                for(int i=0;i<tabs.Length;i++)
+                    Link(tabs[i],tabs[(i+tabs.Length-1)%tabs.Length],tabs[(i+1)%tabs.Length],tabs[i],startButton);
+                Link(closeButton,closeButton,closeButton,closeButton,closeButton);
+                return;
+            }
             Link(startButton,settingsButton,tabs[0],compact?tabs[0]:tabs[0],compact?tabs[4]:retryButton);
             Link(settingsButton,compact?tabs[0]:null,startButton,tabs[0],startButton);
             for(int i=0;i<tabs.Length;i++)Link(tabs[i],compact?startButton:(i==0?settingsButton:tabs[i-1]),compact?startButton:tabs[(i+1)%tabs.Length],compact?tabs[(i+tabs.Length-1)%tabs.Length]:startButton,compact?tabs[(i+1)%tabs.Length]:startButton);
@@ -649,14 +715,39 @@ namespace BattleCities.UI
         public void Back()
         {
             if(IsModalOpen){modal.gameObject.SetActive(false);if(EventSystem.current)EventSystem.current.SetSelectedGameObject(previousSelection?previousSelection:startButton.gameObject);}
+            else if(preBattle && preBattle.IsOpen)preBattle.Back();
             else if(EventSystem.current)EventSystem.current.SetSelectedGameObject(startButton.gameObject);
         }
+        private PreBattleScreen preBattle;
         public void StartBattle()
         {
             if(loading)return;
+            EnsureApiClient();
+            if(!preBattle)
+            {
+                preBattle=gameObject.AddComponent<PreBattleScreen>();
+                preBattle.Configure(mainFrame,theme,apiClient,LaunchPreparedBattle,startButton);
+            }
+            preBattle.Open();
+        }
+        private async void LaunchPreparedBattle()
+        {
+            if(loading)return;
+            if(BattleCities.Multiplayer.BattleLaunchOptions.Error!=null){ShowDialog("INVALID LAUNCH MODE",BattleCities.Multiplayer.BattleLaunchOptions.Error);return;}
             if(!Application.CanStreamedLevelBeLoaded(gameplayScene)){ShowDialog("BATTLE UNAVAILABLE","The gameplay scene is not included in this build.");return;}
+            if(BattleCities.Multiplayer.BattleLaunchOptions.Mode==BattleCities.Core.BattleMode.Offline)
+            {
+                loading=true;startButton.interactable=false;
+                await SceneManager.LoadSceneAsync(gameplayScene);
+                return;
+            }
+            var session=BattleCities.Multiplayer.BattleSession.Instance;
+            if(!session){ShowDialog("BATTLE UNAVAILABLE","The multiplayer session has not initialized.");return;}
+            session.SelectedMode=BattleCities.Multiplayer.BattleLaunchOptions.Mode;
             loading=true; startButton.interactable=false;
-            SceneManager.LoadSceneAsync(gameplayScene,LoadSceneMode.Single);
+            session.Lobby.Show();
+            await session.QuickMatch();
+            if(this){loading=false;startButton.interactable=true;}
         }
         public void PlayTab() { if(EventSystem.current)EventSystem.current.SetSelectedGameObject(startButton.gameObject); }
         public void OpenQuarters() { OpenDestination(quartersScene,"QUARTERS"); }
@@ -668,11 +759,11 @@ namespace BattleCities.UI
             ShowDialog(title,"This page has not been converted to Unity yet.\n\nYour main menu is ready. Select START to enter a battle.");
         }
         public void OpenSettings() { ShowDialog("CONTROLS","WEB   Arrow keys / WASD to navigate\nEnter to select · Escape to go back\n\nPSG1   D-pad / left stick to navigate\nA to select · B to go back\n\nANDROID   Tap a button to select"); }
-        public void OpenRanking() { ShowDialog("REWARDS LEADERBOARD",rows.Length>0?string.Join("\n",rows):"LIVE BOARD UNAVAILABLE\n\nThe Unity leaderboard service is not connected yet."); }
+        public void OpenRanking() { ShowDialog("PLAYER RANKINGS",rows.Length>0?string.Join("\n",rows):"No season rankings are available right now. Retry in a moment."); }
         public void RetryLeaderboard()
         {
             if(apiClient)apiClient.RefreshNow();
-            ShowDialog("REFRESHING LIVE BOARD","Loading the current 30-minute reward round from the Battle Cities API.");
+            ShowDialog("REFRESHING LIVE DATA","Loading the current round and season rankings from the Battle Cities API.");
         }
         public void ConnectWallet()
         {
@@ -700,11 +791,14 @@ namespace BattleCities.UI
         private void BindApiClient()
         {
             if(!apiClient)return;
+            ResolveLeaderboardUi();
             apiClient.PlayerLoaded-=OnApiPlayerLoaded;
-            apiClient.LeaderboardLoaded-=OnApiLeaderboardLoaded;
+            apiClient.RankingsLoaded-=OnApiRankingsLoaded;
+            apiClient.RoundLoaded-=OnApiRoundLoaded;
             apiClient.StatusChanged-=OnApiStatusChanged;
             apiClient.PlayerLoaded+=OnApiPlayerLoaded;
-            apiClient.LeaderboardLoaded+=OnApiLeaderboardLoaded;
+            apiClient.RankingsLoaded+=OnApiRankingsLoaded;
+            apiClient.RoundLoaded+=OnApiRoundLoaded;
             apiClient.StatusChanged+=OnApiStatusChanged;
             if(playerLabel)
             {
@@ -715,6 +809,8 @@ namespace BattleCities.UI
                 walletLoginButton.onClick.RemoveListener(ConnectWallet);
                 walletLoginButton.onClick.AddListener(ConnectWallet);
             }
+            if (apiClient.LastRankings != null) OnApiRankingsLoaded(apiClient.LastRankings);
+            if (apiClient.LastRound != null) OnApiRoundLoaded(apiClient.LastRound);
             apiClient.RefreshNow();
         }
 
@@ -722,7 +818,8 @@ namespace BattleCities.UI
         {
             if(!apiClient)return;
             apiClient.PlayerLoaded-=OnApiPlayerLoaded;
-            apiClient.LeaderboardLoaded-=OnApiLeaderboardLoaded;
+            apiClient.RankingsLoaded-=OnApiRankingsLoaded;
+            apiClient.RoundLoaded-=OnApiRoundLoaded;
             apiClient.StatusChanged-=OnApiStatusChanged;
             if(walletLoginButton)walletLoginButton.onClick.RemoveListener(ConnectWallet);
         }
@@ -746,14 +843,135 @@ namespace BattleCities.UI
             }
         }
 
-        private void OnApiLeaderboardLoaded(string[] formattedRows)
+        private void ResolveLeaderboardUi()
         {
-            SetLeaderboard(formattedRows);
+            if (!leaderboard) return;
+            roundLabel = leaderboard.Find("Round status/Label")?.GetComponent<Text>();
+            roundHeading = leaderboard.Find("Round status/Heading")?.GetComponent<Text>();
+            rankingAvailability = leaderboard.Find("Heading/Availability")?.GetComponent<Text>();
+            rankingTitle = leaderboard.Find("Heading/Title")?.GetComponent<Text>();
+            matchesColumn = leaderboard.Find("Columns/Reward")?.GetComponent<Text>();
+            rankingFooter = leaderboard.Find("Footer/Label")?.GetComponent<Text>();
+            rankingFooterSubtitle = leaderboard.Find("Footer/Subtitle")?.GetComponent<Text>();
+            scoresPanel = leaderboard.Find("Scores") as RectTransform;
+            emptyTrophy = leaderboard.Find("Scores/Empty state trophy")?.gameObject;
+            if (rankingTitle) rankingTitle.text = "PLAYER RANKINGS";
+            if (matchesColumn) matchesColumn.text = "MATCHES";
+            if (rankingFooter) rankingFooter.text = "SEASON STANDINGS";
+            if (rankingFooterSubtitle)
+            {
+                rankingFooterSubtitle.resizeTextForBestFit = true;
+                rankingFooterSubtitle.resizeTextMinSize = 15;
+                rankingFooterSubtitle.resizeTextMaxSize = 21;
+            }
+            if (rankingAvailability) rankingAvailability.text = "LOADING RANKINGS";
+            if (leaderboardMessage) leaderboardMessage.text = "LOADING RANKINGS";
+            if (leaderboardDetail) leaderboardDetail.text = "Fetching live player standings.";
+        }
+
+        private void OnApiRankingsLoaded(MainMenuApiClient.RankingsSnapshot snapshot)
+        {
+            var ranked = snapshot?.rows;
+            var hasRows = ranked != null && ranked.Length > 0;
+            if (rankingAvailability) rankingAvailability.text = snapshot == null ? "RANKINGS UNAVAILABLE" :
+                "LIVE  •  " + (string.IsNullOrWhiteSpace(snapshot.seasonName) ? "CURRENT SEASON" : snapshot.seasonName.ToUpperInvariant());
+            if (emptyTrophy) emptyTrophy.SetActive(!hasRows);
+            if (leaderboardMessage)
+            {
+                leaderboardMessage.gameObject.SetActive(!hasRows);
+                leaderboardMessage.text = snapshot == null ? "RANKINGS UNAVAILABLE" : "NO PLAYERS RANKED YET";
+            }
+            if (leaderboardDetail)
+            {
+                leaderboardDetail.gameObject.SetActive(!hasRows);
+                leaderboardDetail.text = snapshot == null ? "Retry to load live player standings." : "Play a ranked match to join the standings.";
+            }
+            rows = hasRows ? new string[ranked.Length] : Array.Empty<string>();
+            if (hasRows && scoresPanel) EnsureRankingCells(ranked.Length);
+            for (var index = 0; index < rankingCells.Count; index++)
+            {
+                var visible = hasRows && index < ranked.Length;
+                foreach (var cell in rankingCells[index]) cell.gameObject.SetActive(visible);
+                if (!visible) continue;
+                var row = ranked[index];
+                rankingCells[index][0].text = row.rank.ToString();
+                rankingCells[index][1].text = string.IsNullOrWhiteSpace(row.displayName) ? "UNKNOWN" : row.displayName;
+                rankingCells[index][2].text = row.totalPoints.ToString("N0", CultureInfo.InvariantCulture);
+                rankingCells[index][3].text = row.matches.ToString("N0", CultureInfo.InvariantCulture);
+                rows[index] = string.Format(CultureInfo.InvariantCulture, "{0}. {1}  •  {2:N0} points  •  {3:N0} matches",
+                    row.rank, rankingCells[index][1].text, row.totalPoints, row.matches);
+            }
+        }
+
+        private void EnsureRankingCells(int count)
+        {
+            while (rankingCells.Count < count)
+            {
+                var index = rankingCells.Count;
+                var cells = new Text[4];
+                var names = new[] { "Rank", "Player", "Score", "Matches" };
+                var left = new[] { .025f, .15f, .53f, .77f };
+                var widths = new[] { .10f, .36f, .22f, .21f };
+                for (var column = 0; column < cells.Length; column++)
+                {
+                    var child = new GameObject("Live " + (index + 1) + " " + names[column], typeof(RectTransform), typeof(Text));
+                    child.transform.SetParent(scoresPanel, false);
+                    var rect = (RectTransform)child.transform;
+                    var top = .025f + index * .069f;
+                    rect.anchorMin = new Vector2(left[column], 1 - top - .064f);
+                    rect.anchorMax = new Vector2(left[column] + widths[column], 1 - top);
+                    rect.offsetMin = rect.offsetMax = Vector2.zero;
+                    var cell = child.GetComponent<Text>();
+                    cell.font = theme && theme.BodyFont ? theme.BodyFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                    cell.fontSize = 20;
+                    cell.resizeTextForBestFit = true;
+                    cell.resizeTextMinSize = 13;
+                    cell.resizeTextMaxSize = 20;
+                    cell.color = new Color(.04f, .14f, .20f);
+                    cell.alignment = column == 1 ? TextAnchor.MiddleLeft : TextAnchor.MiddleCenter;
+                    cell.horizontalOverflow = HorizontalWrapMode.Wrap;
+                    cell.verticalOverflow = VerticalWrapMode.Truncate;
+                    cell.supportRichText = false;
+                    cell.raycastTarget = false;
+                    cells[column] = cell;
+                }
+                rankingCells.Add(cells);
+            }
+        }
+
+        private void OnApiRoundLoaded(MainMenuApiClient.RoundSnapshot snapshot)
+        {
+            roundSnapshot = snapshot;
+            hasRoundEnd = snapshot != null && DateTimeOffset.TryParse(snapshot.endsAt,
+                CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out roundEndsAt);
+            if (roundHeading) roundHeading.text = "TOP 10 EVERY 30 MINUTES";
+            if (rankingFooterSubtitle)
+            {
+                var count = snapshot?.rows?.Length ?? 0;
+                rankingFooterSubtitle.text = snapshot == null ? "Round status unavailable" :
+                    string.Format(CultureInfo.InvariantCulture, "{0} SCORES  •  PAYOUTS {1}",
+                        count, snapshot.payoutsEnabled ? "ACTIVE" : "PAUSED");
+            }
+            UpdateRoundCountdown();
+        }
+
+        private void UpdateRoundCountdown()
+        {
+            if (!roundLabel) return;
+            if (!hasRoundEnd)
+            {
+                roundLabel.text = roundSnapshot == null ? "ROUND UNAVAILABLE" : "ROUND TIME UNAVAILABLE";
+                return;
+            }
+            var remaining = roundEndsAt - DateTimeOffset.UtcNow;
+            if (remaining < TimeSpan.Zero) remaining = TimeSpan.Zero;
+            roundLabel.text = string.Format(CultureInfo.InvariantCulture, "{0:00}:{1:00}:{2:00}",
+                (int)remaining.TotalHours, remaining.Minutes, remaining.Seconds);
         }
 
         private void OnApiStatusChanged(string title,string detail)
         {
-            if(leaderboardDetail)leaderboardDetail.text=string.IsNullOrWhiteSpace(detail)?title:detail;
+            // Authentication status is unrelated to the public rankings and round panels.
         }
 
         public void SetPlayer(string displayName,int score,int highScore)
@@ -761,8 +979,8 @@ namespace BattleCities.UI
         public void SetLeaderboard(string[] formattedRows)
         {
             rows=formattedRows??Array.Empty<string>();
-            leaderboardMessage.text=rows.Length>0?string.Join("\n",rows):"LIVE SCORES UNAVAILABLE";
-            leaderboardDetail.text=rows.Length>0?"":"Leaderboard service not connected.";
+            if (leaderboardMessage) leaderboardMessage.text=rows.Length>0?string.Join("\n",rows):"RANKINGS UNAVAILABLE";
+            if (leaderboardDetail) leaderboardDetail.text=rows.Length>0?"":"Retry to load live player standings.";
         }
     }
 }

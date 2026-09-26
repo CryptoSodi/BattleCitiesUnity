@@ -12,11 +12,11 @@ Expand `Login Canvas / Login Layout (edit child positions freely)` to adjust the
 
 - Phantom (WebGL): PUT `/api/session` obtains the nonce/message; Phantom signs that message; POST `/api/session` verifies the signature; GET `/api/player` loads the wallet player. HTTP-only session cookies remain browser-managed.
 - WebGL API requests use `credentials: include`. Localhost/127.0.0.1 API hostnames are normalized to the browser hostname so development cookies remain same-site.
-- Main menu reads GET `/api/session`, `/api/player`, and `/api/leaderboard/rewards`.
-- Guest is local-only, intentionally not sent to the wallet-only session endpoint. The UI does not grant server authentication or ranked rewards to guests. A selected guest does not inherit a wallet session from the browser cookie.
+- Main menu reads GET `/api/session`, `/api/player`, `/api/leaderboard/rewards` for the current round, and `/api/rankings?scope=gaming` for season player standings. Public round and ranking data also load for guests.
+- Each Continue as Guest login generates a new random `guest-...` ID. It is used as the Photon user ID for the current login session and is not sent to the wallet-only API session endpoint. This client-selected ID does not grant server authentication or ranked rewards. A selected guest does not inherit a wallet session from the browser cookie.
 - No Google login is imported or offered. Existing Google sessions are not accepted by this client.
 - Native Editor/Android/PSG1 Phantom authentication is not implemented. The screen reports this and leaves Guest usable.
-- Configure the API base URL on `Login Flow / Main Menu Api Client` and the main-menu API client for deployments. Physical devices cannot reach a developer machine through `localhost`.
+- The login and main-menu clients default to `https://api.battlecities.com`. Override their API base URL in the scene for a local development server.
 - Set `Dapp Store Url` on `Login Flow / Login Scene` after a real HTTPS app listing is published. Until then the button explicitly reports that the listing is not available.
 
 ## Verification

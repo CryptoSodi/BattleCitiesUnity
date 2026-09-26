@@ -43,9 +43,9 @@ namespace BattleCities.Editor
                 var importer=(TextureImporter)AssetImporter.GetAtPath(path);
                 importer.textureType=TextureImporterType.Sprite;
                 importer.spriteImportMode=SpriteImportMode.Single;
-                importer.spritePixelsPerUnit=100;
+                importer.spritePixelsPerUnit=path.EndsWith("/shared/panels/navigation-container.png")?700:100;
                 importer.spriteBorder=path.EndsWith("/shared/panels/navigation-container.png")
-                    ?new Vector4(78,78,78,78):Vector4.zero;
+                    ?new Vector4(160,160,160,160):Vector4.zero;
                 importer.alphaIsTransparency=true;
                 importer.mipmapEnabled=false; importer.isReadable=false;
                 importer.filterMode=FilterMode.Bilinear; importer.wrapMode=TextureWrapMode.Clamp;

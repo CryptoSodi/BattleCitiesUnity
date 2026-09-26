@@ -34,7 +34,16 @@ namespace BattleCities.Editor
             game.PowerupAtlas=AssetDatabase.LoadAssetAtPath<Texture2D>(Root+"Art/Powerups/atlas.png");
             game.Stage=1;
             EditorSceneManager.SaveScene(scene,Root+"Scenes/BattleCity.unity");
-            EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene(Root+"Scenes/BattleCity.unity",true)};
+            var battlePath=Root+"Scenes/BattleCity.unity";
+            var loginPath=Root+"Scenes/Login.unity";
+            var menuPath=Root+"Scenes/MainMenu.unity";
+            var remaining=EditorBuildSettings.scenes.Where(s=>s.path!=battlePath&&s.path!=loginPath&&s.path!=menuPath);
+            var ordered=new System.Collections.Generic.List<EditorBuildSettingsScene>();
+            if(AssetDatabase.LoadAssetAtPath<SceneAsset>(loginPath))ordered.Add(new EditorBuildSettingsScene(loginPath,true));
+            if(AssetDatabase.LoadAssetAtPath<SceneAsset>(menuPath))ordered.Add(new EditorBuildSettingsScene(menuPath,true));
+            ordered.Add(new EditorBuildSettingsScene(battlePath,true));
+            ordered.AddRange(remaining);
+            EditorBuildSettings.scenes=ordered.ToArray();
             Selection.activeGameObject=root;AssetDatabase.SaveAssets();
             Debug.Log("[BattleCities] Playable stage scene created. Press Play. F1 opens stage and lighting controls.");
         }

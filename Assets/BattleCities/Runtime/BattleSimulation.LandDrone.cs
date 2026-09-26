@@ -12,7 +12,7 @@ namespace BattleCities.Core
     }
     public sealed class LandDroneState
     {
-        public int Id,TargetId,Health;
+        public int Id,TargetId,Health,OwnerSlot=-1;
         public float X,Y,Age,Speed,Distance,Heading,NoRouteTime,Repath;
         public bool Alive=true;
         public float YieldRemaining,YieldX,YieldY;
@@ -33,7 +33,7 @@ namespace BattleCities.Core
             if(box.X<0||box.Y<0||box.Right>Width||box.Bottom>Height||box.Overlaps(BaseBounds))return false;
             if(Terrain.Any(w=>w.Alive&&(w.Solid||w.Type=="bush"||w.Type=="grass")&&box.Overlaps(w.Bounds)))return false;
             if(Turrets.Any(t=>t.Alive&&box.Overlaps(t.Clearance)))return false;
-            return !Tanks.Any(t=>t.Alive&&t.Player&&box.Overlaps(t.MovementBounds));
+            return !Tanks.Any(t=>t.Alive&&t.Player&&!IsPvp&&box.Overlaps(t.MovementBounds));
         }
         private static Box LandBox(float x,float y)=>new Box(x-LandDroneState.HalfSize,y-LandDroneState.HalfSize,LandDroneState.HalfSize*2,LandDroneState.HalfSize*2);
         private bool PlaceLandDrone(TankState player)
@@ -45,7 +45,7 @@ namespace BattleCities.Core
                 double angle=i*Math.PI/8;float x=player.X+(float)Math.Cos(angle)*radius,y=player.Y+(float)Math.Sin(angle)*radius;
                 var box=LandBox(x,y);
                 if(!LandDroneGroundFree(box)||Tanks.Any(t=>t.Alive&&box.Overlaps(t.MovementBounds))||Mines.Any(m=>m.Alive&&box.Overlaps(m.Bounds)))continue;
-                LandDrones.Add(new LandDroneState{Id=++nextId,X=x,Y=y,Health=Math.Max(1,LandDroneSettings.Health),Heading=(int)player.Direction*90});
+                LandDrones.Add(new LandDroneState{OwnerSlot=player.Slot,Id=++nextId,X=x,Y=y,Health=Math.Max(1,LandDroneSettings.Health),Heading=(int)player.Direction*90});
                 SecondaryCooldown=4;SecondaryStatus="Land drone deployed.";return true;
             }
             SecondaryStatus="No clear ground nearby for the land drone.";return false;
@@ -84,7 +84,7 @@ namespace BattleCities.Core
             }
             var obstacles=Terrain.Where(w=>w.Alive&&(w.Solid||w.Type=="bush"||w.Type=="grass")).Select(w=>w.Bounds)
                 .Concat(Turrets.Where(t=>t.Alive).Select(t=>t.Clearance))
-                .Concat(Tanks.Where(t=>t.Alive&&t.Player).Select(t=>t.MovementBounds)).Concat(new[]{BaseBounds});
+                .Concat(Tanks.Where(t=>t.Alive&&t.Player&&(!IsPvp||t.Slot==drone.OwnerSlot)).Select(t=>t.MovementBounds)).Concat(new[]{BaseBounds});
             foreach(var obstacle in obstacles)
             {
                 int left=Math.Max(0,(int)Math.Floor((obstacle.X-LandDroneState.HalfSize)/cell));
@@ -130,7 +130,7 @@ namespace BattleCities.Core
         // Reserve the player's forward lane and move out of it before resuming pursuit.
         private bool YieldToPlayer(LandDroneState drone,float dt)
         {
-            var player=Player;
+            var player=IsMultiplayer?Tanks.Find(t=>t.Alive&&t.Player&&t.Slot==drone.OwnerSlot):Player;
             bool approaching=false;float px=0,py=0;
             if(player!=null&&(playerMoveIntent.HasValue||player.Slide>0))
             {
@@ -197,11 +197,11 @@ namespace BattleCities.Core
                 if(!drone.Alive)continue;
                 drone.Age+=dt;
                 if(drone.Age>=Math.Max(.1f,LandDroneSettings.Lifetime)){drone.Alive=false;continue;}
-                var contact=Tanks.Find(t=>t.Alive&&!t.Player&&drone.Bounds.Overlaps(t.MovementBounds));
+                var contact=Tanks.Find(t=>t.Alive&&IsSecondaryTarget(t,drone.OwnerSlot)&&drone.Bounds.Overlaps(t.MovementBounds));
                 if(contact!=null){DetonateLandDrone(drone,contact);continue;}
                 if(YieldToPlayer(drone,dt))continue;
                 drone.Repath-=dt;
-                var target=Tanks.Find(t=>t.Alive&&!t.Player&&t.Id==drone.TargetId);
+                var target=Tanks.Find(t=>t.Alive&&IsSecondaryTarget(t,drone.OwnerSlot)&&t.Id==drone.TargetId);
                 if(drone.Repath<=0||target==null&&drone.TargetId!=0)
                 {
                     drone.Repath=Math.Max(.1f,LandDroneSettings.RepathSeconds);
@@ -210,7 +210,7 @@ namespace BattleCities.Core
                     if(!routed)
                     {
                         drone.TargetId=0;drone.Route.Clear();
-                        foreach(var candidate in Tanks.Where(t=>t.Alive&&!t.Player).OrderBy(t=>DistanceSquared(drone.X,drone.Y,t.X,t.Y)))
+                        foreach(var candidate in Tanks.Where(t=>t.Alive&&IsSecondaryTarget(t,drone.OwnerSlot)).OrderBy(t=>DistanceSquared(drone.X,drone.Y,t.X,t.Y)))
                             if(LandSight(drone,candidate)&&PlanLandRoute(drone,candidate)){drone.TargetId=candidate.Id;routed=true;break;}
                         if(!routed){drone.Route.Clear();drone.Route.AddRange(patrolRoute);if(drone.Route.Count==0)PlanLandRoute(drone);}
                     }
@@ -230,7 +230,7 @@ namespace BattleCities.Core
                         float step=Math.Min(1,Math.Min(length,budget)),x=drone.X+dx/length*step,y=drone.Y+dy/length*step;
                         if(!LandDroneGroundFree(Sweep(drone.Bounds,LandBox(x,y)))){drone.Route.Clear();drone.Speed=0;drone.Repath=0;break;}
                         drone.X=x;drone.Y=y;drone.Heading=(float)(Math.Atan2(dx,-dy)*180/Math.PI);drone.Distance+=step;budget-=step;moved=true;
-                        contact=Tanks.Find(t=>t.Alive&&!t.Player&&drone.Bounds.Overlaps(t.MovementBounds));
+                        contact=Tanks.Find(t=>t.Alive&&IsSecondaryTarget(t,drone.OwnerSlot)&&drone.Bounds.Overlaps(t.MovementBounds));
                         if(contact!=null)DetonateLandDrone(drone,contact);
                     }
                 }
@@ -243,7 +243,7 @@ namespace BattleCities.Core
         private void DetonateLandDrone(LandDroneState drone,TankState direct)
         {
             if(!drone.Alive)return;drone.Alive=false;LandDroneExploded?.Invoke(drone);
-            foreach(var victim in Tanks.Where(t=>t.Alive&&!t.Player).ToArray())
+            foreach(var victim in Tanks.Where(t=>t.Alive&&IsSecondaryTarget(t,drone.OwnerSlot)).ToArray())
             {
                 bool hit=victim==direct;
                 if(!hit&&DistanceSquared(victim.X,victim.Y,drone.X,drone.Y)>Math.Pow(Math.Max(0,LandDroneSettings.SplashTiles)*64,2))continue;

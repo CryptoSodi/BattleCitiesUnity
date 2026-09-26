@@ -14,8 +14,5 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/BattleCities/Scenes/BattleCity.unity
     guid: 7a1d820d855d0aa4987346d69a1efb3a
-  - enabled: 1
-    path: Assets/BattleCities/Scenes/Stage00.unity
-    guid: e0de63358eb804947840f848f8b06f94
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

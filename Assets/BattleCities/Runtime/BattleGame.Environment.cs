@@ -10,32 +10,6 @@ namespace BattleCities
     {
         private readonly Dictionary<int, EnvironmentPiece> environmentViews = new Dictionary<int, EnvironmentPiece>();
         private Material forestPath, cityConcrete, cityPlaza, forestMeadow;
-        private bool stageZeroLightingOverride, oldCycle, oldRain, oldClouds;
-        private float oldTimeOfDay;
-
-        private void SetStageLighting(int stage)
-        {
-            if (stage == 0)
-            {
-                if (!stageZeroLightingOverride)
-                {
-                    oldCycle = weather.Cycle; oldRain = weather.Rain; oldClouds = weather.Clouds;
-                    oldTimeOfDay = weather.TimeOfDay;
-                    stageZeroLightingOverride = true;
-                }
-                weather.Cycle = false;
-                weather.Rain = false;
-                weather.Clouds = false;
-                weather.TimeOfDay = .50f;
-            }
-            else if (stageZeroLightingOverride)
-            {
-                weather.Cycle = oldCycle; weather.Rain = oldRain; weather.Clouds = oldClouds;
-                weather.TimeOfDay = oldTimeOfDay;
-                stageZeroLightingOverride = false;
-            }
-        }
-
         private void BuildGroundSurfaces(MapData map)
         {
             if (!forestPath) forestPath = Material(new Color(.37f, .30f, .20f));

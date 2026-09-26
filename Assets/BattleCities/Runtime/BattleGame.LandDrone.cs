@@ -26,6 +26,7 @@ namespace BattleCities
                     if(!landDronePrefab)landDronePrefab=Resources.Load<GameObject>("Deployables/LandAttackDrone");
                     if(!landDronePrefab)throw new System.InvalidOperationException("LandAttackDrone prefab is missing");
                     view=Instantiate(landDronePrefab,actorsRoot).GetComponent<LandAttackDroneView>();
+                    TintDeployable(view.gameObject,state.OwnerSlot);
                     Shadows(view.gameObject);landDroneViews.Add(state.Id,view);
                 }
                 view.Tick(state);
