@@ -15,27 +15,6 @@ namespace BattleCities.UI
 
 
     [Serializable]
-    public sealed class RewardItemLayoutSettings
-    {
-        [Tooltip("Additional pixel offset for this reward. Positive Y moves it upward.")]
-        public Vector2 positionOffset;
-        [Tooltip("Uniform size multiplier. 1 keeps the automatically fitted size and aspect ratio.")]
-        [Range(.25f, 2f)] public float sizeScale = 1;
-
-        [Header("Podium Text")]
-        [Tooltip("Moves both text lines inside this podium. Positive Y moves them upward.")]
-        public Vector2 podiumTextOffset;
-        [Tooltip("Additional offset for the placement label (1ST, 2ND, 3RD, or 4TH-10TH). Positive Y moves it upward.")]
-        public Vector2 rankTextOffset;
-        [Tooltip("Maximum placement-label font size. Best Fit can reduce it when necessary to prevent clipping.")]
-        [Min(1)] public int rankFontSize = 38;
-        [Tooltip("Additional offset for the reward amount. Positive Y moves it upward.")]
-        public Vector2 amountTextOffset;
-        [Tooltip("Maximum reward-amount font size. Best Fit can reduce it when necessary to prevent clipping.")]
-        [Min(1)] public int amountFontSize = 30;
-    }
-
-    [Serializable]
     public sealed class MainMenuLayoutSettings
     {
         [Header("Canvas and Header")]
@@ -65,49 +44,15 @@ namespace BattleCities.UI
         [Min(0)] public float portraitHowToNavigationGap = 12;
         [Min(0)] public float mainToPortraitHowGap = 12;
 
-        [Header("TV and Rewards")]
+        [Header("TV")]
         [Min(0)] public float tvFrameInset = 12;
         [Min(0)] public float contentInset = 28;
-        [Range(.1f, .8f)] public float rewardsHeightRatio = .43f;
-        public bool rewardBannerAtBottom;
-        [Tooltip("Additional pixel offset for the reward chest row. Positive Y moves it upward.")]
-        public Vector2 rewardItemsOffset;
-        [Tooltip("Additional pixel offset for the TOP 10 banner. Positive Y moves it upward.")]
-        public Vector2 rewardBannerOffset;
-
-        [Header("Individual Rewards")]
-        public RewardItemLayoutSettings secondPlaceReward = new RewardItemLayoutSettings();
-        public RewardItemLayoutSettings firstPlaceReward = new RewardItemLayoutSettings();
-        public RewardItemLayoutSettings thirdPlaceReward = new RewardItemLayoutSettings();
-        public RewardItemLayoutSettings fourthToTenthReward = new RewardItemLayoutSettings();
-
-        [Header("Reward Text")]
-        [Tooltip("Top edge of the shared reward text panel, normalized against an unscaled reward cell.")]
-        [Range(0, 1)] public float rewardTextPanelTop = .635f;
-        [Range(.05f, .5f)] public float rewardTextPanelHeight = .27f;
-        [Range(0, .5f)] public float rewardRankTop = .04f;
-        [Range(.1f, .7f)] public float rewardRankHeight = .40f;
-        [Range(0, .8f)] public float rewardAmountTop = .48f;
-        [Range(.1f, .7f)] public float rewardAmountHeight = .40f;
-        [Min(1)] public int rewardRankMinSize = 18;
-        [Min(1)] public int rewardRankMaxSize = 38;
-        [Min(1)] public int rewardAmountMinSize = 16;
-        [Min(1)] public int rewardAmountMaxSize = 30;
-
-        public RewardItemLayoutSettings GetRewardItem(int index)
-        {
-            if(index==0)return secondPlaceReward ?? (secondPlaceReward=new RewardItemLayoutSettings());
-            if(index==1)return firstPlaceReward ?? (firstPlaceReward=new RewardItemLayoutSettings());
-            if(index==2)return thirdPlaceReward ?? (thirdPlaceReward=new RewardItemLayoutSettings());
-            return fourthToTenthReward ?? (fourthToTenthReward=new RewardItemLayoutSettings());
-        }
 
         [Header("Hero, Logo and Start")]
         [Range(.1f, 1f)] public float startWidthRatio = .58f;
         [Min(1)] public float startMaxWidth = 560;
         [Tooltip("Additional pixel offset for the Start button. Positive Y moves it downward.")]
         public Vector2 startButtonOffset;
-        [Min(0)] public float selectHintHeight;
         [Range(.05f, .8f)] public float logoHeightFromWidthRatio = .3066667f;
         [Range(.05f, .9f)] public float logoMaxHeroHeightRatio = .4f;
         [Min(0)] public float heroBlockSpacing = 16;
@@ -147,11 +92,8 @@ namespace BattleCities.UI
                 mainToNavigationGap = 20,
                 controllerLegendSideInset = 34,
                 portraitHowItWorksHeight = 0,
-                rewardsHeightRatio = .52f,
-                rewardBannerAtBottom = true,
                 startMaxWidth = 440,
                 startButtonOffset = new Vector2(0,12),
-                selectHintHeight = 0,
                 menuLabelBottom = .12f,
                 menuLabelTop = .30f,
                 menuLabelMinSize = 16,
@@ -179,9 +121,7 @@ namespace BattleCities.UI
                 portraitHowItWorksHeight = 200,
                 portraitHowToNavigationGap = 12,
                 mainToPortraitHowGap = 12,
-                rewardsHeightRatio = .30f,
                 startMaxWidth = 560,
-                selectHintHeight = 0
             };
         }
 
@@ -199,9 +139,7 @@ namespace BattleCities.UI
                 navigationVerticalPadding = 10,
                 mainToNavigationGap = 8,
                 portraitHowItWorksHeight = 0,
-                rewardsHeightRatio = .30f,
                 startMaxWidth = 400,
-                selectHintHeight = 0
             };
         }
     }
@@ -220,8 +158,8 @@ namespace BattleCities.UI
         [SerializeField] private MainMenuLayoutSettings psg1Layout = MainMenuLayoutSettings.Psg1();
         [SerializeField] private MainMenuLayoutSettings androidLayout = MainMenuLayoutSettings.Android();
         [SerializeField] private MainMenuLayoutSettings androidLandscapeLayout = MainMenuLayoutSettings.AndroidLandscape();
-        [SerializeField] private RectTransform safeArea, content, statusBar, mainFrame, hero, rewards, navigation, leaderboard, howItWorks, controls;
-        [SerializeField] private RectTransform logo, startRect, selectHint, modal;
+        [SerializeField] private RectTransform safeArea, content, statusBar, mainFrame, hero, navigation, leaderboard, howItWorks, controls;
+        [SerializeField] private RectTransform logo, startRect, modal;
         [SerializeField] private Button startButton, settingsButton, retryButton, closeButton;
         [SerializeField] private Button[] tabs;
         [SerializeField] private Text playerLabel, scoreLabel, highScoreLabel, modalTitle, modalBody, leaderboardMessage, leaderboardDetail;
@@ -255,14 +193,20 @@ namespace BattleCities.UI
         public bool IsModalOpen => modal && modal.gameObject.activeSelf;
         public RectTransform Content => content;
 
+        public void SetHeroVisible(bool visible)
+        {
+            if(logo)logo.gameObject.SetActive(visible);
+            if(startRect)startRect.gameObject.SetActive(visible);
+        }
+
         public void Configure(MenuTheme skin, RectTransform safe, RectTransform root, RectTransform header, RectTransform frame,
-            RectTransform battlefield, RectTransform prizes, RectTransform nav, RectTransform board, RectTransform info, RectTransform hints,
-            RectTransform brand, RectTransform play, RectTransform hint, RectTransform dialog, Button start, Button settings, Button retry,
+            RectTransform battlefield, RectTransform nav, RectTransform board, RectTransform info, RectTransform hints,
+            RectTransform brand, RectTransform play, RectTransform dialog, Button start, Button settings, Button retry,
             Button close, Button[] buttons, Text player, Text score, Text highScore, Text title, Text body, Text boardMessage, Text boardDetail,
             InputActionAsset actions, InputSystemUIInputModule module)
         {
-            theme=skin;safeArea=safe;content=root;statusBar=header;mainFrame=frame;hero=battlefield;rewards=prizes;navigation=nav;
-            leaderboard=board;howItWorks=info;controls=hints;logo=brand;startRect=play;selectHint=hint;modal=dialog;
+            theme=skin;safeArea=safe;content=root;statusBar=header;mainFrame=frame;hero=battlefield;navigation=nav;
+            leaderboard=board;howItWorks=info;controls=hints;logo=brand;startRect=play;modal=dialog;
             startButton=start;settingsButton=settings;retryButton=retry;closeButton=close;tabs=buttons;
             playerLabel=player;scoreLabel=score;highScoreLabel=highScore;modalTitle=title;modalBody=body;
             leaderboardMessage=boardMessage;leaderboardDetail=boardDetail;inputActions=actions;inputModule=module;
@@ -322,6 +266,11 @@ namespace BattleCities.UI
         {
             if (!Application.isPlaying) return;
             EnsureApiClient();
+            if(mainFrame && mainFrame.Find("Pre-battle screens"))
+            {
+                EnsurePreBattle();
+                if(preBattle.IsOpen)preBattle.Open();
+            }
             BindApiClient();
             ResetControllerLegendTimer();
             if(!inputActions){RefreshLayout();return;}
@@ -333,7 +282,8 @@ namespace BattleCities.UI
         {
             if (!Application.isPlaying) return;
             RefreshLayout();
-            if (EventSystem.current) EventSystem.current.SetSelectedGameObject(startButton.gameObject);
+            if(preBattle && preBattle.IsOpen)preBattle.Open();
+            else if (EventSystem.current) EventSystem.current.SetSelectedGameObject(startButton.gameObject);
         }
         private void OnDisable()
         {
@@ -472,29 +422,22 @@ namespace BattleCities.UI
                     ?new Vector2(innerH*backgroundAspect,innerH)
                     :new Vector2(innerW,innerW/backgroundAspect);
             }
-            float rewardHeight=layout.rewardsHeightRatio*innerH;
-            Place(hero,contentInset,contentInset,innerW,innerH-rewardHeight);
-            Place(rewards,contentInset,contentInset+innerH-rewardHeight,innerW,rewardHeight);
-            LayoutRewardRow(layout);
+            Place(hero,contentInset,contentInset,innerW,innerH);
             float hw=hero.sizeDelta.x,hh=hero.sizeDelta.y;
             float startW=Mathf.Min(hw*layout.startWidthRatio,layout.startMaxWidth);
             var startSprite=startRect.GetComponent<UnityEngine.UI.Image>().sprite;
             float startAspect=startSprite?startSprite.rect.width/startSprite.rect.height:1400f/335f;
             float startH=startW/startAspect;
-            float hintH=layout.selectHintHeight;
             float logoH=Mathf.Min(hw*layout.logoHeightFromWidthRatio,Mathf.Max(40,hh*layout.logoMaxHeroHeightRatio));
             float logoW=logoH*1.5f;
-            float blockH=logoH+startH+hintH+layout.heroBlockSpacing;
+            float blockH=logoH+startH+layout.heroBlockSpacing;
             float top=Mathf.Max(8,(hh-blockH)*layout.heroTopFactor);
             float heroDown=Mathf.Clamp(hh*layout.heroDownRatio,layout.heroDownMin,layout.heroDownMax);
             float heroGap=Mathf.Clamp(hh*layout.logoStartGapRatio,layout.logoStartGapMin,layout.logoStartGapMax);
             float logoVisualH=logoH*Mathf.Abs(logo.localScale.y);
-            float startVisualH=startH*Mathf.Abs(startRect.localScale.y);
             top+=heroDown;
             Place(logo,(hw-logoW*Mathf.Abs(logo.localScale.x))*.5f,top,logoW,logoH);
             Place(startRect,(hw-startW*Mathf.Abs(startRect.localScale.x))*.5f+layout.startButtonOffset.x,top+logoVisualH+heroGap+layout.startButtonOffset.y,startW,startH);
-            Place(selectHint,(hw-180)/2+layout.startButtonOffset.x,top+logoVisualH+heroGap+startVisualH+8+layout.startButtonOffset.y,180,32);
-            selectHint.gameObject.SetActive(psg&&layout.selectHintHeight>0);
             for(int i=0;i<tabs.Length;i++)
             {
                 float nw=navigation.sizeDelta.x,nh=navigation.sizeDelta.y;
@@ -548,129 +491,6 @@ namespace BattleCities.UI
                 Place(card,i*cell+(cell-width)/2,(statusBar.sizeDelta.y-height)/2,width,height);
             }
         }
-        private void LayoutRewardRow(MainMenuLayoutSettings layout)
-        {
-            // Fit the entire group first, then place adjoining cells. Never stretch artwork
-            // or let independent per-cell fitting reintroduce large horizontal gutters.
-            var garden=rewards.Find("Garden") as RectTransform;
-            if(!garden)return;
-            float width=rewards.sizeDelta.x, height=rewards.sizeDelta.y*.82f;
-            float verticalNudge=Mathf.Clamp(rewards.sizeDelta.y*.025f,6f,12f);
-            var banner=rewards.Find("Header Bar") as RectTransform;
-            bool bannerAtBottom=layout.rewardBannerAtBottom;
-            if(banner)
-            {
-                banner.anchorMin=new Vector2(0,bannerAtBottom?-.016f:.824f);
-                banner.anchorMax=new Vector2(1,bannerAtBottom?.176f:1.016f);
-                banner.pivot=new Vector2(.5f,.5f);
-                banner.sizeDelta=new Vector2(-width*.06812f,0);
-                banner.anchoredPosition=new Vector2(width*.00208f,bannerAtBottom?0:-verticalNudge)+layout.rewardBannerOffset;
-                ConfigureRewardHeaderIcons(banner);
-            }
-            garden.anchorMin=new Vector2(0,bannerAtBottom?.16f:0);
-            garden.anchorMax=new Vector2(1,bannerAtBottom?1:.84f);
-            garden.pivot=new Vector2(.5f,.5f);
-            garden.sizeDelta=Vector2.zero;
-            garden.anchoredPosition=new Vector2(0,bannerAtBottom?verticalNudge:-verticalNudge)+layout.rewardItemsOffset;
-            garden.localScale=Vector3.one*.92f;
-            const float aspect=543f/653f;
-            float cellWidth=Mathf.Min(width*.88f/4,height*.96f*aspect);
-            float cellHeight=cellWidth/aspect;
-            float left=(width-cellWidth*4)/2;
-            for(int i=0;i<4;i++)
-            {
-                var item=garden.Find("Reward "+i) as RectTransform;
-                if(!item)continue;
-                item.localScale=Vector3.one;
-                var itemLayout=layout.GetRewardItem(i);
-                float itemScale=Mathf.Clamp(itemLayout.sizeScale,.25f,2f);
-                float itemWidth=cellWidth*itemScale,itemHeight=cellHeight*itemScale;
-                float itemX=left+i*cellWidth+(cellWidth-itemWidth)/2+itemLayout.positionOffset.x;
-                float itemY=(height-cellHeight)/2+(cellHeight-itemHeight)/2-itemLayout.positionOffset.y;
-                Place(item,itemX,itemY,itemWidth,itemHeight);
-                var art=item.Find("Artwork") as RectTransform;
-                if(!art)continue;
-                // The row already computes exact source proportions. Avoid a second,
-                // deferred fitter pass fighting the platform layout and moving the baseline.
-                var fitter=art.GetComponent<AspectRatioFitter>();
-                if(fitter)fitter.enabled=false;
-                art.anchorMin=Vector2.zero;art.anchorMax=Vector2.one;
-                art.offsetMin=art.offsetMax=Vector2.zero;art.localScale=Vector3.one;
-
-                var podium=art.Find("Podium") as RectTransform;
-                if(!podium)continue;
-                float panelTop=layout.rewardTextPanelTop>.01f?layout.rewardTextPanelTop:.635f;
-                float panelHeight=layout.rewardTextPanelHeight>.01f?layout.rewardTextPanelHeight:.27f;
-                podium.anchorMin=new Vector2(.12f,1-panelTop-panelHeight);
-                podium.anchorMax=new Vector2(.88f,1-panelTop);
-                podium.pivot=new Vector2(.5f,.5f);
-                podium.offsetMin=podium.offsetMax=itemLayout.podiumTextOffset;
-
-                int rankMax=itemLayout.rankFontSize>0?itemLayout.rankFontSize:Mathf.Max(1,layout.rewardRankMaxSize);
-                int rankMin=Mathf.Clamp(layout.rewardRankMinSize,1,rankMax);
-                int amountMax=itemLayout.amountFontSize>0?itemLayout.amountFontSize:Mathf.Max(1,layout.rewardAmountMaxSize);
-                int amountMin=Mathf.Clamp(layout.rewardAmountMinSize,1,amountMax);
-                ConfigureRewardText(podium.Find("Rank")?.GetComponent<Text>(),layout.rewardRankTop,layout.rewardRankHeight,itemLayout.rankTextOffset,rankMin,rankMax);
-                ConfigureRewardText(podium.Find("Reward")?.GetComponent<Text>(),layout.rewardAmountTop,layout.rewardAmountHeight,itemLayout.amountTextOffset,amountMin,amountMax);
-            }
-        }
-        private void ConfigureRewardHeaderIcons(RectTransform banner)
-        {
-            if(!banner||!theme)return;
-            var trophyRect=banner.Find("Trophy") as RectTransform;
-            var trophyImage=trophyRect?trophyRect.GetComponent<UnityEngine.UI.Image>():null;
-            if(trophyImage&&theme.TrophyIcon)
-            {
-                trophyImage.sprite=theme.TrophyIcon;
-                trophyImage.preserveAspect=true;
-            }
-
-            var timerRect=banner.Find("Timer") as RectTransform;
-            if(!theme.TimerIcon)
-            {
-                if(timerRect)timerRect.gameObject.SetActive(false);
-                return;
-            }
-            if(!timerRect)
-            {
-                var timerObject=new GameObject("Timer",typeof(RectTransform),typeof(CanvasRenderer),typeof(UnityEngine.UI.Image));
-                timerRect=timerObject.GetComponent<RectTransform>();
-                timerRect.SetParent(banner,false);
-            }
-            timerRect.gameObject.SetActive(true);
-            timerRect.anchorMin=new Vector2(.925f,.08f);
-            timerRect.anchorMax=new Vector2(.98f,.92f);
-            timerRect.pivot=new Vector2(.5f,.5f);
-            timerRect.offsetMin=timerRect.offsetMax=Vector2.zero;
-            timerRect.SetAsLastSibling();
-            var timerImage=timerRect.GetComponent<UnityEngine.UI.Image>();
-            timerImage.sprite=theme.TimerIcon;
-            timerImage.preserveAspect=true;
-            timerImage.raycastTarget=false;
-
-            var title=banner.Find("Title") as RectTransform;
-            if(title)
-            {
-                title.anchorMin=new Vector2(.105f,.02f);
-                title.anchorMax=new Vector2(.905f,.98f);
-                title.offsetMin=title.offsetMax=Vector2.zero;
-            }
-        }
-        private static void ConfigureRewardText(Text label,float top,float height,Vector2 offset,int minSize,int maxSize)
-        {
-            if(!label)return;
-            var rect=label.rectTransform;
-            top=Mathf.Clamp01(top);height=Mathf.Clamp(height,.1f,1-top);
-            rect.anchorMin=new Vector2(.02f,1-top-height);
-            rect.anchorMax=new Vector2(.98f,1-top);
-            rect.pivot=new Vector2(.5f,.5f);
-            rect.offsetMin=rect.offsetMax=offset;
-            label.fontSize=maxSize;label.resizeTextForBestFit=true;
-            label.resizeTextMinSize=minSize;label.resizeTextMaxSize=maxSize;
-            label.alignment=TextAnchor.MiddleCenter;label.alignByGeometry=true;label.fontStyle=FontStyle.Bold;
-            var shadow=label.GetComponent<Shadow>();
-            if(shadow){shadow.effectColor=new Color(0,0,.02f,.85f);shadow.effectDistance=new Vector2(2,-2);}
-        }
         private static void Link(Button b,Selectable up,Selectable down,Selectable left,Selectable right)
         { b.navigation=new Navigation{mode=Navigation.Mode.Explicit,selectOnUp=up,selectOnDown=down,selectOnLeft=left,selectOnRight=right}; }
         private void ConfigureNavigation(bool compact,bool leftSidebar=false)
@@ -714,20 +534,28 @@ namespace BattleCities.UI
         private void OnCancel(InputAction.CallbackContext ctx) { Back(); }
         public void Back()
         {
-            if(IsModalOpen){modal.gameObject.SetActive(false);if(EventSystem.current)EventSystem.current.SetSelectedGameObject(previousSelection?previousSelection:startButton.gameObject);}
+            if(IsModalOpen)
+            {
+                modal.gameObject.SetActive(false);
+                SetHeroVisible(!(preBattle && preBattle.IsOpen));
+                if(EventSystem.current)EventSystem.current.SetSelectedGameObject(previousSelection?previousSelection:startButton.gameObject);
+            }
             else if(preBattle && preBattle.IsOpen)preBattle.Back();
             else if(EventSystem.current)EventSystem.current.SetSelectedGameObject(startButton.gameObject);
         }
         private PreBattleScreen preBattle;
+        private void EnsurePreBattle()
+        {
+            if(!preBattle)preBattle=GetComponent<PreBattleScreen>();
+            if(!preBattle)preBattle=gameObject.AddComponent<PreBattleScreen>();
+            if(!preBattle.IsConfigured)
+                preBattle.Configure(mainFrame,theme,apiClient,LaunchPreparedBattle,startButton);
+        }
         public void StartBattle()
         {
             if(loading)return;
             EnsureApiClient();
-            if(!preBattle)
-            {
-                preBattle=gameObject.AddComponent<PreBattleScreen>();
-                preBattle.Configure(mainFrame,theme,apiClient,LaunchPreparedBattle,startButton);
-            }
+            EnsurePreBattle();
             preBattle.Open();
         }
         private async void LaunchPreparedBattle()
@@ -778,6 +606,7 @@ namespace BattleCities.UI
         private void ShowDialog(string title,string message)
         {
             previousSelection=EventSystem.current?EventSystem.current.currentSelectedGameObject:null;
+            SetHeroVisible(false);
             modalTitle.text=title;modalBody.text=message;modal.gameObject.SetActive(true);modal.SetAsLastSibling();
             if(EventSystem.current)EventSystem.current.SetSelectedGameObject(closeButton.gameObject);
         }

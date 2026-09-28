@@ -14,6 +14,14 @@ namespace BattleCities.UI.Editor
             Directory.CreateDirectory(folder);
             var names=new[]{"image-built-tank","tracked-upgrade","twin-cannon-ground-up","heavy-fourview"};
             var textures=new Texture2D[4];
+            var cardNames=new[]{"vanguard","striker","twin-fang","siegebreaker"};
+            bool hasCardArt=true;
+            for(int i=0;i<cardNames.Length;i++)
+            {
+                textures[i]=AssetDatabase.LoadAssetAtPath<Texture2D>(folder+"/tank-card-"+cardNames[i]+".png");
+                if(!textures[i])hasCardArt=false;
+            }
+            if(!hasCardArt)
             for(int i=0;i<4;i++)
             {
                 var model=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/BattleCities/Art/Tanks/"+names[i]+"/tank.glb");

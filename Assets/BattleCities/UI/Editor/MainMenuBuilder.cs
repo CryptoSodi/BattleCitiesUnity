@@ -117,9 +117,6 @@ namespace BattleCities.Editor
             var start=Img("Start Battle",hero,theme.PlayButton);start.preserveAspect=true;
             var startButton=MakeButton(start.rectTransform);AddFocus(start.rectTransform,startButton);
             var startLabel=Label("Editable label",start.rectTransform,"START",74,new Color32(48,28,3,255),false);Box(startLabel.rectTransform,.34f,.10f,.46f,.72f);
-            var hint=Panel("A Select hint",hero,theme.DarkPanel);
-            var hintLabel=Label("Label",hint,"A   SELECT",25,Color.white);Stretch(hintLabel.rectTransform);
-            var rewards=BuildRewards(frame);
             var nav=Panel("Navigation",content,Art("reference-style-v2/shared/panels/button-leaderboard-container"));
             var tabs=new Button[5];string[] names={"PLAY","QUARTERS","SHOP","RANKING","SOCIALS"};
             for(int i=0;i<5;i++)
@@ -146,7 +143,7 @@ namespace BattleCities.Editor
             var eventObject=new GameObject("EventSystem",typeof(EventSystem),typeof(InputSystemUIInputModule));
             var module=eventObject.GetComponent<InputSystemUIInputModule>();
             var eventSystem=eventObject.GetComponent<EventSystem>();eventSystem.firstSelectedGameObject=start.gameObject;
-            view.Configure(theme,safe,content,header,frame,hero,rewards,nav,board,how,controls,logo.rectTransform,start.rectTransform,hint,modal,
+            view.Configure(theme,safe,content,header,frame,hero,nav,board,how,controls,logo.rectTransform,start.rectTransform,modal,
                 startButton,settings,retry,close,tabs,player,score,hi,dialogTitle,body,boardMessage,boardDetail,actions,module);
             UnityEventTools.AddPersistentListener(startButton.onClick,view.StartBattle);
             UnityEventTools.AddPersistentListener(settings.onClick,view.OpenSettings);
@@ -163,11 +160,9 @@ namespace BattleCities.Editor
             ReferenceInstructionArt.ApplyTo(controls,how);
             ReferenceStartArt.ApplyTo(start.rectTransform,theme);
             ReferenceHeaderArt.ApplyHeader(header,theme);
-            ReferenceRewardArt.ApplyTo(rewards);
             ExportTemplate(tabs[1].gameObject,"Shared/NavigationTile");
             ExportTemplate(start.gameObject,"Shared/PlayButton");
             ExportTemplate(header.GetChild(1).gameObject,"Shared/StatusCard");
-            ExportTemplate(rewards.Find("Garden/Reward 1").gameObject,"Shared/RewardPodium");
             ExportTemplate(how.gameObject,"MainMenu/HowItWorks");
             ExportTemplate(board.gameObject,"MainMenu/LeaderboardPanel");
             ExportTemplate(frame.gameObject,"MainMenu/MainDisplay");
@@ -236,30 +231,6 @@ namespace BattleCities.Editor
             }
             AssetDatabase.CreateAsset(asset,Root+"Settings/MainMenuInput.asset");return asset;
         }
-        private static RectTransform BuildRewards(Transform parent)
-        {
-            var root=Panel("Rewards",parent,null,new Color(1,1,1,0));
-            var headerBar=Panel("Header Bar",root,theme.DarkPanel,new Color(1,1,1,.84f));Box(headerBar,0,-.016f,1,.192f);
-            headerBar.GetComponent<Image>().pixelsPerUnitMultiplier=4;
-            var trophy=Img("Trophy",headerBar,theme.TrophyIcon);trophy.preserveAspect=true;Box(trophy.rectTransform,.025f,.04f,.07f,.92f);
-            var title=Label("Title",headerBar,"TOP 10 EVERY 30 MINUTES",34,Gold);title.alignment=TextAnchor.MiddleLeft;Box(title.rectTransform,.105f,.02f,.80f,.96f);
-            var timer=Img("Timer",headerBar,theme.TimerIcon);timer.preserveAspect=true;Box(timer.rectTransform,.925f,.08f,.055f,.84f);
-            headerBar.gameObject.SetActive(false);
-
-            var garden=MaskPanel("Garden",root,0);Box(garden,0,.16f,1,.84f);
-            var backdrop=Img("Backdrop",garden,theme.RewardGarden);Stretch(backdrop.rectTransform);
-            string[] ranks={"2ND","1ST","3RD","4TH–10TH"};string[] values={"750 $BATC","1,000 $BATC","500 $BATC","250 $BATC"};
-            Color[] colors={new Color(.35f,.57f,.82f),new Color(1,.74f,.1f),new Color(.9f,.38f,.13f),new Color(.08f,.66f,1)};
-            for(int i=0;i<4;i++)
-            {
-                var item=Rect("Reward "+i,garden);Box(item,.09f+i*.205f,.025f,.205f,.94f);
-                var chest=Img("Chest",item,theme.RewardIcons[i]);chest.preserveAspect=false;Box(chest.rectTransform,i==1?0:.05f,i==1?0:.08f,i==1?1:.90f,i==1?.73f:.65f);
-                var pedestal=Panel("Podium",item,theme.CreamPanel,colors[i]);Box(pedestal,.02f,.69f,.96f,.30f);
-                var rank=Label("Rank",pedestal,ranks[i],28,Color.white);Box(rank.rectTransform,.03f,.04f,.94f,.44f);
-                var amount=Label("Reward",pedestal,values[i],26,i==1?Navy:Color.white);Box(amount.rectTransform,.03f,.47f,.94f,.43f);
-            }
-            return root;
-        }
         private static RectTransform BuildLeaderboard(Transform parent,out Button retry,out Text message,out Text detail)
         {
             var root=Panel("Leaderboard",parent,Art("reference-style-v2/shared/panels/navigation-container"));
@@ -295,10 +266,10 @@ namespace BattleCities.Editor
             footerText.rectTransform.anchorMin=new Vector2(0,1);footerText.rectTransform.anchorMax=new Vector2(1,1);
             footerText.rectTransform.pivot=new Vector2(0,1);
             footerText.rectTransform.offsetMin=new Vector2(110,-43);footerText.rectTransform.offsetMax=new Vector2(-10,-10);
-            var coin=Img("Coin",footer,Art("shared/icons/batc-rewards-coin"));coin.preserveAspect=true;
-            coin.rectTransform.anchorMin=coin.rectTransform.anchorMax=new Vector2(0,.5f);
-            coin.rectTransform.pivot=new Vector2(0,.5f);coin.rectTransform.anchoredPosition=new Vector2(14,0);
-            coin.rectTransform.sizeDelta=new Vector2(78,78);
+            var rewardChest=CreateRewardChestPreview("Reward Chest",footer);
+            rewardChest.anchorMin=rewardChest.anchorMax=new Vector2(0,.5f);
+            rewardChest.pivot=new Vector2(0,.5f);rewardChest.anchoredPosition=new Vector2(14,0);
+            rewardChest.sizeDelta=new Vector2(78,78);
             var footerSubtitle=Label("Subtitle",footer,"Loading round status...",21,new Color(.96f,.97f,1f));
             footerSubtitle.font=theme.BodyFont;footerSubtitle.resizeTextForBestFit=false;footerSubtitle.alignment=TextAnchor.MiddleLeft;
             footerSubtitle.rectTransform.anchorMin=Vector2.zero;footerSubtitle.rectTransform.anchorMax=new Vector2(1,0);
@@ -329,6 +300,21 @@ namespace BattleCities.Editor
                 var body=Label("Body",step,bodies[i],22,Navy,false);body.font=theme.BodyFont;body.alignment=TextAnchor.UpperLeft;Box(body.rectTransform,.30f,.36f,.69f,.61f);
             }
             return root;
+        }
+        private static RectTransform CreateRewardChestPreview(string name,Transform parent)
+        {
+            const string chestPath=Root+"Art/main-menu/rewards/reward-chest.glb";
+            var chest=AssetDatabase.LoadAssetAtPath<GameObject>(chestPath);
+            var clips=AssetDatabase.LoadAllAssetsAtPath(chestPath).OfType<AnimationClip>().ToArray();
+            var open=clips.FirstOrDefault(clip=>clip.name=="Open");
+            var close=clips.FirstOrDefault(clip=>clip.name=="Close");
+            var burst=clips.FirstOrDefault(clip=>clip.name=="Burst");
+            if(!chest||!open||!close||!burst)
+                throw new InvalidOperationException("The reward chest model or its Open, Close, and Burst clips are missing: "+chestPath);
+            var icon=Rect(name,parent);
+            var image=icon.gameObject.AddComponent<RawImage>();image.raycastTarget=false;
+            icon.gameObject.AddComponent<RewardChestMenuPreview>().Configure(chest,open,close,burst);
+            return icon;
         }
         private static RectTransform Rect(string name,Transform parent)
         {var g=new GameObject(name,typeof(RectTransform));g.transform.SetParent(parent,false);return (RectTransform)g.transform;}

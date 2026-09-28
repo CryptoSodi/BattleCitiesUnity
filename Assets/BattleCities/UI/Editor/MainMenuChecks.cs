@@ -107,8 +107,8 @@ namespace BattleCities.Editor
                 Check(Vector3.Distance(backdropCorners[0],blurCorners[0])<1 &&
                     Vector3.Distance(backdropCorners[2],blurCorners[2])<1,
                     v.Item1+" blur artwork aligns with the world backdrop");
-                var rewardHeader=view.Content.Find("Main Display/Rewards/Header Bar");
-                Check(rewardHeader && !rewardHeader.gameObject.activeSelf,v.Item1+" reward stripe is hidden");
+                Check(!view.Content.Find("Main Display/Rewards"),v.Item1+" Rewards is absent");
+                Check(!view.Content.Find("Main Display/Battlefield Hero/A Select hint"),v.Item1+" Select hint is absent");
                 foreach(var button in view.Tabs)
                 {
                     Check(button.navigation.mode==Navigation.Mode.Explicit,v.Item1+" explicit focus "+button.name);

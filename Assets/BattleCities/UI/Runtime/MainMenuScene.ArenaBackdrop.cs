@@ -4,6 +4,22 @@ namespace BattleCities.UI
 {
     public sealed partial class MainMenuScene
     {
+        private static readonly Color TankSelectorMonitorColor = new Color32(0, 52, 153, 255);
+
+        public void SetTankSelectorBackdrop(bool active)
+        {
+            var viewport = mainFrame ? mainFrame.Find("TV Background Viewport") : null;
+            var fog = viewport ? viewport.Find("TV White Fog") : null;
+            if (fog && fog.TryGetComponent<UnityEngine.UI.Image>(out var image))
+                image.color = active ? TankSelectorMonitorColor : new Color(1f, 1f, 1f, 0f);
+        }
+
+        [SerializeField, Min(100f), Tooltip("Start button width used by the responsive layout. Adjust this instead of the button RectTransform scale.")]
+        private float startButtonMaxWidth = 330f;
+        [SerializeField, Range(.25f, 1.5f), Tooltip("Logo size multiplier used by the responsive monitor layout.")]
+        private float monitorLogoSize = .9f;
+        [SerializeField, Tooltip("Moves the logo and Start group upward inside the monitor, in layout units.")]
+        private float monitorHeroLift = 20f;
         // The arena art belongs to the whole screen. Existing menu controls retain their
         // authored positions above it, including separate console and mobile layouts.
         private void ApplyArenaBackdrop(MainMenuPlatform target, Vector2 available)
@@ -88,14 +104,28 @@ namespace BattleCities.UI
                     blurredImage.preserveAspect = false;
                     blurredImage.color = Color.white;
                     blurredImage.raycastTarget = false;
+                    // Keep refraction attached to the TV opening, not the larger
+                    // background image, across all platform layouts.
+                    if (blurredImage.material && blurredImage.material.HasProperty("_GlassRect"))
+                    {
+                        viewport.GetWorldCorners(corners);
+                        var glassMin = blurred.InverseTransformPoint(corners[0]);
+                        var glassMax = blurred.InverseTransformPoint(corners[2]);
+                        var glassBounds = new Vector4(glassMin.x, glassMin.y,
+                            glassMax.x - glassMin.x, glassMax.y - glassMin.y);
+                        blurredImage.material.SetVector("_GlassRect", glassBounds);
+                        // A stencil Mask caches a derived material. Update that
+                        // copy too when switching between screen layouts.
+                        blurredImage.materialForRendering.SetVector("_GlassRect", glassBounds);
+                        blurredImage.SetMaterialDirty();
+                    }
                     viewport.gameObject.SetActive(true);
                     if (viewport.GetSiblingIndex() != 0) viewport.SetAsFirstSibling();
                 }
             }
             if (viewport)
             {
-                // A regular UI image makes the white fog visible even when the
-                // background blur shader is unavailable on a target platform.
+                // A light blue frost remains as a fallback if the blur shader is unavailable.
                 var fog = viewport.Find("TV White Fog") as RectTransform;
                 if (!fog)
                 {
@@ -104,6 +134,7 @@ namespace BattleCities.UI
                     fog = fogObject.GetComponent<RectTransform>();
                     fog.SetParent(viewport, false);
                 }
+                fog.gameObject.layer = viewport.gameObject.layer;
                 fog.anchorMin = Vector2.zero;
                 fog.anchorMax = Vector2.one;
                 fog.pivot = new Vector2(.5f, .5f);
@@ -112,47 +143,59 @@ namespace BattleCities.UI
                 fog.localRotation = Quaternion.identity;
                 fog.localScale = Vector3.one;
                 var fogImage = fog.GetComponent<UnityEngine.UI.Image>();
-                fogImage.color = new Color(1f, 1f, 1f, .60f);
                 fogImage.raycastTarget = false;
                 fogImage.maskable = true;
                 if (fog.GetSiblingIndex() != viewport.childCount - 1) fog.SetAsLastSibling();
                 fog.gameObject.SetActive(true);
             }
-            var rewardHeader = rewards ? rewards.Find("Header Bar") : null;
-            if (rewardHeader) rewardHeader.gameObject.SetActive(false);
-
-            // The supplied full logo is nearly square; the prior logo was wide.
-            // Give the taller artwork enough height while retaining each layout's center.
-            if (logo && hero && theme && theme.Logo &&
-                theme.Logo.rect.width / theme.Logo.rect.height < 1.25f &&
-                target != MainMenuPlatform.AndroidLandscape)
+            var tankScreen = mainFrame.Find("Pre-battle screens");
+            SetTankSelectorBackdrop(tankScreen && tankScreen.gameObject.activeSelf);
+            // The hero fills the TV opening now that the old reward area is gone.
+            // Center the logo and primary action as one group on each layout.
+            if (viewport && hero && logo && startRect)
             {
-                float side = target == MainMenuPlatform.Psg1 ? 380 : portrait ? 420 : 350;
-                float lift = target == MainMenuPlatform.Psg1 ? 10 : portrait ? 35 : 32;
-                if (Mathf.Abs(logo.sizeDelta.x - side) > .1f ||
-                    logo.pivot != new Vector2(.5f, .5f))
+                hero.anchorMin = viewport.anchorMin;
+                hero.anchorMax = viewport.anchorMax;
+                hero.pivot = viewport.pivot;
+                hero.anchoredPosition = viewport.anchoredPosition;
+                hero.sizeDelta = viewport.sizeDelta;
+                hero.localScale = Vector3.one;
+
+                float width = hero.rect.width;
+                float height = hero.rect.height;
+                bool landscapePhone = target == MainMenuPlatform.AndroidLandscape;
+                float logoLimit = landscapePhone ? 300f : portrait ? 420f :
+                    target == MainMenuPlatform.Psg1 ? 380f : 350f;
+                float logoSide = Mathf.Min(logoLimit * monitorLogoSize, height * .72f);
+                float buttonWidth = Mathf.Min(Mathf.Max(100f, startButtonMaxWidth), width * .7f);
+                var startImage = startRect.GetComponent<UnityEngine.UI.Image>();
+                float buttonAspect = startImage && startImage.sprite ?
+                    startImage.sprite.rect.width / startImage.sprite.rect.height : 1400f / 335f;
+                float buttonHeight = buttonWidth / buttonAspect;
+                float gap = landscapePhone ? 12f : Mathf.Clamp(height * .045f, 24f, 40f);
+                float groupHeight = logoSide + gap + buttonHeight;
+                if (groupHeight > height - 20f)
                 {
-                    Vector3 oldCenter = hero.InverseTransformPoint(logo.TransformPoint(logo.rect.center));
-                    logo.anchorMin = logo.anchorMax = logo.pivot = new Vector2(.5f, .5f);
-                    logo.localScale = Vector3.one;
-                    logo.sizeDelta = new Vector2(side, side);
-                    logo.anchoredPosition = new Vector2(0, oldCenter.y - hero.rect.center.y + lift);
+                    float fit = (height - 20f) / groupHeight;
+                    logoSide *= fit;
+                    buttonWidth *= fit;
+                    buttonHeight *= fit;
+                    gap *= fit;
+                    groupHeight = logoSide + gap + buttonHeight;
                 }
-            }
-
-            if (target == MainMenuPlatform.AndroidLandscape && hero && rewards && logo && startRect)
-            {
-                // A wide phone has room for the primary action and tabs, but not the
-                // full reward podium. Ranking remains available from the navigation.
-                rewards.gameObject.SetActive(false);
-                float inset = GetLayout(target).contentInset;
-                float width = mainFrame.sizeDelta.x - 2 * inset;
-                float height = mainFrame.sizeDelta.y - 2 * inset;
-                Place(hero, inset, inset, width, height);
+                float top = Mathf.Clamp((height - groupHeight) * .5f - monitorHeroLift,
+                    10f, Mathf.Max(10f, height - groupHeight - 10f));
                 logo.localScale = Vector3.one;
                 startRect.localScale = Vector3.one;
-                Place(logo, (width - 340) * .5f, 0, 340, 340);
-                Place(startRect, (width - 500) * .5f, 325, 500, 110);
+                Place(logo, (width - logoSide) * .5f, top, logoSide, logoSide);
+                Place(startRect, (width - buttonWidth) * .5f,
+                    top + logoSide + gap, buttonWidth, buttonHeight);
+                // Scale around the monitor center, not the left edge.
+                // Preserve the authored top edge and vertical placement.
+                logo.pivot = new Vector2(.5f, logo.pivot.y);
+                logo.anchoredPosition += new Vector2(logoSide * .5f, 0);
+                startRect.pivot = new Vector2(.5f, startRect.pivot.y);
+                startRect.anchoredPosition += new Vector2(buttonWidth * .5f, 0);
             }
 
             if (portrait && highScoreLabel)

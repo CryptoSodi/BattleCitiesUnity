@@ -81,10 +81,12 @@ namespace BattleCities.UI
             }
             profile.designSize=content.rect.size;
             profile.elements.Clear();
+            var battleScreen=mainFrame?mainFrame.Find("Pre-battle screens"):null;
             foreach(var rect in content.GetComponentsInChildren<RectTransform>(true))
             {
                 // Modal visibility and API-driven text contents belong to runtime behavior.
                 if(rect==content || (modal && (rect==modal || rect.IsChildOf(modal))))continue;
+                if(battleScreen && (rect==battleScreen || rect.IsChildOf(battleScreen)))continue;
                 profile.elements.Add(new AuthoredElement(rect));
             }
             return profile;
@@ -93,8 +95,6 @@ namespace BattleCities.UI
         private void ApplyAuthoredLayout(MainMenuPlatform target, Vector2 available)
         {
             if(available.x<=0 || available.y<=0)return;
-            var banner=rewards?rewards.Find("Header Bar") as RectTransform:null;
-            if(banner && theme && theme.TimerIcon && !banner.Find("Timer"))ConfigureRewardHeaderIcons(banner);
             if(authoredPlatform==MainMenuPlatform.Auto)
             {
                 authoredPlatform=target;
@@ -112,7 +112,15 @@ namespace BattleCities.UI
                 profile=CaptureAuthoredLayout(target);
             }
             else if(switching)
-                foreach(var element in profile.elements)element.Restore();
+            {
+                // Pre-battle controls own their layout and visibility; old scene captures may include them.
+                var battleScreen=mainFrame?mainFrame.Find("Pre-battle screens"):null;
+                foreach(var element in profile.elements)
+                {
+                    if(battleScreen && element.rect && (element.rect==battleScreen || element.rect.IsChildOf(battleScreen)))continue;
+                    element.Restore();
+                }
+            }
             authoredPlatform=target;
             Vector2 design=profile.designSize;
             if(design.x<=0 || design.y<=0)design=GetLayout(target).referenceResolution;
@@ -133,6 +141,10 @@ namespace BattleCities.UI
             ConfigureNavigation(target!=MainMenuPlatform.Web,target==MainMenuPlatform.Psg1);
             if(Application.isPlaying && inputModule && (target!=lastPlatform || inputModule.actionsAsset!=liveInput))
                 ConfigureInput(target==MainMenuPlatform.Psg1);
+            // A platform profile may restore the home artwork while the tank selector is open.
+            var openBattleScreen=mainFrame?mainFrame.Find("Pre-battle screens"):null;
+            if(openBattleScreen && openBattleScreen.gameObject.activeInHierarchy)
+                SetHeroVisible(false);
             lastPlatform=target;
         }
     }

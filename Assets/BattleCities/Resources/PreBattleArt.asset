@@ -13,8 +13,20 @@ MonoBehaviour:
   m_Name: PreBattleArt
   m_EditorClassIdentifier: Assembly-CSharp::BattleCities.UI.PreBattleArt
   tanks:
-  - {fileID: 2800000, guid: e06a102d46698c34cb296dcdae715f49, type: 3}
-  - {fileID: 2800000, guid: 155472e8410ad2e439b5633113a28e87, type: 3}
-  - {fileID: 2800000, guid: 2c97cc3f17139734f8ccae628dec7990, type: 3}
-  - {fileID: 2800000, guid: 251246213a1e05040990ec61bbca5ff7, type: 3}
+  - {fileID: 2800000, guid: 4f6a984abd3e9c042a72c381ccc78ace, type: 3}
+  - {fileID: 2800000, guid: 13128f0457287b241afa6b6dde17c46c, type: 3}
+  - {fileID: 2800000, guid: 878230874df01ad4a93b894de188d2b8, type: 3}
+  - {fileID: 2800000, guid: 03c13b64c87480441b18361ec223144c, type: 3}
   powerups: {fileID: 2800000, guid: 568e90744418d7c44b34ccf05aad8d49, type: 3}
+  continueActive: {fileID: 21300000, guid: 603c519350fbd484d8b64509d0c9ad00, type: 3}
+  continueInactive: {fileID: 21300000, guid: 333c5b39d8d9da6469ad7563317979b7, type: 3}
+  backButton: {fileID: 21300000, guid: 9675958bf02da2a4b818f5e1c0692cb3, type: 3}
+  tankTitlePanel: {fileID: 21300000, guid: 130e24e98f4c39040b49567b9df5de5f, type: 3}
+  headerBackdrop: {fileID: 21300000, guid: 1baeacf6427a58140a893b82aa69031c, type: 3}
+  statusPanel: {fileID: 21300000, guid: 95c9f58470af97b45a4ad4c53e1b07cf, type: 3}
+  fuelCan: {fileID: 21300000, guid: 44d5ddc8e726dd14ba321fd455d6d123, type: 3}
+  buttonFuelCan: {fileID: 21300000, guid: 84e84152b77c2ac4ba762d4c3ebb5f5a, type: 3}
+  tankCostButton: {fileID: 21300000, guid: 619226c15f84541418e987f6aef5f830, type: 3}
+  tankCardSelected: {fileID: 21300000, guid: 3c7b7003312b6ab428c1176a172639d0, type: 3}
+  tankCardAvailable: {fileID: 21300000, guid: 2b5ca88a28baf0d45905b8eb98638613, type: 3}
+  tankCardUnavailable: {fileID: 21300000, guid: 64bd9b84d4533d341a46697305113cb5, type: 3}
