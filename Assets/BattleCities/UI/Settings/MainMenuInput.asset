@@ -247,6 +247,54 @@ MonoBehaviour:
       m_Groups: 
       m_Action: Click
       m_Flags: 0
+    - m_Name: 2DVector
+      m_Id: 7b7b8256-7c79-4ca0-8bff-04acdd52a798
+      m_Path: 2DVector
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Navigate
+      m_Flags: 4
+    - m_Name: Up
+      m_Id: 5d510432-8043-41a3-9cd3-ed50c311809b
+      m_Path: <Keyboard>/numpad8
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Navigate
+      m_Flags: 8
+    - m_Name: Down
+      m_Id: e0b42623-4297-4a5d-9ff8-06c71c18b7dd
+      m_Path: <Keyboard>/numpad2
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Navigate
+      m_Flags: 8
+    - m_Name: Left
+      m_Id: cd27cbd3-30bf-4613-a6d0-84e978a5c89d
+      m_Path: <Keyboard>/numpad4
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Navigate
+      m_Flags: 8
+    - m_Name: Right
+      m_Id: b073f78b-9f8b-4aa5-8d39-defd0fb1b5c7
+      m_Path: <Keyboard>/numpad6
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Navigate
+      m_Flags: 8
+    - m_Name: 
+      m_Id: 8137b3a4-2282-4488-823f-952ae1f6ec4c
+      m_Path: <Keyboard>/numpadEnter
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Submit
+      m_Flags: 0
   - m_Name: PSG1
     m_Id: 
     m_Asset: {fileID: 11400000}
@@ -480,6 +528,54 @@ MonoBehaviour:
       m_Processors: 
       m_Groups: 
       m_Action: Click
+      m_Flags: 0
+    - m_Name: 2DVector
+      m_Id: 3252a369-0f98-4762-aac9-4919adc02265
+      m_Path: 2DVector
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Navigate
+      m_Flags: 4
+    - m_Name: Up
+      m_Id: e364d77c-3cfb-4ee1-a49d-718002802f4d
+      m_Path: <Keyboard>/numpad8
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Navigate
+      m_Flags: 8
+    - m_Name: Down
+      m_Id: ba6c71eb-da79-4d76-bb5c-320d42298d02
+      m_Path: <Keyboard>/numpad2
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Navigate
+      m_Flags: 8
+    - m_Name: Left
+      m_Id: 5b51a127-b4b1-469a-8be0-9cae838a2f01
+      m_Path: <Keyboard>/numpad4
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Navigate
+      m_Flags: 8
+    - m_Name: Right
+      m_Id: 94fccdbf-83cb-4d95-ba26-5462bef39a41
+      m_Path: <Keyboard>/numpad6
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Navigate
+      m_Flags: 8
+    - m_Name: 
+      m_Id: 275a3ab5-8eaf-4992-bc42-21bcbfe850cd
+      m_Path: <Keyboard>/numpadEnter
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Submit
       m_Flags: 0
   m_ControlSchemes: []
   m_IsProjectWide: 0

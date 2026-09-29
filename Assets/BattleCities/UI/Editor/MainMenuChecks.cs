@@ -153,7 +153,7 @@ namespace BattleCities.Editor
                     case 0:InputSystem.QueueStateEvent(testPad,new GamepadState().WithButton(GamepadButton.DpadDown));break;
                     case 1:Assert(EventSystem.current.currentSelectedGameObject==view.Tabs[0].gameObject,"D-pad down must focus Play");InputSystem.QueueStateEvent(testPad,new GamepadState());break;
                     case 2:InputSystem.QueueStateEvent(testPad,new GamepadState().WithButton(GamepadButton.DpadRight));break;
-                    case 3:Assert(EventSystem.current.currentSelectedGameObject==view.Tabs[1].gameObject,"D-pad right must focus Quarters");InputSystem.QueueStateEvent(testPad,new GamepadState());break;
+                    case 3:Assert(EventSystem.current.currentSelectedGameObject==view.Tabs[1].gameObject,"D-pad right must focus Shop");InputSystem.QueueStateEvent(testPad,new GamepadState());break;
                     case 4:InputSystem.QueueStateEvent(testPad,new GamepadState().WithButton(GamepadButton.East));break;
                     case 5:Assert(view.IsModalOpen,"PSG1 A must select");InputSystem.QueueStateEvent(testPad,new GamepadState());break;
                     case 6:InputSystem.QueueStateEvent(testPad,new GamepadState().WithButton(GamepadButton.South));break;

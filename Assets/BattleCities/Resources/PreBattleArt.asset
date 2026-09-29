@@ -26,7 +26,10 @@ MonoBehaviour:
   statusPanel: {fileID: 21300000, guid: 95c9f58470af97b45a4ad4c53e1b07cf, type: 3}
   fuelCan: {fileID: 21300000, guid: 44d5ddc8e726dd14ba321fd455d6d123, type: 3}
   buttonFuelCan: {fileID: 21300000, guid: 84e84152b77c2ac4ba762d4c3ebb5f5a, type: 3}
-  tankCostButton: {fileID: 21300000, guid: 619226c15f84541418e987f6aef5f830, type: 3}
+  tankCostButton: {fileID: 21300000, guid: a347cda8b6418954aad468b55353f1c1, type: 3}
+  tankCostButtonSelected: {fileID: 21300000, guid: 5a513d7d3d9cb194d9bb15148d534f20, type: 3}
+  tankCostButtonLocked: {fileID: 21300000, guid: 78f77b4469e71b74f86bb9898f091759, type: 3}
   tankCardSelected: {fileID: 21300000, guid: 3c7b7003312b6ab428c1176a172639d0, type: 3}
   tankCardAvailable: {fileID: 21300000, guid: 2b5ca88a28baf0d45905b8eb98638613, type: 3}
   tankCardUnavailable: {fileID: 21300000, guid: 64bd9b84d4533d341a46697305113cb5, type: 3}
+  classifiedTank: {fileID: 21300000, guid: 8ed303c29d3da3f4890e539b66fd5054, type: 3}

@@ -118,11 +118,12 @@ namespace BattleCities.Editor
             var startButton=MakeButton(start.rectTransform);AddFocus(start.rectTransform,startButton);
             var startLabel=Label("Editable label",start.rectTransform,"START",74,new Color32(48,28,3,255),false);Box(startLabel.rectTransform,.34f,.10f,.46f,.72f);
             var nav=Panel("Navigation",content,Art("reference-style-v2/shared/panels/button-leaderboard-container"));
-            var tabs=new Button[5];string[] names={"PLAY","QUARTERS","SHOP","RANKING","SOCIALS"};
+            var tabs=new Button[5];string[] names={"PLAY","SHOP","RANKING","QUARTERS","SOCIALS"};
+            int[] iconIndices={0,2,3,1,4};
             for(int i=0;i<5;i++)
             {
                 var tile=Panel(names[i],nav,i==0?theme.SelectedPanel:theme.CreamPanel);
-                var icon=Img("Icon",tile,theme.NavigationIcons[i]);icon.preserveAspect=true;Box(icon.rectTransform,.12f,.04f,.76f,.68f);
+                var icon=Img("Icon",tile,theme.NavigationIcons[iconIndices[i]]);icon.preserveAspect=true;Box(icon.rectTransform,.12f,.04f,.76f,.68f);
                 var label=Label("Label",tile,names[i],29,Navy,false);Box(label.rectTransform,.03f,.72f,.94f,.22f);
                 tabs[i]=MakeButton(tile);AddFocus(tile,tabs[i]);
             }
@@ -150,9 +151,9 @@ namespace BattleCities.Editor
             UnityEventTools.AddPersistentListener(retry.onClick,view.RetryLeaderboard);
             UnityEventTools.AddPersistentListener(close.onClick,view.Back);
             UnityEventTools.AddPersistentListener(tabs[0].onClick,view.PlayTab);
-            UnityEventTools.AddPersistentListener(tabs[1].onClick,view.OpenQuarters);
-            UnityEventTools.AddPersistentListener(tabs[2].onClick,view.OpenShop);
-            UnityEventTools.AddPersistentListener(tabs[3].onClick,view.OpenRanking);
+            UnityEventTools.AddPersistentListener(tabs[1].onClick,view.OpenShop);
+            UnityEventTools.AddPersistentListener(tabs[2].onClick,view.OpenRanking);
+            UnityEventTools.AddPersistentListener(tabs[3].onClick,view.OpenQuarters);
             UnityEventTools.AddPersistentListener(tabs[4].onClick,view.OpenSocials);
             // Reusable component prefabs are clean templates; scene-specific events stay in the scene.
             ReferenceHeaderArt.Import();
@@ -224,7 +225,9 @@ namespace BattleCities.Editor
                 nav.AddBinding("<Gamepad>/dpad");nav.AddBinding("<Gamepad>/leftStick");
                 nav.AddCompositeBinding("2DVector").With("Up","<Keyboard>/upArrow").With("Down","<Keyboard>/downArrow").With("Left","<Keyboard>/leftArrow").With("Right","<Keyboard>/rightArrow");
                 nav.AddCompositeBinding("2DVector").With("Up","<Keyboard>/w").With("Down","<Keyboard>/s").With("Left","<Keyboard>/a").With("Right","<Keyboard>/d");
+                nav.AddCompositeBinding("2DVector").With("Up","<Keyboard>/numpad8").With("Down","<Keyboard>/numpad2").With("Left","<Keyboard>/numpad4").With("Right","<Keyboard>/numpad6");
                 var submit=map.AddAction("Submit",InputActionType.Button);submit.AddBinding("<Keyboard>/enter");submit.AddBinding("<Keyboard>/space");submit.AddBinding(psg?"<Gamepad>/buttonEast":"<Gamepad>/buttonSouth");
+                submit.AddBinding("<Keyboard>/numpadEnter");
                 var cancel=map.AddAction("Cancel",InputActionType.Button);cancel.AddBinding("<Keyboard>/escape");cancel.AddBinding(psg?"<Gamepad>/buttonSouth":"<Gamepad>/buttonEast");
                 var point=map.AddAction("Point",InputActionType.PassThrough);point.expectedControlType="Vector2";point.AddBinding("<Mouse>/position");point.AddBinding("<Touchscreen>/touch*/position");point.AddBinding("<Pen>/position");
                 var click=map.AddAction("Click",InputActionType.PassThrough);click.expectedControlType="Button";click.AddBinding("<Mouse>/leftButton");click.AddBinding("<Touchscreen>/touch*/press");click.AddBinding("<Pen>/tip");

@@ -111,7 +111,7 @@ namespace BattleCities.UI
                 finally { generatingLayout=false; }
                 profile=CaptureAuthoredLayout(target);
             }
-            else if(switching)
+            else if(switching || target==MainMenuPlatform.Android)
             {
                 // Pre-battle controls own their layout and visibility; old scene captures may include them.
                 var battleScreen=mainFrame?mainFrame.Find("Pre-battle screens"):null;
@@ -126,8 +126,13 @@ namespace BattleCities.UI
             if(design.x<=0 || design.y<=0)design=GetLayout(target).referenceResolution;
             content.anchorMin=content.anchorMax=content.pivot=new Vector2(.5f,.5f);
             content.anchoredPosition=Vector2.zero;
-            content.sizeDelta=design;
-            content.localScale=Vector3.one*Mathf.Min(available.x/design.x,available.y/design.y);
+            float scale=Mathf.Min(available.x/design.x,available.y/design.y);
+            float extraPortraitHeight=target==MainMenuPlatform.Android && available.y>available.x
+                ?Mathf.Max(0f,available.y/scale-design.y):0f;
+            content.sizeDelta=new Vector2(design.x,design.y+extraPortraitHeight);
+            content.localScale=Vector3.one*scale;
+            if(target==MainMenuPlatform.Android)
+                FitAndroidPortraitEdges(extraPortraitHeight);
 
             var viewport=mainFrame?mainFrame.Find("TV Background Viewport"):null;
             var background=viewport?viewport.Find("TV Background"):null;
@@ -138,14 +143,71 @@ namespace BattleCities.UI
             {
                 controls.gameObject.SetActive(!controllerLegendHidden);
             }
-            ConfigureNavigation(target!=MainMenuPlatform.Web,target==MainMenuPlatform.Psg1);
+            ConfigureNavigation(target!=MainMenuPlatform.Web);
             if(Application.isPlaying && inputModule && (target!=lastPlatform || inputModule.actionsAsset!=liveInput))
                 ConfigureInput(target==MainMenuPlatform.Psg1);
             // A platform profile may restore the home artwork while the tank selector is open.
             var openBattleScreen=mainFrame?mainFrame.Find("Pre-battle screens"):null;
-            if(openBattleScreen && openBattleScreen.gameObject.activeInHierarchy)
-                SetHeroVisible(false);
+            bool showHome= !IsModalOpen && !(openBattleScreen && openBattleScreen.gameObject.activeInHierarchy);
+            if(target==MainMenuPlatform.Android || !showHome)SetHeroVisible(showHome);
             lastPlatform=target;
+        }
+
+        private void FitAndroidPortraitEdges(float extraHeight)
+        {
+            if(!statusBar || !navigation || !mainFrame)return;
+
+            // Keep the HUD near the safe area's top edge and give its readouts
+            // the width that was previously left between the three cards.
+            const float outerCardHeight=108f;
+            const float scoreCardHeight=124f;
+            Place(statusBar,8f,24f,content.sizeDelta.x-16f,scoreCardHeight);
+            float hudWidth=statusBar.sizeDelta.x;
+            float gap=4f;
+            float playerWidth=hudWidth*.35f;
+            float scoreWidth=hudWidth*.30f;
+            var commander=(RectTransform)statusBar.GetChild(0);
+            var score=(RectTransform)statusBar.GetChild(1);
+            var highScore=(RectTransform)statusBar.GetChild(2);
+            float outerInset=(scoreCardHeight-outerCardHeight)*.5f;
+            Place(commander,0f,outerInset,playerWidth,outerCardHeight);
+            Place(score,playerWidth+gap,0f,scoreWidth,scoreCardHeight);
+            Place(highScore,playerWidth+scoreWidth+gap*2f,outerInset,
+                hudWidth-playerWidth-scoreWidth-gap*2f,outerCardHeight);
+            // The reference artwork otherwise letterboxes inside these wider cards.
+            commander.GetComponent<UnityEngine.UI.Image>().preserveAspect=false;
+            score.GetComponent<UnityEngine.UI.Image>().preserveAspect=false;
+            highScore.GetComponent<UnityEngine.UI.Image>().preserveAspect=false;
+            if(playerLabel)
+            {
+                var name=playerLabel.rectTransform;
+                name.anchorMin=new Vector2(.25f,.53f);
+                name.anchorMax=new Vector2(.95f,.86f);
+                name.offsetMin=name.offsetMax=Vector2.zero;
+                playerLabel.fontSize=playerLabel.resizeTextMaxSize=26;
+                playerLabel.resizeTextMinSize=16;
+            }
+
+            if(extraHeight>0f)
+            {
+                navigation.anchoredPosition+=new Vector2(0f,-extraHeight);
+                if(howItWorks)howItWorks.anchoredPosition+=new Vector2(0f,-extraHeight);
+            }
+            if(!howItWorks)return;
+            // End the TV above the instruction panel, including on taller phones.
+            float mainTop=-mainFrame.anchoredPosition.y;
+            float legendTop=-howItWorks.anchoredPosition.y;
+            float frameHeight=Mathf.Max(0f,(legendTop-12f-mainTop)/Mathf.Max(.01f,mainFrame.localScale.y));
+            mainFrame.sizeDelta=new Vector2(mainFrame.sizeDelta.x,frameHeight);
+            foreach(var name in new[]{"TV Frame","TV Background Viewport"})
+            {
+                var rect=mainFrame.Find(name) as RectTransform;
+                if(rect)
+                {
+                    float inset=-rect.anchoredPosition.y;
+                    rect.sizeDelta=new Vector2(rect.sizeDelta.x,Mathf.Max(0f,frameHeight-2f*inset));
+                }
+            }
         }
     }
 }

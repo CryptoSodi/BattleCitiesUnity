@@ -12,8 +12,21 @@ namespace BattleCities.UI
     /// <summary>TV-contained tank selection and server-confirmed deployment/loadout flow.</summary>
     public sealed class PreBattleScreen : MonoBehaviour
     {
+        const float ContinueWidth=220f,Psg1ContinueWidth=280f,FooterHeight=60f,Psg1FooterHeight=72f,FooterBottomAnchor=.012f,ContinueBottomInset=8f,ContinueRosterGap=2f,FooterColumnGap=10f;
+        const float DefaultStatLabelSize=15f,Psg1StatLabelSize=30f;
         static readonly string[] Names={"VANGUARD","STRIKER","TWIN FANG","SIEGEBREAKER"};
-        static readonly string[] Roles={"BALANCED CHASSIS","HIGH VELOCITY","RAPID FIRE","HEAVY SHELLS"};
+        // Roster ratings: Health, Rounds, Speed, Power. Classified II-IV are placeholders.
+        static readonly int[,] TankRatings=
+        {
+            {1,1,1,1}, // Vanguard
+            {2,1,1,1}, // Striker
+            {1,2,1,1}, // Twin Fang
+            {5,1,1,2}, // Siegebreaker
+            {1,1,3,1}, // Classified I
+            {3,1,2,2}, // Classified II
+            {2,3,2,1}, // Classified III
+            {4,2,1,3}  // Classified IV
+        };
         static readonly string[] Items={"shield","base-defence","freeze","extra-life","upgrade","zoom-out","wipeout","speed"};
         static readonly string[] ItemNames={"SHIELD","BASE DEFENCE","FREEZE","EXTRA LIFE","UPGRADE","ZOOM OUT","WIPEOUT","SPEED"};
         static readonly string[] Slots={"active-one","active-two","active-three","active-four"};
@@ -23,13 +36,16 @@ namespace BattleCities.UI
         TMP_Text title,status,fuel,fuelAmount,deploymentHeading,deploymentCost,continueLabel,wallet;
         readonly List<Button> selectable=new List<Button>();
         readonly Button[] tankButtons=new Button[4],slotButtons=new Button[4];
+        readonly Button[] classifiedButtons=new Button[4];
+        TankRosterScroll rosterScroll;
         readonly TMP_Text[] slotNames=new TMP_Text[4],slotEmpty=new TMP_Text[4],inventoryLabels=new TMP_Text[8];
         readonly RawImage[] slotIcons=new RawImage[4];
         Button back,proceed;
         PreBattleArt art;
         JObject account,pendingFuel,loadout=new JObject();
         int selected,paidTier=-1;
-        bool busy,inLoadout,ownsFont;
+        bool busy,inLoadout,ownsFont,psg1Spacing;
+        float ActiveFooterHeight=>psg1Spacing?Psg1FooterHeight:FooterHeight;
         public bool IsOpen=>root&&root.gameObject.activeSelf;
         public bool IsConfigured=>root&&tankButtons[0]&&launch!=null;
         public void Configure(RectTransform frame,MenuTheme skin,MainMenuApiClient client,Action onLaunch,Button returnTo)
@@ -84,10 +100,9 @@ namespace BattleCities.UI
                 var b=Button(Names[i],tankPage,"",new Rect(i*.25f+.006f,0,.238f,1),()=>SelectTank(index));
                 tankButtons[i]=b;
                 Label("Name",b.transform,Names[i],new Rect(.025f,.04f,.95f,.10f),26,theme.Navy);
-                var picture=Raw("Tank model",b.transform,new Rect(.035f,.11f,.93f,.40f));
+                var picture=Raw("Tank model",b.transform,new Rect(.10f,.115f,.80f,.38f));
                 picture.texture=art&&art.tanks!=null&&i<art.tanks.Length?art.tanks[i]:null;
                 picture.color=picture.texture?Color.white:Color.clear;
-                Label("Role",b.transform,Roles[i],new Rect(.04f,.485f,.92f,.085f),19,theme.Navy);
                 Label("Specifications",b.transform,"",new Rect(.06f,.58f,.88f,.19f),18,theme.Navy);
             }
             ApplyRosterPanel();
@@ -111,7 +126,7 @@ namespace BattleCities.UI
                 slotNames[i]=Label("Item name",b.transform,"EMPTY",new Rect(.03f,.65f,.94f,.13f),25,theme.Navy);
                 Label("Change",b.transform,"CHANGE",new Rect(.08f,.81f,.84f,.14f),24,new Color(.03f,.32f,.65f));
             }
-            status=Label("Status",root,"CHOOSE YOUR CHASSIS",new Rect(.035f,.88f,.58f,.105f),19,new Color32(245,235,207,255));
+            status=Label("Status",root,"",new Rect(.035f,.88f,.58f,.105f),19,new Color32(245,235,207,255));
             status.alignment=TextAlignmentOptions.MidlineLeft;
             proceed=Button("Continue",root,"CONTINUE",new Rect(.68f,.88f,.29f,.105f),Continue);
             continueLabel=proceed.GetComponentInChildren<TMP_Text>();
@@ -135,6 +150,8 @@ namespace BattleCities.UI
             proceed=root.Find("Continue").GetComponent<Button>();
             continueLabel=proceed.GetComponentInChildren<TMP_Text>(true);
             tankPage=(RectTransform)root.Find("Tank roster");
+            var rosterCards=tankPage.Find("Viewport/Content");
+            if(!rosterCards)rosterCards=tankPage;
             loadoutPage=(RectTransform)root.Find("Loadout");
             var inventory=loadoutPage.Find("Wallet and inventory");
             wallet=inventory.Find("Wallet").GetComponent<TMP_Text>();
@@ -145,7 +162,7 @@ namespace BattleCities.UI
             for(int i=0;i<4;i++)
             {
                 int index=i;
-                tankButtons[i]=tankPage.Find(Names[i]).GetComponent<Button>();
+                tankButtons[i]=rosterCards.Find(Names[i]).GetComponent<Button>();
                 slotButtons[i]=loadoutPage.Find("Slot "+(i+1)).GetComponent<Button>();
                 var slot=slotButtons[i].transform;
                 slotNames[i]=slot.Find("Item name").GetComponent<TMP_Text>();
@@ -187,6 +204,105 @@ namespace BattleCities.UI
             status.color=new Color32(245,235,207,255);
             ApplyRosterPanel();
             ApplyStatusPanel();
+            GetComponent<MainMenuScene>()?.FitPreBattleScreen(root);
+        }
+        public void ApplyPlatformSpacing(bool psg1)
+        {
+            if(!root)
+            {
+                var frame=GetComponent<MainMenuScene>()?.Content?.Find("Main Display");
+                root=frame?frame.Find("Pre-battle screens") as RectTransform:null;
+            }
+            if(!root)return;
+            psg1Spacing=psg1;
+            var titlePlate=root.Find("Title plate") as RectTransform;
+            var backButton=root.Find("Back") as RectTransform;
+            var roster=root.Find("Tank roster") as RectTransform;
+            var balance=root.Find("Fuel summary") as RectTransform;
+            var continueButton=root.Find("Continue") as RectTransform;
+            if(titlePlate)Fit(titlePlate,
+                psg1?new Rect(.025f,.026f,.710f,.065f):new Rect(.02176f,.0176f,.7203f,.0798f));
+            if(backButton)Fit(backButton,
+                psg1?new Rect(.765f,.026f,.210f,.065f):new Rect(.7548f,.0176f,.2254f,.0798f));
+            if(roster)
+            {
+                ApplyRosterBounds(roster);
+                var content=roster.Find("Viewport/Content") as RectTransform;
+                var grid=content?content.GetComponent<GridLayoutGroup>():null;
+                if(grid)
+                {
+                    grid.padding=new RectOffset(4,4,psg1?2:4,4);
+                    grid.spacing=new Vector2(4,psg1?6:8);
+                }
+            }
+            var statArea=psg1?new Rect(.035f,.465f,.93f,.36f):new Rect(.06f,.505f,.88f,.265f);
+            var badgeArea=psg1?new Rect(.055f,.81f,.89f,.18f):new Rect(.055f,.79f,.89f,.18f);
+            foreach(var rect in root.GetComponentsInChildren<RectTransform>(true))
+            {
+                if(rect.name=="Specifications")Fit(rect,statArea);
+                else if(rect.name=="Cost badge")Fit(rect,badgeArea);
+                else if(rect.name=="Name"&&rect.parent&&
+                    (Array.IndexOf(Names,rect.parent.name)>=0||rect.parent.name.StartsWith("CLASSIFIED ")))
+                    Fit(rect,CardTitleArea(psg1,rect.parent.name.StartsWith("CLASSIFIED ")));
+            }
+            foreach(var label in root.GetComponentsInChildren<TMP_Text>(true))
+            {
+                if(label.name!="Heading"||!label.transform.parent||
+                    !label.transform.parent.name.StartsWith("Specification row "))continue;
+                Fit((RectTransform)label.transform,
+                    psg1?new Rect(.03f,0,.50f,1):new Rect(.04f,0,.43f,1));
+                var rating=label.transform.parent.Find("Rating") as RectTransform;
+                if(rating)Fit(rating,
+                    psg1?new Rect(.53f,.13f,.45f,.74f):new Rect(.49f,.13f,.48f,.74f));
+                float size=psg1?Psg1StatLabelSize:DefaultStatLabelSize;
+                label.fontSize=label.fontSizeMax=size;
+                label.fontSizeMin=psg1?29f:10f;
+            }
+            if(balance&&roster&&roster.gameObject.activeSelf)
+            {
+                balance.anchorMin=new Vector2(.015f,FooterBottomAnchor);
+                balance.anchorMax=new Vector2(.97f,FooterBottomAnchor);
+                balance.pivot=new Vector2(.5f,0);
+                balance.offsetMin=new Vector2(0,ContinueBottomInset);
+                balance.offsetMax=new Vector2(-(psg1?Psg1ContinueWidth:ContinueWidth)-FooterColumnGap,ContinueBottomInset+ActiveFooterHeight);
+                if(continueButton)
+                {
+                    var buttonImage=continueButton.GetComponent<Image>();
+                    if(buttonImage&&buttonImage.sprite&&buttonImage.type==Image.Type.Simple&&buttonImage.preserveAspect)
+                    {
+                        float buttonWidth=psg1?Psg1ContinueWidth:ContinueWidth;
+                        float buttonHeight=buttonWidth*buttonImage.sprite.rect.height/buttonImage.sprite.rect.width;
+                        continueButton.anchorMin=continueButton.anchorMax=new Vector2(.97f,FooterBottomAnchor);
+                        continueButton.pivot=new Vector2(1f,0);
+                        continueButton.sizeDelta=new Vector2(buttonWidth,buttonHeight);
+                        continueButton.anchoredPosition=new Vector2(0,
+                            ContinueBottomInset+(ActiveFooterHeight-buttonHeight)*.5f);
+                    }
+                }
+                if(psg1)FitPsg1SummaryLabels(balance);
+                SetSummaryFont(balance,"Fuel",psg1?36:24);
+                SetSummaryFont(balance,"Fuel amount",psg1?52:36);
+                SetSummaryFont(balance,"Deployment heading",psg1?27:20);
+                SetSummaryFont(balance,"Deployment cost",psg1?32:26);
+            }
+            if(fuelAmount&&proceed)ApplyContinueArt();
+        }
+        static void SetSummaryFont(Transform parent,string name,float size)
+        {
+            var label=parent.Find(name)?.GetComponent<TMP_Text>();
+            if(label)label.fontSize=label.fontSizeMax=size;
+        }
+        static Rect CardTitleArea(bool psg1,bool classified)
+        {
+            return new Rect(.025f,psg1?.02f:.04f,.95f,classified?.12f:.10f);
+        }
+        static void FitPsg1SummaryLabels(RectTransform balance)
+        {
+            Fit((RectTransform)balance.Find("Fuel"),new Rect(.10f,.08f,.26f,.84f));
+            Fit((RectTransform)balance.Find("Fuel amount"),new Rect(.35f,.08f,.085f,.84f));
+            Fit((RectTransform)balance.Find("Deployment heading"),new Rect(.439f,.08f,.215f,.84f));
+            Fit((RectTransform)balance.Find("Deployment cost"),new Rect(.667f,.08f,.32f,.84f));
+            balance.Find("Deployment cost").GetComponent<TMP_Text>().alignment=TextAlignmentOptions.MidlineLeft;
         }
         void ApplyStatusPanel()
         {
@@ -226,6 +342,43 @@ namespace BattleCities.UI
             fuelAmount.outlineWidth=.12f;
             deploymentCost.outlineColor=new Color32(76,46,8,255);
             deploymentCost.outlineWidth=.08f;
+            ApplySummaryLayout();
+        }
+        void ApplySummaryLayout()
+        {
+            var balance=(RectTransform)fuel.transform.parent;
+            if(inLoadout)Fit(balance,new Rect(.015f,.103f,.97f,.089f));
+            else
+            {
+                balance.anchorMin=new Vector2(.015f,FooterBottomAnchor);
+                balance.anchorMax=new Vector2(.97f,FooterBottomAnchor);
+                balance.pivot=new Vector2(.5f,0);
+                balance.offsetMin=new Vector2(0,ContinueBottomInset);
+                balance.offsetMax=new Vector2(-(psg1Spacing?Psg1ContinueWidth:ContinueWidth)-FooterColumnGap,ContinueBottomInset+ActiveFooterHeight);
+            }
+            Fit((RectTransform)balance.Find("Fuel can"),new Rect(.018f,.08f,.085f,.84f));
+            if(psg1Spacing&&!inLoadout)FitPsg1SummaryLabels(balance);
+            else
+            {
+                Fit((RectTransform)fuel.transform,new Rect(.105f,.10f,.225f,.80f));
+                Fit((RectTransform)fuelAmount.transform,new Rect(.34f,.08f,.12f,.84f));
+                Fit((RectTransform)deploymentHeading.transform,
+                    inLoadout?new Rect(.53f,.07f,.445f,.39f):new Rect(.51f,.12f,.445f,.39f));
+                Fit((RectTransform)deploymentCost.transform,
+                    inLoadout?new Rect(.485f,.45f,.49f,.48f):new Rect(.465f,.45f,.49f,.48f));
+            }
+            fuelAmount.alignment=TextAlignmentOptions.MidlineLeft;
+            deploymentCost.alignment=psg1Spacing&&!inLoadout?TextAlignmentOptions.MidlineLeft:TextAlignmentOptions.MidlineRight;
+            fuel.fontSize=fuel.fontSizeMax=inLoadout?25:psg1Spacing?36:24;
+            fuelAmount.fontSize=fuelAmount.fontSizeMax=inLoadout?38:psg1Spacing?52:36;
+            deploymentHeading.fontSize=deploymentHeading.fontSizeMax=inLoadout?21:psg1Spacing?27:20;
+            deploymentCost.fontSize=deploymentCost.fontSizeMax=inLoadout?28:psg1Spacing?32:26;
+        }
+        void ApplyRosterBounds(RectTransform roster)
+        {
+            float top=psg1Spacing ? .096f : .103f;
+            Fit(roster,new Rect(.015f,top,.97f,1f-top-FooterBottomAnchor));
+            roster.offsetMin=new Vector2(0,ContinueBottomInset+ActiveFooterHeight+ContinueRosterGap);
         }
         TMP_Text SummaryLabel(Transform parent,string name,Rect area,string value,float size,Color color,TextAlignmentOptions alignment)
         {
@@ -241,38 +394,143 @@ namespace BattleCities.UI
         }
         void ApplyRosterPanel()
         {
-            // Fill the space between the fuel bar and the Continue footer.
+            // Fill the space from the title down to the shared fuel/Continue footer.
             var rosterAspect=tankPage.GetComponent<AspectRatioFitter>();
             if(rosterAspect)
             {
                 rosterAspect.aspectMode=AspectRatioFitter.AspectMode.None;
                 rosterAspect.enabled=false;
             }
-            Fit(tankPage,new Rect(.015f,.196f,.97f,.674f));
+            ApplyRosterBounds(tankPage);
             var panel=tankPage.GetComponent<Image>();
             panel.sprite=theme.CreamPanel;
             panel.type=Image.Type.Sliced;
             panel.pixelsPerUnitMultiplier=2f;
             panel.color=Color.white;
-            panel.raycastTarget=false;
-            // Keep the cards compact at the top of the expanded white panel.
+            panel.raycastTarget=true;
+            var content=ConfigureRosterScroll();
             for(int i=0;i<tankButtons.Length;i++)
             {
                 var card=(RectTransform)tankButtons[i].transform;
-                card.anchorMin=new Vector2(.009f+i*.24625f,1f);
-                card.anchorMax=new Vector2(.25225f+i*.24625f,1f);
-                card.pivot=new Vector2(.5f,1f);
-                card.anchoredPosition=new Vector2(0,-8f);
-                card.sizeDelta=new Vector2(0,1);
+                if(card.parent!=content)card.SetParent(content,false);
+                card.SetSiblingIndex(i);
                 var cardAspect=card.GetComponent<AspectRatioFitter>();
-                if(!cardAspect)cardAspect=card.gameObject.AddComponent<AspectRatioFitter>();
-                cardAspect.aspectMode=AspectRatioFitter.AspectMode.WidthControlsHeight;
-                cardAspect.aspectRatio=.24325f*2.4f/.94f;
+                if(cardAspect)cardAspect.enabled=false;
                 var name=tankButtons[i].transform.Find("Name") as RectTransform;
-                if(name)Fit(name,new Rect(.025f,.04f,.95f,.10f));
+                if(name)Fit(name,CardTitleArea(psg1Spacing,false));
                 ApplyTankPicture(tankButtons[i],i);
                 ApplyCostBadge(tankButtons[i],i);
+                ConfigureRosterFocus(tankButtons[i]);
             }
+            for(int i=0;i<classifiedButtons.Length;i++)ApplyClassifiedCard(content,i);
+            LayoutRebuilder.MarkLayoutForRebuild(content);
+        }
+        RectTransform ConfigureRosterScroll()
+        {
+            var viewport=tankPage.Find("Viewport") as RectTransform;
+            if(!viewport)viewport=Panel("Viewport",tankPage,theme.CreamPanel,new Rect(0,0,1,1));
+            Fit(viewport,new Rect(0,0,1,1));
+            viewport.offsetMin=new Vector2(6,6);
+            viewport.offsetMax=new Vector2(-28,-6);
+            var viewportImage=viewport.GetComponent<Image>();
+            viewportImage.sprite=theme.CreamPanel;
+            viewportImage.pixelsPerUnitMultiplier=2f;
+            viewportImage.color=Color.white;
+            viewportImage.raycastTarget=true;
+            var mask=viewport.GetComponent<Mask>();
+            if(!mask)mask=viewport.gameObject.AddComponent<Mask>();
+            mask.showMaskGraphic=false;
+
+            var content=viewport.Find("Content") as RectTransform;
+            if(!content)
+            {
+                var go=new GameObject("Content",typeof(RectTransform));go.layer=viewport.gameObject.layer;
+                content=(RectTransform)go.transform;content.SetParent(viewport,false);
+                content.anchorMin=new Vector2(0,1);content.anchorMax=new Vector2(1,1);
+                content.pivot=new Vector2(.5f,1);content.anchoredPosition=Vector2.zero;content.sizeDelta=Vector2.zero;
+            }
+            var grid=content.GetComponent<GridLayoutGroup>();
+            if(!grid)grid=content.gameObject.AddComponent<GridLayoutGroup>();
+            grid.constraint=GridLayoutGroup.Constraint.FixedColumnCount;grid.constraintCount=4;
+            grid.startAxis=GridLayoutGroup.Axis.Horizontal;grid.startCorner=GridLayoutGroup.Corner.UpperLeft;
+            grid.childAlignment=TextAnchor.UpperLeft;grid.padding=new RectOffset(4,4,4,4);grid.spacing=new Vector2(4,8);
+            var fitter=content.GetComponent<ContentSizeFitter>();
+            if(!fitter)fitter=content.gameObject.AddComponent<ContentSizeFitter>();
+            fitter.horizontalFit=ContentSizeFitter.FitMode.Unconstrained;
+            fitter.verticalFit=ContentSizeFitter.FitMode.PreferredSize;
+
+            var track=tankPage.Find("Scrollbar") as RectTransform;
+            if(!track)track=Panel("Scrollbar",tankPage,theme.DarkPanel,new Rect(0,0,1,1));
+            track.anchorMin=new Vector2(1,0);track.anchorMax=new Vector2(1,1);track.pivot=new Vector2(1,.5f);
+            track.anchoredPosition=new Vector2(-5,0);track.sizeDelta=new Vector2(18,-12);
+            var trackImage=track.GetComponent<Image>();trackImage.sprite=theme.DarkPanel;
+            trackImage.pixelsPerUnitMultiplier=3f;trackImage.color=new Color32(110,198,255,255);trackImage.raycastTarget=true;
+            var sliding=track.Find("Sliding Area") as RectTransform;
+            if(!sliding)sliding=Panel("Sliding Area",track,null,new Rect(0,0,1,1));
+            Fit(sliding,new Rect(0,0,1,1));sliding.offsetMin=new Vector2(2,2);sliding.offsetMax=new Vector2(-2,-2);
+            var thumb=sliding.Find("Handle") as RectTransform;
+            if(!thumb)thumb=Panel("Handle",sliding,theme.GoldPanel,new Rect(0,0,1,1));
+            var thumbImage=thumb.GetComponent<Image>();thumbImage.sprite=theme.GoldPanel;
+            thumbImage.pixelsPerUnitMultiplier=3f;thumbImage.color=new Color32(255,224,76,255);thumbImage.raycastTarget=true;
+            var scrollbar=track.GetComponent<Scrollbar>();
+            if(!scrollbar)scrollbar=track.gameObject.AddComponent<Scrollbar>();
+            scrollbar.handleRect=thumb;scrollbar.targetGraphic=thumbImage;scrollbar.direction=Scrollbar.Direction.BottomToTop;
+            scrollbar.navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.None};
+            rosterScroll=tankPage.GetComponent<TankRosterScroll>();
+            if(!rosterScroll)rosterScroll=tankPage.gameObject.AddComponent<TankRosterScroll>();
+            rosterScroll.viewport=viewport;rosterScroll.content=content;
+            rosterScroll.horizontal=false;rosterScroll.vertical=true;rosterScroll.movementType=ScrollRect.MovementType.Clamped;
+            rosterScroll.scrollSensitivity=35f;rosterScroll.inertia=true;
+            rosterScroll.verticalScrollbar=scrollbar;rosterScroll.verticalScrollbarVisibility=ScrollRect.ScrollbarVisibility.Permanent;
+            return content;
+        }
+        void ConfigureRosterFocus(Button card)
+        {
+            var focus=card.GetComponent<TankRosterCardFocus>();
+            if(!focus)focus=card.gameObject.AddComponent<TankRosterCardFocus>();
+            focus.Configure(rosterScroll);
+        }
+        void ApplyClassifiedCard(RectTransform content,int index)
+        {
+            string[] numerals={"I","II","III","IV"};
+            string name="CLASSIFIED "+numerals[index];
+            var existing=content.Find(name);
+            var card=existing?existing.GetComponent<Button>():Button(name,content,"",new Rect(0,0,1,1),()=>{});
+            classifiedButtons[index]=card;
+            card.transform.SetSiblingIndex(4+index);
+            BindClick(card,()=>{status.text=name+" — LOCKED";});
+            card.image.sprite=art&&art.tankCardUnavailable?art.tankCardUnavailable:theme.SilverFrame;
+            card.image.type=Image.Type.Sliced;card.image.pixelsPerUnitMultiplier=4f;
+            card.image.color=new Color32(160,188,208,255);
+            var colors=card.colors;colors.normalColor=Color.white;
+            colors.highlightedColor=new Color(1f,.98f,.88f);colors.selectedColor=colors.highlightedColor;
+            colors.pressedColor=new Color(.85f,.91f,1f);card.colors=colors;
+            SummaryLabel(card.transform,"Name",CardTitleArea(psg1Spacing,true),name,26,theme.Navy,TextAlignmentOptions.Center);
+            var covered=card.transform.Find("Classified tank") as RectTransform;
+            if(!covered)covered=Panel("Classified tank",card.transform,null,new Rect(.08f,.17f,.84f,.32f));
+            Fit(covered,new Rect(.08f,.17f,.84f,.32f));
+            var coveredImage=covered.GetComponent<Image>();coveredImage.sprite=art?art.classifiedTank:null;
+            coveredImage.type=Image.Type.Simple;coveredImage.preserveAspect=true;
+            coveredImage.color=Color.white;coveredImage.raycastTarget=false;
+            ApplySpecifications(card,4+index);
+            var oldLocked=card.transform.Find("Locked");
+            if(oldLocked)oldLocked.gameObject.SetActive(false);
+            var badge=card.transform.Find("Cost badge") as RectTransform;
+            var badgeArea=psg1Spacing?new Rect(.055f,.81f,.89f,.18f):new Rect(.055f,.79f,.89f,.18f);
+            if(!badge)badge=Panel("Cost badge",card.transform,null,badgeArea);
+            Fit(badge,badgeArea);
+            var badgeImage=badge.GetComponent<Image>();
+            bool hasLockedArt=art&&art.tankCostButtonLocked;
+            badgeImage.sprite=hasLockedArt?art.tankCostButtonLocked:theme.SilverFrame;
+            badgeImage.type=hasLockedArt?Image.Type.Simple:Image.Type.Sliced;
+            badgeImage.preserveAspect=hasLockedArt;
+            badgeImage.color=Color.white;
+            badgeImage.raycastTarget=false;
+            var caption=SummaryLabel(badge,"Locked text",new Rect(.05f,.04f,.90f,.92f),
+                "LOCKED",27,Color.white,TextAlignmentOptions.Center);
+            caption.fontStyle=FontStyles.Bold;
+            caption.raycastTarget=false;
+            ConfigureRosterFocus(card);
         }
         void ApplyTankPicture(Button card,int index)
         {
@@ -290,7 +548,7 @@ namespace BattleCities.UI
             aspect.aspectRatio=(float)texture.width/texture.height;
             if(bounds)
             {
-                Fit((RectTransform)bounds,new Rect(.035f,.11f,.93f,.40f));
+                Fit((RectTransform)bounds,new Rect(.10f,.115f,.80f,.38f));
                 // Let the illustration tuck behind the title without covering its lettering.
                 bounds.SetAsFirstSibling();
                 aspect.aspectMode=AspectRatioFitter.AspectMode.FitInParent;
@@ -298,8 +556,8 @@ namespace BattleCities.UI
             }
             // Keep the supplied transparent illustrations at their original proportions.
             picture.SetAsFirstSibling();
-            picture.anchorMin=new Vector2(.035f,.69f);
-            picture.anchorMax=new Vector2(.965f,.69f);
+            picture.anchorMin=new Vector2(.10f,.695f);
+            picture.anchorMax=new Vector2(.90f,.695f);
             picture.pivot=new Vector2(.5f,.5f);
             picture.anchoredPosition=Vector2.zero;
             picture.sizeDelta=new Vector2(0,1);
@@ -308,7 +566,11 @@ namespace BattleCities.UI
         void ApplyCostBadge(Button card,int index)
         {
             var role=card.transform.Find("Role") as RectTransform;
-            if(role)Fit(role,new Rect(.04f,.485f,.92f,.085f));
+            if(role)
+            {
+                role.GetComponent<TMP_Text>().text="";
+                role.gameObject.SetActive(false);
+            }
             ApplySpecifications(card,index);
             var oldTier=card.transform.Find("Tank tier");
             if(oldTier)
@@ -317,17 +579,19 @@ namespace BattleCities.UI
                 else DestroyImmediate(oldTier.gameObject);
             }
             var badge=card.transform.Find("Cost badge") as RectTransform;
-            if(!badge)badge=Panel("Cost badge",card.transform,null,new Rect(.025f,.80f,.95f,.17f));
-            Fit(badge,new Rect(.025f,.80f,.95f,.17f));
+            var badgeArea=psg1Spacing?new Rect(.055f,.81f,.89f,.18f):new Rect(.055f,.79f,.89f,.18f);
+            if(!badge)badge=Panel("Cost badge",card.transform,null,badgeArea);
+            Fit(badge,badgeArea);
             var badgeImage=badge.GetComponent<Image>();
-            badgeImage.sprite=art&&art.tankCostButton?art.tankCostButton:theme.BlueFrame;
-            badgeImage.type=Image.Type.Sliced;
-            badgeImage.pixelsPerUnitMultiplier=2f;
+            bool hasActiveArt=art&&art.tankCostButton;
+            badgeImage.sprite=hasActiveArt?art.tankCostButton:theme.BlueFrame;
+            badgeImage.type=hasActiveArt?Image.Type.Simple:Image.Type.Sliced;
+            badgeImage.preserveAspect=hasActiveArt;
             badgeImage.color=Color.white;
             badgeImage.raycastTarget=false;
             var can=badge.Find("Fuel can") as RectTransform;
             if(!can)can=Panel("Fuel can",badge,null,new Rect(.13f,.14f,.28f,.72f));
-            Fit(can,new Rect(.13f,.14f,.28f,.72f));
+            Fit(can,new Rect(.13f,.20f,.28f,.60f));
             var canImage=can.GetComponent<Image>();
             canImage.sprite=art?(art.buttonFuelCan?art.buttonFuelCan:art.fuelCan):null;
             canImage.type=Image.Type.Simple;
@@ -344,55 +608,85 @@ namespace BattleCities.UI
             caption.fontSize=27;
             caption.fontSizeMax=27;
             caption.raycastTarget=false;
+            ApplyCostBadgeSelection(card,index);
+        }
+        void ApplyCostBadgeSelection(Button card,int index)
+        {
+            var badge=card.transform.Find("Cost badge");
+            if(!badge)return;
+            bool gold=index==selected&&art&&art.tankCostButtonSelected;
+            var badgeImage=badge.GetComponent<Image>();
+            bool supplied=art&&(gold?art.tankCostButtonSelected:art.tankCostButton);
+            badgeImage.sprite=supplied?(gold?art.tankCostButtonSelected:art.tankCostButton):theme.BlueFrame;
+            badgeImage.type=supplied?Image.Type.Simple:Image.Type.Sliced;
+            badgeImage.preserveAspect=supplied;
+            badgeImage.enabled=true;
+            var goldBackground=badge.Find("Selected background") as RectTransform;
+            if(goldBackground)goldBackground.gameObject.SetActive(false);
+            var caption=badge.Find("Cost text");
+            if(caption)caption.GetComponent<TMP_Text>().color=gold?theme.Navy:Color.white;
         }
         void ApplySpecifications(Button card,int index)
         {
             var specifications=card.transform.Find("Specifications") as RectTransform;
-            if(!specifications)return;
-            Fit(specifications,new Rect(.06f,.58f,.88f,.19f));
+            var statArea=psg1Spacing?new Rect(.035f,.465f,.93f,.36f):new Rect(.06f,.505f,.88f,.265f);
+            if(!specifications)specifications=Panel("Specifications",card.transform,null,statArea);
+            Fit(specifications,statArea);
             var legacy=specifications.GetComponent<TMP_Text>();
             if(legacy)legacy.text="";
-            string[] headings={"ROUNDS","VELOCITY","WALL DAMAGE"};
-            string[] values={index<2?"SINGLE":"TWIN",index==0?"STANDARD":"HIGH",index==3?"HEAVY":"STANDARD"};
-            for(int row=0;row<3;row++)
+            string[] headings={"HEALTH","ROUNDS","SPEED","POWER"};
+            for(int row=0;row<headings.Length;row++)
             {
                 var stripe=specifications.Find("Specification row "+row) as RectTransform;
-                var area=new Rect(0,row/3f,1,1f/3f);
+                var area=new Rect(0,(float)row/headings.Length,1,1f/headings.Length);
                 if(!stripe)stripe=Panel("Specification row "+row,specifications,null,area);
                 Fit(stripe,area);
                 var background=stripe.GetComponent<Image>();
                 background.type=Image.Type.Simple;
-                background.color=row==1?new Color32(255,250,238,70):new Color32(238,220,184,130);
+                background.color=row%2==1?new Color32(255,250,238,70):new Color32(238,220,184,130);
                 background.raycastTarget=false;
                 var heading=stripe.Find("Heading");
-                var left=heading?heading.GetComponent<TMP_Text>():Label("Heading",stripe,"",new Rect(.04f,0,.54f,1),15,theme.Navy);
-                Fit((RectTransform)left.transform,new Rect(.04f,0,.54f,1));
+                var labelArea=psg1Spacing?new Rect(.03f,0,.50f,1):new Rect(.04f,0,.43f,1);
+                var left=heading?heading.GetComponent<TMP_Text>():Label("Heading",stripe,"",labelArea,DefaultStatLabelSize,theme.Navy);
+                Fit((RectTransform)left.transform,labelArea);
                 left.text=headings[row];
                 left.color=theme.Navy;
                 left.fontStyle=FontStyles.Bold;
                 left.alignment=TextAlignmentOptions.MidlineLeft;
-                left.fontSize=15;
-                left.fontSizeMax=15;
+                float statLabelSize=psg1Spacing?Psg1StatLabelSize:DefaultStatLabelSize;
+                left.fontSize=left.fontSizeMax=statLabelSize;
+                left.fontSizeMin=psg1Spacing?29f:10f;
                 var value=stripe.Find("Value");
-                var right=value?value.GetComponent<TMP_Text>():Label("Value",stripe,"",new Rect(.62f,0,.34f,1),15,new Color32(154,87,15,255));
-                Fit((RectTransform)right.transform,new Rect(.62f,0,.34f,1));
-                right.text=values[row];
-                right.color=new Color32(154,87,15,255);
-                right.fontStyle=FontStyles.Bold;
-                right.alignment=TextAlignmentOptions.MidlineRight;
-                right.fontSize=15;
-                right.fontSizeMax=15;
+                if(value)
+                {
+                    value.GetComponent<TMP_Text>().text="";
+                    value.gameObject.SetActive(false);
+                }
+                var meterRect=stripe.Find("Rating") as RectTransform;
+                if(!meterRect)
+                {
+                    var go=new GameObject("Rating",typeof(RectTransform),typeof(TankStatMeter));
+                    go.layer=stripe.gameObject.layer;go.transform.SetParent(stripe,false);
+                    meterRect=(RectTransform)go.transform;
+                }
+                Fit(meterRect,psg1Spacing?new Rect(.53f,.13f,.45f,.74f):new Rect(.49f,.13f,.48f,.74f));
+                var meter=meterRect.GetComponent<TankStatMeter>();
+                meter.raycastTarget=false;
+                meter.color=Color.white;
+                meter.FilledSegments=TankRatings[index,row];
             }
         }
         public void Open()
         {
+            GetComponent<MainMenuScene>()?.FitPreBattleScreen(root);
             ApplyRosterPanel();
             GetComponent<MainMenuScene>()?.SetHeroVisible(false);
             root.gameObject.SetActive(true);root.SetAsLastSibling();
             GetComponent<MainMenuScene>()?.SetTankSelectorBackdrop(true);
             ShowPage(false);SelectTank(selected);
-            status.text="SELECT A TANK, THEN CONTINUE TO BATTLE";
+            status.text="";
             Focus(tankButtons[selected]);
+            rosterScroll.Reveal((RectTransform)tankButtons[selected].transform);
             if(Application.isPlaying&&api)StartCoroutine(LoadAccount());
         }
         public void Back()
@@ -413,16 +707,29 @@ namespace BattleCities.UI
         }
         void ApplyContinueArt()
         {
+            ApplySummaryLayout();
             bool useSuppliedSprites=!inLoadout&&art&&art.continueActive&&art.continueInactive;
             continueLabel.text=inLoadout?"START BATTLE":"CONTINUE";
             continueLabel.gameObject.SetActive(!useSuppliedSprites);
             proceed.image.overrideSprite=null;
             proceed.image.color=Color.white;
+            var buttonRect=(RectTransform)proceed.transform;
+            var statusRect=(RectTransform)status.transform;
+            var buttonAspect=proceed.GetComponent<AspectRatioFitter>();
+            status.gameObject.SetActive(inLoadout);
             if(useSuppliedSprites)
             {
                 proceed.image.sprite=art.continueInactive;
                 proceed.image.type=Image.Type.Simple;
                 proceed.image.preserveAspect=true;
+                // Keep the button artwork proportional beside the fuel summary.
+                float buttonWidth=psg1Spacing?Psg1ContinueWidth:ContinueWidth;
+                float buttonHeight=buttonWidth*art.continueInactive.rect.height/art.continueInactive.rect.width;
+                buttonRect.anchorMin=buttonRect.anchorMax=new Vector2(.97f,FooterBottomAnchor);
+                buttonRect.pivot=new Vector2(1f,0);
+                buttonRect.anchoredPosition=new Vector2(0,ContinueBottomInset+(ActiveFooterHeight-buttonHeight)*.5f);
+                if(buttonAspect)buttonAspect.enabled=false;
+                buttonRect.sizeDelta=new Vector2(buttonWidth,buttonHeight);
                 proceed.spriteState=new SpriteState
                 {
                     highlightedSprite=art.continueActive,
@@ -434,6 +741,10 @@ namespace BattleCities.UI
             }
             else
             {
+                if(buttonAspect)buttonAspect.enabled=false;
+                Fit(buttonRect,new Rect(.68f,.88f,.29f,.105f));
+                Fit(statusRect,new Rect(.035f,.88f,.58f,.105f));
+                status.fontSize=status.fontSizeMax=19;
                 proceed.transition=Selectable.Transition.ColorTint;
                 proceed.image.sprite=theme.GoldPanel;
                 proceed.image.type=Image.Type.Sliced;
@@ -460,6 +771,7 @@ namespace BattleCities.UI
                 card.image.type=Image.Type.Sliced;
                 card.image.pixelsPerUnitMultiplier=supplied?4f:1f;
                 card.image.color=Color.white;
+                ApplyCostBadgeSelection(card,i);
                 if(supplied)
                 {
                     var colors=card.colors;
@@ -478,6 +790,7 @@ namespace BattleCities.UI
             wallet.text="WALLET\n"+(account==null?"NOT CONNECTED":"CONNECTED")+"\nBATC  "+Number(account?["tokenBalance"])+"\nSOL  "+Number(account?["solBalance"]);
             for(int i=0;i<8;i++)inventoryLabels[i].text=Number(account?["inventory"]?[Items[i]]);
             back.interactable=!busy;
+            foreach(var card in classifiedButtons)if(card)card.interactable=!busy&&paidTier<0&&pendingFuel==null;
             proceed.interactable=true;
             Navigation();
         }
@@ -557,6 +870,26 @@ namespace BattleCities.UI
         }
         void Navigation()
         {
+            if(!inLoadout)
+            {
+                bool available=!busy&&paidTier<0&&pendingFuel==null;
+                back.navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.Explicit,
+                    selectOnDown=available?tankButtons[selected]:proceed,selectOnUp=proceed,
+                    selectOnLeft=proceed,selectOnRight=available?tankButtons[selected]:proceed};
+                proceed.navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.Explicit,
+                    selectOnUp=available?classifiedButtons[selected]:back,selectOnDown=back,
+                    selectOnLeft=available?classifiedButtons[3]:back,selectOnRight=back};
+                for(int i=0;i<4;i++)
+                {
+                    tankButtons[i].navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.Explicit,
+                        selectOnUp=back,selectOnDown=classifiedButtons[i],
+                        selectOnLeft=tankButtons[(i+3)%4],selectOnRight=tankButtons[(i+1)%4]};
+                    classifiedButtons[i].navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.Explicit,
+                        selectOnUp=tankButtons[i],selectOnDown=proceed,
+                        selectOnLeft=classifiedButtons[(i+3)%4],selectOnRight=classifiedButtons[(i+1)%4]};
+                }
+                return;
+            }
             selectable.Clear();selectable.Add(back);
             var cards=inLoadout?slotButtons:tankButtons;
             bool editable=inLoadout||(paidTier<0&&pendingFuel==null);

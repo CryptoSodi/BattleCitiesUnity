@@ -15,8 +15,11 @@ namespace BattleCities.UI
         public Sprite fuelCan;
         public Sprite buttonFuelCan;
         public Sprite tankCostButton;
+        public Sprite tankCostButtonSelected;
+        public Sprite tankCostButtonLocked;
         public Sprite tankCardSelected;
         public Sprite tankCardAvailable;
         public Sprite tankCardUnavailable;
+        public Sprite classifiedTank;
     }
 }

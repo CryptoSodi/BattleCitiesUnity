@@ -24,6 +24,8 @@ namespace BattleCities.UI
         // authored positions above it, including separate console and mobile layouts.
         private void ApplyArenaBackdrop(MainMenuPlatform target, Vector2 available)
         {
+            if (target == MainMenuPlatform.Psg1) ApplyPsg1Layout();
+            else if (statusBar) statusBar.gameObject.SetActive(true);
             var canvasRect = transform as RectTransform;
             var backdrop = canvasRect ? canvasRect.Find("World backdrop") as RectTransform : null;
             var image = backdrop ? backdrop.GetComponent<UnityEngine.UI.Image>() : null;
@@ -149,6 +151,7 @@ namespace BattleCities.UI
                 fog.gameObject.SetActive(true);
             }
             var tankScreen = mainFrame.Find("Pre-battle screens");
+            FitPreBattleScreen(tankScreen as RectTransform);
             SetTankSelectorBackdrop(tankScreen && tankScreen.gameObject.activeSelf);
             // The hero fills the TV opening now that the old reward area is gone.
             // Center the logo and primary action as one group on each layout.
@@ -161,13 +164,20 @@ namespace BattleCities.UI
                 hero.sizeDelta = viewport.sizeDelta;
                 hero.localScale = Vector3.one;
 
+                if (target == MainMenuPlatform.Psg1)
+                {
+                    hero.anchoredPosition += new Vector2(0f, -PsgHudBandHeight + 16f);
+                    hero.sizeDelta -= new Vector2(0f, PsgHudBandHeight - 16f);
+                }
+
                 float width = hero.rect.width;
                 float height = hero.rect.height;
                 bool landscapePhone = target == MainMenuPlatform.AndroidLandscape;
                 float logoLimit = landscapePhone ? 300f : portrait ? 420f :
-                    target == MainMenuPlatform.Psg1 ? 380f : 350f;
+                    target == MainMenuPlatform.Psg1 ? 420f : 350f;
                 float logoSide = Mathf.Min(logoLimit * monitorLogoSize, height * .72f);
-                float buttonWidth = Mathf.Min(Mathf.Max(100f, startButtonMaxWidth), width * .7f);
+                float buttonLimit = target == MainMenuPlatform.Psg1 ? startButtonMaxWidth * 1.1f : startButtonMaxWidth;
+                float buttonWidth = Mathf.Min(Mathf.Max(100f, buttonLimit), width * .7f);
                 var startImage = startRect.GetComponent<UnityEngine.UI.Image>();
                 float buttonAspect = startImage && startImage.sprite ?
                     startImage.sprite.rect.width / startImage.sprite.rect.height : 1400f / 335f;

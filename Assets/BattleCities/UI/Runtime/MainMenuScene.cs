@@ -197,6 +197,10 @@ namespace BattleCities.UI
         {
             if(logo)logo.gameObject.SetActive(visible);
             if(startRect)startRect.gameObject.SetActive(visible);
+            if(statusBar && lastPlatform==MainMenuPlatform.Psg1)
+                statusBar.gameObject.SetActive(visible);
+            if(controls && lastPlatform==MainMenuPlatform.Psg1)
+                controls.gameObject.SetActive(visible && !controllerLegendHidden);
         }
 
         public void Configure(MenuTheme skin, RectTransform safe, RectTransform root, RectTransform header, RectTransform frame,
@@ -303,10 +307,15 @@ namespace BattleCities.UI
             if (!content || !safeArea) return;
             var size=new Vector2(Screen.width,Screen.height);
             var resolved=Resolve(size);
-            if(Application.isPlaying && resolved==MainMenuPlatform.Psg1 && !controllerLegendHidden && controllerLegendHideAt>=0 && Time.unscaledTime>=controllerLegendHideAt)
+            if(Application.isPlaying && resolved==MainMenuPlatform.Psg1 && !controllerLegendHidden && controllerLegendHideAt>=0)
             {
-                controllerLegendHidden=true;
-                RefreshLayout();
+                if(controls && controls.TryGetComponent<CanvasGroup>(out var legendGroup))
+                    legendGroup.alpha=Mathf.Clamp01((controllerLegendHideAt-Time.unscaledTime)/.4f);
+                if(Time.unscaledTime>=controllerLegendHideAt)
+                {
+                    controllerLegendHidden=true;
+                    RefreshLayout();
+                }
             }
             if(size!=lastSize || Screen.safeArea!=lastSafeArea || resolved!=lastPlatform) RefreshLayout();
         }
@@ -466,7 +475,7 @@ namespace BattleCities.UI
             var modalPanel=(RectTransform)modal.Find("Dialog");
             float mw=Mathf.Min(w-70,720),mh=portrait?520:440;
             Place(modalPanel,(w-mw)/2,(h-mh)/2,mw,mh);
-            ConfigureNavigation(compact,psg);
+            ConfigureNavigation(compact);
             if(Application.isPlaying && (target!=lastPlatform || inputModule.actionsAsset!=liveInput))ConfigureInput(psg);
             lastPlatform=target;
             ApplyArenaBackdrop(target,available);
@@ -493,17 +502,8 @@ namespace BattleCities.UI
         }
         private static void Link(Button b,Selectable up,Selectable down,Selectable left,Selectable right)
         { b.navigation=new Navigation{mode=Navigation.Mode.Explicit,selectOnUp=up,selectOnDown=down,selectOnLeft=left,selectOnRight=right}; }
-        private void ConfigureNavigation(bool compact,bool leftSidebar=false)
+        private void ConfigureNavigation(bool compact)
         {
-            if(leftSidebar)
-            {
-                Link(startButton,settingsButton,tabs[0],tabs[0],startButton);
-                Link(settingsButton,tabs[0],startButton,tabs[0],startButton);
-                for(int i=0;i<tabs.Length;i++)
-                    Link(tabs[i],tabs[(i+tabs.Length-1)%tabs.Length],tabs[(i+1)%tabs.Length],tabs[i],startButton);
-                Link(closeButton,closeButton,closeButton,closeButton,closeButton);
-                return;
-            }
             Link(startButton,settingsButton,tabs[0],compact?tabs[0]:tabs[0],compact?tabs[4]:retryButton);
             Link(settingsButton,compact?tabs[0]:null,startButton,tabs[0],startButton);
             for(int i=0;i<tabs.Length;i++)Link(tabs[i],compact?startButton:(i==0?settingsButton:tabs[i-1]),compact?startButton:tabs[(i+1)%tabs.Length],compact?tabs[(i+tabs.Length-1)%tabs.Length]:startButton,compact?tabs[(i+1)%tabs.Length]:startButton);

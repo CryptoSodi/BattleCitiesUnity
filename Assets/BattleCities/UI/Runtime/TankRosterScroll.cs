@@ -1,0 +1,40 @@
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace BattleCities.UI
+{
+    /// <summary>Responsive four-column roster with focus-driven scrolling.</summary>
+    [ExecuteAlways]
+    public sealed class TankRosterScroll : ScrollRect
+    {
+        const float CardAspect=.72f;
+
+        public override void SetLayoutHorizontal()
+        {
+            base.SetLayoutHorizontal();
+            if(!content||!viewport)return;
+            var grid=content.GetComponent<GridLayoutGroup>();
+            if(!grid)return;
+            float width=Mathf.Max(1f,(viewport.rect.width-grid.padding.horizontal-grid.spacing.x*3f)/4f);
+            var size=new Vector2(width,width/CardAspect);
+            if((grid.cellSize-size).sqrMagnitude>.01f)grid.cellSize=size;
+        }
+
+        public void Reveal(RectTransform card)
+        {
+            if(!card||!content||!viewport||!card.IsChildOf(content))return;
+            Canvas.ForceUpdateCanvases();
+            StopMovement();
+            float range=Mathf.Max(0,content.rect.height-viewport.rect.height);
+            if(range<=.01f){verticalNormalizedPosition=1f;return;}
+            var bounds=RectTransformUtility.CalculateRelativeRectTransformBounds(viewport,card);
+            const float inset=4f;
+            float top=viewport.rect.yMax-inset,bottom=viewport.rect.yMin+inset;
+            float delta=0;
+            if(bounds.size.y>top-bottom||bounds.max.y>top)delta=top-bounds.max.y;
+            else if(bounds.min.y<bottom)delta=bottom-bounds.min.y;
+            if(Mathf.Abs(delta)>.01f)
+                verticalNormalizedPosition=1f-Mathf.Clamp(content.anchoredPosition.y+delta,0,range)/range;
+        }
+    }
+}
