@@ -193,7 +193,7 @@ namespace BattleCities.UI
         public bool IsModalOpen => modal && modal.gameObject.activeSelf;
         public RectTransform Content => content;
 
-        public void SetHeroVisible(bool visible)
+        public void SetHeroVisible(bool visible,bool animateTv=true)
         {
             if(logo)logo.gameObject.SetActive(visible);
             if(startRect)startRect.gameObject.SetActive(visible);
@@ -201,6 +201,7 @@ namespace BattleCities.UI
                 statusBar.gameObject.SetActive(visible);
             if(controls && lastPlatform==MainMenuPlatform.Psg1)
                 controls.gameObject.SetActive(visible && !controllerLegendHidden);
+            SetAndroidTvVisible(!visible,animateTv);
         }
 
         public void Configure(MenuTheme skin, RectTransform safe, RectTransform root, RectTransform header, RectTransform frame,
@@ -291,6 +292,10 @@ namespace BattleCities.UI
         }
         private void OnDisable()
         {
+            if(androidTvReveal!=null){StopCoroutine(androidTvReveal);androidTvReveal=null;}
+            androidTvVisible=false;
+            var tvGroup=mainFrame?mainFrame.GetComponent<CanvasGroup>():null;
+            if(tvGroup)tvGroup.alpha=1f;
             UnbindApiClient();
             if (cancel != null) cancel.performed -= OnCancel;
             cancel=null;
@@ -534,6 +539,8 @@ namespace BattleCities.UI
         private void OnCancel(InputAction.CallbackContext ctx) { Back(); }
         public void Back()
         {
+            // The lobby owns B while it is open, including its room-code keypad.
+            if (BattleCities.Multiplayer.BattleSession.Instance && BattleCities.Multiplayer.BattleSession.Instance.Lobby.Visible) return;
             if(IsModalOpen)
             {
                 modal.gameObject.SetActive(false);
@@ -542,6 +549,22 @@ namespace BattleCities.UI
             }
             else if(preBattle && preBattle.IsOpen)preBattle.Back();
             else if(EventSystem.current)EventSystem.current.SetSelectedGameObject(startButton.gameObject);
+        }
+        private void LateUpdate()
+        {
+            if (!Application.isPlaying || lastPlatform != MainMenuPlatform.Psg1 || !EventSystem.current) return;
+            var lobby = BattleCities.Multiplayer.BattleSession.Instance ? BattleCities.Multiplayer.BattleSession.Instance.Lobby : null;
+            if (lobby && lobby.Visible) return;
+            if (IsModalOpen) { Psg1UiNavigation.KeepFocus(modal, closeButton); return; }
+            if (preBattle && preBattle.IsOpen) { preBattle.KeepControllerFocus(); return; }
+            var online = lobby ? lobby.OpenButton : null;
+            Psg1UiNavigation.Rows(new Selectable[] { walletLoginButton, settingsButton, online, retryButton },
+                new Selectable[] { startButton }, tabs);
+            var selected = EventSystem.current.currentSelectedGameObject;
+            // ONLINE belongs to the persistent multiplayer canvas, outside this menu's hierarchy.
+            if (online && selected == online.gameObject && Psg1UiNavigation.Available(online))
+                Psg1UiNavigation.KeepFocus(online.transform.parent, online);
+            else Psg1UiNavigation.KeepFocus(content, startButton);
         }
         private PreBattleScreen preBattle;
         private void EnsurePreBattle()

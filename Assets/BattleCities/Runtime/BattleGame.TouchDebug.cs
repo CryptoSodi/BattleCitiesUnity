@@ -12,21 +12,37 @@ namespace BattleCities
         private GameObject touchDebugRoot;
         private readonly List<Action> touchDebugRefresh = new List<Action>();
         private Font touchDebugFont;
+        private Psg1UiInput debugControllerInput;
+        private UnityEngine.UI.Button debugClose;
 
         private void Start()
         {
+            if (RuntimePlatformInfo.IsPsg1) MobileBattleOrientation.ShowBattle();
+            CreateTouchControls();
             if (RuntimePlatformInfo.IsPsg1) CreateTouchDebugMenu();
         }
 
         private void LateUpdate()
         {
-            if (!RuntimePlatformInfo.IsPsg1) return;
+            if (!RuntimePlatformInfo.IsPsg1) { ReleaseDebugController(); return; }
             if (!touchDebugRoot) CreateTouchDebugMenu();
             if (!touchDebugRoot) return;
             if (touchDebugRoot.activeSelf != showDebug) touchDebugRoot.SetActive(showDebug);
-            if (!showDebug) return;
+            if (!showDebug) { ReleaseDebugController(); return; }
+            if (debugControllerInput == null || !debugControllerInput.MatchesCurrent)
+            { ReleaseDebugController(); debugControllerInput = new Psg1UiInput(); }
             foreach (var refresh in touchDebugRefresh) refresh();
+            var items = new List<UnityEngine.UI.Selectable>();
+            foreach (var item in touchDebugRoot.GetComponentsInChildren<UnityEngine.UI.Selectable>())
+                if (Psg1UiNavigation.Available(item)) items.Add(item);
+            for (int i = 0; i < items.Count; i++)
+                items[i].navigation = new UnityEngine.UI.Navigation { mode = UnityEngine.UI.Navigation.Mode.Explicit,
+                    selectOnUp = items[(i + items.Count - 1) % items.Count], selectOnDown = items[(i + 1) % items.Count] };
+            // Left/right remains unassigned so Slider.OnMove adjusts its value.
+            Psg1UiNavigation.KeepFocus(touchDebugRoot.transform, debugClose);
         }
+
+        private void ReleaseDebugController() { debugControllerInput?.Dispose(); debugControllerInput = null; }
 
         private static RectTransform UiObject(string name, Transform parent)
         {
@@ -169,6 +185,7 @@ namespace BattleCities
             var closeImage = closeRect.gameObject.AddComponent<UnityEngine.UI.Image>();
             closeImage.color = new Color(.13f, .39f, .64f, 1);
             var close = closeRect.gameObject.AddComponent<UnityEngine.UI.Button>();
+            debugClose = close;
             close.targetGraphic = closeImage;
             close.onClick.AddListener(() => showDebug = false);
             var closeText = UiText("X", closeRect, "X", 25, TextAnchor.MiddleCenter);

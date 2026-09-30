@@ -75,7 +75,7 @@ namespace BattleCities
         private readonly BattleHud hud=new BattleHud();
         private bool consumePending;
         private InputAction[] slots;
-        public bool Paused {get=>paused;set=>paused=value;}
+        public bool Paused {get=>paused;set{if(paused==value)return;paused=value;BlockControllerTransition();}}
         private sealed class Actor { public GameObject Root,Model; public Transform Turret; public Transform[] Muzzles; public ParticleSystem Dust; public Light[] Lights; public int Tier; public bool Drop; public Color Color; public TankAnimation Animation; public TankShield Shield; }
         private sealed class Part { public Mesh Mesh;public Material Material;public int Submesh;public Matrix4x4 Local; }
         private sealed class Batch { public Part Part;public Matrix4x4[] Matrices; }
@@ -99,6 +99,8 @@ namespace BattleCities
             ConfigureDayNightShortcuts();
             slots=Enumerable.Range(1,4).Select(i=>input.AddAction("Powerup"+i,InputActionType.Button,"<Keyboard>/digit"+i)).ToArray();
             economy=GetComponent<EconomyClient>();
+            ConfigureTouchBindings();
+            ConfigureGamepadBindings();
             input.Enable();
             street=Material(new Color(.24f,.28f,.29f));pavement=Material(new Color(.58f,.58f,.51f));paint=Material(new Color(.82f,.81f,.65f));
             water=Material(new Color(.03f,.53f,.72f));water.SetFloat("_Smoothness",.85f);
@@ -242,16 +244,17 @@ namespace BattleCities
         private void Update()
         {
             if(Simulation==null)return;float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);fps=Mathf.Lerp(fps,1/Mathf.Max(.0001f,Time.unscaledDeltaTime),.05f);
-            if(pause.WasPressedThisFrame())paused=!paused;if(debug.WasPressedThisFrame())showDebug=!showDebug;if(restart.WasPressedThisFrame()&&!IsOnline)LoadStage(Stage);if(overhead.WasPressedThisFrame())CameraElevation=CameraElevation>85?70:90;
+            UpdateGamepadControls();
+            if(debug.WasPressedThisFrame())showDebug=!showDebug;if(restart.WasPressedThisFrame()&&!IsOnline)LoadStage(Stage);if(overhead.WasPressedThisFrame())CameraElevation=CameraElevation>85?70:90;
             if(Multiplayer.BattleSession.Instance&&Multiplayer.BattleSession.Instance.Lobby.Visible)paused=true;
             UpdateDayNightShortcuts(dt);
             for(int i=0;i<slots.Length;i++)if(slots[i].WasPressedThisFrame()&&!paused)UsePowerupSlot(i);
             SamplePrimaryFire(dt);
-            if(!paused&&!consumePending)
+            if(!paused&&!consumePending&&!BlockCombat)
             {
                 secondaryQueued|=secondaryFire.WasPressedThisFrame();
                 if(secondarySelect.WasPressedThisFrame())CycleSecondary();
-                accumulator+=dt;var cmd=new Command{Move=Latest(moveKeys,moveOrder),Aim=PlayerAim()};
+                accumulator+=dt;var cmd=new Command{Move=PlayerMove(),Aim=PlayerAim()};
                 Simulation.DisableEnemyFire=!EnemyFire;
                 if(IsOnline)accumulator=0;
                 while(accumulator>=BattleSimulation.StepSeconds){QueuePrimaryCommand(ref cmd);cmd.SecondaryFire=secondaryQueued;secondaryQueued=false;Simulation.Step(cmd);accumulator-=BattleSimulation.StepSeconds;}
@@ -462,7 +465,7 @@ namespace BattleCities
         private void OnGUI()
         {
             if(Simulation==null)return;
-            hud.Draw(Simulation,IsOnline?null:economy,PowerupAtlas,consumePending);
+            hud.Draw(Simulation,IsOnline?null:economy,PowerupAtlas,consumePending,selectedPowerup);
             if(Multiplayer.BattleSession.Instance&&Multiplayer.BattleSession.Instance.Lobby.Visible)return;
             if(ChaseCamera&&!IsOnline&&Simulation.Player!=null&&!paused&&!showDebug)
             {
@@ -475,18 +478,23 @@ namespace BattleCities
                 GUI.DrawTexture(new Rect(centerX-1,centerY+3,2,6),Texture2D.whiteTexture);
                 GUI.color=oldColor;
             }
-            var secondaryRect=new Rect(12,Screen.height-96,156,58);
+            if(!HasTouchControls)
+            {
+            float secondaryBottom=Psg1?132:96;
+            var secondaryRect=new Rect(12,Screen.height-secondaryBottom,156,58);
             string secondaryStatus=Simulation.SecondaryCooldown>0?Simulation.SecondaryCooldown.ToString("0.0")+"s":Simulation.SecondaryCount>=Simulation.SecondaryLimit?"LIMIT":"READY";
             string secondaryName=Simulation.EquippedSecondary==SecondaryAttack.LandDrone?"LAND DRONE":Simulation.EquippedSecondary==SecondaryAttack.PatrolDrone?"DRONE":Simulation.EquippedSecondary==SecondaryAttack.GroundTurret?"TURRET":"MINE";
-            if(GUI.Button(new Rect(12,Screen.height-126,156,26),"[Q] Switch: "+secondaryName))CycleSecondary();
+            if(GUI.Button(new Rect(12,Screen.height-secondaryBottom-30,156,26),(Psg1?"[Y] Switch: ":"[Q] Switch: ")+secondaryName))CycleSecondary();
             bool previousEnabled=GUI.enabled;GUI.enabled=!paused&&!consumePending&&Simulation.CanUseSecondary;
-            if(GUI.Button(secondaryRect,secondaryName+"  [E / RMB]\n"+secondaryStatus+"   "+Simulation.SecondaryCount+"/"+Simulation.SecondaryLimit+" deployed"))secondaryQueued=true;
+            if(GUI.Button(secondaryRect,secondaryName+(Psg1?"  [B]\n":"  [E / RMB]\n")+secondaryStatus+"   "+Simulation.SecondaryCount+"/"+Simulation.SecondaryLimit+" deployed"))secondaryQueued=true;
             GUI.enabled=previousEnabled;
-            if(!string.IsNullOrEmpty(Simulation.SecondaryStatus))GUI.Label(new Rect(180,Screen.height-94,Screen.width-200,44),Simulation.SecondaryStatus);
+            if(!string.IsNullOrEmpty(Simulation.SecondaryStatus))GUI.Label(new Rect(180,Screen.height-secondaryBottom+2,Screen.width-200,44),Simulation.SecondaryStatus);
+            }
             if(economy&&showDebug)GUI.Label(new Rect(12,Screen.height-84,650,24),consumePending?"Confirming power-upÃ¢â‚¬Â¦":economy.Status);
             if(Simulation.PickupType!=null){var screen=gameCamera.WorldToScreenPoint(World(Simulation.PickupX,Simulation.PickupY,.7f));float size=Mathf.Clamp(Vector3.Distance(gameCamera.WorldToScreenPoint(World(Simulation.PickupX+67,Simulation.PickupY,.7f)),screen),96,144);var r=new Rect(screen.x-size/2,Screen.height-screen.y-size/2,size,size);if(PowerupAtlas&&BattleHud.TryPowerupUv(Simulation.PickupType,out var uv))GUI.DrawTextureWithTexCoords(r,PowerupAtlas,uv);else GUI.Box(r,Simulation.PickupType);pickupSparkles.Draw(r,Simulation.Tick*BattleSimulation.StepSeconds);}
-            GUI.Label(new Rect(12,Screen.height-28,Screen.width-24,24),"WASD drive   Ã¢â‚¬Â¢   Arrows aim   Ã¢â‚¬Â¢   Space: tap / hold + release   Ã¢â‚¬Â¢   P pause   Ã¢â‚¬Â¢   R restart   Ã¢â‚¬Â¢   C camera");
-            if(!IsOnline&&(paused||Simulation.Lost||Simulation.Won)){GUI.Box(new Rect(Screen.width/2-130,Screen.height/2-35,260,70),(paused?"PAUSED":Simulation.Won?"STAGE CLEAR":"GAME OVER")+"\nR: Restart");if(Simulation.Won&&Stage<35&&GUI.Button(new Rect(Screen.width/2-65,Screen.height/2+45,130,30),"Next stage"))LoadStage(Stage+1);}
+            if(!HasTouchControls&&!Psg1)GUI.Label(new Rect(12,Screen.height-28,Screen.width-24,24),"WASD drive   Ã¢â‚¬Â¢   Arrows aim   Ã¢â‚¬Â¢   Space: tap / hold + release   Ã¢â‚¬Â¢   P pause   Ã¢â‚¬Â¢   R restart   Ã¢â‚¬Â¢   C camera");
+            DrawPsg1Controls();
+            if(!HasTouchControls&&!Psg1&&!IsOnline&&(paused||Simulation.Lost||Simulation.Won)){GUI.Box(new Rect(Screen.width/2-130,Screen.height/2-35,260,70),(paused?"PAUSED":Simulation.Won?"STAGE CLEAR":"GAME OVER")+"\nR: Restart");if(Simulation.Won&&Stage<35&&GUI.Button(new Rect(Screen.width/2-65,Screen.height/2+45,130,30),"Next stage"))LoadStage(Stage+1);}
             if(IsOnline||!showDebug||RuntimePlatformInfo.IsPsg1)return;
             GUILayout.BeginArea(new Rect(Mathf.Max(8,Screen.width-282),92,270,Mathf.Max(120,Screen.height-132)),"Battle Cities Ã¢â‚¬Â¢ Debug",GUI.skin.window);
             debugScroll=GUILayout.BeginScrollView(debugScroll);
@@ -538,12 +546,12 @@ namespace BattleCities
             Simulation.ApplyPowerup(type);
             debugPowerupStatus="Applied: "+debugPowerupNames[index]+(paused?" (paused)":"");
         }
-        private void OnApplicationFocus(bool focus){if(!focus){if(!IsOnline)paused=true;ResetPrimaryFire();secondaryQueued=false;}}
+        private void OnApplicationFocus(bool focus){if(!focus){if(!IsOnline)paused=true;CancelTouchGameplay();}}
         private async void RollDrop(BattleSimulation current)
         {if(IsOnline){if(NetworkMatch.Object.HasStateAuthority)current.SpawnPickup();return;}var drop=economy?await economy.Roll(Stage):null;if(this&&Simulation==current)current.SpawnPickup(drop?.Type,drop?.ClaimId);}
         public void UsePowerupSlot(int index)
         {
-            if(IsOnline||index<0||index>=4||consumePending||!economy||Simulation.Player==null||Simulation.Lost||Simulation.Won)return;
+            if(IsOnline||index<0||index>=4||paused||showDebug||consumePending||!economy||!economy.Authenticated||economy.SlotCount(index)<=0||Simulation==null||!Simulation.CanAcceptPlayerFire)return;
             consumePending=true;_ = ConsumePowerupSlot(index);
         }
         private async System.Threading.Tasks.Task ConsumePowerupSlot(int index)

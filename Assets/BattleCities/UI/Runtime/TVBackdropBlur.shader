@@ -11,6 +11,7 @@ Shader "BattleCities/UI/TVBackdropBlur"
         _Dispersion ("Edge Color Separation", Range(0, 1)) = 0
         _Saturation ("Glass Saturation", Range(0, 2)) = 1
         _GlassRect ("Glass Local Bounds", Vector) = (0, 0, 1000, 700)
+        _GlassUVRect ("Glass Texture Bounds", Vector) = (0, 0, 1, 1)
         _CornerRadius ("Corner Radius", Float) = 16
         _BorderOpacity ("White Border Opacity", Range(0, 1)) = 0.3
         _StencilComp ("Stencil Comparison", Float) = 8
@@ -79,6 +80,7 @@ Shader "BattleCities/UI/TVBackdropBlur"
             float _Dispersion;
             float _Saturation;
             float4 _GlassRect;
+            float4 _GlassUVRect;
             float _CornerRadius;
             float _BorderOpacity;
 
@@ -99,9 +101,10 @@ Shader "BattleCities/UI/TVBackdropBlur"
                 float2 delta = float2(length(float2(ddx(input.texcoord.x), ddy(input.texcoord.x))),
                     length(float2(ddx(input.texcoord.y), ddy(input.texcoord.y)))) * (_BlurRadius / 3.0);
                 float2 uv = input.texcoord;
-                // The backdrop is screen-sized; glass edges belong to the smaller
-                // TV viewport, expressed in this graphic's local coordinates.
-                float2 panelUV = saturate((input.worldPosition.xy - _GlassRect.xy) / max(_GlassRect.zw, 1));
+                // UVs survive Canvas batching and fullscreen scale changes;
+                // incoming vertex positions need not remain graphic-local.
+                float2 glassUV = (input.texcoord - _GlassUVRect.xy) / max(_GlassUVRect.zw, .00001);
+                float2 panelUV = saturate(glassUV);
                 float2 edgeDistance = min(panelUV, 1 - panelUV);
                 float2 edgeNormal = (1 - smoothstep(0, .09, edgeDistance)) * sign(.5 - panelUV);
                 uv += edgeNormal * _MainTex_TexelSize.xy * _Refraction;
@@ -136,7 +139,7 @@ Shader "BattleCities/UI/TVBackdropBlur"
                 color.rgb = lerp(color.rgb, half3(.92, .97, 1), reflection);
                 float2 halfSize = _GlassRect.zw * .5;
                 float radius = min(_CornerRadius, min(halfSize.x, halfSize.y));
-                float2 q = abs(input.worldPosition.xy - _GlassRect.xy - halfSize) - halfSize + radius;
+                float2 q = abs((glassUV - .5) * _GlassRect.zw) - halfSize + radius;
                 float distanceToEdge = length(max(q, 0)) + min(max(q.x, q.y), 0) - radius;
                 float antialias = max(fwidth(distanceToEdge), .001);
                 float border = 1 - smoothstep(.5, 1.5, -distanceToEdge);

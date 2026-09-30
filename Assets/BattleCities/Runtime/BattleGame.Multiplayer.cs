@@ -33,8 +33,8 @@ namespace BattleCities
         public BattleNetworkInput ReadOnlineInput()
         {
             var result=new BattleNetworkInput{Move=-1,Aim=-1,ShotSequence=shotSequence,SecondarySequence=secondarySequence,Secondary=(int)onlineSecondary,PowerRequested=latestPowerShot};
-            if(!IsOnline||paused||!Simulation.MatchStarted||NetworkMatch.LocalSlot<0||Simulation.Lost||Simulation.Won)return result;
-            result.Move=(int?)Latest(moveKeys,moveOrder)??-1;result.Aim=(int?)Latest(aimKeys,aimOrder)??-1;
+            if(!IsOnline||paused||BlockCombat||!Simulation.MatchStarted||NetworkMatch.LocalSlot<0||Simulation.Lost||Simulation.Won)return result;
+            result.Move=(int?)PlayerMove()??-1;result.Aim=(int?)DirectionalAim()??-1;
             result.ChargeHeld=fire.IsPressed();
             var command=default(Command);QueuePrimaryCommand(ref command);
             if(command.Fire){result.ShotSequence=++shotSequence;result.PowerRequested=latestPowerShot=command.PowerShot;}

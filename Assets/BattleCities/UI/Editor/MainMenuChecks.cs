@@ -89,12 +89,15 @@ namespace BattleCities.Editor
                 Check(backdrop.sprite==expected,v.Item1+" uses its supplied arena background");
                 var tv=view.Content.Find("Main Display/TV Frame");
                 var viewport=view.Content.Find("Main Display/TV Background Viewport");
+                var selector=view.Content.Find("Main Display/Pre-battle screens");
+                bool androidHome=(v.Item1==MainMenuPlatform.Android || v.Item1==MainMenuPlatform.AndroidLandscape) &&
+                    !view.IsModalOpen && !(selector && selector.gameObject.activeInHierarchy);
                 var tvImage=tv?tv.GetComponent<Image>():null;
-                Check(tv && tv.gameObject.activeSelf && tvImage && tvImage.type==Image.Type.Sliced && !tvImage.fillCenter,
-                    v.Item1+" TV border shows the arena through its screen");
+                Check(tv && tv.gameObject.activeSelf!=androidHome && tvImage && tvImage.type==Image.Type.Sliced && !tvImage.fillCenter,
+                    v.Item1+" TV border visibility matches the menu page");
                 var blurred=viewport?viewport.Find("TV Background") as RectTransform:null;
                 var blurredImage=blurred?blurred.GetComponent<Image>():null;
-                Check(viewport && viewport.gameObject.activeSelf && blurredImage && blurredImage.sprite==expected &&
+                Check(viewport && viewport.gameObject.activeSelf!=androidHome && blurredImage && blurredImage.sprite==expected &&
                     blurredImage.material==blurMaterial && viewport.GetSiblingIndex()<tv.GetSiblingIndex(),
                     v.Item1+" masked blur uses the matching arena under the TV frame");
                 var fog=viewport?viewport.Find("TV White Fog") as RectTransform:null;

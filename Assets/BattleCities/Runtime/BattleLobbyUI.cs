@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace BattleCities.Multiplayer
 {
-    public sealed class BattleLobbyUI : MonoBehaviour
+    public sealed partial class BattleLobbyUI : MonoBehaviour
     {
         private Canvas canvas;
         private GameObject panel;
@@ -18,7 +18,12 @@ namespace BattleCities.Multiplayer
         private Font font;
         private bool terminalShown;
         private bool lastStarted;
+        private Psg1UiInput controllerInput;
+        private GameObject previousSelection;
+        private UI.MainMenuScene mainMenuView;
+        private int openedFrame;
         public bool Visible=>panel&&panel.activeSelf;
+        public UnityEngine.UI.Button OpenButton=>open;
         private BattleSession Session=>BattleSession.Instance;
         private static readonly Color Cream=new Color(1,.94f,.8f),Gold=new Color(.92f,.64f,.12f),Dark=new Color(.065f,.085f,.095f,.98f);
 
@@ -56,27 +61,38 @@ namespace BattleCities.Multiplayer
             Place(quickControls.rectTransform,.08f,.92f,.25f,.45f);quickControls.gameObject.SetActive(false);
             start=Button(panel.transform,"START MATCH",Vector2.zero,Vector2.zero,()=>{Session.Match.RequestStart();Hide();});Place((RectTransform)start.transform,.06f,.47f,.075f,.155f);
             rematch=Button(panel.transform,"REMATCH LOBBY",Vector2.zero,Vector2.zero,()=>{Session.Match.RequestRematch();terminalShown=false;});Place((RectTransform)rematch.transform,.06f,.47f,.075f,.155f);
-            leave=Button(panel.transform,"LEAVE ROOM",Vector2.zero,Vector2.zero,()=>{_ = Session.Leave();});Place((RectTransform)leave.transform,.53f,.94f,.075f,.155f);
+            leave=Button(panel.transform,"LEAVE ROOM",Vector2.zero,Vector2.zero,()=>{if(Session.CanCancelConnection)Session.CancelConnection();else _ = Session.Leave();});Place((RectTransform)leave.transform,.53f,.94f,.075f,.155f);
             close=Button(panel.transform,"BACK TO GAME",Vector2.zero,Vector2.zero,Hide);Place((RectTransform)close.transform,.3f,.7f,.015f,.065f);
+            BuildRoomCodeKeypad();
             panel.SetActive(false);
         }
         public void Show()
         {
             if(!panel)return;
+            if(!Visible)previousSelection=EventSystem.current?EventSystem.current.currentSelectedGameObject:null;
             EnsureEventSystem();panel.SetActive(true);
+            ConfigureController();openedFrame=Time.frameCount;
             var game=UnityEngine.Object.FindFirstObjectByType<BattleGame>();if(game)game.Paused=true;
+            codeKeypad.SetActive(false);
             EventSystem.current.SetSelectedGameObject(Session.QuickMatching?leave.gameObject:close.gameObject);
         }
         public void Hide()
         {
-            if(!panel)return;panel.SetActive(false);
+            if(!panel)return;panel.SetActive(false);codeKeypad.SetActive(false);
+            if(EventSystem.current)EventSystem.current.SetSelectedGameObject(previousSelection&&previousSelection.activeInHierarchy?previousSelection:null);
+            ReleaseController();
             var game=UnityEngine.Object.FindFirstObjectByType<BattleGame>();if(game)game.Paused=false;
         }
         private void Update()
         {
             if(!canvas||!Session)return;
             bool available=SceneManager.GetActiveScene().name!="Login";
-            open.gameObject.SetActive(available&&!Visible);
+            bool psgMenu=RuntimePlatformInfo.IsPsg1&&SceneManager.GetActiveScene().name=="MainMenu";
+            if(psgMenu&&!mainMenuView)mainMenuView=UnityEngine.Object.FindFirstObjectByType<UI.MainMenuScene>();
+            var homeHud=psgMenu&&mainMenuView?mainMenuView.Content.Find("Status Bar"):null;
+            open.gameObject.SetActive(available&&!Visible&&(!homeHud||homeHud.gameObject.activeInHierarchy));
+            ((RectTransform)open.transform).anchoredPosition=psgMenu
+                ?new Vector2(128,-206):new Vector2(92,-74);
             var match=Session.Match;
             bool advancing=match&&match.Mode==BattleMode.Coop&&match.Won&&match.Map<35;
             bool ended=match&&(match.Won||match.Lost)&&!advancing;
@@ -88,11 +104,21 @@ namespace BattleCities.Multiplayer
             if(match&&!match.Started)terminalShown=false;
             if(!Visible)return;
             EnsureEventSystem();
+            ConfigureController();
+            if(controllerInput!=null && Time.frameCount>openedFrame && controllerInput.CancelPressed)
+            {
+                if(codeKeypad.activeSelf){CloseRoomCodeKeypad();return;}
+                if(Session.CanCancelConnection){Session.CancelConnection();return;}
+                if(Session.QuickMatching && !Session.Busy){_ = Session.Leave();return;}
+                if(!Session.Busy){Hide();return;}
+            }
             bool connected=Session.Online,editable=!connected&&!Session.Busy;
             bool quick=Session.QuickMatching;
             mode.gameObject.SetActive(!quick);region.gameObject.SetActive(!quick);
             mapLabel.gameObject.SetActive(!quick);previousMap.gameObject.SetActive(!quick);nextMap.gameObject.SetActive(!quick);
-            code.gameObject.SetActive(!quick);create.gameObject.SetActive(!quick);join.gameObject.SetActive(!quick);
+            code.gameObject.SetActive(!quick&&!RuntimePlatformInfo.IsPsg1);
+            codeButton.gameObject.SetActive(!quick&&RuntimePlatformInfo.IsPsg1);
+            create.gameObject.SetActive(!quick);join.gameObject.SetActive(!quick);
             roomLabel.gameObject.SetActive(!quick);quickControls.gameObject.SetActive(quick&&!ended);
             close.gameObject.SetActive(!quick);
             Place(roster.rectTransform,.06f,.94f,quick?.63f:.29f,quick?.74f:.38f);
@@ -101,6 +127,9 @@ namespace BattleCities.Multiplayer
             mode.interactable=editable&&!Session.ModeLockedByLaunchFlag;
             region.interactable=previousMap.interactable=nextMap.interactable=create.interactable=editable;
             code.interactable=editable;join.interactable=editable&&!string.IsNullOrWhiteSpace(code.text);
+            codeButton.interactable=editable;
+            codeButton.GetComponentInChildren<UnityEngine.UI.Text>().text=string.IsNullOrEmpty(code.text)?"ENTER ROOM CODE":code.text;
+            if(!editable&&codeKeypad.activeSelf)CloseRoomCodeKeypad();
             modeLabel.text=connected&&match?(match.Mode==BattleMode.Coop?"CO-OP":"PVP — LAST TANK STANDING"):(Session.SelectedMode==BattleMode.Coop?"CO-OP":"PVP — LAST TANK STANDING");
             regionLabel.text="REGION: "+Session.Region.ToUpperInvariant();mapLabel.text="MAP "+(match?match.Map:Session.SelectedMap).ToString("00");
             roomLabel.text=connected?(Session.QuickMatching?"AUTOMATIC MATCH":"ROOM  "+Session.RoomCode):"2–4 PLAYERS  •  3 LIVES EACH";
@@ -115,9 +144,27 @@ namespace BattleCities.Multiplayer
             else if(quick&&ended)status.text="Match complete.";
             start.gameObject.SetActive(connected&&!ended&&!Session.QuickMatching);start.interactable=Session.IsHost&&match&&!match.Started&&match.PlayerCount>=2;
             rematch.gameObject.SetActive(connected&&ended);rematch.interactable=Session.IsHost;
-            leave.gameObject.SetActive(connected||Session.Busy);leave.interactable=!Session.Busy;
+            leave.gameObject.SetActive(connected||Session.Busy);leave.interactable=!Session.Busy||Session.CanCancelConnection;
+            leave.GetComponentInChildren<UnityEngine.UI.Text>().text=Session.CanCancelConnection?"CANCEL CONNECTION":"LEAVE ROOM";
             close.interactable=!Session.Busy;
+            close.GetComponentInChildren<UnityEngine.UI.Text>().text=SceneManager.GetActiveScene().name=="MainMenu"?"BACK TO MENU":"BACK TO GAME";
+            if(RuntimePlatformInfo.IsPsg1)
+            {
+                quickControls.text=BattleGamepadBindings.Help;
+                ConfigureLobbyNavigation();
+            }
         }
+        private void ConfigureController()
+        {
+            if(!RuntimePlatformInfo.IsPsg1||!EventSystem.current)return;
+            if(controllerInput!=null&&controllerInput.MatchesCurrent)return;
+            ReleaseController();controllerInput=new Psg1UiInput();
+        }
+        private void ReleaseController()
+        {
+            controllerInput?.Dispose();controllerInput=null;
+        }
+        private void OnDestroy()=>ReleaseController();
         private void EnsureEventSystem()
         {
             if(EventSystem.current)return;

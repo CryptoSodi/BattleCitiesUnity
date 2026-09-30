@@ -38,6 +38,8 @@ namespace BattleCities
             {
 #if UNITY_EDITOR
                 if (IsPsg1Simulator()) return GameRuntimePlatform.Psg1;
+                if (SimulatedSystemInfo.operatingSystem.IndexOf("android", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return GameRuntimePlatform.Android;
 #endif
                 return detectedPlatform;
             }

@@ -33,6 +33,13 @@ namespace BattleCities.Multiplayer
         public BattleLobbyUI Lobby {get;private set;}
         private CancellationTokenSource connection;
         private bool leaving;
+        private bool connectionCancelled;
+        public bool CanCancelConnection => Busy && !leaving && connection != null;
+        public void CancelConnection()
+        {
+            if (!CanCancelConnection) return;
+            connectionCancelled = true; Status = "Cancelling connection..."; connection.Cancel();
+        }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         public Func<BattleNetworkInput> TestInput;
 #endif
@@ -63,7 +70,7 @@ namespace BattleCities.Multiplayer
             if(BattleLaunchOptions.Error!=null){Status=BattleLaunchOptions.Error;Lobby.Show();return;}
             if(Application.platform==RuntimePlatform.WebGLPlayer)
             {Status="This host-mode build supports native PC and Android. Browser multiplayer requires a separate build.";return;}
-            Busy=true;leaving=false;QuickMatching=quick;
+            Busy=true;leaving=false;connectionCancelled=false;QuickMatching=quick;
             Status=quick?"Finding a "+(SelectedMode==BattleMode.Versus?"PvP":"co-op")+" match...":"Connecting to Photon...";
             try
             {
@@ -102,6 +109,7 @@ namespace BattleCities.Multiplayer
                     CustomPhotonAppSettings=settings,StartGameCancellationToken=connection.Token,
                     SessionProperties=quick?new Dictionary<string,SessionProperty>{{"mode",(int)SelectedMode}}:
                         host?new Dictionary<string,SessionProperty>{{"mode",(int)SelectedMode},{"map",SelectedMap}}:null});
+                connection.Token.ThrowIfCancellationRequested();
                 if(!result.Ok)throw new InvalidOperationException(result.ShutdownReason.ToString());
                 if(leaving||!Runner||!Runner.IsRunning)return;
                 if(quick)RoomCode=Runner.SessionInfo.Name;
@@ -116,7 +124,7 @@ namespace BattleCities.Multiplayer
             }
             catch(Exception e)
             {
-                Status=FriendlyError(e.Message);QuickMatching=false;await ShutdownRunner();Lobby.Show();
+                Status=connectionCancelled?"Connection cancelled.":FriendlyError(e.Message);QuickMatching=false;await ShutdownRunner();Lobby.Show();
             }
             finally{Busy=false;connection?.Dispose();connection=null;}
         }

@@ -3,13 +3,25 @@ using UnityEngine.UI;
 
 namespace BattleCities.UI
 {
-    /// <summary>A continuous bar filled in five equal rating steps.</summary>
+    /// <summary>A tank rating bar with continuous and five-block display modes.</summary>
     [AddComponentMenu("Battle Cities/UI/Tank Stat Meter")]
     [RequireComponent(typeof(CanvasRenderer))]
     public sealed class TankStatMeter : MaskableGraphic
     {
         public const int SegmentCount=5;
         [SerializeField,Range(0,SegmentCount)] int filledSegments;
+        [SerializeField] bool useBlockStyle;
+
+        public bool UseBlockStyle
+        {
+            get=>useBlockStyle;
+            set
+            {
+                if(useBlockStyle==value)return;
+                useBlockStyle=value;
+                SetVerticesDirty();
+            }
+        }
 
         public int FilledSegments
         {
@@ -34,6 +46,11 @@ namespace BattleCities.UI
             var face=new Rect(area.x+border,area.y+border,
                 area.width-border*2f,area.height-border*2f);
             float innerRadius=Mathf.Max(0,radius-border);
+            if(useBlockStyle)
+            {
+                DrawBlocks(mesh,face);
+                return;
+            }
             AddBeveledRect(mesh,face,innerRadius,
                 new Color32(58,98,139,255),new Color32(126,165,198,255));
 
@@ -50,6 +67,24 @@ namespace BattleCities.UI
                 AddQuad(mesh,new Rect(gold.x+innerRadius,gold.yMax-shineHeight,
                     Mathf.Max(0,gold.width-innerRadius*2f),shineHeight),
                     new Color32(255,236,133,255));
+            }
+        }
+
+        void DrawBlocks(VertexHelper mesh,Rect face)
+        {
+            float step=face.width/SegmentCount;
+            float divider=Mathf.Clamp(face.height*.09f,1f,1.5f);
+            float shineHeight=Mathf.Clamp(face.height*.10f,1f,2.5f);
+            for(int i=0;i<SegmentCount;i++)
+            {
+                var cell=new Rect(face.x+i*step,face.y,step,face.height);
+                bool filled=i<filledSegments;
+                AddQuad(mesh,cell,filled?new Color32(237,148,0,255):new Color32(58,98,139,255),
+                    filled?new Color32(255,204,39,255):new Color32(126,165,198,255));
+                AddQuad(mesh,new Rect(cell.x,cell.yMax-shineHeight,cell.width,shineHeight),
+                    filled?new Color32(255,236,133,255):new Color32(177,207,228,255));
+                if(i>0)AddQuad(mesh,new Rect(cell.x-divider*.5f,face.y,divider,face.height),
+                    new Color32(9,32,55,255));
             }
         }
 

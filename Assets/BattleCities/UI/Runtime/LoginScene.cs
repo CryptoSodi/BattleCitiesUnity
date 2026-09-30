@@ -25,6 +25,7 @@ namespace BattleCities.UI
         [SerializeField] private string dappStoreUrl;
         private bool pendingWallet;
         private bool loading;
+        private Psg1UiInput controllerInput;
 
         public void Configure(MainMenuApiClient client, Button phantom, Button guest, Button store, Text status)
         { apiClient = client; phantomButton = phantom; guestButton = guest; storeButton = store; statusText = status; }
@@ -59,6 +60,7 @@ namespace BattleCities.UI
         }
         private void OnDisable()
         {
+            controllerInput?.Dispose(); controllerInput = null;
             if (apiClient) { apiClient.PlayerLoaded -= OnPlayerLoaded; apiClient.StatusChanged -= OnStatusChanged; }
             if (phantomButton) phantomButton.onClick.RemoveListener(ConnectPhantom);
             if (guestButton) guestButton.onClick.RemoveListener(ContinueAsGuest);
@@ -66,6 +68,16 @@ namespace BattleCities.UI
             if (psgPhantomButton) psgPhantomButton.onClick.RemoveListener(ConnectPhantom);
             if (psgGuestButton) psgGuestButton.onClick.RemoveListener(ContinueAsGuest);
             if (psgStoreButton) psgStoreButton.onClick.RemoveListener(OpenStore);
+        }
+        private void LateUpdate()
+        {
+            if (!layout || !layout.UsesPsg1) { controllerInput?.Dispose(); controllerInput = null; return; }
+            if (controllerInput == null || !controllerInput.MatchesCurrent)
+            { controllerInput?.Dispose(); controllerInput = new Psg1UiInput(); }
+            Psg1UiNavigation.Rows(new Selectable[] { psgPhantomButton }, new Selectable[] { psgGuestButton }, new Selectable[] { psgStoreButton });
+            if (controllerInput.CancelPressed && Psg1UiNavigation.Available(psgPhantomButton))
+                EventSystem.current.SetSelectedGameObject(psgPhantomButton.gameObject);
+            if (psgPhantomButton) Psg1UiNavigation.KeepFocus(psgPhantomButton.transform.parent, psgPhantomButton);
         }
         public void ConnectPhantom()
         {

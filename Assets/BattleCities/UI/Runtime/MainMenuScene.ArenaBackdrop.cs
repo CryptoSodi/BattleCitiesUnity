@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace BattleCities.UI
@@ -5,6 +6,60 @@ namespace BattleCities.UI
     public sealed partial class MainMenuScene
     {
         private static readonly Color TankSelectorMonitorColor = new Color32(0, 52, 153, 255);
+        private const float AndroidTvRevealSeconds = .3f;
+        private Coroutine androidTvReveal;
+        private bool androidTvVisible;
+
+        private void SetAndroidTvVisible(bool visible,bool animate)
+        {
+            if(!mainFrame)return;
+            var tv=mainFrame.Find("TV Frame");
+            var viewport=mainFrame.Find("TV Background Viewport");
+            bool android=lastPlatform==MainMenuPlatform.Android ||
+                lastPlatform==MainMenuPlatform.AndroidLandscape;
+            if(!android)
+            {
+                if(androidTvReveal!=null){StopCoroutine(androidTvReveal);androidTvReveal=null;}
+                var oldGroup=mainFrame.GetComponent<CanvasGroup>();
+                if(oldGroup)oldGroup.alpha=1f;
+                androidTvVisible=false;
+                return;
+            }
+            var group=mainFrame.GetComponent<CanvasGroup>();
+            if(!visible)
+            {
+                if(androidTvReveal!=null){StopCoroutine(androidTvReveal);androidTvReveal=null;}
+                if(group)group.alpha=1f;
+                if(tv)tv.gameObject.SetActive(false);
+                if(viewport)viewport.gameObject.SetActive(false);
+                androidTvVisible=false;
+                return;
+            }
+            if(tv)tv.gameObject.SetActive(true);
+            if(viewport)viewport.gameObject.SetActive(true);
+            if(androidTvVisible)return;
+            androidTvVisible=true;
+            if(animate && Application.isPlaying && isActiveAndEnabled)
+            {
+                if(!group)group=mainFrame.gameObject.AddComponent<CanvasGroup>();
+                group.alpha=0f;
+                androidTvReveal=StartCoroutine(RevealAndroidTv(group));
+            }
+            else if(group)group.alpha=1f;
+        }
+
+        private IEnumerator RevealAndroidTv(CanvasGroup group)
+        {
+            float elapsed=0f;
+            while(elapsed<AndroidTvRevealSeconds)
+            {
+                elapsed+=Time.unscaledDeltaTime;
+                group.alpha=Mathf.SmoothStep(0f,1f,Mathf.Clamp01(elapsed/AndroidTvRevealSeconds));
+                yield return null;
+            }
+            group.alpha=1f;
+            androidTvReveal=null;
+        }
 
         public void SetTankSelectorBackdrop(bool active)
         {
@@ -115,10 +170,22 @@ namespace BattleCities.UI
                         var glassMax = blurred.InverseTransformPoint(corners[2]);
                         var glassBounds = new Vector4(glassMin.x, glassMin.y,
                             glassMax.x - glassMin.x, glassMax.y - glassMin.y);
+                        // Canvas batching can transform UI vertices into canvas
+                        // space. Texture coordinates remain stable when entering
+                        // fullscreen, so use them to locate the glass edges.
+                        var uv = UnityEngine.Sprites.DataUtility.GetOuterUV(sprite);
+                        var bounds = blurred.rect;
+                        var glassUv = new Vector4(
+                            Mathf.Lerp(uv.x, uv.z, (glassMin.x - bounds.xMin) / bounds.width),
+                            Mathf.Lerp(uv.y, uv.w, (glassMin.y - bounds.yMin) / bounds.height),
+                            (glassMax.x - glassMin.x) / bounds.width * (uv.z - uv.x),
+                            (glassMax.y - glassMin.y) / bounds.height * (uv.w - uv.y));
                         blurredImage.material.SetVector("_GlassRect", glassBounds);
+                        blurredImage.material.SetVector("_GlassUVRect", glassUv);
                         // A stencil Mask caches a derived material. Update that
                         // copy too when switching between screen layouts.
                         blurredImage.materialForRendering.SetVector("_GlassRect", glassBounds);
+                        blurredImage.materialForRendering.SetVector("_GlassUVRect", glassUv);
                         blurredImage.SetMaterialDirty();
                     }
                     viewport.gameObject.SetActive(true);
@@ -208,20 +275,14 @@ namespace BattleCities.UI
                 startRect.anchoredPosition += new Vector2(buttonWidth * .5f, 0);
             }
 
-            if (portrait && highScoreLabel)
+            if (portrait && statusBar)
             {
-                // An older portrait profile puts the value below its blue card.
-                var value = highScoreLabel.rectTransform;
-                value.anchorMin = new Vector2(.265f, .34f);
-                value.anchorMax = new Vector2(.925f, .58f);
-                value.pivot = new Vector2(.5f, .5f);
-                value.offsetMin = value.offsetMax = Vector2.zero;
-                value.localScale = Vector3.one;
-                highScoreLabel.fontSize = 30;
-                highScoreLabel.resizeTextForBestFit = true;
-                highScoreLabel.resizeTextMinSize = 18;
-                highScoreLabel.resizeTextMaxSize = 30;
+                FitAndroidStatusCard((RectTransform)statusBar.GetChild(0),true);
+                FitAndroidStatusCard((RectTransform)statusBar.GetChild(2),false);
             }
+            var openScreen=mainFrame.Find("Pre-battle screens");
+            bool showHome=!IsModalOpen && !(openScreen && openScreen.gameObject.activeInHierarchy);
+            SetHeroVisible(showHome,false);
         }
     }
 }

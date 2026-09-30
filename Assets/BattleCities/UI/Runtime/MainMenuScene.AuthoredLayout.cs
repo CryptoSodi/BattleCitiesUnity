@@ -149,8 +149,8 @@ namespace BattleCities.UI
             // A platform profile may restore the home artwork while the tank selector is open.
             var openBattleScreen=mainFrame?mainFrame.Find("Pre-battle screens"):null;
             bool showHome= !IsModalOpen && !(openBattleScreen && openBattleScreen.gameObject.activeInHierarchy);
-            if(target==MainMenuPlatform.Android || !showHome)SetHeroVisible(showHome);
             lastPlatform=target;
+            SetHeroVisible(showHome,false);
         }
 
         private void FitAndroidPortraitEdges(float extraHeight)
@@ -178,16 +178,6 @@ namespace BattleCities.UI
             commander.GetComponent<UnityEngine.UI.Image>().preserveAspect=false;
             score.GetComponent<UnityEngine.UI.Image>().preserveAspect=false;
             highScore.GetComponent<UnityEngine.UI.Image>().preserveAspect=false;
-            if(playerLabel)
-            {
-                var name=playerLabel.rectTransform;
-                name.anchorMin=new Vector2(.25f,.53f);
-                name.anchorMax=new Vector2(.95f,.86f);
-                name.offsetMin=name.offsetMax=Vector2.zero;
-                playerLabel.fontSize=playerLabel.resizeTextMaxSize=26;
-                playerLabel.resizeTextMinSize=16;
-            }
-
             if(extraHeight>0f)
             {
                 navigation.anchoredPosition+=new Vector2(0f,-extraHeight);
@@ -208,6 +198,66 @@ namespace BattleCities.UI
                     rect.sizeDelta=new Vector2(rect.sizeDelta.x,Mathf.Max(0f,frameHeight-2f*inset));
                 }
             }
+        }
+
+        private static void FitAndroidStatusCard(RectTransform card,bool commander)
+        {
+            // Fit the contents to the compact card, keeping clear of its frame and rivets.
+            float width=card.rect.width,height=card.rect.height;
+            var socket=card.Find("Icon tile") as RectTransform;
+            if(socket)
+            {
+                float size=height*.66f;
+                Place(socket,width*.06f,(height-size)*.5f,size,size);
+                var icon=socket.Find("Icon") as RectTransform;
+                if(icon)
+                {
+                    HudBounds(icon,.07f,.07f,.93f,.93f);
+                    var image=icon.GetComponent<UnityEngine.UI.Image>();
+                    if(image){image.type=UnityEngine.UI.Image.Type.Simple;image.preserveAspect=true;}
+                }
+            }
+            var readout=card.Find("Readout");
+            if(!readout)return;
+            var label=readout.Find("Label")?.GetComponent<UnityEngine.UI.Text>();
+            var value=readout.Find("Value")?.GetComponent<UnityEngine.UI.Text>();
+            if(label)
+            {
+                HudBounds(label.rectTransform,.31f,.52f,.92f,.88f);
+                FitHudText(label,36,commander?TextAnchor.MiddleLeft:TextAnchor.MiddleCenter);
+            }
+            if(commander)
+            {
+                var progress=readout.Find("Progress") as RectTransform;
+                var level=readout.Find("Level Pill") as RectTransform;
+                if(progress)HudBounds(progress,.31f,.21f,.71f,.42f);
+                if(level)HudBounds(level,.735f,.17f,.925f,.46f);
+                if(value)
+                {
+                    HudBounds(value.rectTransform,.748f,.19f,.912f,.44f);
+                    FitHudText(value,28,TextAnchor.MiddleCenter);
+                }
+            }
+            else if(value)
+            {
+                HudBounds(value.rectTransform,.31f,.14f,.92f,.54f);
+                FitHudText(value,44,TextAnchor.MiddleCenter);
+            }
+        }
+
+        private static void HudBounds(RectTransform rect,float left,float bottom,float right,float top)
+        {
+            rect.anchorMin=new Vector2(left,bottom);rect.anchorMax=new Vector2(right,top);
+            rect.offsetMin=rect.offsetMax=Vector2.zero;
+        }
+
+        private static void FitHudText(UnityEngine.UI.Text text,int maximum,TextAnchor alignment)
+        {
+            text.fontSize=text.resizeTextMaxSize=maximum;
+            text.resizeTextMinSize=16;text.resizeTextForBestFit=true;
+            text.alignment=alignment;
+            text.horizontalOverflow=HorizontalWrapMode.Wrap;
+            text.verticalOverflow=VerticalWrapMode.Truncate;
         }
     }
 }

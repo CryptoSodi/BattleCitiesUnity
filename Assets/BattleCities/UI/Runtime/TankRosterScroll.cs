@@ -3,11 +3,11 @@ using UnityEngine.UI;
 
 namespace BattleCities.UI
 {
-    /// <summary>Responsive four-column roster with focus-driven scrolling.</summary>
+    /// <summary>Responsive roster with focus-driven scrolling.</summary>
     [ExecuteAlways]
     public sealed class TankRosterScroll : ScrollRect
     {
-        const float CardAspect=.72f;
+        internal const float CardAspect=.72f;
 
         public override void SetLayoutHorizontal()
         {
@@ -15,7 +15,8 @@ namespace BattleCities.UI
             if(!content||!viewport)return;
             var grid=content.GetComponent<GridLayoutGroup>();
             if(!grid)return;
-            float width=Mathf.Max(1f,(viewport.rect.width-grid.padding.horizontal-grid.spacing.x*3f)/4f);
+            int columns=Mathf.Max(1,grid.constraintCount);
+            float width=Mathf.Max(1f,(viewport.rect.width-grid.padding.horizontal-grid.spacing.x*(columns-1))/columns);
             var size=new Vector2(width,width/CardAspect);
             if((grid.cellSize-size).sqrMagnitude>.01f)grid.cellSize=size;
         }

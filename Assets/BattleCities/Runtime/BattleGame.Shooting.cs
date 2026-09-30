@@ -28,7 +28,7 @@ namespace BattleCities
 
         private Facing? PlayerAim()
         {
-            var keyboardAim = Latest(aimKeys, aimOrder);
+            var keyboardAim = DirectionalAim();
             if (!ChaseCamera || IsOnline)
             {
                 chaseAim = null;
@@ -55,13 +55,13 @@ namespace BattleCities
         private void SamplePrimaryFire(float dt)
         {
             var player = Simulation.Player;
-            if (paused || consumePending || !Simulation.CanAcceptPlayerFire)
+            if (paused || consumePending || BlockCombat || !Simulation.CanAcceptPlayerFire)
             {
                 ResetPrimaryFire();
                 return;
             }
             if (chargingTankId != player.Id) { ResetPrimaryFire(); chargingTankId = player.Id; }
-            bool mouseEnabled = ChaseCamera && !IsOnline && !showDebug && Mouse.current != null &&
+            bool mouseEnabled = !HasTouchControls && ChaseCamera && !IsOnline && !showDebug && Mouse.current != null &&
                 Mouse.current.position.ReadValue().y >= 150 &&
                 Mouse.current.position.ReadValue().y <= Screen.height - BattleHud.TopHeightPixels;
             primaryCharge.Sample(

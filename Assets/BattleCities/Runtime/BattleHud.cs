@@ -128,7 +128,7 @@ namespace BattleCities
             float scale=Mathf.Clamp(Screen.width/1240f,.78f,1.15f),size=(narrow?34:38)*scale,gap=3*scale;
             return size*4+gap*3+14*scale;
         }
-        void Psg1Powerups(EconomyClient economy,Texture2D atlas,bool pending,bool narrow)
+        void Psg1Powerups(EconomyClient economy,Texture2D atlas,bool pending,bool narrow,int selectedSlot)
         {
             float scale=Mathf.Clamp(Screen.width/1240f,.78f,1.15f),size=(narrow?34:38)*scale,gap=3*scale;
             float total=size*4+gap*3,x=Screen.width-total-6*scale,y=narrow?46:5,badge=14*scale;
@@ -138,6 +138,7 @@ namespace BattleCities
                 string liveType=economy?economy.SlotType(i):null;int count=economy?economy.SlotCount(i):0;bool available=count>0&&!pending;string type=string.IsNullOrEmpty(liveType)?emptySlotTypes[i]:liveType;
                 float px=x+i*(size+gap);
                 PowerupIcon(new Rect(px,y,size,size),atlas,type,available);
+                if(i==selectedSlot)Outline(new Rect(px-2*scale,y-2*scale,size+4*scale,size+4*scale),gold,2*scale);
                 Rounded(new Rect(px+scale,y+scale,badge,badge),new Color(.92f,.95f,.94f,.98f));
                 Text(new Rect(px+scale,y,badge,badge),(i+1).ToString(),new Color(.04f,.1f,.17f),false,TextAnchor.MiddleCenter,Mathf.RoundToInt(9*scale));
                 Rounded(new Rect(px+size-badge-scale,y+scale,badge,badge),new Color(.015f,.045f,.08f,.94f));
@@ -179,7 +180,7 @@ namespace BattleCities
             var map=Element<RawImage>(new Rect(x,y,size,size));map.texture=minimapTexture;map.uvRect=new Rect(0,0,1,1);map.color=new Color(1,1,1,.88f);
             Outline(new Rect(x,y,size,size),new Color(1,.68f,.05f,.86f),1.5f*scale);
         }
-        public void Draw(BattleSimulation state,EconomyClient economy,Texture2D powerupAtlas,bool consumePending)
+        public void Draw(BattleSimulation state,EconomyClient economy,Texture2D powerupAtlas,bool consumePending,int selectedSlot=0)
         {
             Initialize();cursor=0;bool narrow=Screen.width<920;float h=TopHeightPixels;
             var powerupUi=RuntimePlatformInfo.PowerupUi;bool psg1=powerupUi==PowerupUiMode.MergedTopHud;
@@ -211,7 +212,7 @@ namespace BattleCities
             Minimap(state);
             if(!state.IsMultiplayer)
             {
-                if(psg1)Psg1Powerups(economy,powerupAtlas,consumePending,narrow);
+                if(psg1)Psg1Powerups(economy,powerupAtlas,consumePending,narrow,selectedSlot);
                 else if(powerupUi==PowerupUiMode.WebTopLeft)PowerupBar(economy,powerupAtlas,consumePending,true);
                 else if(powerupUi==PowerupUiMode.GameOverlay)PowerupBar(economy,powerupAtlas,consumePending,false);
             }
