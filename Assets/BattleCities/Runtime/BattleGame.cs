@@ -24,7 +24,7 @@ namespace BattleCities
         public bool ChaseCamera;
         [Range(.9f,2.4f)] public float ChaseCameraHeight=1.65f;
         [Range(1.2f,4f)] public float ChaseCameraDistance=2.1f;
-        public bool EnemyFire=false;
+        public bool EnemyFire=true;
         [Range(40,90)] public float CameraElevation=70;
         [Range(.7f,2f)] public float Zoom=1;
         public BattleSimulation Simulation { get; private set; }

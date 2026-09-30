@@ -254,7 +254,10 @@ MonoBehaviour:
   Headlights: 1
   AutomaticCamera: 1
   CameraShake: 1
-  EnemyFire: 0
+  ChaseCamera: 0
+  ChaseCameraHeight: 1.65
+  ChaseCameraDistance: 2.1
+  EnemyFire: 1
   CameraElevation: 70
   Zoom: 1
 --- !u!4 &2055024269
