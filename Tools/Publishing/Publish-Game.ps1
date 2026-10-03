@@ -88,13 +88,17 @@ Write-Output "Prepared release assets: $outputDirectory"
 if ($PrepareOnly) { return }
 if (-not $PSCmdlet.ShouldProcess($Repository, "Publish $tag and update the existing public APK link")) { return }
 
-$existing = Invoke-GitHub -Arguments @('api', "repos/$Repository/releases?per_page=100", '--paginate', '--jq',
-    ".[] | select(.tag_name == `"$tag`") | .draft")
-if ($existing -and $existing -ne 'true') {
+$releasePages = Invoke-GitHub -Arguments @('api', "repos/$Repository/releases?per_page=100", '--paginate', '--slurp')
+$existing = @(foreach ($releasePage in ($releasePages | ConvertFrom-Json)) {
+    foreach ($release in $releasePage) {
+        if ($release.tag_name -eq $tag) { $release }
+    }
+})
+if ($existing.Count -gt 0 -and -not $existing[0].draft) {
     throw 'This release is already published. Use a new version to preserve historical release assets.'
 }
 $assets = @($webZip, $stagedApk, $checksumFile)
-if ($existing -eq 'true') {
+if ($existing.Count -gt 0) {
     Invoke-GitHub -Arguments (@('release', 'upload', $tag, '--repo', $Repository, '--clobber') + $assets) | Out-Null
     Invoke-GitHub -Arguments @('release', 'edit', $tag, '--repo', $Repository, '--notes-file', $notesFile) | Out-Null
 } else {
@@ -103,8 +107,10 @@ if ($existing -eq 'true') {
 }
 
 if (-not $SkipLegacyApkMirror) {
-    $legacyDigest = Invoke-GitHub -Arguments @('api', "repos/$LegacyRepository/releases/tags/$LegacyTag", '--jq',
-        ".assets[] | select(.name == `"$apkName`") | .digest")
+    $legacyRelease = Invoke-GitHub -Arguments @('api', "repos/$LegacyRepository/releases/tags/$LegacyTag") |
+        ConvertFrom-Json
+    $legacyApk = @($legacyRelease.assets | Where-Object { $_.name -eq $apkName })
+    $legacyDigest = if ($legacyApk.Count -gt 0) { $legacyApk[0].digest } else { $null }
     $apkDigest = 'sha256:' + (Get-ReleaseSha256 $stagedApk)
     if ($legacyDigest -ne $apkDigest) {
         Invoke-GitHub -Arguments @('release', 'upload', $LegacyTag, $stagedApk, '--repo', $LegacyRepository, '--clobber') | Out-Null
