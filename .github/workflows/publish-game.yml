@@ -1,0 +1,83 @@
+name: Publish game to GitHub Pages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to deploy (leave empty for the latest release)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out publishing tools
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: Tools/Publishing
+          persist-credentials: false
+
+      - name: Download released web build and checksums
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$RELEASE_TAG" ]; then
+            RELEASE_TAG=$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name)
+          fi
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Expected a stable version tag such as v0.1.3" >&2
+            exit 1
+          fi
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern 'BattleCities-*-Web.zip' --pattern 'SHA256SUMS.txt' --dir release-assets
+          echo "RELEASE_TAG=$RELEASE_TAG" >> "$GITHUB_ENV"
+
+      - name: Verify and prepare web build
+        shell: pwsh
+        run: |
+          $archives = @(Get-ChildItem -LiteralPath release-assets -Filter 'BattleCities-*-Web.zip' -File)
+          if ($archives.Count -ne 1) { throw 'The release must contain exactly one web ZIP.' }
+          $checksumLines = Get-Content -LiteralPath release-assets/SHA256SUMS.txt
+          $expected = $null
+          foreach ($line in $checksumLines) {
+            if ($line -match '^([a-fA-F0-9]{64})\s+\*?(.+)$' -and $Matches[2] -eq $archives[0].Name) {
+              $expected = $Matches[1]
+              break
+            }
+          }
+          if (-not $expected) { throw 'The web ZIP checksum is missing from SHA256SUMS.txt.' }
+          ./Tools/Publishing/Prepare-WebSite.ps1 -ArchivePath $archives[0].FullName `
+            -Destination _site -ExpectedSha256 $expected `
+            -Repository $env:GITHUB_REPOSITORY -ReleaseTag $env:RELEASE_TAG
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload web game
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+      - name: Deploy web game
+        id: deployment
+        uses: actions/deploy-pages@v4
