@@ -5,11 +5,11 @@ These are the user's approved typography and UI design rules as of 2026-10-04. A
 ## Fonts and text treatments
 
 - Use the bundled Barlow Condensed family. Golden yellow text, white text, and button captions use `BarlowCondensed-Bold.ttf` with the bold setting. Reuse `MenuTheme.HeadingFont`, `ArcadeTypography`, and the shared `ArcadeHeadingFont` TMP atlas.
-- Golden yellow lettering uses the approved `ArcadeTextStyles` Gold treatment: a warm yellow-to-gold gradient, crisp dark brown outline, and short navy shadow. Apply this to golden titles, score values, fuel amounts, deployment cost, PLAYER RANKINGS, SEASON STANDINGS, instruction titles (PLAY, REACH TOP 10, EARN SKR), and prize ranks (1ST, 2ND, 3RD, 4TH-10TH).
+- Golden yellow lettering uses the approved `ArcadeTextStyles` Gold treatment: a warm yellow-to-gold gradient, crisp dark brown outline, and short navy shadow. Apply this to golden titles, score values, fuel amounts, deployment cost, instruction titles (PLAY, REACH TOP 10, EARN SKR), and prize ranks (1ST, 2ND, 3RD, 4TH-10TH).
 - All white UI text follows the fuel-button lettering rule everywhere: a solid white face, crisp navy outline, and short dark shadow. This includes HUD labels and values, player names, ranking columns, live/season subtitles, controls, and button captions.
 - Button captions over blue or dark artwork use `ArcadeTextTreatment.WhiteButton`. Captions over gold or cream artwork use the Navy treatment.
 - Legacy uGUI uses `ArcadeTextStyles.ApplyGold` / `ArcadeGoldText`, `ApplyWhite` / `ArcadeWhiteText`, or `ApplyNavy`. TMP uses `ArcadeTextStyles.Apply`. Reuse the shared treatments and materials across platforms and interaction states.
-- Main navigation labels (PLAY, SHOP, RANKING, QUARTERS, SOCIALS) use larger, bold navy lettering with a fine dark edge. Fit each full label on one line below its icon and keep it clear of the bottom rim. Reapply this treatment after restoring a platform layout.
+- Main navigation labels (PLAY, SHOP, RANKING, QUARTERS, SOCIALS) use the clean prize amount lettering (15 SKR EACH): BarlowCondensed-Bold with FontStyle.Normal, theme.Navy `(6,29,54)`, and no added outline or shadow. Preserve the larger caption sizes and raised placement below the icons, keep full labels on one line clear of the bottom rim, and reapply this treatment after restoring a platform layout.
 - Use available space for readable text. Preserve alignment and responsive fitting; avoid wrapping or clipping compact headings and captions. TOP 10 EVERY 30 MINUTES has an enlarged text area and a maximum size of 28, with best fit on smaller layouts.
 - Keep labels and related values close together. In particular, the fuel count belongs immediately after FUEL AVAILABLE.
 - Keep the approved color values in `ArcadeTextStyles`: gold top `(255,235,112)`, gold bottom `(255,183,12)`, gold outline `(52,31,9)`, white outline `(6,33,64)`, navy face `(7,43,94)`, and shadow `(5,18,36,220)`.
@@ -56,13 +56,14 @@ These are the user's approved typography and UI design rules as of 2026-10-04. A
 - Keep each icon and its text together as a group, with clear space between groups on every platform. Reduce the gap between a text heading and its description.
 - Place enlarged 1/2/3 step badges before the icon-and-text groups. Do not place the step number between its icon and text.
 - Use thin vertical separation lines between instruction groups and between prize groups. Place the horizontal divider below the yellow heading.
-- Instruction action headings and prize ranks use the Gold text rule. Supporting descriptions and prize amounts retain their approved navy text treatment.
+- Instruction action headings and prize ranks use the Gold text rule. How It Works supporting descriptions use the same clean font, weight, navy color, and absence of outline/shadow as prize amounts (15 SKR EACH), through the shared `ApplyPrizeAmountTextStyle` helper.
 - EARN SKR uses the game's golden prize crate (`MenuTheme.PrizeCrates[0]`, `prize-crate-gold.png`), matching the first-place prize icon.
 
 ## Leaderboard panels
 
 - PLAYER RANKINGS joins the top of its parent panel: square at the top seam, rounded only at the bottom.
 - SEASON STANDINGS joins the bottom of its parent panel: rounded only at the top, square at the bottom seam.
+- Both leaderboard mini panels use the same frosted TV glass background inside their joined shapes, with a thin blue edge. Use the approved Gold treatment for their headings. Supporting text must match the clean prize amount lettering (15 SKR EACH): BarlowCondensed-Bold with FontStyle.Normal, theme.Navy `(6,29,54)`, and no extra bolding, outline, or shadow. Position the heading trophy 18 units from the left edge and keep its contact shadow aligned beneath it.
 - Align the season heading and subtitle to the left, immediately after the star/coin icon. Keep the original outer frame intact.
 - Keep the removed Retry button out of the leaderboard and controller focus order unless the user requests it again.
 

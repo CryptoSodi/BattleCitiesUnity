@@ -15,6 +15,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 . (Join-Path $PSScriptRoot 'Release-Functions.ps1')
 
@@ -49,8 +50,17 @@ if ($PSCmdlet.ParameterSetName -eq 'Archive') {
         throw 'Publishing output must be outside the web build input directory.'
     }
     if (Test-Path -LiteralPath $webZip) { Remove-Item -LiteralPath $webZip }
-    [IO.Compression.ZipFile]::CreateFromDirectory($webDirectory, $webZip,
-        [IO.Compression.CompressionLevel]::Optimal, $false)
+    # Windows PowerShell's .NET Framework can create backslash ZIP entries.
+    # Use portable entry names so validation and Linux Pages extraction agree.
+    $archive = [IO.Compression.ZipFile]::Open($webZip, [IO.Compression.ZipArchiveMode]::Create)
+    try {
+        $rootLength = $webDirectory.TrimEnd('\', '/').Length + 1
+        foreach ($file in [IO.Directory]::EnumerateFiles($webDirectory, '*', [IO.SearchOption]::AllDirectories)) {
+            $entryName = $file.Substring($rootLength).Replace('\', '/')
+            [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $file, $entryName,
+                [IO.Compression.CompressionLevel]::Optimal) | Out-Null
+        }
+    } finally { $archive.Dispose() }
 }
 if ($apkFile -ne $stagedApk) { Copy-Item -LiteralPath $apkFile -Destination $stagedApk -Force }
 

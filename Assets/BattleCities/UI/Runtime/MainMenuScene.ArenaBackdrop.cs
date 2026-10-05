@@ -10,18 +10,25 @@ namespace BattleCities.UI
         private Coroutine androidTvReveal;
         private bool androidTvVisible;
         private Material rankingsBackdropMaterial;
+        private Material rankingHeadingBackdropMaterial;
+        private Material rankingFooterBackdropMaterial;
         private Material instructionsBackdropMaterial;
         private Material inventoryBackdropMaterial;
 
         private void ReleasePaperBackdropMaterials()
         {
             ClearPanelMaterial(leaderboard ? leaderboard.Find("Scores/TV Background") : null);
+            ClearPanelMaterial(leaderboard ? leaderboard.Find("Heading/Glass viewport/Paper/TV Background") : null);
+            ClearPanelMaterial(leaderboard ? leaderboard.Find("Footer/Glass viewport/Paper/TV Background") : null);
             ClearPanelMaterial(howItWorks ? howItWorks.Find("Paper/TV Background") : null);
             ClearPanelMaterial(mainFrame ? mainFrame.Find("Shop screen/Inventory/Paper/TV Background") : null);
             ReleasePanelMaterial(rankingsBackdropMaterial);
+            ReleasePanelMaterial(rankingHeadingBackdropMaterial);
+            ReleasePanelMaterial(rankingFooterBackdropMaterial);
             ReleasePanelMaterial(instructionsBackdropMaterial);
             ReleasePanelMaterial(inventoryBackdropMaterial);
             rankingsBackdropMaterial = instructionsBackdropMaterial = inventoryBackdropMaterial = null;
+            rankingHeadingBackdropMaterial = rankingFooterBackdropMaterial = null;
         }
 
         private static void ClearPanelMaterial(Transform background)

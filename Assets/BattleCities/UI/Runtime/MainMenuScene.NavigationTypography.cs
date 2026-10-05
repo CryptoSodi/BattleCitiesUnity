@@ -24,7 +24,7 @@ namespace BattleCities.UI
                 label.resizeTextMinSize=12;
                 float height=((RectTransform)tab.transform).rect.height;
                 label.fontSize=label.resizeTextMaxSize=Mathf.Max(12,Mathf.RoundToInt(height*.32f));
-                ArcadeTextStyles.ApplyNavy(label,theme?theme.HeadingFont:null);
+                ApplyPrizeAmountTextStyle(label);
                 rect.SetAsLastSibling();
             }
         }

@@ -40,6 +40,7 @@ namespace BattleCities.UI
                 FitHudText(title, 25, TextAnchor.LowerLeft);
                 FitHudText(body, 22, TextAnchor.UpperLeft);
                 ArcadeTextStyles.ApplyGold(title, theme ? theme.HeadingFont : null);
+                ApplyPrizeAmountTextStyle(body);
                 title.resizeTextMinSize = body.resizeTextMinSize = 12;
                 float width = step.rect.width;
                 float height = step.rect.height;
@@ -134,15 +135,24 @@ namespace BattleCities.UI
             return rect;
         }
 
+        private void ApplyPrizeAmountTextStyle(Text label)
+        {
+            if(!label)return;
+            // The bundled font is already bold; keep the clean prize lettering free of extra effects.
+            label.font=theme?theme.HeadingFont:ArcadeTextStyles.HeadingFont;
+            label.fontStyle=FontStyle.Normal;
+            label.color=theme?theme.Navy:new Color32(6,29,54,255);
+            foreach(var effect in label.GetComponents<BaseMeshEffect>())effect.enabled=false;
+        }
+
         private Text PrizeText(Transform parent, string name, string value, int size)
         {
             var rect = PrizeRect(parent, name);
             var label = rect.GetComponent<Text>();
             if (!label) label = rect.gameObject.AddComponent<Text>();
             label.text = value;
-            label.font = theme ? theme.HeadingFont : null;
+            ApplyPrizeAmountTextStyle(label);
             label.fontSize = size;
-            label.color = theme ? theme.Navy : new Color32(6, 29, 54, 255);
             label.alignment = TextAnchor.MiddleCenter;
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
             label.verticalOverflow = VerticalWrapMode.Truncate;

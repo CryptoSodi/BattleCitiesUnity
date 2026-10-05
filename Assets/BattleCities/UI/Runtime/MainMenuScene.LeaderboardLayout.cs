@@ -29,7 +29,15 @@ namespace BattleCities.UI
             var footer=leaderboard.Find("Footer") as RectTransform;
             FitJoinedPanel(heading,side,edge,true);
             FitJoinedPanel(footer,side,edge,false);
-            ApplyTrophyGroundShadow(heading?heading.Find("Trophy")?.GetComponent<Image>():null);
+            ApplyJoinedLeaderboardGlass(heading,true,ref rankingHeadingBackdropMaterial);
+            ApplyJoinedLeaderboardGlass(footer,false,ref rankingFooterBackdropMaterial);
+            var trophy=heading?heading.Find("Trophy")?.GetComponent<Image>():null;
+            if(trophy)
+            {
+                var position=trophy.rectTransform.anchoredPosition;position.x=18f;
+                trophy.rectTransform.anchoredPosition=position;
+            }
+            ApplyTrophyGroundShadow(trophy);
             ApplyTrophyGroundShadow(leaderboard.Find("Scores/Empty state trophy")?.GetComponent<Image>());
             if(!footer)return;
             var coin=footer.Find("Reward Coin") as RectTransform;
@@ -46,6 +54,32 @@ namespace BattleCities.UI
                 rect.offsetMax=new Vector2(-10f,rect.offsetMax.y);
                 text.alignment=TextAnchor.MiddleLeft;
             }
+        }
+
+        void ApplyJoinedLeaderboardGlass(RectTransform panel,bool joinTop,ref Material material)
+        {
+            if(!panel||panel.rect.height<=0)return;
+            var viewport=panel.Find("Glass viewport") as RectTransform;
+            if(!viewport)
+            {
+                var go=new GameObject("Glass viewport",typeof(RectTransform),typeof(RectMask2D));
+                go.layer=panel.gameObject.layer;viewport=(RectTransform)go.transform;viewport.SetParent(panel,false);
+            }
+            viewport.anchorMin=Vector2.zero;viewport.anchorMax=Vector2.one;
+            viewport.offsetMin=viewport.offsetMax=Vector2.zero;viewport.localScale=Vector3.one;
+            viewport.SetSiblingIndex(1);
+            const float border=2.2f;
+            float radius=Mathf.Max(1f,Mathf.Min(32f,panel.rect.height*.45f)-border);
+            var paper=EnsurePanelImage(viewport,"Paper").rectTransform;
+            paper.anchorMin=Vector2.zero;paper.anchorMax=Vector2.one;
+            // Extend the joined side beyond the clipping viewport so that edge stays square.
+            paper.offsetMin=new Vector2(border,joinTop?border:-radius);
+            paper.offsetMax=new Vector2(-border,joinTop?radius:-border);
+            var backdrop=transform.Find("World backdrop") as RectTransform;
+            var arena=backdrop?backdrop.GetComponent<Image>():null;
+            var television=mainFrame?mainFrame.Find("TV Background Viewport/TV Background")?.GetComponent<Image>():null;
+            ApplyPaperBackdrop(paper,backdrop,arena?arena.sprite:null,television?television.material:null,
+                ref material,radius);
         }
 
         static void ApplyTrophyGroundShadow(Image trophy)

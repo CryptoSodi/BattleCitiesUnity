@@ -505,8 +505,10 @@ namespace BattleCities.UI
             ArcadeTextStyles.ApplyGold(scoreLabel,theme?theme.HeadingFont:null);
             ArcadeTextStyles.ApplyGold(leaderboard?leaderboard.Find("Heading/Title")?.GetComponent<Text>():null,
                 theme?theme.HeadingFont:null);
+            ApplyPrizeAmountTextStyle(leaderboard?leaderboard.Find("Heading/Availability")?.GetComponent<Text>():null);
             ArcadeTextStyles.ApplyGold(leaderboard?leaderboard.Find("Footer/Label")?.GetComponent<Text>():null,
                 theme?theme.HeadingFont:null);
+            ApplyPrizeAmountTextStyle(leaderboard?leaderboard.Find("Footer/Subtitle")?.GetComponent<Text>():null);
             ArcadeTextStyles.ApplyWhiteLabels(transform,theme?theme.HeadingFont:null);
             // Saved scenes may still contain the old control; exclude it from every platform profile.
             var retry=leaderboard?leaderboard.Find("Scores/Retry"):null;
