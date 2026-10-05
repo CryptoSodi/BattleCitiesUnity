@@ -34,6 +34,7 @@ jobs:
           sparse-checkout: |
             Tools/Publishing
             Assets/WebGLTemplates/BattleCities/TemplateData
+          lfs: true
           persist-credentials: false
 
       - name: Download released web build and checksums

@@ -63,6 +63,29 @@ $index = [regex]::Replace($index, '<title>[^<]*</title>', '<title>Battle Cities<
 if ($index -notmatch '<meta[^>]+name="viewport"') {
     $index = $index.Replace('</head>', '    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">' + "`n  </head>")
 }
+# Replace legacy Unity loading artwork with the current game's template assets.
+# Validate the PNG signature so a Git LFS pointer cannot become a broken logo.
+$brandDirectory = Join-Path $PSScriptRoot '../../Assets/WebGLTemplates/BattleCities/TemplateData'
+$logoSource = Join-Path $brandDirectory 'battle-cities-logo.png'
+$styleSource = Join-Path $brandDirectory 'style.css'
+$logoBytes = [IO.File]::ReadAllBytes($logoSource)
+if ($logoBytes.Length -lt 8 -or [BitConverter]::ToString($logoBytes, 0, 8) -ne '89-50-4E-47-0D-0A-1A-0A') {
+    throw 'The game logo is not a PNG. Download Git LFS assets before preparing the site.'
+}
+$logoPattern = '<div id="unity-logo"\s*>\s*</div>|<img id="unity-logo"[^>]*>'
+if ([regex]::Matches($index, $logoPattern).Count -ne 1 -or -not $index.Contains('href="TemplateData/style.css"')) {
+    throw 'Expected exactly one Unity loading logo and the template stylesheet.'
+}
+$logoName = 'battle-cities-logo.' + (Get-ReleaseSha256 $logoSource).Substring(0, 12) + '.png'
+$styleName = 'battle-cities-style.' + (Get-ReleaseSha256 $styleSource).Substring(0, 12) + '.css'
+Copy-Item -LiteralPath $logoSource -Destination (Join-Path $templateDirectory $logoName)
+Copy-Item -LiteralPath $styleSource -Destination (Join-Path $templateDirectory $styleName)
+$logoUrl = 'TemplateData/' + $logoName
+$logoElement = '<img id="unity-logo" src="' + $logoUrl + '" alt="Battle Cities" width="1254" height="1254" fetchpriority="high">'
+$index = [regex]::Replace($index, $logoPattern, $logoElement)
+$index = $index.Replace('href="TemplateData/style.css"', 'href="TemplateData/' + $styleName + '"')
+$index = [regex]::Replace($index, '<link[^>]+rel="(?:shortcut )?icon"[^>]*>', '<link rel="icon" type="image/png" href="' + $logoUrl + '">')
+$index = $index.Replace('</head>', '    <link rel="preload" as="image" href="' + $logoUrl + '">' + "`n  </head>")
 [IO.File]::WriteAllText($indexPath, $index, [Text.UTF8Encoding]::new($false))
 [IO.File]::WriteAllText((Join-Path $siteDirectory '.nojekyll'), '')
 $releaseInfo = [ordered]@{

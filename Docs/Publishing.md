@@ -49,7 +49,10 @@ uses the same `battle-cities-viewport.css` stylesheet as the Pages preparation s
 Pages also applies it to older release archives after checksum verification, so a
 presentation-only correction can be deployed without rebuilding the game or
 replacing historical release assets. The stylesheet filename includes its content
-hash to prevent a cached older layout from being reused. Browser chrome can still
+hash to prevent a cached older layout from being reused. Pages also replaces the
+browser loading screen and favicon with the current Battle Cities logo and template
+styles. The workflow downloads Git LFS assets, and preparation checks the logo's
+PNG signature before deploying. Logo and style filenames are content-hashed too. Browser chrome can still
 be hidden with the browser's own fullscreen command (F11 on Windows).
 
 It can also be run from **Actions → Publish game to GitHub Pages → Run workflow**. Enter a stable release tag such as `v0.1.3`, or leave the tag empty to deploy the latest release. No Unity license or external publishing token is needed for this deployment because it uses the already built release assets and the repository's `GITHUB_TOKEN`.
