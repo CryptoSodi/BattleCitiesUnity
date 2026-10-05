@@ -2,7 +2,7 @@
 
 Unity source and public releases for Battle Cities.
 
-- [Play in your browser](https://cryptosodi.github.io/BattleCitiesUnity/)
+- [Play in your browser](https://play.battlecities.com/)
 - [Download the Android APK](https://github.com/CryptoSodi/BattleCitiesUnity/releases/latest/download/BattleCities-0.1.1.apk)
 - [Browse releases](https://github.com/CryptoSodi/BattleCitiesUnity/releases)
 - [Publishing instructions](Docs/Publishing.md)

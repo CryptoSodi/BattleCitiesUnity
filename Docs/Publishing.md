@@ -2,7 +2,7 @@
 
 The Unity repository owns the public game releases and web deployment:
 
-- Game: https://cryptosodi.github.io/BattleCitiesUnity/
+- Game: https://play.battlecities.com/
 - APK: https://github.com/CryptoSodi/BattleCitiesUnity/releases/latest/download/BattleCities-0.1.1.apk
 - Releases: https://github.com/CryptoSodi/BattleCitiesUnity/releases
 
@@ -46,6 +46,12 @@ The initial release on this repository reuses the already published v0.1.3 artif
 It can also be run from **Actions → Publish game to GitHub Pages → Run workflow**. Enter a stable release tag such as `v0.1.3`, or leave the tag empty to deploy the latest release. No Unity license or external publishing token is needed for this deployment because it uses the already built release assets and the repository's `GITHUB_TOKEN`.
 
 APK assets stay in GitHub Releases; build binaries are not committed to the Unity source branch.
+
+## Play domain
+
+GitHub Pages for `CryptoSodi/BattleCitiesUnity` uses the custom domain `play.battlecities.com`. Cloudflare's `play` CNAME points to `cryptosodi.github.io` with proxying enabled. The hostname's HTTP-to-HTTPS redirect preserves the requested path and query string.
+
+The GitHub Pages address, https://cryptosodi.github.io/BattleCitiesUnity/, also leads to this domain. Future release deployments update the game at the same public address automatically. Domain settings belong in GitHub Pages and Cloudflare; the deployment workflow does not need a CNAME file.
 
 ## Existing public link
 

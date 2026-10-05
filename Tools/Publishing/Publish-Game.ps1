@@ -78,7 +78,7 @@ $notesFile = Join-Path $outputDirectory 'release-notes.md'
 $notes = @"
 Battle Cities $number
 
-- Play: https://cryptosodi.github.io/BattleCitiesUnity/
+- Play: https://play.battlecities.com/
 - APK: https://github.com/$Repository/releases/latest/download/$apkName
 - Web archive and SHA256 checksums are attached to this release.
 - The APK asset keeps its original filename so existing download links stay compatible.
