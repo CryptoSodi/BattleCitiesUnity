@@ -43,6 +43,15 @@ The initial release on this repository reuses the already published v0.1.3 artif
 
 `.github/workflows/publish-game.yml` runs on published stable releases. It downloads the web ZIP and `SHA256SUMS.txt`, verifies the ZIP checksum, validates and extracts the Unity site, then deploys with GitHub's Pages actions.
 
+The published game fills the browser viewport on desktop and mobile, with no Unity
+footer, build title, or separate maximize button. The custom BattleCities template
+uses the same `battle-cities-viewport.css` stylesheet as the Pages preparation step.
+Pages also applies it to older release archives after checksum verification, so a
+presentation-only correction can be deployed without rebuilding the game or
+replacing historical release assets. The stylesheet filename includes its content
+hash to prevent a cached older layout from being reused. Browser chrome can still
+be hidden with the browser's own fullscreen command (F11 on Windows).
+
 It can also be run from **Actions → Publish game to GitHub Pages → Run workflow**. Enter a stable release tag such as `v0.1.3`, or leave the tag empty to deploy the latest release. No Unity license or external publishing token is needed for this deployment because it uses the already built release assets and the repository's `GITHUB_TOKEN`.
 
 APK assets stay in GitHub Releases; build binaries are not committed to the Unity source branch.

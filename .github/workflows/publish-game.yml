@@ -31,7 +31,9 @@ jobs:
       - name: Check out publishing tools
         uses: actions/checkout@v6
         with:
-          sparse-checkout: Tools/Publishing
+          sparse-checkout: |
+            Tools/Publishing
+            Assets/WebGLTemplates/BattleCities/TemplateData
           persist-credentials: false
 
       - name: Download released web build and checksums

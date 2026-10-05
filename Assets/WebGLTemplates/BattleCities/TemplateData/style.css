@@ -1,18 +1,10 @@
 /* Based on the Unity 6000.6 default template. Logo artwork always uses aspect-fit. */
-body { padding: 0; margin: 0; background: #0b1424; color: #f5efe0 }
-#unity-container { position: absolute }
-#unity-container.unity-desktop { left: 50%; top: 50%; transform: translate(-50%, -50%) }
-#unity-container.unity-mobile { position: fixed; width: 100%; height: 100% }
-.unity-mobile #unity-fullscreen-container { width: 100%; height: 100% }
-#unity-fullscreen-container { position: relative }
-#unity-canvas { position: absolute; width: 100%; height: 100%; background: #0b1424 }
 #unity-loading-container { position: absolute; width: 100%; height: 100%; background: #0b1424; display: block }
 #unity-loading-bar { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(360px, 64vw, 56vh) }
 #unity-logo { display: block; width: 100%; height: auto; object-fit: contain }
 #unity-progress-bar-empty { width: 76%; height: 10px; margin: 16px auto 0; box-sizing: border-box; border: 1px solid #28517a; border-radius: 6px; background: #152a43; overflow: hidden }
 #unity-progress-bar-full { width: 0%; height: 100%; border-radius: 5px; background: #29b6f6 }
-#unity-footer { position: relative }
-.unity-mobile #unity-footer { display: none }
-#unity-build-title { float: right; margin-right: 10px; line-height: 38px; font-family: arial, sans-serif; font-size: 18px }
-#unity-fullscreen-button { cursor: pointer; float: right; width: 38px; height: 38px; background: url('fullscreen-button.png') no-repeat center }
 #unity-warning { position: absolute; left: 50%; top: 5%; transform: translate(-50%); background: white; color: black; padding: 10px; display: none; max-width: 90%; overflow-wrap: anywhere }
+#unity-debug-controls { position: absolute; top: 10px; right: 10px; z-index: 4 }
+#diagnostics-icon { position: absolute; bottom: 10px; right: 10px; z-index: 4; cursor: pointer }
+#unity-warning { z-index: 5 }

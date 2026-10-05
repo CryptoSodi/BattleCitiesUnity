@@ -42,6 +42,28 @@ try {
 }
 
 [IO.Compression.ZipFile]::ExtractToDirectory($archiveFile, $siteDirectory)
+
+# Apply the current viewport presentation to older, checksum-verified releases too.
+# The compiled game and its original release archive remain unchanged.
+$viewportSource = Join-Path $PSScriptRoot '../../Assets/WebGLTemplates/BattleCities/TemplateData/battle-cities-viewport.css'
+if (-not (Test-Path -LiteralPath $viewportSource)) { throw 'The Battle Cities viewport stylesheet is missing.' }
+$indexPath = Join-Path $siteDirectory 'index.html'
+$index = [IO.File]::ReadAllText($indexPath)
+if ($index -notmatch 'id="unity-canvas"' -or $index -notmatch '</head>') {
+    throw 'Expected a Unity web page with a canvas and HTML head.'
+}
+$viewportName = 'battle-cities-viewport.' + (Get-ReleaseSha256 $viewportSource).Substring(0, 12) + '.css'
+$templateDirectory = Join-Path $siteDirectory 'TemplateData'
+[IO.Directory]::CreateDirectory($templateDirectory) | Out-Null
+Copy-Item -LiteralPath $viewportSource -Destination (Join-Path $templateDirectory $viewportName)
+$viewportLink = '<link id="battle-cities-viewport" rel="stylesheet" href="TemplateData/' + $viewportName + '">'
+$index = [regex]::Replace($index, '<link id="battle-cities-viewport"[^>]*>\s*', '')
+$index = $index.Replace('</head>', "    $viewportLink`n  </head>")
+$index = [regex]::Replace($index, '<title>[^<]*</title>', '<title>Battle Cities</title>')
+if ($index -notmatch '<meta[^>]+name="viewport"') {
+    $index = $index.Replace('</head>', '    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">' + "`n  </head>")
+}
+[IO.File]::WriteAllText($indexPath, $index, [Text.UTF8Encoding]::new($false))
 [IO.File]::WriteAllText((Join-Path $siteDirectory '.nojekyll'), '')
 $releaseInfo = [ordered]@{
     repository = $Repository
