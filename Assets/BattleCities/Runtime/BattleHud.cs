@@ -79,6 +79,8 @@ namespace BattleCities
         void Text(Rect rect,string text,Color color,bool value=false,TextAnchor alignment=TextAnchor.MiddleLeft,int size=0)
         {
             var t=Element<Text>(rect);t.font=font;t.fontSize=size>0?size:value?23:16;t.fontStyle=FontStyle.Bold;t.color=color;t.text=text;t.alignment=alignment;t.horizontalOverflow=HorizontalWrapMode.Overflow;t.verticalOverflow=VerticalWrapMode.Overflow;
+            if(UI.ArcadeTextStyles.IsWhite(color))UI.ArcadeTextStyles.ApplyWhite(t);
+            else if(t.TryGetComponent<UI.ArcadeWhiteText>(out var style))style.enabled=false;
         }
         void Icon(Rect rect,Texture2D texture,bool dead=false){var image=Element<RawImage>(rect);image.texture=texture;image.uvRect=new Rect(0,0,1,1);image.color=dead?new Color(.025f,.03f,.04f,1):Color.white;}
         public static int PowerupIcon(string type)

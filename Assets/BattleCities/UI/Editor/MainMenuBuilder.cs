@@ -127,7 +127,7 @@ namespace BattleCities.Editor
                 var label=Label("Label",tile,names[i],29,Navy,false);Box(label.rectTransform,.03f,.72f,.94f,.22f);
                 tabs[i]=MakeButton(tile);AddFocus(tile,tabs[i]);
             }
-            var board=BuildLeaderboard(content,out var retry,out var boardMessage,out var boardDetail);
+            var board=BuildLeaderboard(content,out var boardMessage,out var boardDetail);
             var how=BuildHowItWorks(content);
             var controls=Panel("PSG1 Controls",content,theme.DarkPanel);
             var controlText=Label("Hints",controls,"D-PAD  NAVIGATE          A  SELECT          B  BACK",26,Color.white);Stretch(controlText.rectTransform);
@@ -145,10 +145,9 @@ namespace BattleCities.Editor
             var module=eventObject.GetComponent<InputSystemUIInputModule>();
             var eventSystem=eventObject.GetComponent<EventSystem>();eventSystem.firstSelectedGameObject=start.gameObject;
             view.Configure(theme,safe,content,header,frame,hero,nav,board,how,controls,logo.rectTransform,start.rectTransform,modal,
-                startButton,settings,retry,close,tabs,player,score,hi,dialogTitle,body,boardMessage,boardDetail,actions,module);
+                startButton,settings,close,tabs,player,score,hi,dialogTitle,body,boardMessage,boardDetail,actions,module);
             UnityEventTools.AddPersistentListener(startButton.onClick,view.StartBattle);
             UnityEventTools.AddPersistentListener(settings.onClick,view.OpenSettings);
-            UnityEventTools.AddPersistentListener(retry.onClick,view.RetryLeaderboard);
             UnityEventTools.AddPersistentListener(close.onClick,view.Back);
             UnityEventTools.AddPersistentListener(tabs[0].onClick,view.PlayTab);
             UnityEventTools.AddPersistentListener(tabs[1].onClick,view.OpenShop);
@@ -196,6 +195,8 @@ namespace BattleCities.Editor
             t.NavigationIcons=new[]{"play","quarters","shop","ranking","socials"}.Select(s=>Art("reference-style-v2/shared/navigation/"+s)).ToArray();
             t.SettingsIcon=Art("shared/icons/settings");t.ScoreIcon=Art("shared/icons/score-coin");t.HighScoreIcon=Art("shared/icons/high-score-shield");t.TrophyIcon=Art("shared/icons/trophy");t.TimerIcon=Art("shared/icons/timer");
             t.RewardIcons=new[]{"chest-silver-v2","chest-gold-v2","chest-bronze-v2","chest-cyan-v2"}.Select(s=>Art("shared/icons/"+s)).ToArray();
+            t.PrizeCrates=new[]{"gold","orange","blue","black"}.Select(s=>Art("shared/icons/prize-crate-"+s)).ToArray();
+            t.StepBadges=Enumerable.Range(1,4).Select(i=>Art("reference-style-v2/shared/icons/steps/step-"+i)).ToArray();
             AssetDatabase.CreateAsset(t,Root+"Settings/ArcadeMenuTheme.asset");return t;
         }
         private static Sprite Art(string path)
@@ -210,7 +211,7 @@ namespace BattleCities.Editor
                 imp.alphaIsTransparency=true;imp.mipmapEnabled=false;imp.isReadable=false;imp.filterMode=FilterMode.Bilinear;imp.wrapMode=TextureWrapMode.Clamp;
                 imp.maxTextureSize=2048;imp.textureCompression=TextureImporterCompression.Uncompressed;
                 var settings=new TextureImporterSettings();imp.ReadTextureSettings(settings);settings.spriteMeshType=SpriteMeshType.FullRect;imp.SetTextureSettings(settings);
-                imp.spriteBorder=(p.EndsWith("/shared/panels/blue-frame.png")||p.EndsWith("/shared/panels/navigation-container.png")||p.EndsWith("/shared/panels/button-leaderboard-container.png"))?new Vector4(160,160,160,160):p.Contains("/panels/")?new Vector4(32,32,32,32):Vector4.zero;
+                imp.spriteBorder=(p.EndsWith("/shared/panels/blue-frame.png")||p.EndsWith("/shared/panels/navigation-container.png")||p.EndsWith("/shared/panels/button-leaderboard-container.png"))?new Vector4(160,160,160,160):p.EndsWith("/shared/header/high-score-center.png")?new Vector4(160,0,160,0):p.Contains("/panels/")?new Vector4(32,32,32,32):Vector4.zero;
                 var android=imp.GetPlatformTextureSettings("Android");android.overridden=true;android.maxTextureSize=2048;android.format=TextureImporterFormat.ASTC_6x6;imp.SetPlatformTextureSettings(android);
                 imp.SaveAndReimport();
             }
@@ -234,7 +235,7 @@ namespace BattleCities.Editor
             }
             AssetDatabase.CreateAsset(asset,Root+"Settings/MainMenuInput.asset");return asset;
         }
-        private static RectTransform BuildLeaderboard(Transform parent,out Button retry,out Text message,out Text detail)
+        private static RectTransform BuildLeaderboard(Transform parent,out Text message,out Text detail)
         {
             var root=Panel("Leaderboard",parent,Art("reference-style-v2/shared/panels/navigation-container"));
             var heading=Panel("Heading",root,theme.DarkPanel);Box(heading,.04f,.025f,.92f,.10f);
@@ -260,19 +261,16 @@ namespace BattleCities.Editor
             var bigTrophy=Img("Empty state trophy",list,theme.TrophyIcon);bigTrophy.preserveAspect=true;Box(bigTrophy.rectTransform,.31f,.20f,.38f,.27f);
             message=Label("Message",list,"LOADING RANKINGS",26,Navy,false);Box(message.rectTransform,.04f,.52f,.92f,.09f);
             detail=Label("Detail",list,"Fetching live player standings.",21,Navy,false);detail.font=theme.BodyFont;Box(detail.rectTransform,.05f,.61f,.9f,.07f);
-            var retryRect=Panel("Retry",list,Art("shared/buttons/retry-blue"));Box(retryRect,.27f,.7375f,.46f,.13f);
-            retryRect.GetComponent<Image>().pixelsPerUnitMultiplier=2;
-            var retryText=Label("Label",retryRect,"RETRY",30,Color.white);retryText.resizeTextMinSize=20;Stretch(retryText.rectTransform);retryText.rectTransform.anchoredPosition=new Vector2(0,2);retry=MakeButton(retryRect);AddFocus(retryRect,retry);
             var footer=Panel("Footer",root,theme.DarkPanel);Box(footer,.04f,.88f,.92f,.095f);
             var footerText=Label("Label",footer,"SEASON STANDINGS",25,new Color(1f,.878f,.43f));
             footerText.resizeTextForBestFit=false;footerText.alignment=TextAnchor.MiddleLeft;
             footerText.rectTransform.anchorMin=new Vector2(0,1);footerText.rectTransform.anchorMax=new Vector2(1,1);
             footerText.rectTransform.pivot=new Vector2(0,1);
             footerText.rectTransform.offsetMin=new Vector2(110,-43);footerText.rectTransform.offsetMax=new Vector2(-10,-10);
-            var rewardChest=CreateRewardChestPreview("Reward Chest",footer);
-            rewardChest.anchorMin=rewardChest.anchorMax=new Vector2(0,.5f);
-            rewardChest.pivot=new Vector2(0,.5f);rewardChest.anchoredPosition=new Vector2(14,0);
-            rewardChest.sizeDelta=new Vector2(78,78);
+            var rewardCoin=CreateRewardCoin("Reward Coin",footer);
+            rewardCoin.anchorMin=rewardCoin.anchorMax=new Vector2(0,.5f);
+            rewardCoin.pivot=new Vector2(0,.5f);rewardCoin.anchoredPosition=new Vector2(14,0);
+            rewardCoin.sizeDelta=new Vector2(78,78);
             var footerSubtitle=Label("Subtitle",footer,"Loading round status...",21,new Color(.96f,.97f,1f));
             footerSubtitle.font=theme.BodyFont;footerSubtitle.resizeTextForBestFit=false;footerSubtitle.alignment=TextAnchor.MiddleLeft;
             footerSubtitle.rectTransform.anchorMin=Vector2.zero;footerSubtitle.rectTransform.anchorMax=new Vector2(1,0);
@@ -288,13 +286,13 @@ namespace BattleCities.Editor
             var paper=Panel("Paper",root,theme.CreamPanel);Box(paper,.012f,.10f,.976f,.80f);
             var label=Panel("Heading",root,theme.GoldPanel);Box(label,.025f,.015f,.30f,.36f);
             label.GetComponent<Image>().pixelsPerUnitMultiplier=5;
-            var title=Label("Title",label,"HOW IT WORKS",36,Navy,false);title.resizeTextMinSize=20;Stretch(title.rectTransform);
+            var title=Label("Title",label,"HOW IT WORKS ?",36,Navy,false);title.resizeTextMinSize=20;Stretch(title.rectTransform);
             label.anchorMin=label.anchorMax=new Vector2(.025f,.985f);
             label.pivot=new Vector2(0,1);label.anchoredPosition=Vector2.zero;
             label.sizeDelta=new Vector2(title.preferredWidth+24,45);
             string[] headings={"PLAY","REACH TOP 10","EARN BATC"};
             string[] bodies={"Play battles\nand earn points","Reach the top 10\nbefore the round closes","Eligible rewards go\nto your linked wallet"};
-            Sprite[] icons={theme.NavigationIcons[0],theme.NavigationIcons[3],theme.RewardIcons[1]};
+            Sprite[] icons={theme.NavigationIcons[0],theme.NavigationIcons[3],theme.PrizeCrates[0]};
             for(int i=0;i<3;i++)
             {
                 var step=Rect("Step "+(i+1),paper);Box(step,.02f+i*.325f,.20f,.32f,.75f);
@@ -304,20 +302,13 @@ namespace BattleCities.Editor
             }
             return root;
         }
-        private static RectTransform CreateRewardChestPreview(string name,Transform parent)
+        private static RectTransform CreateRewardCoin(string name,Transform parent)
         {
-            const string chestPath=Root+"Art/main-menu/rewards/reward-chest.glb";
-            var chest=AssetDatabase.LoadAssetAtPath<GameObject>(chestPath);
-            var clips=AssetDatabase.LoadAllAssetsAtPath(chestPath).OfType<AnimationClip>().ToArray();
-            var open=clips.FirstOrDefault(clip=>clip.name=="Open");
-            var close=clips.FirstOrDefault(clip=>clip.name=="Close");
-            var burst=clips.FirstOrDefault(clip=>clip.name=="Burst");
-            if(!chest||!open||!close||!burst)
-                throw new InvalidOperationException("The reward chest model or its Open, Close, and Burst clips are missing: "+chestPath);
-            var icon=Rect(name,parent);
-            var image=icon.gameObject.AddComponent<RawImage>();image.raycastTarget=false;
-            icon.gameObject.AddComponent<RewardChestMenuPreview>().Configure(chest,open,close,burst);
-            return icon;
+            var coin=Art("shared/icons/reward-star-coin");
+            if(!coin)throw new InvalidOperationException("The reward coin sprite is missing.");
+            var image=Img(name,parent,coin);
+            image.type=Image.Type.Simple;image.preserveAspect=true;
+            return image.rectTransform;
         }
         private static RectTransform Rect(string name,Transform parent)
         {var g=new GameObject(name,typeof(RectTransform));g.transform.SetParent(parent,false);return (RectTransform)g.transform;}
@@ -377,7 +368,7 @@ namespace BattleCities.Editor
         private static Button MakeButton(RectTransform rect)
         {var image=rect.GetComponent<Image>();image.raycastTarget=true;var b=rect.gameObject.AddComponent<Button>();b.targetGraphic=image;var colors=b.colors;colors.highlightedColor=new Color(1,1,.94f);colors.pressedColor=new Color(.8f,.87f,.91f);colors.selectedColor=Color.white;colors.fadeDuration=.08f;b.colors=colors;return b;}
         private static void AddFocus(RectTransform rect,Button button)
-        {var ring=Img("Focus outline",rect,theme.FocusRing);ring.type=Image.Type.Sliced;Stretch(ring.rectTransform,-4);ring.enabled=false;rect.gameObject.AddComponent<MenuButtonVisual>().Configure(ring,rect);}
+        {rect.gameObject.AddComponent<MenuButtonVisual>().Configure(null,rect);}
         public static void Box(RectTransform rect,float x,float y,float width,float height)
         {rect.anchorMin=new Vector2(x,1-y-height);rect.anchorMax=new Vector2(x+width,1-y);rect.pivot=new Vector2(.5f,.5f);rect.offsetMin=rect.offsetMax=Vector2.zero;}
         public static void Stretch(RectTransform rect,float inset=0)

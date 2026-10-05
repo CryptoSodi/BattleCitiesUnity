@@ -51,9 +51,10 @@ namespace BattleCities.Editor
                 Check(BattleGamepadBindings.Direction(map["StickMove"].ReadValue<Vector2>()) == null, "stick drift is ignored");
                 Check(!map.bindings.Any(b => b.path.Contains("Trigger")), "PSG1 needs no L2/R2");
                 foreach (bool battle in new[] { false, true })
+                {
                     Check(MobileBattleOrientation.OrientationFor(GameRuntimePlatform.Psg1, battle, ScreenOrientation.LandscapeLeft) == ScreenOrientation.Portrait, "PSG1 native orientation in menu/match");
-                Check(MobileBattleOrientation.OrientationFor(GameRuntimePlatform.Android, true, ScreenOrientation.Portrait) == ScreenOrientation.LandscapeLeft, "Seeker matches remain landscape");
-                Check(MobileBattleOrientation.OrientationFor(GameRuntimePlatform.Android, false, ScreenOrientation.LandscapeLeft) == ScreenOrientation.Portrait, "Seeker menus remain portrait");
+                    Check(MobileBattleOrientation.OrientationFor(GameRuntimePlatform.Android, battle, ScreenOrientation.Portrait) == ScreenOrientation.LandscapeLeft, "Android orientation stays landscape in menu/match");
+                }
                 Debug.Log("PSG1 INPUT PASS: " + checks + " checks using the installed PSG1 SDK device.");
             }
             finally { map.Dispose(); InputSystem.RemoveDevice(pad); }

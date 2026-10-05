@@ -90,7 +90,7 @@ namespace BattleCities.Editor
                 var tv=view.Content.Find("Main Display/TV Frame");
                 var viewport=view.Content.Find("Main Display/TV Background Viewport");
                 var selector=view.Content.Find("Main Display/Pre-battle screens");
-                bool androidHome=(v.Item1==MainMenuPlatform.Android || v.Item1==MainMenuPlatform.AndroidLandscape) &&
+                bool androidHome=v.Item1==MainMenuPlatform.Android &&
                     !view.IsModalOpen && !(selector && selector.gameObject.activeInHierarchy);
                 var tvImage=tv?tv.GetComponent<Image>():null;
                 Check(tv && tv.gameObject.activeSelf!=androidHome && tvImage && tvImage.type==Image.Type.Sliced && !tvImage.fillCenter,

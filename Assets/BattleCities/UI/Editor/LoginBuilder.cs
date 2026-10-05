@@ -72,7 +72,7 @@ namespace BattleCities.Editor
             var flowGo = new GameObject("Login Flow"); flowGo.SetActive(false);
             var api = flowGo.AddComponent<MainMenuApiClient>(); api.enabled = false;
             api.ConfigureGuestFallback(false); api.ConfigureAutomaticRefresh(false);
-            flowGo.AddComponent<LoginScene>().Configure(api, phantom, guest, store, status); flowGo.SetActive(true);
+            flowGo.AddComponent<LoginScene>().Configure(api, phantom, guest, store, status, theme); flowGo.SetActive(true);
             var buttons = new[] { phantom, guest, store };
             for (int i = 0; i < buttons.Length; i++) buttons[i].navigation = new Navigation { mode = Navigation.Mode.Explicit,
                 selectOnUp = buttons[(i + 2) % 3], selectOnDown = buttons[(i + 1) % 3] };

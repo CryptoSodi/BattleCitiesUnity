@@ -7,7 +7,9 @@ namespace BattleCities.UI
     [ExecuteAlways]
     public sealed class TankRosterScroll : ScrollRect
     {
-        internal const float CardAspect=.72f;
+        internal const float CardAspect=.85f;
+        [SerializeField,Min(.1f)] float cardAspectRatio=CardAspect;
+        public float CardAspectRatio { get=>cardAspectRatio; set=>cardAspectRatio=Mathf.Max(.1f,value); }
 
         public override void SetLayoutHorizontal()
         {
@@ -17,7 +19,7 @@ namespace BattleCities.UI
             if(!grid)return;
             int columns=Mathf.Max(1,grid.constraintCount);
             float width=Mathf.Max(1f,(viewport.rect.width-grid.padding.horizontal-grid.spacing.x*(columns-1))/columns);
-            var size=new Vector2(width,width/CardAspect);
+            var size=new Vector2(width,width/Mathf.Max(.1f,cardAspectRatio));
             if((grid.cellSize-size).sqrMagnitude>.01f)grid.cellSize=size;
         }
 

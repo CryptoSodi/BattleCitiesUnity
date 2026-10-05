@@ -1681,10 +1681,9 @@ GameObject:
   m_Component:
   - component: {fileID: 7879905318915366124}
   - component: {fileID: 6566433817135194480}
-  - component: {fileID: 1331811673004768054}
-  - component: {fileID: 6021898601124286716}
+  - component: {fileID: 7344285687966413060}
   m_Layer: 0
-  m_Name: Reward Chest
+  m_Name: Reward Coin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1717,7 +1716,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7551649699317148266}
   m_CullTransparentMesh: 1
---- !u!114 &1331811673004768054
+--- !u!114 &7344285687966413060
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1726,9 +1725,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 7551649699317148266}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
@@ -1737,39 +1736,16 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 0}
-  m_UVRect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 1
-    height: 1
---- !u!114 &6021898601124286716
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7551649699317148266}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4c3faaf0cc124b47ad70ee2b7e76fe8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BattleCities.UI.RewardChestMenuPreview
-  chestPrefab: {fileID: 8771091787928289351, guid: 29017b181d83c01498f006b99951e9b7, type: 3}
-  openClip: {fileID: -1323644021792163125, guid: 29017b181d83c01498f006b99951e9b7, type: 3}
-  closeClip: {fileID: 8807733894710256198, guid: 29017b181d83c01498f006b99951e9b7, type: 3}
-  burstClip: {fileID: 7917605471656224170, guid: 29017b181d83c01498f006b99951e9b7, type: 3}
-  ranks:
-  - 1st
-  - 2nd
-  - 3rd
-  - 4th - 10th
-  prizes:
-  - 100 SKR
-  - 50 SKR
-  - 25 SKR
-  - 15 SKR
+  m_Sprite: {fileID: 21300000, guid: 23dbfebf5f0594d44a3b008523ce2076, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 1
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &7926079666471976059
 GameObject:
   m_ObjectHideFlags: 0

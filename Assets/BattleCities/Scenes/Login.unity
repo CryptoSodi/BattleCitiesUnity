@@ -3859,6 +3859,7 @@ MonoBehaviour:
   psgStoreButton: {fileID: 1935781349}
   psgStatusText: {fileID: 2114555592}
   layout: {fileID: 1013731461}
+  walletButtonTheme: {fileID: 11400000, guid: d86b0da1c3607b2428d21ee5d0611f24, type: 2}
   dappStoreUrl: 
 --- !u!114 &1583817394
 MonoBehaviour:

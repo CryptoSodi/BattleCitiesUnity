@@ -9,14 +9,135 @@ namespace BattleCities.UI
         private const float AndroidTvRevealSeconds = .3f;
         private Coroutine androidTvReveal;
         private bool androidTvVisible;
+        private Material rankingsBackdropMaterial;
+        private Material instructionsBackdropMaterial;
+        private Material inventoryBackdropMaterial;
+
+        private void ReleasePaperBackdropMaterials()
+        {
+            ClearPanelMaterial(leaderboard ? leaderboard.Find("Scores/TV Background") : null);
+            ClearPanelMaterial(howItWorks ? howItWorks.Find("Paper/TV Background") : null);
+            ClearPanelMaterial(mainFrame ? mainFrame.Find("Shop screen/Inventory/Paper/TV Background") : null);
+            ReleasePanelMaterial(rankingsBackdropMaterial);
+            ReleasePanelMaterial(instructionsBackdropMaterial);
+            ReleasePanelMaterial(inventoryBackdropMaterial);
+            rankingsBackdropMaterial = instructionsBackdropMaterial = inventoryBackdropMaterial = null;
+        }
+
+        private static void ClearPanelMaterial(Transform background)
+        {
+            if (background && background.TryGetComponent<UnityEngine.UI.Image>(out var image))
+                image.material = null;
+        }
+
+        private static void ReleasePanelMaterial(Material material)
+        {
+            if (!material) return;
+            if (Application.isPlaying) Destroy(material);
+            else DestroyImmediate(material);
+        }
+
+        private void ApplyPaperBackdrop(RectTransform panel, RectTransform backdrop, Sprite sprite,
+            Material televisionMaterial, ref Material panelMaterial, float cornerRadius = 16f)
+        {
+            if (!panel || !backdrop || !sprite || !theme || !theme.Rounded) return;
+
+            // The former paper is now the clipping boundary. Its contents and
+            // the arena image all stay inside the same rounded opening.
+            var maskImage = panel.GetComponent<UnityEngine.UI.Image>();
+            if (!maskImage) maskImage = panel.gameObject.AddComponent<UnityEngine.UI.Image>();
+            maskImage.enabled = true;
+            maskImage.sprite = theme.Rounded;
+            maskImage.type = UnityEngine.UI.Image.Type.Sliced;
+            maskImage.pixelsPerUnitMultiplier = 32f / (cornerRadius * maskImage.pixelsPerUnit);
+            maskImage.color = Color.white;
+            maskImage.raycastTarget = false;
+            var mask = panel.GetComponent<UnityEngine.UI.Mask>();
+            if (!mask) mask = panel.gameObject.AddComponent<UnityEngine.UI.Mask>();
+            mask.showMaskGraphic = false;
+
+            var blurred = EnsurePanelImage(panel, "TV Background");
+            var blurredRect = blurred.rectTransform;
+            blurredRect.SetAsFirstSibling();
+            var corners = new Vector3[4];
+            backdrop.GetWorldCorners(corners);
+            var bottomLeft = panel.InverseTransformPoint(corners[0]);
+            var topRight = panel.InverseTransformPoint(corners[2]);
+            blurredRect.anchorMin = blurredRect.anchorMax = blurredRect.pivot = new Vector2(.5f, .5f);
+            blurredRect.localRotation = Quaternion.identity;
+            blurredRect.localScale = Vector3.one;
+            blurredRect.sizeDelta = new Vector2(topRight.x - bottomLeft.x, topRight.y - bottomLeft.y);
+            blurredRect.anchoredPosition = new Vector2(
+                (bottomLeft.x + topRight.x) * .5f - panel.rect.center.x,
+                (bottomLeft.y + topRight.y) * .5f - panel.rect.center.y);
+            blurred.sprite = sprite;
+            blurred.type = UnityEngine.UI.Image.Type.Simple;
+            blurred.preserveAspect = false;
+
+            if (televisionMaterial)
+            {
+                // Each opening needs its own glass bounds; sharing the TV's
+                // mutable material would move its edges onto these panels.
+                if (!panelMaterial)
+                    panelMaterial = new Material(televisionMaterial) { hideFlags = HideFlags.HideAndDontSave };
+                panelMaterial.CopyPropertiesFromMaterial(televisionMaterial);
+                panel.GetWorldCorners(corners);
+                var glassMin = blurredRect.InverseTransformPoint(corners[0]);
+                var glassMax = blurredRect.InverseTransformPoint(corners[2]);
+                var glassBounds = new Vector4(glassMin.x, glassMin.y,
+                    glassMax.x - glassMin.x, glassMax.y - glassMin.y);
+                var uv = UnityEngine.Sprites.DataUtility.GetOuterUV(sprite);
+                var bounds = blurredRect.rect;
+                var glassUv = new Vector4(
+                    Mathf.Lerp(uv.x, uv.z, (glassMin.x - bounds.xMin) / bounds.width),
+                    Mathf.Lerp(uv.y, uv.w, (glassMin.y - bounds.yMin) / bounds.height),
+                    (glassMax.x - glassMin.x) / bounds.width * (uv.z - uv.x),
+                    (glassMax.y - glassMin.y) / bounds.height * (uv.w - uv.y));
+                panelMaterial.SetVector("_GlassRect", glassBounds);
+                panelMaterial.SetVector("_GlassUVRect", glassUv);
+                panelMaterial.SetFloat("_CornerRadius", cornerRadius);
+                blurred.material = panelMaterial;
+                blurred.materialForRendering.SetVector("_GlassRect", glassBounds);
+                blurred.materialForRendering.SetVector("_GlassUVRect", glassUv);
+                blurred.materialForRendering.SetFloat("_CornerRadius", cornerRadius);
+                blurred.SetMaterialDirty();
+            }
+
+            var fog = EnsurePanelImage(panel, "TV White Fog");
+            var fogRect = fog.rectTransform;
+            fogRect.anchorMin = Vector2.zero;
+            fogRect.anchorMax = Vector2.one;
+            fogRect.offsetMin = fogRect.offsetMax = Vector2.zero;
+            fogRect.localScale = Vector3.one;
+            fogRect.SetSiblingIndex(1);
+            // The TV shader supplies the white fog. Keep a plain white fallback
+            // for a missing blur material, without doubling its normal opacity.
+            fog.color = new Color(1, 1, 1, televisionMaterial ? 0 : .6f);
+        }
+
+        private static UnityEngine.UI.Image EnsurePanelImage(RectTransform panel, string name)
+        {
+            var child = panel.Find(name);
+            if (!child)
+            {
+                var go = new GameObject(name, typeof(RectTransform), typeof(UnityEngine.UI.Image));
+                go.transform.SetParent(panel, false);
+                child = go.transform;
+            }
+            child.gameObject.layer = panel.gameObject.layer;
+            var image = child.GetComponent<UnityEngine.UI.Image>();
+            image.color = Color.white;
+            image.raycastTarget = false;
+            image.maskable = true;
+            return image;
+        }
 
         private void SetAndroidTvVisible(bool visible,bool animate)
         {
             if(!mainFrame)return;
             var tv=mainFrame.Find("TV Frame");
             var viewport=mainFrame.Find("TV Background Viewport");
-            bool android=lastPlatform==MainMenuPlatform.Android ||
-                lastPlatform==MainMenuPlatform.AndroidLandscape;
+            bool android=lastPlatform==MainMenuPlatform.Android;
             if(!android)
             {
                 if(androidTvReveal!=null){StopCoroutine(androidTvReveal);androidTvReveal=null;}
@@ -80,7 +201,13 @@ namespace BattleCities.UI
         private void ApplyArenaBackdrop(MainMenuPlatform target, Vector2 available)
         {
             if (target == MainMenuPlatform.Psg1) ApplyPsg1Layout();
-            else if (statusBar) statusBar.gameObject.SetActive(true);
+            else if (target == MainMenuPlatform.AndroidLandscape) ApplyAndroidLandscapeLayout(available);
+            else if (statusBar)
+            {
+                statusBar.gameObject.SetActive(true);
+                for (int i = 0; i < statusBar.childCount; i++)
+                    FitStatusCardFrame((RectTransform)statusBar.GetChild(i), false);
+            }
             var canvasRect = transform as RectTransform;
             var backdrop = canvasRect ? canvasRect.Find("World backdrop") as RectTransform : null;
             var image = backdrop ? backdrop.GetComponent<UnityEngine.UI.Image>() : null;
@@ -217,9 +344,90 @@ namespace BattleCities.UI
                 if (fog.GetSiblingIndex() != viewport.childCount - 1) fog.SetAsLastSibling();
                 fog.gameObject.SetActive(true);
             }
+            var televisionBlur = viewport ? viewport.Find("TV Background")?.GetComponent<UnityEngine.UI.Image>() : null;
+            var televisionMaterial = televisionBlur ? televisionBlur.material : null;
+            var rewardCoin = leaderboard ? leaderboard.Find("Footer/Reward Coin") as RectTransform : null;
+            if (rewardCoin)
+            {
+                // Authored layouts still contain the old animated chest's
+                // transform. The replacement coin uses the footer icon bounds.
+                rewardCoin.anchorMin = rewardCoin.anchorMax = new Vector2(0f, .5f);
+                rewardCoin.pivot = new Vector2(0f, .5f);
+                rewardCoin.anchoredPosition = new Vector2(14f, 0f);
+                float coinSize = target == MainMenuPlatform.AndroidLandscape
+                    ? Mathf.Min(78f, ((RectTransform)rewardCoin.parent).rect.height * .8f) : 78f;
+                rewardCoin.sizeDelta = new Vector2(coinSize, coinSize);
+                rewardCoin.localScale = Vector3.one;
+            }
+            ApplyPaperBackdrop(leaderboard ? leaderboard.Find("Scores") as RectTransform : null,
+                backdrop, sprite, televisionMaterial, ref rankingsBackdropMaterial);
+            var instructionsPaper = howItWorks ? howItWorks.Find("Paper") as RectTransform : null;
+            if (instructionsPaper)
+            {
+                bool directOnTv = target == MainMenuPlatform.AndroidLandscape || target == MainMenuPlatform.Psg1;
+                // Inner edge of navigation-container's white rim, in source
+                // pixels. Nine-sliced borders keep this inset fixed as the
+                // container widens; percentage padding leaves a growing gap.
+                var frame = howItWorks.GetComponent<UnityEngine.UI.Image>();
+                if (frame) frame.enabled = !directOnTv;
+                var headingPanel = howItWorks.Find("Heading")?.GetComponent<UnityEngine.UI.Image>();
+                if (headingPanel) headingPanel.enabled = true;
+                var startSeparator = EnsurePanelImage(howItWorks, "Start separator");
+                startSeparator.gameObject.SetActive(directOnTv);
+                startSeparator.color = new Color(6f / 255f, 29f / 255f, 54f / 255f, .5f);
+                var separatorRect = startSeparator.rectTransform;
+                separatorRect.anchorMin = new Vector2(.015f, 1f);
+                separatorRect.anchorMax = new Vector2(.985f, 1f);
+                separatorRect.pivot = new Vector2(.5f, .5f);
+                float headingBottom = headingPanel
+                    ? howItWorks.InverseTransformPoint(headingPanel.rectTransform.TransformPoint(
+                        new Vector3(0f, headingPanel.rectTransform.rect.yMin, 0f))).y
+                    : howItWorks.rect.yMax - 38f;
+                separatorRect.anchoredPosition = new Vector2(0f, headingBottom - howItWorks.rect.yMax - 5f);
+                separatorRect.sizeDelta = new Vector2(0f, 3f);
+                separatorRect.localScale = Vector3.one;
+                separatorRect.SetAsLastSibling();
+                float pixelsPerUnit = frame ? frame.pixelsPerUnit * frame.pixelsPerUnitMultiplier : 7f;
+                var inset = new Vector4(114f, 138f, 113f, 126f) / pixelsPerUnit;
+                instructionsPaper.anchorMin = Vector2.zero;
+                instructionsPaper.anchorMax = Vector2.one;
+                instructionsPaper.offsetMin = directOnTv ? Vector2.zero : new Vector2(inset.x, inset.y);
+                instructionsPaper.offsetMax = directOnTv ? new Vector2(0f, -42f) : new Vector2(-inset.z, -inset.w);
+                var paperMask = instructionsPaper.GetComponent<UnityEngine.UI.Mask>();
+                if (paperMask) paperMask.enabled = !directOnTv;
+                foreach (var name in new[] { "TV Background", "TV White Fog" })
+                {
+                    var background = instructionsPaper.Find(name);
+                    if (background) background.gameObject.SetActive(!directOnTv);
+                }
+                if (directOnTv)
+                {
+                    var paperImage = instructionsPaper.GetComponent<UnityEngine.UI.Image>();
+                    if (paperImage) paperImage.enabled = false;
+                }
+                else
+                    ApplyPaperBackdrop(instructionsPaper, backdrop, sprite, televisionMaterial,
+                        ref instructionsBackdropMaterial, 46f / pixelsPerUnit);
+                LayoutInstructionSteps(instructionsPaper);
+                for (int step = 1; step < 3; step++)
+                {
+                    var divider = EnsurePanelImage(instructionsPaper, "Step Divider " + step);
+                    divider.color = new Color(6f / 255f, 29f / 255f, 54f / 255f, .5f);
+                    var dividerRect = divider.rectTransform;
+                    dividerRect.anchorMin = new Vector2(step / 3f, .10f);
+                    dividerRect.anchorMax = new Vector2(step / 3f, .86f);
+                    dividerRect.pivot = new Vector2(.5f, .5f);
+                    dividerRect.anchoredPosition = Vector2.zero;
+                    dividerRect.sizeDelta = new Vector2(3f, 0);
+                    dividerRect.localScale = Vector3.one;
+                    dividerRect.SetAsLastSibling();
+                }
+                LayoutPrizeStrip(instructionsPaper, portrait);
+            }
             var tankScreen = mainFrame.Find("Pre-battle screens");
             FitPreBattleScreen(tankScreen as RectTransform);
-            SetTankSelectorBackdrop(tankScreen && tankScreen.gameObject.activeSelf);
+            LayoutShopScreen();
+            SetTankSelectorBackdrop(IsTvScreenOpen);
             // The hero fills the TV opening now that the old reward area is gone.
             // Center the logo and primary action as one group on each layout.
             if (viewport && hero && logo && startRect)
@@ -231,11 +439,7 @@ namespace BattleCities.UI
                 hero.sizeDelta = viewport.sizeDelta;
                 hero.localScale = Vector3.one;
 
-                if (target == MainMenuPlatform.Psg1)
-                {
-                    hero.anchoredPosition += new Vector2(0f, -PsgHudBandHeight + 16f);
-                    hero.sizeDelta -= new Vector2(0f, PsgHudBandHeight - 16f);
-                }
+                FitHeroBetweenMonitorPanels(target);
 
                 float width = hero.rect.width;
                 float height = hero.rect.height;
@@ -280,8 +484,7 @@ namespace BattleCities.UI
                 FitAndroidStatusCard((RectTransform)statusBar.GetChild(0),true);
                 FitAndroidStatusCard((RectTransform)statusBar.GetChild(2),false);
             }
-            var openScreen=mainFrame.Find("Pre-battle screens");
-            bool showHome=!IsModalOpen && !(openScreen && openScreen.gameObject.activeInHierarchy);
+            bool showHome=!IsModalOpen && !IsTvScreenOpen;
             SetHeroVisible(showHome,false);
         }
     }

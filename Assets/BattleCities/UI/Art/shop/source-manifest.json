@@ -1,0 +1,377 @@
+{
+  "status": "exported_and_reviewed",
+  "created_date": "2026-10-04",
+  "tool": "built-in image_gen",
+  "transparent_background": true,
+  "inventory_sidebar": {
+    "action": "retain existing artwork",
+    "path": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/Art/Powerups/atlas.png"
+  },
+  "notes": [
+    "Shop product illustrations only; Unity imports and source files were not modified.",
+    "Fuel One is an unchanged copy of the approved existing sprite.",
+    "Artwork has no labels or UI frames. Plus/minus/pump/star symbols are intentional subject details.",
+    "Unity should render ground shadows. Outputs have object self-shading only.",
+    "Native generated dimensions are retained; scale to the product image area while preserving aspect ratio."
+  ],
+  "assets": [
+    {
+      "name": "fuel-one.png",
+      "path": "C:/repos/BattleCity/art_exports/ui/shop-icons/fuel-one.png",
+      "source": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/fuel-can.png",
+      "method": "copied unchanged; no generation",
+      "prompt": null,
+      "validation": {
+        "width": 250,
+        "height": 250,
+        "hasAlpha": true,
+        "transparentPixelPercent": 65.19,
+        "partialAlphaPixelPercent": 2.16,
+        "visibleBoundsAlphaAbove16": {
+          "left": 53,
+          "top": 37,
+          "width": 141,
+          "height": 178
+        },
+        "edgeTouchPixels": 0,
+        "sha256": "b7171f05976c79d212b054d1e3efd7d968b431b5b10b409d1d51f19c2c8a55ea"
+      }
+    },
+    {
+      "name": "shield-helmet.png",
+      "path": "C:/repos/BattleCity/art_exports/ui/shop-icons/shield-helmet.png",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-8cda9726-c178-4acb-992d-6e919125496a.png",
+      "method": "generated with built-in image_gen",
+      "references": [
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/Art/Powerups/atlas.png"
+      ],
+      "prompt": "Use case: background-extraction / stylized-concept. Production standalone Shop product illustration for Battle Cities. Reference 1 is the existing inventory atlas, authoritative for the subject, colors, form and polished illustrated toy-game rendering. Extract/recreate ONLY the specified subject from its cell as a single large standalone object, without its blue tile or gold frame. Preserve the recognizable original identity. Crisp clean silhouette, chunky molded plastic and painted metal, upper-left lighting, saturated controlled colors, simple readable details. Square 1024x1024 RGBA image with genuine transparent background. Center the complete subject at roughly 74% of canvas width or height, with generous even transparent margins and no cropped edges. No lettering, numbers, labels, UI frame, plate, background, floor, pedestal, ground contact shadow, drop shadow, smoky haze or glow outside the silhouette. Self-shading on the object is allowed. Render the object only with clean alpha. SUBJECT: top row, first cell: glossy green protective helmet with a solid white/silver shield emblem on the front, dark chin straps at both lower sides. Preserve the helmet shape and silver shield. No human head.",
+      "validation": {
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": true,
+        "transparentPixelPercent": 50.69,
+        "partialAlphaPixelPercent": 49.25,
+        "visibleBoundsAlphaAbove16": {
+          "left": 80,
+          "top": 160,
+          "width": 1092,
+          "height": 946
+        },
+        "edgeTouchPixels": 0,
+        "sha256": "f5660c501c2613743237044b360013765536a1c82940557afa8135240feea44a"
+      }
+    },
+    {
+      "name": "base-defence-shovel-bricks.png",
+      "path": "C:/repos/BattleCity/art_exports/ui/shop-icons/base-defence-shovel-bricks.png",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-94e0f067-ccd6-4864-9f53-fefadda09c20.png",
+      "method": "generated with built-in image_gen",
+      "references": [
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/Art/Powerups/atlas.png"
+      ],
+      "prompt": "Use case: background-extraction / stylized-concept. Production standalone Shop product illustration for Battle Cities. Reference 1 is the existing inventory atlas, authoritative for the subject, colors, form and polished illustrated toy-game rendering. Extract/recreate ONLY the specified subject from its cell as a single large standalone object, without its blue tile or gold frame. Preserve the recognizable original identity. Crisp clean silhouette, chunky molded plastic and painted metal, upper-left lighting, saturated controlled colors, simple readable details. Square 1024x1024 RGBA image with genuine transparent background. Center the complete subject at roughly 74% of canvas width or height, with generous even transparent margins and no cropped edges. No lettering, numbers, labels, UI frame, plate, background, floor, pedestal, ground contact shadow, drop shadow, smoky haze or glow outside the silhouette. Self-shading on the object is allowed. Render the object only with clean alpha. SUBJECT: top row, second cell: silver spade with dark D-shaped handle rising from a small defensive semicircle of chunky ORANGE-red bricks. Preserve orange bricks, metal shovel, compact curved brick wall. Not gold bricks.",
+      "validation": {
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": true,
+        "transparentPixelPercent": 60.72,
+        "partialAlphaPixelPercent": 39.19,
+        "visibleBoundsAlphaAbove16": {
+          "left": 121,
+          "top": 124,
+          "width": 995,
+          "height": 1026
+        },
+        "edgeTouchPixels": 0,
+        "sha256": "2e18a3f1cebea8f1d49b6490ca5f108569a107d8b060741b810cebdfae56b1cb"
+      }
+    },
+    {
+      "name": "freeze-stopwatch.png",
+      "path": "C:/repos/BattleCity/art_exports/ui/shop-icons/freeze-stopwatch.png",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-4a209493-42f5-435f-8735-b61f0595389c.png",
+      "method": "generated with built-in image_gen",
+      "references": [
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/Art/Powerups/atlas.png"
+      ],
+      "prompt": "Use case: background-extraction / stylized-concept. Production standalone Shop product illustration for Battle Cities. Reference 1 is the existing inventory atlas, authoritative for the subject, colors, form and polished illustrated toy-game rendering. Extract/recreate ONLY the specified subject from its cell as a single large standalone object, without its blue tile or gold frame. Preserve the recognizable original identity. Crisp clean silhouette, chunky molded plastic and painted metal, upper-left lighting, saturated controlled colors, simple readable details. Square 1024x1024 RGBA image with genuine transparent background. Center the complete subject at roughly 74% of canvas width or height, with generous even transparent margins and no cropped edges. No lettering, numbers, labels, UI frame, plate, background, floor, pedestal, ground contact shadow, drop shadow, smoky haze or glow outside the silhouette. Self-shading on the object is allowed. Render the object only with clean alpha. SUBJECT: top row, third cell: cobalt/cyan blue stopwatch with a large white snowflake centered on the blue dial, silver winding crown and two silver side buttons, seen almost front-on. No numbers and no time markings.",
+      "validation": {
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": true,
+        "transparentPixelPercent": 49.57,
+        "partialAlphaPixelPercent": 50.33,
+        "visibleBoundsAlphaAbove16": {
+          "left": 157,
+          "top": 81,
+          "width": 934,
+          "height": 1126
+        },
+        "edgeTouchPixels": 0,
+        "sha256": "4be4e70d043b15385fd7e9a83184bac2e5e67d8a3a8202ebd86bc9fa3db70858"
+      }
+    },
+    {
+      "name": "speed-wheel-arrows.png",
+      "path": "C:/repos/BattleCity/art_exports/ui/shop-icons/speed-wheel-arrows.png",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-81925c9c-6d8a-4116-b8c1-a0f0841d4c24.png",
+      "method": "generated with built-in image_gen",
+      "references": [
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/Art/Powerups/atlas.png"
+      ],
+      "prompt": "Use case: background-extraction / stylized-concept. Production standalone Shop product illustration for Battle Cities. Reference 1 is the existing inventory atlas, authoritative for the subject, colors, form and polished illustrated toy-game rendering. Extract/recreate ONLY the specified subject from its cell as a single large standalone object, without its blue tile or gold frame. Preserve the recognizable original identity. Crisp clean silhouette, chunky molded plastic and painted metal, upper-left lighting, saturated controlled colors, simple readable details. Square 1024x1024 RGBA image with genuine transparent background. Center the complete subject at roughly 74% of canvas width or height, with generous even transparent margins and no cropped edges. No lettering, numbers, labels, UI frame, plate, background, floor, pedestal, ground contact shadow, drop shadow, smoky haze or glow outside the silhouette. Self-shading on the object is allowed. Render the object only with clean alpha. SUBJECT: second row, third cell: thick black rubber treaded wheel with a bright gold wheel hub and exactly two chunky gold chevron arrows pointing right in front of the wheel. Preserve this wheel-and-double-chevron subject; do not depict a tank.",
+      "validation": {
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": true,
+        "transparentPixelPercent": 57.85,
+        "partialAlphaPixelPercent": 42.13,
+        "visibleBoundsAlphaAbove16": {
+          "left": 105,
+          "top": 208,
+          "width": 1059,
+          "height": 864
+        },
+        "edgeTouchPixels": 0,
+        "sha256": "6b202e1330309d7f555695a20234f29b50dd96bcf61edae77a8bbf5febbb9c7a"
+      }
+    },
+    {
+      "name": "star-upgrade.png",
+      "path": "C:/repos/BattleCity/art_exports/ui/shop-icons/star-upgrade.png",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-d6f18644-991e-4260-b83d-ea303d7b98f5.png",
+      "method": "generated with built-in image_gen",
+      "references": [
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/Art/Powerups/atlas.png"
+      ],
+      "prompt": "Use case: background-extraction / stylized-concept. Production standalone Shop product illustration for Battle Cities. Reference 1 is the existing inventory atlas, authoritative for the subject, colors, form and polished illustrated toy-game rendering. Extract/recreate ONLY the specified subject from its cell as a single large standalone object, without its blue tile or gold frame. Preserve the recognizable original identity. Crisp clean silhouette, chunky molded plastic and painted metal, upper-left lighting, saturated controlled colors, simple readable details. Square 1024x1024 RGBA image with genuine transparent background. Center the complete subject at roughly 74% of canvas width or height, with generous even transparent margins and no cropped edges. No lettering, numbers, labels, UI frame, plate, background, floor, pedestal, ground contact shadow, drop shadow, smoky haze or glow outside the silhouette. Self-shading on the object is allowed. Render the object only with clean alpha. SUBJECT: top row, fifth cell: one chunky gold five-point star, faceted with orange-gold shadow facets and pale yellow highlights, rounded toy edges. Single star only, no coin, no badge or plaque behind it.",
+      "validation": {
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": true,
+        "transparentPixelPercent": 58,
+        "partialAlphaPixelPercent": 41.93,
+        "visibleBoundsAlphaAbove16": {
+          "left": 73,
+          "top": 109,
+          "width": 1107,
+          "height": 1036
+        },
+        "edgeTouchPixels": 0,
+        "sha256": "01427cb9159b291ec12b447a69ad3a2ce4f7b694f6953b5bb03351239028fd10"
+      }
+    },
+    {
+      "name": "zoom-out-magnifier-map.png",
+      "path": "C:/repos/BattleCity/art_exports/ui/shop-icons/zoom-out-magnifier-map.png",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-f5322fbd-7622-4049-8bd7-c67aed1cb546.png",
+      "method": "generated with built-in image_gen",
+      "references": [
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/Art/Powerups/atlas.png"
+      ],
+      "prompt": "Use case: background-extraction / stylized-concept. Production standalone Shop product illustration for Battle Cities. Reference 1 is the existing inventory atlas, authoritative for the subject, colors, form and polished illustrated toy-game rendering. Extract/recreate ONLY the specified subject from its cell as a single large standalone object, without its blue tile or gold frame. Preserve the recognizable original identity. Crisp clean silhouette, chunky molded plastic and painted metal, upper-left lighting, saturated controlled colors, simple readable details. Square 1024x1024 RGBA image with genuine transparent background. Center the complete subject at roughly 74% of canvas width or height, with generous even transparent margins and no cropped edges. No lettering, numbers, labels, UI frame, plate, background, floor, pedestal, ground contact shadow, drop shadow, smoky haze or glow outside the silhouette. Self-shading on the object is allowed. Render the object only with clean alpha. SUBJECT: bottom row, fifth cell: a small square overhead battlefield map with tiny green trees, orange brick walls and tan-green roads; a large blue magnifying glass over its center with a single WHITE MINUS symbol on the lens and a dark gray handle toward lower right; cyan diagonal arrows pointing outward around the map corners. The map is part of the icon, not a UI backing plate; remove the original blue and gold enclosing tile. The subject must clearly mean zoom OUT, not zoom in.",
+      "validation": {
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": true,
+        "transparentPixelPercent": 42.21,
+        "partialAlphaPixelPercent": 57.75,
+        "visibleBoundsAlphaAbove16": {
+          "left": 133,
+          "top": 167,
+          "width": 987,
+          "height": 1008
+        },
+        "edgeTouchPixels": 0,
+        "sha256": "d87c23ea3ee87b3204ee432d437ee2eb0116d66eaaffe6c3ce2fee988ee84023"
+      }
+    },
+    {
+      "name": "wipeout-grenade.png",
+      "path": "C:/repos/BattleCity/art_exports/ui/shop-icons/wipeout-grenade.png",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-a25b647e-864f-4b9c-81e9-e26af1b542a9.png",
+      "method": "generated with built-in image_gen",
+      "references": [
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/Art/Powerups/atlas.png"
+      ],
+      "prompt": "Use case: background-extraction / stylized-concept. Production standalone Shop product illustration for Battle Cities. Reference 1 is the existing inventory atlas, authoritative for the subject, colors, form and polished illustrated toy-game rendering. Extract/recreate ONLY the specified subject from its cell as a single large standalone object, without its blue tile or gold frame. Preserve the recognizable original identity. Crisp clean silhouette, chunky molded plastic and painted metal, upper-left lighting, saturated controlled colors, simple readable details. Square 1024x1024 RGBA image with genuine transparent background. Center the complete subject at roughly 74% of canvas width or height, with generous even transparent margins and no cropped edges. No lettering, numbers, labels, UI frame, plate, background, floor, pedestal, ground contact shadow, drop shadow, smoky haze or glow outside the silhouette. Self-shading on the object is allowed. Render the object only with clean alpha. SUBJECT: second row, first cell: one chunky bright green segmented pineapple grenade, silver safety top, dark silver lever and circular pull ring, slight three-quarter angle. Preserve the illustrated harmless toy-game style.",
+      "validation": {
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": true,
+        "transparentPixelPercent": 56.98,
+        "partialAlphaPixelPercent": 42.96,
+        "visibleBoundsAlphaAbove16": {
+          "left": 172,
+          "top": 128,
+          "width": 909,
+          "height": 1008
+        },
+        "edgeTouchPixels": 0,
+        "sha256": "1fcc2969ee7fe00c4745bf89ed705ef97bf33f0d39121a8f9b107e9e7a57d610"
+      }
+    },
+    {
+      "name": "extra-life-yellow-tank-plus.png",
+      "path": "C:/repos/BattleCity/art_exports/ui/shop-icons/extra-life-yellow-tank-plus.png",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-1cc520fb-bad6-47ad-940b-950f37567ab0.png",
+      "method": "generated with built-in image_gen",
+      "references": [
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/Art/Powerups/atlas.png"
+      ],
+      "prompt": "Use case: background-extraction / stylized-concept. Production standalone Shop product illustration for Battle Cities. Reference 1 is the existing inventory atlas, authoritative for the subject, colors, form and polished illustrated toy-game rendering. Extract/recreate ONLY the specified subject from its cell as a single large standalone object, without its blue tile or gold frame. Preserve the recognizable original identity. Crisp clean silhouette, chunky molded plastic and painted metal, upper-left lighting, saturated controlled colors, simple readable details. Square 1024x1024 RGBA image with genuine transparent background. Center the complete subject at roughly 74% of canvas width or height, with generous even transparent margins and no cropped edges. No lettering, numbers, labels, UI frame, plate, background, floor, pedestal, ground contact shadow, drop shadow, smoky haze or glow outside the silhouette. Self-shading on the object is allowed. Render the object only with clean alpha. SUBJECT: top row, fourth cell: a small yellow toy tank with black tracks and its cannon pointing toward the lower right, seen three-quarter from slightly above, with a green circular plus symbol badge floating tightly adjacent at upper right. White plus on green circle is essential and must remain visible. No words or numbers.",
+      "validation": {
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": true,
+        "transparentPixelPercent": 54.63,
+        "partialAlphaPixelPercent": 45.31,
+        "visibleBoundsAlphaAbove16": {
+          "left": 104,
+          "top": 164,
+          "width": 1072,
+          "height": 967
+        },
+        "edgeTouchPixels": 0,
+        "sha256": "f9785e554f654d694f2eb8f94f6ff8995aa7782b17a4886fca54d80a57fc464e"
+      }
+    },
+    {
+      "name": "fuel-five.png",
+      "path": "C:/repos/BattleCity/art_exports/ui/shop-icons/fuel-five.png",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-b016dbd4-16d7-4014-8849-15f91707921f.png",
+      "method": "generated with built-in image_gen",
+      "references": [
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/fuel-can.png"
+      ],
+      "prompt": "Use case: stylized-concept. Standalone Battle Cities Shop icon. Reference image is the exact approved fuel can identity: olive green jerrycan, integrated handle, upper-left dark screw cap, reinforced dark gray base corners, yellow fuel-pump pictogram. Create exactly FIVE of that same can, arranged as a compact attractive staggered group, two front and three behind, with all five handles/caps distinguishable. Preserve can silhouette, olive color, metal fittings and yellow pump pictogram; not a star badge. Match crisp illustrated game asset shading, no realistic photographic textures. Square 1024x1024 RGBA, full group centered at 74% canvas extent with generous transparent margins. Genuine transparent background. No numbers or lettering, no frame or plate, no floor, no ground shadow, no drop shadow, no glow, no scenery, no extra objects. Only five cans with self-shading.",
+      "validation": {
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": true,
+        "transparentPixelPercent": 48.41,
+        "partialAlphaPixelPercent": 51.53,
+        "visibleBoundsAlphaAbove16": {
+          "left": 58,
+          "top": 159,
+          "width": 1139,
+          "height": 922
+        },
+        "edgeTouchPixels": 0,
+        "sha256": "4f6645d855c7b22cdd436d501e4d75c1ef28779853827262b11bc851508c53ca"
+      }
+    },
+    {
+      "name": "fuel-twenty-crate.png",
+      "path": "C:/repos/BattleCity/art_exports/ui/shop-icons/fuel-twenty-crate.png",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-584c8bd6-2697-4117-8e7e-a57752a3a282.png",
+      "method": "generated with built-in image_gen",
+      "references": [
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/fuel-can.png",
+        "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-d7b017de-7e22-4d62-ab9c-d2bfd536afad.png"
+      ],
+      "prompt": "Use case: stylized-concept. Standalone Battle Cities Shop icon for FUEL TWENTY. Reference 1 is authoritative fuel-can identity: olive green jerrycans, integrated handles, upper-left dark screw caps, dark gray corner reinforcement, yellow fuel-pump pictogram. Reference 2 supplies the approved shop's wooden crate-of-cans composition. A compact open orange-brown wooden supply crate filled with a tightly packed array of these fuel cans; several neat rows of handles and caps visible, enough to convey a twenty-can bulk pack. One simple gold star emblem on crate front, bronze metal corner brackets. Keep high quality illustrated toy game rendering, crisp silhouette, readable 3/4 front view and upper-left lighting. Square 1024x1024 RGBA. Whole object centered about74% canvas extent with generous even transparent margins. Genuine transparent background, no floor or baked ground shadows, no external drop shadow, no text or numbers, no UI borders, plates, price tags or pedestal. Only crate and cans, contained shadows only inside object.",
+      "validation": {
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": true,
+        "transparentPixelPercent": 50.73,
+        "partialAlphaPixelPercent": 49.22,
+        "visibleBoundsAlphaAbove16": {
+          "left": 60,
+          "top": 196,
+          "width": 1138,
+          "height": 912
+        },
+        "edgeTouchPixels": 0,
+        "sha256": "e01a8871c48e65f58fba05c57d5e728ea1e5130cdbb52c50a3aa627e71a0bd7b"
+      }
+    },
+    {
+      "name": "starter-pack.png",
+      "path": "C:/repos/BattleCity/art_exports/ui/shop-icons/starter-pack.png",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-25fbfa95-8c7e-4043-b4fd-1dd57b92bd22.png",
+      "method": "generated with built-in image_gen",
+      "references": [
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/Art/Powerups/atlas.png",
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/fuel-can.png"
+      ],
+      "prompt": "Use case: stylized-concept. Standalone Battle Cities Shop STARTER PACK artwork. Reference 1 inventory atlas defines shield helmet and base defence subjects; reference 2 defines olive fuel can identity. Compose ONE cohesive compact bundle made of exactly TWO olive fuel cans with yellow pump pictograms at back left, ONE green helmet with silver shield at front left, and ONE silver shovel with dark D-handle rising from small ORANGE brick semicircle at right. These three item types are all clearly recognizable. Match polished illustrated toy-game rendering and existing identities, upper-left lighting, crisp chunky shapes, consistent scale. Do not add other items or container. Square 1024x1024 RGBA, group centered about74% canvas extent, generous transparent margins. Genuine transparent background. No labels, words, numbers, frames, backing plate, ribbons, ground, external shadows or glow. Only the bundle; self-shading allowed.",
+      "validation": {
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": true,
+        "transparentPixelPercent": 55.04,
+        "partialAlphaPixelPercent": 44.87,
+        "visibleBoundsAlphaAbove16": {
+          "left": 124,
+          "top": 186,
+          "width": 1014,
+          "height": 902
+        },
+        "edgeTouchPixels": 0,
+        "sha256": "52daa2fa808c2bf8a7e2f2387c4c639166e8ea66d9c984821e4ad3e04dcc5d54"
+      }
+    },
+    {
+      "name": "supply-crate-header.png",
+      "path": "C:/repos/BattleCity/art_exports/ui/shop-icons/supply-crate-header.png",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-be65448c-92e6-4b22-b4ff-686fe1aeefc2.png",
+      "method": "generated with built-in image_gen",
+      "references": [
+        "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-d7b017de-7e22-4d62-ab9c-d2bfd536afad.png"
+      ],
+      "prompt": "Use case: background-extraction. Create the standalone small green supply-crate icon shown beside SHOP and LOADOUT in this approved Battle Cities screen. ONE closed squat olive-green military supply box, slightly three-quarter from above, chunky green reinforced edges, gold-yellow edge highlights, two simple front latch panels, clear molded painted-metal toy-game style. Reproduce that icon's design without the surrounding UI. Make it readable at 40 pixels. Square 1024x1024 RGBA, complete crate centered at74% canvas extent with generous transparent margins. Truly transparent background. No lettering, numbers, labels, UI frame, backing plate, floor, drop shadow, ground shadow or glow. Only the green supply crate.",
+      "validation": {
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": true,
+        "transparentPixelPercent": 69.79,
+        "partialAlphaPixelPercent": 30.17,
+        "visibleBoundsAlphaAbove16": {
+          "left": 222,
+          "top": 291,
+          "width": 845,
+          "height": 740
+        },
+        "edgeTouchPixels": 0,
+        "sha256": "9ce1306275d8c947fdd40f3cda7bc3364c174ddfd8456870331809f594649aa3"
+      }
+    },
+    {
+      "name": "swap-arrows.png",
+      "path": "C:/repos/BattleCity/art_exports/ui/shop-icons/swap-arrows.png",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-e017666f-784b-4311-b4e8-e93042264549.png",
+      "method": "generated with built-in image_gen",
+      "references": [
+        "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-d7b017de-7e22-4d62-ab9c-d2bfd536afad.png"
+      ],
+      "prompt": "Use case: background-extraction. Standalone Battle Cities SWAP navigation icon matching the supplied screen. Exactly two thick gold-yellow opposite arrows, top arrow points RIGHT and bottom arrow points LEFT, with tiny olive-green curled connector ends as in the screenshot's SWAP icon. Compact horizontal stacked exchange-arrow silhouette, crisp polished toy-game plastic, orange bevel shadows and small cream highlights. No coins or words. Square 1024x1024 RGBA, icon centered about74% canvas extent, generous transparent margins. Truly transparent background. No UI frame, backing plate, floor, ground shadows, external drop shadows, glow, scenery, text or watermark. Only the exchange arrows.",
+      "validation": {
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": true,
+        "transparentPixelPercent": 70.78,
+        "partialAlphaPixelPercent": 29.08,
+        "visibleBoundsAlphaAbove16": {
+          "left": 163,
+          "top": 217,
+          "width": 935,
+          "height": 821
+        },
+        "edgeTouchPixels": 0,
+        "sha256": "f478c704593f24fc7fa46f5edba94be99815dd6cbacd08016880bb9f89022ae5"
+      }
+    }
+  ],
+  "validation": {
+    "assetCount": 14,
+    "allPngsHaveAlpha": true,
+    "allHaveTransparentMargins": true,
+    "previewPath": "C:/repos/BattleCity/tmp/shop-icons/native-scale-preview.png",
+    "nativeScaleVisualReview": "Passed: reviewed at 144px and 80px canvas sizes on cream and navy backgrounds; no UI frames or ground shadows visible.",
+    "inEngineReview": "not performed; delegated importer handles Unity",
+    "alphaNote": "Generated subjects have median alpha 253/255; transparent backgrounds and non-clipped margins verified."
+  }
+}

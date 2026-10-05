@@ -16,6 +16,7 @@ namespace BattleCities
         private RectTransform safeRoot, pauseRect;
         private CanvasGroup visibility;
         private readonly List<BattleTouchControl> controls = new List<BattleTouchControl>();
+        private readonly UI.ArcadeTextStyles textStyles=new UI.ArcadeTextStyles();
         private BattleTouchControl move, fire, special, switchSpecial;
         private readonly BattleTouchControl[] slots = new BattleTouchControl[4];
         private readonly UnityEngine.UI.RawImage[] slotIcons = new UnityEngine.UI.RawImage[4];
@@ -74,6 +75,7 @@ namespace BattleCities
             label.color = color;
             label.raycastTarget = false;
             label.textWrappingMode = TextWrappingModes.NoWrap;
+            if(UI.ArcadeTextStyles.IsWhite(color))textStyles.Apply(label,UI.ArcadeTextTreatment.WhiteButton);
             return label;
         }
 
@@ -236,6 +238,7 @@ namespace BattleCities
         private void OnEnable() { if (canvas) canvas.gameObject.SetActive(true); }
         private void OnDestroy()
         {
+            textStyles.Dispose();
             if (canvas) Destroy(canvas.gameObject);
             if (circle) Destroy(circle);
             if (circleTexture) Destroy(circleTexture);

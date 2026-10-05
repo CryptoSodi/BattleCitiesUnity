@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using MobileScreen = UnityEngine.Device.Screen;
 
 namespace BattleCities
@@ -56,17 +57,48 @@ namespace BattleCities
 
     public static class MobileBattleOrientation
     {
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void StartInPortrait()
+#if UNITY_EDITOR
+        [UnityEditor.InitializeOnLoadMethod]
+        private static void InitializeEditorOrientationLock()
+        {
+            UnityEditor.EditorApplication.update -= RefreshEditorOrientationLock;
+            UnityEditor.EditorApplication.update += RefreshEditorOrientationLock;
+        }
+
+        private static void RefreshEditorOrientationLock()
+        {
+            if (UnityEditor.EditorApplication.isCompiling || UnityEditor.EditorApplication.isUpdating) return;
+            var platform = RuntimePlatformInfo.Current;
+            if (platform != GameRuntimePlatform.Android && platform != GameRuntimePlatform.Psg1) return;
+
+            // Switching simulator devices resets orientation without loading a scene.
+            // Keep the editor preview under the same lock as the installed game.
+            var orientation = OrientationFor(platform, false, MobileScreen.orientation);
+            if (MobileScreen.orientation != orientation ||
+                MobileScreen.autorotateToPortrait != (orientation == ScreenOrientation.Portrait) ||
+                MobileScreen.autorotateToPortraitUpsideDown ||
+                MobileScreen.autorotateToLandscapeLeft != (orientation == ScreenOrientation.LandscapeLeft) ||
+                MobileScreen.autorotateToLandscapeRight)
+                ShowMenu();
+        }
+#endif
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+        private static void InitializeOrientationLock()
         {
             ShowMenu();
+            SceneManager.sceneLoaded -= ApplySceneOrientation;
+            SceneManager.sceneLoaded += ApplySceneOrientation;
         }
+
+        private static void ApplySceneOrientation(Scene scene, LoadSceneMode mode) => ShowMenu();
 
         public static ScreenOrientation OrientationFor(GameRuntimePlatform platform, bool battle, ScreenOrientation current)
         {
             // PSG1's natural (Portrait) orientation is its native 1240 x 1080 screen.
             if (platform == GameRuntimePlatform.Psg1) return ScreenOrientation.Portrait;
-            if (platform == GameRuntimePlatform.Android) return battle ? ScreenOrientation.LandscapeLeft : ScreenOrientation.Portrait;
+            // Phones use landscape throughout login, menus and matches.
+            if (platform == GameRuntimePlatform.Android) return ScreenOrientation.LandscapeLeft;
             return current;
         }
 
@@ -76,7 +108,12 @@ namespace BattleCities
         {
             var platform = RuntimePlatformInfo.Current;
             if (platform != GameRuntimePlatform.Android && platform != GameRuntimePlatform.Psg1) return;
-            MobileScreen.orientation = OrientationFor(platform, battle, MobileScreen.orientation);
+            var orientation = OrientationFor(platform, battle, MobileScreen.orientation);
+            MobileScreen.orientation = orientation;
+            MobileScreen.autorotateToPortrait = orientation == ScreenOrientation.Portrait;
+            MobileScreen.autorotateToPortraitUpsideDown = false;
+            MobileScreen.autorotateToLandscapeLeft = orientation == ScreenOrientation.LandscapeLeft;
+            MobileScreen.autorotateToLandscapeRight = false;
         }
     }
 }

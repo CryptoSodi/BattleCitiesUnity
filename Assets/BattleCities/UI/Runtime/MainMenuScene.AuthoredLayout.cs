@@ -82,11 +82,13 @@ namespace BattleCities.UI
             profile.designSize=content.rect.size;
             profile.elements.Clear();
             var battleScreen=mainFrame?mainFrame.Find("Pre-battle screens"):null;
+            var shopScreen=mainFrame?mainFrame.Find("Shop screen"):null;
             foreach(var rect in content.GetComponentsInChildren<RectTransform>(true))
             {
                 // Modal visibility and API-driven text contents belong to runtime behavior.
                 if(rect==content || (modal && (rect==modal || rect.IsChildOf(modal))))continue;
                 if(battleScreen && (rect==battleScreen || rect.IsChildOf(battleScreen)))continue;
+                if(shopScreen && (rect==shopScreen || rect.IsChildOf(shopScreen)))continue;
                 profile.elements.Add(new AuthoredElement(rect));
             }
             return profile;
@@ -115,9 +117,11 @@ namespace BattleCities.UI
             {
                 // Pre-battle controls own their layout and visibility; old scene captures may include them.
                 var battleScreen=mainFrame?mainFrame.Find("Pre-battle screens"):null;
+                var shopScreen=mainFrame?mainFrame.Find("Shop screen"):null;
                 foreach(var element in profile.elements)
                 {
                     if(battleScreen && element.rect && (element.rect==battleScreen || element.rect.IsChildOf(battleScreen)))continue;
+                    if(shopScreen && element.rect && (element.rect==shopScreen || element.rect.IsChildOf(shopScreen)))continue;
                     element.Restore();
                 }
             }
@@ -143,12 +147,11 @@ namespace BattleCities.UI
             {
                 controls.gameObject.SetActive(!controllerLegendHidden);
             }
-            ConfigureNavigation(target!=MainMenuPlatform.Web);
+            ConfigureNavigation(target!=MainMenuPlatform.Web && target!=MainMenuPlatform.AndroidLandscape);
             if(Application.isPlaying && inputModule && (target!=lastPlatform || inputModule.actionsAsset!=liveInput))
                 ConfigureInput(target==MainMenuPlatform.Psg1);
             // A platform profile may restore the home artwork while the tank selector is open.
-            var openBattleScreen=mainFrame?mainFrame.Find("Pre-battle screens"):null;
-            bool showHome= !IsModalOpen && !(openBattleScreen && openBattleScreen.gameObject.activeInHierarchy);
+            bool showHome= !IsModalOpen && !IsTvScreenOpen;
             lastPlatform=target;
             SetHeroVisible(showHome,false);
         }

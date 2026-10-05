@@ -18,6 +18,7 @@ namespace BattleCities.UI
 
         public void Configure(Image ring, RectTransform art)
         {
+            if (focusRing) focusRing.enabled = false;
             focusRing = ring;
             artwork = art;
             CaptureArtworkScale();
@@ -55,7 +56,7 @@ namespace BattleCities.UI
         }
         private void Refresh()
         {
-            if (focusRing) focusRing.enabled = selected || hovered;
+            if (focusRing) focusRing.enabled = false;
             if(stateImage&&inactiveSkin&&activeSkin)
                 stateImage.sprite=activePage||selected||hovered?activeSkin:inactiveSkin;
         }

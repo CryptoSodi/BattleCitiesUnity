@@ -160,7 +160,7 @@ namespace BattleCities.UI
         [SerializeField] private MainMenuLayoutSettings androidLandscapeLayout = MainMenuLayoutSettings.AndroidLandscape();
         [SerializeField] private RectTransform safeArea, content, statusBar, mainFrame, hero, navigation, leaderboard, howItWorks, controls;
         [SerializeField] private RectTransform logo, startRect, modal;
-        [SerializeField] private Button startButton, settingsButton, retryButton, closeButton;
+        [SerializeField] private Button startButton, settingsButton, closeButton;
         [SerializeField] private Button[] tabs;
         [SerializeField] private Text playerLabel, scoreLabel, highScoreLabel, modalTitle, modalBody, leaderboardMessage, leaderboardDetail;
         [SerializeField] private InputActionAsset inputActions;
@@ -197,22 +197,24 @@ namespace BattleCities.UI
         {
             if(logo)logo.gameObject.SetActive(visible);
             if(startRect)startRect.gameObject.SetActive(visible);
-            if(statusBar && lastPlatform==MainMenuPlatform.Psg1)
+            if(statusBar && (lastPlatform==MainMenuPlatform.Psg1 || lastPlatform==MainMenuPlatform.AndroidLandscape))
                 statusBar.gameObject.SetActive(visible);
             if(controls && lastPlatform==MainMenuPlatform.Psg1)
                 controls.gameObject.SetActive(visible && !controllerLegendHidden);
+            if(howItWorks && (lastPlatform==MainMenuPlatform.Psg1 || lastPlatform==MainMenuPlatform.AndroidLandscape))
+                howItWorks.gameObject.SetActive(visible && (lastPlatform==MainMenuPlatform.AndroidLandscape || controllerLegendHidden));
             SetAndroidTvVisible(!visible,animateTv);
         }
 
         public void Configure(MenuTheme skin, RectTransform safe, RectTransform root, RectTransform header, RectTransform frame,
             RectTransform battlefield, RectTransform nav, RectTransform board, RectTransform info, RectTransform hints,
-            RectTransform brand, RectTransform play, RectTransform dialog, Button start, Button settings, Button retry,
+            RectTransform brand, RectTransform play, RectTransform dialog, Button start, Button settings,
             Button close, Button[] buttons, Text player, Text score, Text highScore, Text title, Text body, Text boardMessage, Text boardDetail,
             InputActionAsset actions, InputSystemUIInputModule module)
         {
             theme=skin;safeArea=safe;content=root;statusBar=header;mainFrame=frame;hero=battlefield;navigation=nav;
             leaderboard=board;howItWorks=info;controls=hints;logo=brand;startRect=play;modal=dialog;
-            startButton=start;settingsButton=settings;retryButton=retry;closeButton=close;tabs=buttons;
+            startButton=start;settingsButton=settings;closeButton=close;tabs=buttons;
             playerLabel=player;scoreLabel=score;highScoreLabel=highScore;modalTitle=title;modalBody=body;
             leaderboardMessage=boardMessage;leaderboardDetail=boardDetail;inputActions=actions;inputModule=module;
             canvas=GetComponent<Canvas>();
@@ -270,12 +272,15 @@ namespace BattleCities.UI
         private void OnEnable()
         {
             if (!Application.isPlaying) return;
+            instructionsPageElapsed = 0f;
+            SetInstructionsPage(false);
             EnsureApiClient();
             if(mainFrame && mainFrame.Find("Pre-battle screens"))
             {
                 EnsurePreBattle();
                 if(preBattle.IsOpen)preBattle.Open();
             }
+            if(mainFrame && mainFrame.Find("Shop screen"))EnsureShop();
             BindApiClient();
             ResetControllerLegendTimer();
             if(!inputActions){RefreshLayout();return;}
@@ -288,10 +293,13 @@ namespace BattleCities.UI
             if (!Application.isPlaying) return;
             RefreshLayout();
             if(preBattle && preBattle.IsOpen)preBattle.Open();
+            else if(IsShopOpen){EnsureShop();shop.Open();}
             else if (EventSystem.current) EventSystem.current.SetSelectedGameObject(startButton.gameObject);
         }
         private void OnDisable()
         {
+            SetInstructionsPage(false);
+            ReleasePaperBackdropMaterials();
             if(androidTvReveal!=null){StopCoroutine(androidTvReveal);androidTvReveal=null;}
             androidTvVisible=false;
             var tvGroup=mainFrame?mainFrame.GetComponent<CanvasGroup>():null;
@@ -304,6 +312,7 @@ namespace BattleCities.UI
         }
         private void Update()
         {
+            if (Application.isPlaying) UpdateInstructionsPage(Time.unscaledDeltaTime);
             if (Application.isPlaying && Time.unscaledTime >= nextRoundUpdate)
             {
                 nextRoundUpdate = Time.unscaledTime + 1;
@@ -326,6 +335,8 @@ namespace BattleCities.UI
         }
         public MainMenuPlatform Resolve(Vector2 size)
         {
+            if(Application.isPlaying && RuntimePlatformInfo.IsAndroid)
+                return RuntimePlatformInfo.IsPsg1 ? MainMenuPlatform.Psg1 : MainMenuPlatform.AndroidLandscape;
             if(platform!=MainMenuPlatform.Auto)
                 return platform==MainMenuPlatform.Android && size.x>size.y ? MainMenuPlatform.AndroidLandscape : platform;
             if(RuntimePlatformInfo.IsPsg1)return MainMenuPlatform.Psg1;
@@ -355,6 +366,7 @@ namespace BattleCities.UI
             {
                 ApplyAuthoredLayout(target,available);
                 ApplyArenaBackdrop(target,available);
+                ApplyMenuPresentation();
                 return;
             }
             bool psg=target==MainMenuPlatform.Psg1;
@@ -484,6 +496,29 @@ namespace BattleCities.UI
             if(Application.isPlaying && (target!=lastPlatform || inputModule.actionsAsset!=liveInput))ConfigureInput(psg);
             lastPlatform=target;
             ApplyArenaBackdrop(target,available);
+            ApplyMenuPresentation();
+        }
+        private void ApplyMenuPresentation()
+        {
+            LayoutLeaderboardEdges();
+            ApplyNavigationTypography();
+            ArcadeTextStyles.ApplyGold(scoreLabel,theme?theme.HeadingFont:null);
+            ArcadeTextStyles.ApplyGold(leaderboard?leaderboard.Find("Heading/Title")?.GetComponent<Text>():null,
+                theme?theme.HeadingFont:null);
+            ArcadeTextStyles.ApplyGold(leaderboard?leaderboard.Find("Footer/Label")?.GetComponent<Text>():null,
+                theme?theme.HeadingFont:null);
+            ArcadeTextStyles.ApplyWhiteLabels(transform,theme?theme.HeadingFont:null);
+            // Saved scenes may still contain the old control; exclude it from every platform profile.
+            var retry=leaderboard?leaderboard.Find("Scores/Retry"):null;
+            if(retry)
+            {
+                retry.gameObject.SetActive(false);
+                if(retry.TryGetComponent<Button>(out var button))
+                {
+                    button.interactable=false;
+                    button.navigation=new Navigation { mode=Navigation.Mode.None };
+                }
+            }
         }
         // Navigation plates fill their slots; their reference composition is slightly wider than tall.
         private const float NavigationAspect=9f/8f;
@@ -509,10 +544,9 @@ namespace BattleCities.UI
         { b.navigation=new Navigation{mode=Navigation.Mode.Explicit,selectOnUp=up,selectOnDown=down,selectOnLeft=left,selectOnRight=right}; }
         private void ConfigureNavigation(bool compact)
         {
-            Link(startButton,settingsButton,tabs[0],compact?tabs[0]:tabs[0],compact?tabs[4]:retryButton);
+            Link(startButton,settingsButton,tabs[0],tabs[0],tabs[4]);
             Link(settingsButton,compact?tabs[0]:null,startButton,tabs[0],startButton);
             for(int i=0;i<tabs.Length;i++)Link(tabs[i],compact?startButton:(i==0?settingsButton:tabs[i-1]),compact?startButton:tabs[(i+1)%tabs.Length],compact?tabs[(i+tabs.Length-1)%tabs.Length]:startButton,compact?tabs[(i+1)%tabs.Length]:startButton);
-            Link(retryButton,settingsButton,startButton,startButton,tabs[0]);
             Link(closeButton,closeButton,closeButton,closeButton,closeButton);
         }
         private void ConfigureInput(bool psg)
@@ -544,9 +578,10 @@ namespace BattleCities.UI
             if(IsModalOpen)
             {
                 modal.gameObject.SetActive(false);
-                SetHeroVisible(!(preBattle && preBattle.IsOpen));
+                SetHeroVisible(!IsTvScreenOpen);
                 if(EventSystem.current)EventSystem.current.SetSelectedGameObject(previousSelection?previousSelection:startButton.gameObject);
             }
+            else if(IsShopOpen){EnsureShop();shop.Back();}
             else if(preBattle && preBattle.IsOpen)preBattle.Back();
             else if(EventSystem.current)EventSystem.current.SetSelectedGameObject(startButton.gameObject);
         }
@@ -556,9 +591,10 @@ namespace BattleCities.UI
             var lobby = BattleCities.Multiplayer.BattleSession.Instance ? BattleCities.Multiplayer.BattleSession.Instance.Lobby : null;
             if (lobby && lobby.Visible) return;
             if (IsModalOpen) { Psg1UiNavigation.KeepFocus(modal, closeButton); return; }
+            if (IsShopOpen) { EnsureShop();shop.KeepControllerFocus();return; }
             if (preBattle && preBattle.IsOpen) { preBattle.KeepControllerFocus(); return; }
             var online = lobby ? lobby.OpenButton : null;
-            Psg1UiNavigation.Rows(new Selectable[] { walletLoginButton, settingsButton, online, retryButton },
+            Psg1UiNavigation.Rows(new Selectable[] { walletLoginButton, settingsButton, online },
                 new Selectable[] { startButton }, tabs);
             var selected = EventSystem.current.currentSelectedGameObject;
             // ONLINE belongs to the persistent multiplayer canvas, outside this menu's hierarchy.
@@ -577,6 +613,7 @@ namespace BattleCities.UI
         public void StartBattle()
         {
             if(loading)return;
+            if(IsShopOpen){EnsureShop();shop.Close(false);}
             EnsureApiClient();
             EnsurePreBattle();
             preBattle.Open();
@@ -600,9 +637,12 @@ namespace BattleCities.UI
             await session.QuickMatch();
             if(this){loading=false;startButton.interactable=true;}
         }
-        public void PlayTab() { if(EventSystem.current)EventSystem.current.SetSelectedGameObject(startButton.gameObject); }
+        public void PlayTab()
+        {
+            if(IsShopOpen){EnsureShop();shop.Close(false);}
+            if(EventSystem.current)EventSystem.current.SetSelectedGameObject(startButton.gameObject);
+        }
         public void OpenQuarters() { OpenDestination(quartersScene,"QUARTERS"); }
-        public void OpenShop() { OpenDestination(shopScene,"SHOP"); }
         public void OpenSocials() { OpenDestination(socialsScene,"SOCIALS"); }
         private void OpenDestination(string scene,string title)
         {
@@ -610,12 +650,7 @@ namespace BattleCities.UI
             ShowDialog(title,"This page has not been converted to Unity yet.\n\nYour main menu is ready. Select START to enter a battle.");
         }
         public void OpenSettings() { ShowDialog("CONTROLS","WEB   Arrow keys / WASD to navigate\nEnter to select · Escape to go back\n\nPSG1   D-pad / left stick to navigate\nA to select · B to go back\n\nANDROID   Tap a button to select"); }
-        public void OpenRanking() { ShowDialog("PLAYER RANKINGS",rows.Length>0?string.Join("\n",rows):"No season rankings are available right now. Retry in a moment."); }
-        public void RetryLeaderboard()
-        {
-            if(apiClient)apiClient.RefreshNow();
-            ShowDialog("REFRESHING LIVE DATA","Loading the current round and season rankings from the Battle Cities API.");
-        }
+        public void OpenRanking() { ShowDialog("PLAYER RANKINGS",rows.Length>0?string.Join("\n",rows):"No season rankings are available right now. Check back in a moment."); }
         public void ConnectWallet()
         {
             EnsureApiClient();
@@ -727,7 +762,12 @@ namespace BattleCities.UI
             var hasRows = ranked != null && ranked.Length > 0;
             if (rankingAvailability) rankingAvailability.text = snapshot == null ? "RANKINGS UNAVAILABLE" :
                 "LIVE  •  " + (string.IsNullOrWhiteSpace(snapshot.seasonName) ? "CURRENT SEASON" : snapshot.seasonName.ToUpperInvariant());
-            if (emptyTrophy) emptyTrophy.SetActive(!hasRows);
+            if (emptyTrophy)
+            {
+                emptyTrophy.SetActive(!hasRows);
+                var shadow=emptyTrophy.transform.parent.Find(emptyTrophy.name+" ground shadow");
+                if(shadow)shadow.gameObject.SetActive(!hasRows);
+            }
             if (leaderboardMessage)
             {
                 leaderboardMessage.gameObject.SetActive(!hasRows);
@@ -736,7 +776,7 @@ namespace BattleCities.UI
             if (leaderboardDetail)
             {
                 leaderboardDetail.gameObject.SetActive(!hasRows);
-                leaderboardDetail.text = snapshot == null ? "Retry to load live player standings." : "Play a ranked match to join the standings.";
+                leaderboardDetail.text = snapshot == null ? "Waiting for live player standings." : "Play a ranked match to join the standings.";
             }
             rows = hasRows ? new string[ranked.Length] : Array.Empty<string>();
             if (hasRows && scoresPanel) EnsureRankingCells(ranked.Length);
@@ -832,7 +872,7 @@ namespace BattleCities.UI
         {
             rows=formattedRows??Array.Empty<string>();
             if (leaderboardMessage) leaderboardMessage.text=rows.Length>0?string.Join("\n",rows):"RANKINGS UNAVAILABLE";
-            if (leaderboardDetail) leaderboardDetail.text=rows.Length>0?"":"Retry to load live player standings.";
+            if (leaderboardDetail) leaderboardDetail.text=rows.Length>0?"":"Waiting for live player standings.";
         }
     }
 }

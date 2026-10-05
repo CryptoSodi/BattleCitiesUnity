@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0f0f2f5d6a1d4c4ea9e74d78208a548, type: 3}
+  m_Name: ArcadeTypography
+  m_EditorClassIdentifier: Assembly-CSharp::BattleCities.UI.ArcadeTypography
+  headingFont: {fileID: 12800000, guid: f894bb9cd367f8e4e85f9c7f7c858c47, type: 3}
+  headingSdf: {fileID: 11400000, guid: 46d303970bd3b304b82967e28acadf16, type: 2}

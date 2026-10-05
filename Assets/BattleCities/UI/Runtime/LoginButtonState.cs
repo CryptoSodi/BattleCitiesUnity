@@ -64,7 +64,7 @@ namespace BattleCities.UI
             bool active=lastInteractable && (hovered||selected);
             bool down=lastInteractable && (pressed||submitUntil>Time.unscaledTime);
             art.color=!lastInteractable?disabledTint:down?pressedTint:active?activeTint:inactiveTint;
-            if(focusRing) focusRing.enabled=active&&!down;
+            if(focusRing) focusRing.enabled=false;
             transform.localScale=restScale*(down?pressedScale:active?activeScale:1);
         }
     }

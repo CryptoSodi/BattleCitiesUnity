@@ -12,7 +12,7 @@ namespace BattleCities.UI
     /// Main-menu adapter for the Battle Cities HTTP API.
     /// Supports wallet sessions and guest play. Google authentication is intentionally excluded.
     /// </summary>
-    public sealed class MainMenuApiClient : MonoBehaviour
+    public sealed partial class MainMenuApiClient : MonoBehaviour
     {
         public const string DefaultApiBaseUrl = "https://api.battlecities.com";
 
@@ -75,10 +75,12 @@ namespace BattleCities.UI
         public RoundSnapshot LastRound { get; private set; }
 
         private static string sessionCookie;
+        private static string sessionCookieOrigin;
         public static string CurrentGuestId { get; private set; }
         private static string currentGuestName;
         private readonly System.Collections.Generic.Dictionary<string, JObject> browserResponses = new System.Collections.Generic.Dictionary<string, JObject>();
         private Coroutine refreshRoutine;
+        private Coroutine menuDataRoutine;
         private bool requestInFlight;
         private bool guestLoginAttempted;
 
@@ -94,6 +96,7 @@ namespace BattleCities.UI
 
         private void OnDisable()
         {
+            CancelWalletLogin(false);
             StopAllCoroutines();
             refreshRoutine = null;
             requestInFlight = false;
@@ -117,22 +120,44 @@ namespace BattleCities.UI
 
         public void RefreshNow()
         {
-            if (isActiveAndEnabled && !requestInFlight) StartCoroutine(RefreshMenuData());
+            if (isActiveAndEnabled && !requestInFlight && !IsWalletLoginPending)
+                menuDataRoutine = StartCoroutine(RefreshMenuData());
         }
 
         public void ConnectWallet()
         {
+            if (!isActiveAndEnabled || IsWalletLoginPending) return;
+            if (menuDataRoutine != null) { StopCoroutine(menuDataRoutine); menuDataRoutine = null; }
+            requestInFlight = false;
+            walletAttemptId = Guid.NewGuid().ToString("N");
+            walletDeadline = Time.realtimeSinceStartupAsDouble + 200;
+            try
+            {
 #if UNITY_WEBGL && !UNITY_EDITOR
             NotifyStatus("CONNECTING WALLET", "Approve the Phantom connection and message signature.");
-            BattleCitiesWalletBridge.Connect(gameObject.name, nameof(OnWalletLoginResult), baseUrl.TrimEnd('/'));
+            BattleCitiesWalletBridge.Connect(gameObject.name, nameof(OnWalletLoginResult), baseUrl.TrimEnd('/'), walletAttemptId);
+#elif UNITY_ANDROID && !UNITY_EDITOR
+            NotifyStatus("CONNECTING WALLET", RuntimePlatformInfo.IsPsg1
+                ? "Approve sign-in in Jupiter Wallet, then return to Battle Cities."
+                : "Choose your Seeker wallet and approve the sign-in message.");
+            if (!mobileWallet) mobileWallet = gameObject.AddComponent<MobileWalletLogin>();
+            mobileWallet.Connect(baseUrl.TrimEnd('/'), RuntimePlatformInfo.IsPsg1, walletAttemptId, OnWalletLoginResult);
 #else
-            NotifyStatus("WALLET LOGIN UNAVAILABLE", "Open the WebGL build to sign in with Phantom. Guest play is available here.");
+            CancelWalletLogin(false);
+            NotifyStatus("WALLET LOGIN UNAVAILABLE", "Wallet sign-in runs in the web build or on an Android device. Guest play is available in the Editor.");
 #endif
+            }
+            catch (Exception)
+            {
+                CancelWalletLogin(false);
+                NotifyStatus("WALLET LOGIN FAILED", "Could not open the wallet. Check that a compatible wallet is installed and try again.");
+            }
         }
 
         public void ContinueAsGuest()
         {
             if (!isActiveAndEnabled) return;
+            CancelWalletLogin(false);
             BeginGuestLogin();
             PlayerPrefs.SetString("battlecities.loginMode", "guest");
             UseLocalGuest();
@@ -152,31 +177,45 @@ namespace BattleCities.UI
         {
             CurrentGuestId = null;
             currentGuestName = null;
+            sessionCookie = null;
+            sessionCookieOrigin = null;
         }
 
         public void OnWalletLoginResult(string json)
         {
+            if (!isActiveAndEnabled || !IsWalletLoginPending) return;
             try
             {
                 var body = JObject.Parse(json);
+                if ((string)body["attemptId"] != walletAttemptId) return;
                 if ((bool?)body["ok"] != true)
                 {
-                    NotifyStatus("WALLET LOGIN FAILED", (string)body["error"] ?? "Phantom did not complete login.");
+                    CancelWalletLogin(false);
+                    NotifyStatus("WALLET LOGIN FAILED", (string)body["error"] ?? "The wallet did not complete sign-in.");
                     return;
                 }
 
                 var player = ParsePlayer(body["player"] as JObject);
-                if (player == null || player.provider != "wallet") throw new InvalidOperationException("Wallet player response was invalid.");
+                if (player == null || player.provider != "wallet" || string.IsNullOrWhiteSpace(player.walletAddress))
+                    throw new InvalidOperationException("Wallet player response was invalid.");
+#if UNITY_ANDROID && !UNITY_EDITOR
+                CaptureSessionCookie((string)body["sessionCookie"]);
+                if (string.IsNullOrEmpty(sessionCookie) || sessionCookieOrigin != ApiOrigin)
+                    throw new InvalidOperationException("The server did not return a wallet session.");
+#endif
+                CancelWalletLogin(false);
                 PlayerPrefs.SetString("battlecities.loginMode", "wallet");
+                PlayerPrefs.Save();
                 IsAuthenticated = true;
                 IsWalletAuthenticated = true;
                 IsLocalGuest = false;
-                PlayerLoaded?.Invoke(player);
                 NotifyStatus("WALLET CONNECTED", ShortWallet(player.walletAddress));
+                PlayerLoaded?.Invoke(player);
                 if (automaticRefresh) RefreshNow();
             }
             catch (Exception exception)
             {
+                CancelWalletLogin(false);
                 NotifyStatus("WALLET LOGIN FAILED", exception.Message);
             }
         }
@@ -186,7 +225,7 @@ namespace BattleCities.UI
             while (enabled)
             {
                 yield return new WaitForSecondsRealtime(Mathf.Max(5, leaderboardRefreshSeconds));
-                if (!requestInFlight) yield return RefreshMenuData();
+                if (!requestInFlight && !IsWalletLoginPending) RefreshNow();
             }
         }
 
@@ -225,6 +264,12 @@ namespace BattleCities.UI
             else if (!string.IsNullOrEmpty(sessionError))
             {
                 NotifyStatus("API OFFLINE", sessionError);
+            }
+            else if (session != null && (bool?)session["authenticated"] != true)
+            {
+                IsAuthenticated = false;
+                IsWalletAuthenticated = false;
+                NotifyStatus("WALLET SESSION EXPIRED", "Please connect your wallet again.");
             }
 
             yield return LoadRound();
@@ -366,7 +411,8 @@ namespace BattleCities.UI
                     request.SetRequestHeader("Content-Type", "application/json");
                 }
 #if !UNITY_WEBGL || UNITY_EDITOR
-                if (!string.IsNullOrEmpty(sessionCookie)) request.SetRequestHeader("Cookie", sessionCookie);
+                if (!string.IsNullOrEmpty(sessionCookie) && sessionCookieOrigin == ApiOrigin)
+                    request.SetRequestHeader("Cookie", sessionCookie);
 #endif
                 yield return request.SendWebRequest();
 
@@ -399,8 +445,11 @@ namespace BattleCities.UI
         private void CaptureSessionCookie(string setCookie)
         {
             if (string.IsNullOrWhiteSpace(setCookie)) return;
-            var separator = setCookie.IndexOf(';');
-            sessionCookie = separator >= 0 ? setCookie.Substring(0, separator) : setCookie;
+            var match = System.Text.RegularExpressions.Regex.Match(setCookie,
+                @"(?:^|[,\r\n])\s*(battlecity_session=([^;,\r\n]*))");
+            if (!match.Success) return;
+            sessionCookie = string.IsNullOrEmpty(match.Groups[2].Value) ? null : match.Groups[1].Value;
+            sessionCookieOrigin = ApiOrigin;
         }
 
         private void NotifyStatus(string title, string detail)
@@ -450,7 +499,7 @@ namespace BattleCities.UI
         private static string ShortWallet(string value)
         {
             return string.IsNullOrWhiteSpace(value) || value.Length < 9
-                ? "Phantom wallet authenticated."
+                ? "Wallet authenticated."
                 : value.Substring(0, 4) + "..." + value.Substring(value.Length - 4);
         }
 
@@ -465,14 +514,22 @@ namespace BattleCities.UI
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
         [System.Runtime.InteropServices.DllImport("__Internal")]
-        private static extern void BattleCitiesConnectWallet(string gameObjectName, string callbackMethod, string baseUrl);
+        private static extern void BattleCitiesConnectWallet(string gameObjectName, string callbackMethod, string baseUrl, string attemptId);
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern void BattleCitiesCancelWallet(string attemptId);
         [System.Runtime.InteropServices.DllImport("__Internal")]
         private static extern void BattleCitiesApiRequest(string target, string callback, string id, string url, string method, string payload, int timeout);
 #endif
-        public static void Connect(string gameObjectName, string callbackMethod, string baseUrl)
+        public static void Connect(string gameObjectName, string callbackMethod, string baseUrl, string attemptId)
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
-            BattleCitiesConnectWallet(gameObjectName, callbackMethod, baseUrl);
+            BattleCitiesConnectWallet(gameObjectName, callbackMethod, baseUrl, attemptId);
+#endif
+        }
+        public static void Cancel(string attemptId)
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            BattleCitiesCancelWallet(attemptId);
 #endif
         }
         public static void Request(string target, string callback, string id, string url, string method, string payload, int timeout)

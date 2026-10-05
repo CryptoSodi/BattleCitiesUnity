@@ -112,3 +112,7 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Generated Burst WebGL build outputs
+/Data/Plugins/lib_burst_generated.cpp
+/Data/Plugins/lib_burst_generated.wasm

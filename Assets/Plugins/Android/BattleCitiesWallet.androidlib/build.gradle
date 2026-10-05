@@ -1,0 +1,19 @@
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'com.battlecities.wallet'
+    compileSdk 36
+    defaultConfig {
+        minSdk 26
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // 2.2 requires Android API 37; 2.1.1 supports the project's Unity/API 36 toolchain.
+    implementation 'com.solanamobile:mobile-wallet-adapter-clientlib:2.1.1'
+}

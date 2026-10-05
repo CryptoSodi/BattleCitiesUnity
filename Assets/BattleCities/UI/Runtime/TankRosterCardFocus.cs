@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 namespace BattleCities.UI
 {
-    /// <summary>Shows keyboard/gamepad focus without changing the deployed tank.</summary>
+    /// <summary>Reveals the focused card without drawing an outline or changing the deployed tank.</summary>
     public sealed class TankRosterCardFocus : MonoBehaviour,ISelectHandler,IDeselectHandler
     {
         [SerializeField] TankRosterScroll roster;
@@ -13,16 +13,12 @@ namespace BattleCities.UI
         {
             roster=scroll;
             highlight=GetComponent<UnityEngine.UI.Outline>();
-            if(!highlight)highlight=gameObject.AddComponent<UnityEngine.UI.Outline>();
-            highlight.effectColor=new Color32(255,205,40,255);
-            highlight.effectDistance=new Vector2(2,-2);
-            highlight.useGraphicAlpha=true;
-            highlight.enabled=EventSystem.current&&EventSystem.current.currentSelectedGameObject==gameObject;
+            if(highlight)highlight.enabled=false;
         }
 
         public void OnSelect(BaseEventData eventData)
         {
-            if(highlight)highlight.enabled=true;
+            if(highlight)highlight.enabled=false;
             if(roster)roster.Reveal((RectTransform)transform);
         }
 

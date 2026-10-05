@@ -100,8 +100,9 @@ namespace BattleCities.Editor
         {
             foreach (int direction in Path(target)) yield return Direction(direction);
             Check(Selected == target, "Gamepad did not reach " + target.name + "; selected " + Selected?.name);
-            Check(target.GetComponent<Psg1FocusRing>() && target.transform.Find("Controller focus").gameObject.activeSelf,
-                "Focus indicator missing on " + target.name);
+            var indicator=target.transform.Find("Controller focus");
+            Check(!indicator || !indicator.gameObject.activeSelf,
+                "Unexpected focus indicator on " + target.name);
         }
         static void Reachable(IEnumerable<Selectable> items)
         { foreach (var item in items.Where(s => Psg1UiNavigation.Available(s) && s.navigation.mode != Navigation.Mode.None)) Path(item); }
