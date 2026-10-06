@@ -1,0 +1,532 @@
+{
+  "family": "headquarters-v2",
+  "createdDate": "2026-10-06",
+  "count": 7,
+  "tool": "built-in image_gen",
+  "technicalFrame": {
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "background": "transparent",
+    "lighting": "upper-left",
+    "materials": "chunky polished illustrated toy metal",
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "animation": "static",
+    "engine": "Unity import handled separately",
+    "filtering": "smooth illustration; engine settings not modified"
+  },
+  "assets": [
+    {
+      "id": "treasury-safe",
+      "title": "Treasury",
+      "file": "C:/repos/BattleCity/public/assets/headquarters-v2/treasury-safe.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-b1cc13dd-3846-4a3b-bf66-50ae9bb145de.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-aa791ec6-6d1f-4671-92c2-c0b09c103e85.png",
+        "prompt": "ROLE: Completely NEW high-resolution individual Quarters menu card illustration for Battle Cities. Generate a fresh object; do not crop or upscale the screenshot or reuse an old-game icon.\nREFERENCE1 is the user's current Quarters concept: preserve the relevant object's identity and colors. REFERENCE2 Vanguard tank establishes chunky beveled modeled construction, polished painted metal, silver edge highlights, subtle wear and simple readable mechanical detail. Do not include the tank itself except the drawing on the field manual where requested.\nMATCHING FAMILY: premium polished chunky 3D illustrated toy arcade artwork, rich cobalt/navy, warm gold, steel/silver and military olive accents. Near-frontal with mild three-quarter depth, upper-left light and soft self-shading. Complete bold recognizable silhouettes, clean high resolution, not pixel art, not flat web icons or realistic war photos. Same rendering and size as the new Socials icons.\nTECHNICAL: one coherent subject,1024x1024 square, genuine transparent alpha background, centered with approximately12% clear padding, no clipped parts. NO baked ground shadow, floor, reflection, halo, glow or scene; self-shadows on object are allowed. No lettering, digits, text, logo wordmarks, UI card, surrounding frame, plaque, labels, watermark or extra unrelated props. Full-color normal-state assets even for features currently locked in UI; game handles any disabled tint. Readable at128px.\nSUBJECT: a sturdy compact navy/dark steel TREASURY SAFE in slight three-quarter view, closed armored door, large gold vault wheel, thick visible silver hinges, small gold fasteners and edge trim. Two small integrated groups of shiny gold coins flank its base, a taller stack to right and a shorter stack left; all belong to the one treasury illustration. Clear safe silhouette and wheel readable at small size. No words or currency symbols, no ground underneath, no cast shadow.",
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 48,
+          "top": 180,
+          "width": 1161,
+          "height": 916
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 800,
+          "height": 631
+        },
+        "padding": {
+          "left": 112,
+          "right": 112,
+          "top": 196,
+          "bottom": 197
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 115,
+          "top": 199,
+          "width": 795,
+          "height": 625,
+          "edgePixels": 0,
+          "transparentPercent": 62.53
+        },
+        "sourceEdges": 0,
+        "sha256": "9464114087bc8f062e83255d31cc2365786a82133752b08b34f5a9705cde2cc7",
+        "visualReview": "Passed: complete silhouette and readable on cream/navy at216,128,64px",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "field-manual",
+      "title": "Field Manual",
+      "file": "C:/repos/BattleCity/public/assets/headquarters-v2/field-manual.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-b1cc13dd-3846-4a3b-bf66-50ae9bb145de.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-79b396d8-d289-48cd-99d1-021599ce090d.png",
+        "prompt": "ROLE: Completely NEW high-resolution individual Quarters menu card illustration for Battle Cities. Generate a fresh object; do not crop or upscale the screenshot or reuse an old-game icon.\nREFERENCE1 is the user's current Quarters concept: preserve the relevant object's identity and colors. REFERENCE2 Vanguard tank establishes chunky beveled modeled construction, polished painted metal, silver edge highlights, subtle wear and simple readable mechanical detail. Do not include the tank itself except the drawing on the field manual where requested.\nMATCHING FAMILY: premium polished chunky 3D illustrated toy arcade artwork, rich cobalt/navy, warm gold, steel/silver and military olive accents. Near-frontal with mild three-quarter depth, upper-left light and soft self-shading. Complete bold recognizable silhouettes, clean high resolution, not pixel art, not flat web icons or realistic war photos. Same rendering and size as the new Socials icons.\nTECHNICAL: one coherent subject,1024x1024 square, genuine transparent alpha background, centered with approximately12% clear padding, no clipped parts. NO baked ground shadow, floor, reflection, halo, glow or scene; self-shadows on object are allowed. No lettering, digits, text, logo wordmarks, UI card, surrounding frame, plaque, labels, watermark or extra unrelated props. Full-color normal-state assets even for features currently locked in UI; game handles any disabled tint. Readable at128px.\nSUBJECT: an OPEN MILITARY STRATEGY BOOK viewed from above at a gentle three-quarter angle. Thick olive-green cover with gold protective corners, warm cream parchment pages, red ribbon bookmark, a bold olive tank drawing on the left page and simple RED tactical arrows, target circles and route marks on right. No writing or letter-like glyphs anywhere on pages. Small gold clasp on outer cover. Slightly curved open pages and thick beveled layered edges give polished toy volume. One book only, complete cover and bookmark within silhouette.",
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 35,
+          "top": 164,
+          "width": 1179,
+          "height": 905
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 800,
+          "height": 614
+        },
+        "padding": {
+          "left": 112,
+          "right": 112,
+          "top": 205,
+          "bottom": 205
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 115,
+          "top": 208,
+          "width": 795,
+          "height": 609,
+          "edgePixels": 0,
+          "transparentPercent": 66.95
+        },
+        "sourceEdges": 0,
+        "sha256": "a794f0b659b47a6aa36e2244565474f7fdea777b7115e17a4f834550522fac23",
+        "visualReview": "Passed: complete silhouette and readable on cream/navy at216,128,64px",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "campaigns-medal",
+      "title": "Campaigns",
+      "file": "C:/repos/BattleCity/public/assets/headquarters-v2/campaigns-medal.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-b1cc13dd-3846-4a3b-bf66-50ae9bb145de.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-256bf93c-57ba-44b2-879f-f50ab5a702bd.png",
+        "prompt": "ROLE: Completely NEW high-resolution individual Quarters menu card illustration for Battle Cities. Generate a fresh object; do not crop or upscale the screenshot or reuse an old-game icon.\nREFERENCE1 is the user's current Quarters concept: preserve the relevant object's identity and colors. REFERENCE2 Vanguard tank establishes chunky beveled modeled construction, polished painted metal, silver edge highlights, subtle wear and simple readable mechanical detail. Do not include the tank itself except the drawing on the field manual where requested.\nMATCHING FAMILY: premium polished chunky 3D illustrated toy arcade artwork, rich cobalt/navy, warm gold, steel/silver and military olive accents. Near-frontal with mild three-quarter depth, upper-left light and soft self-shading. Complete bold recognizable silhouettes, clean high resolution, not pixel art, not flat web icons or realistic war photos. Same rendering and size as the new Socials icons.\nTECHNICAL: one coherent subject,1024x1024 square, genuine transparent alpha background, centered with approximately12% clear padding, no clipped parts. NO baked ground shadow, floor, reflection, halo, glow or scene; self-shadows on object are allowed. No lettering, digits, text, logo wordmarks, UI card, surrounding frame, plaque, labels, watermark or extra unrelated props. Full-color normal-state assets even for features currently locked in UI; game handles any disabled tint. Readable at128px.\nSUBJECT: a large polished SILVER FIVE-POINT STAR MEDAL hanging from a short rich RED RIBBON. Navy/steel top suspension bar with silver beveled ends, red cloth ribbon folded neatly with subtle fabric modeling, small steel joining ring, deeply faceted reflective silver star below. Compact tall icon with large readable star and clear red ribbon. Near-frontal slight dimensional depth, no lettering, crest, award text or badge background. Exactly one medal.",
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 233,
+          "top": 55,
+          "width": 789,
+          "height": 1142
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 553,
+          "height": 800
+        },
+        "padding": {
+          "left": 235,
+          "right": 236,
+          "top": 112,
+          "bottom": 112
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 237,
+          "top": 115,
+          "width": 548,
+          "height": 794,
+          "edgePixels": 0,
+          "transparentPercent": 74.2
+        },
+        "sourceEdges": 0,
+        "sha256": "382485da1f41c0cfa12aa4539abc9655ab1a2c7e68d92a6d2544691998a2d8d2",
+        "visualReview": "Passed: complete silhouette and readable on cream/navy at216,128,64px",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "staking-lock",
+      "title": "Staking",
+      "file": "C:/repos/BattleCity/public/assets/headquarters-v2/staking-lock.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-b1cc13dd-3846-4a3b-bf66-50ae9bb145de.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-4b9c5df5-02c0-4b0a-a38b-69cc0cd2cc05.png",
+        "prompt": "ROLE: Completely NEW high-resolution individual Quarters menu card illustration for Battle Cities. Generate a fresh object; do not crop or upscale the screenshot or reuse an old-game icon.\nREFERENCE1 is the user's current Quarters concept: preserve the relevant object's identity and colors. REFERENCE2 Vanguard tank establishes chunky beveled modeled construction, polished painted metal, silver edge highlights, subtle wear and simple readable mechanical detail. Do not include the tank itself except the drawing on the field manual where requested.\nMATCHING FAMILY: premium polished chunky 3D illustrated toy arcade artwork, rich cobalt/navy, warm gold, steel/silver and military olive accents. Near-frontal with mild three-quarter depth, upper-left light and soft self-shading. Complete bold recognizable silhouettes, clean high resolution, not pixel art, not flat web icons or realistic war photos. Same rendering and size as the new Socials icons.\nTECHNICAL: one coherent subject,1024x1024 square, genuine transparent alpha background, centered with approximately12% clear padding, no clipped parts. NO baked ground shadow, floor, reflection, halo, glow or scene; self-shadows on object are allowed. No lettering, digits, text, logo wordmarks, UI card, surrounding frame, plaque, labels, watermark or extra unrelated props. Full-color normal-state assets even for features currently locked in UI; game handles any disabled tint. Readable at128px.\nSUBJECT: a chunky brushed steel PADLOCK with thick curved silver shackle, beveled square armored lock body, readable dark keyhole, a few small bolts. Two neatly grouped metallic coin stacks behind/to its right, one tall and one short; primarily silver with subtle gold rims for warmth. Padlock is dominant, coins secondary. Three-quarter near-frontal view, complete object group without floor or shadow. No currency letters, chain, text or separate frame.",
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 54,
+          "top": 172,
+          "width": 1161,
+          "height": 939
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 800,
+          "height": 647
+        },
+        "padding": {
+          "left": 112,
+          "right": 112,
+          "top": 188,
+          "bottom": 189
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 115,
+          "top": 191,
+          "width": 794,
+          "height": 641,
+          "edgePixels": 0,
+          "transparentPercent": 65.2
+        },
+        "sourceEdges": 0,
+        "sha256": "3c9658260ae298b3ae5f0118fe21c02420831351d74a0c2be73a4b9f42cdde0c",
+        "visualReview": "Passed: complete silhouette and readable on cream/navy at216,128,64px",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "trading-arrows",
+      "title": "Trading",
+      "file": "C:/repos/BattleCity/public/assets/headquarters-v2/trading-arrows.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-b1cc13dd-3846-4a3b-bf66-50ae9bb145de.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-26790f26-fe10-4ddd-ad9d-740d6c3e084d.png",
+        "prompt": "ROLE: Completely NEW high-resolution individual Quarters menu card illustration for Battle Cities. Generate a fresh object; do not crop or upscale the screenshot or reuse an old-game icon.\nREFERENCE1 is the user's current Quarters concept: preserve the relevant object's identity and colors. REFERENCE2 Vanguard tank establishes chunky beveled modeled construction, polished painted metal, silver edge highlights, subtle wear and simple readable mechanical detail. Do not include the tank itself except the drawing on the field manual where requested.\nMATCHING FAMILY: premium polished chunky 3D illustrated toy arcade artwork, rich cobalt/navy, warm gold, steel/silver and military olive accents. Near-frontal with mild three-quarter depth, upper-left light and soft self-shading. Complete bold recognizable silhouettes, clean high resolution, not pixel art, not flat web icons or realistic war photos. Same rendering and size as the new Socials icons.\nTECHNICAL: one coherent subject,1024x1024 square, genuine transparent alpha background, centered with approximately12% clear padding, no clipped parts. NO baked ground shadow, floor, reflection, halo, glow or scene; self-shadows on object are allowed. No lettering, digits, text, logo wordmarks, UI card, surrounding frame, plaque, labels, watermark or extra unrelated props. Full-color normal-state assets even for features currently locked in UI; game handles any disabled tint. Readable at128px.\nSUBJECT: one bright GOLD COIN with a simple raised five-point star, surrounded by TWO thick curved exchange arrows. Upper arrow rich COBALT BLUE, lower arrow warm GOLD, clearly forming circular exchange motion in opposite halves around the central coin. Navy edge separation and small silver bevels add polished toy-metal depth. Open negative-space gaps between coin and arrows, near-frontal balanced silhouette. No currency letters, chart, straight swap-arrow pair, card, background circle or extra coins.",
+        "initialSource": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-b3bda86e-8bab-4c82-abe7-fa7cecbdfc03.png",
+        "editHistory": [
+          {
+            "input": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-b3bda86e-8bab-4c82-abe7-fa7cecbdfc03.png",
+            "output": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-26790f26-fe10-4ddd-ad9d-740d6c3e084d.png",
+            "prompt": "Transparent-background extraction edit of this exact Trading icon. Preserve the gold star coin and both curved exchange arrows, their shapes, colors, bevels, material highlights and arrangement. Remove ALL gray/cream backing, fog, translucent haze, ambient cast shadow and colored halo from around the icon AND from every negative-space gap between the arrows and coin. The space between these three separate solid objects must be fully transparent alpha. Outer object boundaries must be crisp. Keep self-shading only on actual solid surfaces. Do not add a panel or connecting plate, no new background, no shadow. Center the entire complete icon on transparent square canvas with about12 percent margin, no text, no crops. The finished cutout should place cleanly on any background without a visible hazy blob.",
+            "result": "selected: halo removed"
+          }
+        ],
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 84,
+          "top": 109,
+          "width": 1113,
+          "height": 1025
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 800,
+          "height": 737
+        },
+        "padding": {
+          "left": 112,
+          "right": 112,
+          "top": 143,
+          "bottom": 144
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 115,
+          "top": 146,
+          "width": 794,
+          "height": 731,
+          "edgePixels": 0,
+          "transparentPercent": 61
+        },
+        "sourceEdges": 0,
+        "sha256": "70be72552655b7f23cddecfaf9ae6210c984de7c5feef5c6fa9667924d7c1063",
+        "visualReview": "Passed: complete silhouette and readable on cream/navy at216,128,64px",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "boosts-chevrons",
+      "title": "Boosts",
+      "file": "C:/repos/BattleCity/public/assets/headquarters-v2/boosts-chevrons.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-839a4fa8-bc63-4755-80b1-27f344e8d16e.png",
+        "prompt": "Create a NEW Battle Cities BOOSTS icon: the classic SERGEANT TRIPLE-CHEVRON rank insignia, made of THREE SEPARATE OLIVE-GREEN CHEVRON BARS stacked vertically.\nEXACT LAYOUT on a1024square transparent canvas:\nTop bar: an upward-pointing chevron with peak near y180.\nMiddle bar: an identical upward-pointing chevron with peak near y440.\nBottom bar: an identical upward-pointing chevron with peak near y700.\nAll three have the same approximately640px width and about200px overall height. Small clear transparent gaps separate the three bars. The visible green faces must be THREE distinct stripes, all pointing UP. The bottom bar is fully present, not cropped.\nEach bar has a broad olive-green painted face, a crisp brushed-silver beveled rim, and a thin dark navy sidewall. Chunky polished 3D toy military insignia with upper-left studio light and mild paint edge wear matching the supplied Vanguard tank's material. Front-facing, balanced symmetrical composition.\nGenuine transparent background and gaps, no ground shadow, halo, shield, backing plate, card, text, letters or numbers. One complete triple-chevron icon, centered and generously padded. Do not include a tank.",
+        "initialPrompt": "ROLE: Completely NEW high-resolution individual Quarters menu card illustration for Battle Cities. Generate a fresh object; do not crop or upscale the screenshot or reuse an old-game icon.\nREFERENCE1 is the user's current Quarters concept: preserve the relevant object's identity and colors. REFERENCE2 Vanguard tank establishes chunky beveled modeled construction, polished painted metal, silver edge highlights, subtle wear and simple readable mechanical detail. Do not include the tank itself except the drawing on the field manual where requested.\nMATCHING FAMILY: premium polished chunky 3D illustrated toy arcade artwork, rich cobalt/navy, warm gold, steel/silver and military olive accents. Near-frontal with mild three-quarter depth, upper-left light and soft self-shading. Complete bold recognizable silhouettes, clean high resolution, not pixel art, not flat web icons or realistic war photos. Same rendering and size as the new Socials icons.\nTECHNICAL: one coherent subject,1024x1024 square, genuine transparent alpha background, centered with approximately12% clear padding, no clipped parts. NO baked ground shadow, floor, reflection, halo, glow or scene; self-shadows on object are allowed. No lettering, digits, text, logo wordmarks, UI card, surrounding frame, plaque, labels, watermark or extra unrelated props. Full-color normal-state assets even for features currently locked in UI; game handles any disabled tint. Readable at128px.\nSUBJECT: EXACTLY THREE stacked upward-pointing MILITARY GREEN CHEVRONS. Three separate nested V-up chevron bars arranged vertically, consistent gaps, painted olive-green faces with bright beveled edges, thick brushed silver outer rims and navy side depth. The stack itself is the complete icon with no shield, plaque or backing. Near-frontal, sturdy toy insignia, three bars clearly countable and bold at small size. Not two and not four chevrons. No letters or rank text.",
+        "conceptReferences": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-b1cc13dd-3846-4a3b-bf66-50ae9bb145de.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "editHistory": [
+          {
+            "input": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-93e194ff-7eae-441b-8a63-64038e0839b4.png",
+            "output": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-4f1cfed6-2d7f-464a-9a1b-7aa6f71f4b01.png",
+            "prompt": "Precise asset edit: change this icon from TWO green military chevrons to EXACTLY THREE GREEN MILITARY CHEVRONS. Output a vertical stack containing a TOP chevron, a MIDDLE chevron, and a BOTTOM chevron: THREE visibly separate identical upward-pointing green bars with silver rims and navy depth. Scale the individual chevrons down enough to fit ALL THREE complete chevrons and equal transparent gaps within one square canvas with generous padding. All three identical width and style, clear visible count of3. Preserve the polished olive paint, steel bevels, upper-left light and crisp 3D toy material. No connecting backing/shield/plaque. Actual transparent background, no cast shadow or halo, no text or numeral3. Three green chevrons, not two. Full-color asset.",
+            "result": "discarded: rendered two chevrons"
+          }
+        ],
+        "discardedSources": [
+          "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-93e194ff-7eae-441b-8a63-64038e0839b4.png",
+          "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-4f1cfed6-2d7f-464a-9a1b-7aa6f71f4b01.png"
+        ],
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 172,
+          "top": 58,
+          "width": 910,
+          "height": 1157
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 629,
+          "height": 800
+        },
+        "padding": {
+          "left": 197,
+          "right": 198,
+          "top": 112,
+          "bottom": 112
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 200,
+          "top": 114,
+          "width": 623,
+          "height": 795,
+          "edgePixels": 0,
+          "transparentPercent": 65.95
+        },
+        "sourceEdges": 0,
+        "sha256": "c58e8525dff6f8547ad9a1adaf54ed9ffb685e53559caedd4e7b23d621316cc2",
+        "visualReview": "Passed: complete silhouette and readable on cream/navy at216,128,64px",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "airdrop-crate",
+      "title": "Airdrop",
+      "file": "C:/repos/BattleCity/public/assets/headquarters-v2/airdrop-crate.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-b1cc13dd-3846-4a3b-bf66-50ae9bb145de.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-535127e4-0638-47d5-9c7d-b4256cee6c98.png",
+        "prompt": "ROLE: Completely NEW high-resolution individual Quarters menu card illustration for Battle Cities. Generate a fresh object; do not crop or upscale the screenshot or reuse an old-game icon.\nREFERENCE1 is the user's current Quarters concept: preserve the relevant object's identity and colors. REFERENCE2 Vanguard tank establishes chunky beveled modeled construction, polished painted metal, silver edge highlights, subtle wear and simple readable mechanical detail. Do not include the tank itself except the drawing on the field manual where requested.\nMATCHING FAMILY: premium polished chunky 3D illustrated toy arcade artwork, rich cobalt/navy, warm gold, steel/silver and military olive accents. Near-frontal with mild three-quarter depth, upper-left light and soft self-shading. Complete bold recognizable silhouettes, clean high resolution, not pixel art, not flat web icons or realistic war photos. Same rendering and size as the new Socials icons.\nTECHNICAL: one coherent subject,1024x1024 square, genuine transparent alpha background, centered with approximately12% clear padding, no clipped parts. NO baked ground shadow, floor, reflection, halo, glow or scene; self-shadows on object are allowed. No lettering, digits, text, logo wordmarks, UI card, surrounding frame, plaque, labels, watermark or extra unrelated props. Full-color normal-state assets even for features currently locked in UI; game handles any disabled tint. Readable at128px.\nSUBJECT: a compact SUPPLY CRATE suspended beneath a fully open GREEN AND CREAM PARACHUTE. Rounded segmented canopy alternates military olive-green and warm cream panels, visible dimensional folds, four clean sturdy cord lines joining a small olive/navy armored supply crate below. Crate has silver protective corners, gold latch and a simple gold star emblem with no words. Entire canopy, all cords and entire crate visible as one complete vertical silhouette with modest width. Bold toy proportions with readable sturdy cords, not wispy thin lines. No sky, cloud, motion trails, floor, ground shadow, plane or person.",
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 111,
+          "top": 23,
+          "width": 1031,
+          "height": 1204
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 685,
+          "height": 800
+        },
+        "padding": {
+          "left": 169,
+          "right": 170,
+          "top": 112,
+          "bottom": 112
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 172,
+          "top": 114,
+          "width": 679,
+          "height": 796,
+          "edgePixels": 0,
+          "transparentPercent": 69.8
+        },
+        "sourceEdges": 0,
+        "sha256": "15ee2c257a32c8177555477e3cf5f9d5e7533239d7b30dfb94dede5918834f03",
+        "visualReview": "Passed: complete silhouette and readable on cream/navy at216,128,64px",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    }
+  ],
+  "validation": {
+    "status": "asset_checks_passed",
+    "reviewedCanvasSizes": [
+      216,
+      128,
+      64
+    ],
+    "reviewBackgrounds": [
+      "cream",
+      "navy"
+    ],
+    "preview": "C:/repos/BattleCity/tmp/fresh-menu-icons-v2-20261006/headquarters-v2-preview.png",
+    "notes": "Fresh individual illustrations, complete silhouettes, transparent backgrounds and internal gaps, no visible baked shadows or halos. No text/card backplates. Three Boosts chevrons verified. Unity import and in-engine checks remain with the implementing chat."
+  }
+}

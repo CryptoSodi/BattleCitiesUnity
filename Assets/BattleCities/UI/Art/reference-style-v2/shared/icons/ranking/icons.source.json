@@ -1,0 +1,134 @@
+{
+  "created_date": "2026-10-06",
+  "tool": "built-in image_gen",
+  "transparent_background": true,
+  "inspected_references": [
+    "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/reference-style-v2/shared/navigation/play.png",
+    "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/reference-style-v2/shared/navigation/shop.png",
+    "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/reference-style-v2/shared/navigation/ranking.png",
+    "C:/repos/Unity/ui assets/main-menu/previews/psg-ranking-page-final.png"
+  ],
+  "assets": [
+    {
+      "slug": "gaming",
+      "filename": "ranking-tab-gaming-icon-v1.png",
+      "prompt": "Use case: stylized-concept. Create ONE standalone Battle Cities tab icon. These reference images show the existing SHOP storefront and RANKING podium menu illustrations. Match their polished toy-like 3D forms, saturated colors, crisp dark navy contours, softly rounded sculpted edges, upper-left glossy highlights and clean painted-material shading. Use them for visual style only; do not include their subject or numbers. This is a finished small UI icon, not a screen concept.\n\nTECHNICAL: square 1024x1024 RGBA PNG with genuinely transparent background. Center one complete icon, with its longest visible dimension about82% of the canvas and modest even padding; avoid excessive blank space. The solid silhouette must read instantly when aspect-fitted into a20–30px-high game tab on BOTH deep blue and gold backgrounds. Use a clean thin navy contour plus restrained pale-blue edge highlights to separate the icon on either color. No tab/button background, no backplate or badge enclosing the overall icon, no lettering, numbers, logos, currency tickers, text, mockup, collage, outer glow, fuzzy halo, floor or large external drop shadow. Self-shadow and very short close edge shading only. No tiny ornamental details. Entire object uncut, sharp smooth alpha edges.\nSUBJECT: A compact friendly GAME CONTROLLER with a dark navy and royal-blue molded body. Distinct ergonomic controller silhouette with two short chunky hand grips, broad top shoulders and softly indented bottom center. Compact proportions, roughly1.25:1 width to height, not a very long thin controller. Nearly front-on with a slight elevated view so the top bevel and tactile buttons have visible depth.\nLEFT SIDE: one large clearly readable light silver-blue D-PAD cross with dark inset edges.\nRIGHT SIDE: four small but distinct round glossy face buttons arranged in a diamond: red, yellow, green and bright cyan. They must be strong simple color dots without letters.\nA restrained cyan-blue shell highlight along the upper and side edges, darker navy underside. At most one small unlabeled dark central oval detail; keep the middle uncluttered. Do not add a cable, hands, character, console, screen, big glowing elements or complex internal markings. Focus on recognizable controller body, D-pad and button cluster at tiny display size.",
+      "path": "C:/repos/BattleCity/art_exports/ui/ranking-tab-gaming-icon-v1.png",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-58a5c02e-9925-4341-b0db-268604e4d4f4.png",
+      "generationReferences": [
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/reference-style-v2/shared/navigation/shop.png",
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/reference-style-v2/shared/navigation/ranking.png"
+      ],
+      "normalization": {
+        "sourceDimensions": {
+          "width": 1254,
+          "height": 1254
+        },
+        "sourceCrop": {
+          "left": 12,
+          "top": 212,
+          "width": 1230,
+          "height": 852
+        },
+        "aspectPreservingResizedDimensions": {
+          "width": 880,
+          "height": 610
+        },
+        "padding": {
+          "left": 72,
+          "right": 72,
+          "top": 207,
+          "bottom": 207
+        }
+      },
+      "validation": {
+        "width": 1024,
+        "height": 1024,
+        "channels": 4,
+        "hasAlpha": true,
+        "visibleBounds": {
+          "left": 73,
+          "top": 208,
+          "width": 878,
+          "height": 608
+        },
+        "transparentPixelPercent": 62.55,
+        "edgeTouchPixels": 0,
+        "sha256": "fa067db8ba03b5fdc31823830186cfd464492a1cfe7399a1dd4898d6cac85566"
+      }
+    },
+    {
+      "slug": "trading",
+      "filename": "ranking-tab-trading-icon-v1.png",
+      "prompt": "Use case: stylized-concept. Create ONE standalone Battle Cities tab icon. These reference images show the existing SHOP storefront and RANKING podium menu illustrations. Match their polished toy-like 3D forms, saturated colors, crisp dark navy contours, softly rounded sculpted edges, upper-left glossy highlights and clean painted-material shading. Use them for visual style only; do not include their subject or numbers. This is a finished small UI icon, not a screen concept.\n\nTECHNICAL: square 1024x1024 RGBA PNG with genuinely transparent background. Center one complete icon, with its longest visible dimension about82% of the canvas and modest even padding; avoid excessive blank space. The solid silhouette must read instantly when aspect-fitted into a20–30px-high game tab on BOTH deep blue and gold backgrounds. Use a clean thin navy contour plus restrained pale-blue edge highlights to separate the icon on either color. No tab/button background, no backplate or badge enclosing the overall icon, no lettering, numbers, logos, currency tickers, text, mockup, collage, outer glow, fuzzy halo, floor or large external drop shadow. Self-shadow and very short close edge shading only. No tiny ornamental details. Entire object uncut, sharp smooth alpha edges.\nSUBJECT: A compact EXCHANGE icon made from exactly TWO CHUNKY OPPOSING CURVED ARROWS wrapped around ONE METALLIC COIN. The upper semicircular arrow is warm gold/yellow, ending in a large arrowhead pointing down/right along the curve. The lower semicircular arrow is saturated cyan/royal blue, ending in a large arrowhead pointing up/left along the curve. Clear circular exchange motion and separation between the two arrows. This must look visibly different from a pair of straight stacked horizontal Swap arrows.\nAt the CENTER, one simple thick metallic SILVER coin with a softly domed blank face and a clean beveled rim. No embossed symbol, logo, letters or numbers. The silver face should remain visible between the enclosing curved arrows. Arrows and coin form one cohesive nearly round silhouette with strong dark navy contour. Small depth offsets and controlled top-left highlights make it look like the same polished toy menu art. Keep arrow bodies broad, arrowheads oversized enough to read at24px. No stock charts, candles, graphs, tiny ticks, extra coins, dollar signs or sparkles.",
+      "path": "C:/repos/BattleCity/art_exports/ui/ranking-tab-trading-icon-v1.png",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-566bac13-d854-4758-9c03-b5d3d5f9b7f1.png",
+      "generationReferences": [
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/reference-style-v2/shared/navigation/shop.png",
+        "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/reference-style-v2/shared/navigation/ranking.png"
+      ],
+      "normalization": {
+        "sourceDimensions": {
+          "width": 1254,
+          "height": 1254
+        },
+        "sourceCrop": {
+          "left": 64,
+          "top": 85,
+          "width": 1125,
+          "height": 1076
+        },
+        "aspectPreservingResizedDimensions": {
+          "width": 880,
+          "height": 842
+        },
+        "padding": {
+          "left": 72,
+          "right": 72,
+          "top": 91,
+          "bottom": 91
+        }
+      },
+      "validation": {
+        "width": 1024,
+        "height": 1024,
+        "channels": 4,
+        "hasAlpha": true,
+        "visibleBounds": {
+          "left": 73,
+          "top": 92,
+          "width": 877,
+          "height": 839
+        },
+        "transparentPixelPercent": 49.53,
+        "edgeTouchPixels": 0,
+        "sha256": "2123e4f800eae286310a5bc324ece9f631265a46da5337a6658b75a7d3e07062"
+      }
+    }
+  ],
+  "export_spec": {
+    "width": 1024,
+    "height": 1024,
+    "format": "RGBA PNG",
+    "visible_long_edge_target": 880,
+    "normalization": "Aspect-preserving resize and centered transparent padding only; no repainting or recoloring.",
+    "usage": "Use aspect-fit/preserve-aspect layout; do not stretch.",
+    "inventory_or_title_art_changes": "none"
+  },
+  "validation": {
+    "status": "dimensions_and_alpha_passed",
+    "asset_count": 2,
+    "preview": "C:/repos/BattleCity/tmp/ranking-tab-icons-v1/readability.png",
+    "preview_sizes_px": [
+      20,
+      24,
+      30
+    ],
+    "preview_backgrounds": [
+      "#082f55",
+      "#ffd126"
+    ],
+    "visual_review": "pending",
+    "in_engine_review": "Unity importing chat will validate in game"
+  }
+}

@@ -37,6 +37,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: f918b6757a18e43498a725750f7a70c7, type: 3}
   - {fileID: 21300000, guid: f70342f29962a8844a64ecd0daa20f46, type: 3}
   - {fileID: 21300000, guid: fe31d6130f8b47547a2ef962084c2785, type: 3}
+  RankingGamingIcon: {fileID: 21300000, guid: a894d0516b1663048934ae8e517068fc, type: 3}
+  RankingTradingIcon: {fileID: 21300000, guid: 98d36b9a24a0ceb4c8133b2fa5573529, type: 3}
   SettingsIcon: {fileID: 21300000, guid: ce466a145b2815143818156c8cc7983f, type: 3}
   ScoreIcon: {fileID: 21300000, guid: 20a96ad9b2e8eca47a233780ac4daa59, type: 3}
   HighScoreIcon: {fileID: 21300000, guid: e60c9f98b6d1d834cb353c906d7b87ab, type: 3}

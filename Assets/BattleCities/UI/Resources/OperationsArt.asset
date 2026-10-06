@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19b0e68d4daaadd48ac4c4910e5e90d7, type: 3}
+  m_Name: OperationsArt
+  m_EditorClassIdentifier: Assembly-CSharp::BattleCities.UI.OperationsArt
+  quarters:
+  - {fileID: 2177944711336104391, guid: 2f956aa95cd09f3479b56a1b6e392420, type: 3}
+  - {fileID: 1229685431167568971, guid: c200bc57df379834e964792786bb82b8, type: 3}
+  - {fileID: -6618421604780632772, guid: dcff970b72be4a54488e86073a78f6dd, type: 3}
+  - {fileID: -2243109410739458169, guid: cfeab8876726b3c479ccc2eb1355b7f0, type: 3}
+  - {fileID: -562779745197917600, guid: 3bd2382eec87b8c4ea1b122bcb657c66, type: 3}
+  - {fileID: 5955655701198177659, guid: d155fe567d427f140920d8116a1f6125, type: 3}
+  - {fileID: -912261265393781088, guid: 70eb7808cbb6a7f4e94b0c48ca619d7e, type: 3}
+  socials:
+  - {fileID: 5124876053065607992, guid: 6fee6802651ef2c4c96cf4d70ceded09, type: 3}
+  - {fileID: 870361518925698519, guid: abaad6e7a5e724d409487c4cf09ddde3, type: 3}
+  - {fileID: 550732296429884945, guid: 227a811c85dd12943b483a39f71014a4, type: 3}
+  - {fileID: 8924947656317453358, guid: 5e18ac5459adfa941926d0226625d51e, type: 3}
+  - {fileID: -8586097681645895071, guid: b04a3d82002eecc4b820cac7ef5ccd0b, type: 3}
+  - {fileID: 9043755253799671106, guid: 38ae0cf4b7a2c1a4c86afa56a141c950, type: 3}
+  playerTanks:
+  - {fileID: 1135612159295214548, guid: f0e74f8a48473084f8786baf5537b0fd, type: 3}
+  - {fileID: -926711855478776023, guid: 562c601812cd9534e9871da246e98be7, type: 3}
+  - {fileID: 3881675274392882265, guid: 8fcb9858225c7e14198a467586cae57c, type: 3}
+  - {fileID: 5830843985586904733, guid: 7fb203d455e7a8b4b9fd6cfe285a2126, type: 3}
+  enemies:
+  - {fileID: -4552107494924540277, guid: aaf5ad2d1a8e3d2499d18cc156587b5c, type: 3}
+  - {fileID: 7016150275349600982, guid: ce96d84758f9d874b921ad82b077bd38, type: 3}
+  - {fileID: -2845481488082104249, guid: 6d5a674b038aea444b41074b282820ba, type: 3}
+  - {fileID: 7825183866733181154, guid: acd9ecd0b0d7d4e4391177fc3d9117cf, type: 3}
+  cannon: {fileID: 252820194293200846, guid: c5089d2d46473584dbf6723ca58963e4, type: 3}
+  manual: {fileID: 4900000, guid: 5df2fc94ed003ff4e93fcaa67d30556c, type: 3}

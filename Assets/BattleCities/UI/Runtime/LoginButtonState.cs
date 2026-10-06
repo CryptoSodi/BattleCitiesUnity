@@ -20,8 +20,25 @@ namespace BattleCities.UI
         private Image art;
         private Vector3 restScale;
         private bool hovered, selected, pressed, lastInteractable;
+        private bool interactionLocked;
+        private Color lockedTint;
+        private Vector3 lockedScale;
         private float submitUntil;
         public void Configure(Image ring) { focusRing=ring; Cache(); Refresh(); }
+        public void SetInteractionLocked(bool value)
+        {
+            Cache();
+            if(value && !interactionLocked)
+            {
+                bool activated=pressed || submitUntil>Time.unscaledTime ||
+                    (EventSystem.current && EventSystem.current.currentSelectedGameObject==gameObject);
+                lockedTint=activated?pressedTint:art.color;
+                lockedScale=activated?restScale*pressedScale:transform.localScale;
+            }
+            interactionLocked=value;
+            button.interactable=!value;
+            Refresh();
+        }
         private void Cache()
         {
             if (button) return;
@@ -61,6 +78,13 @@ namespace BattleCities.UI
         {
             if(!button || !art) return;
             lastInteractable=button.IsInteractable();
+            if(interactionLocked)
+            {
+                art.color=lockedTint;
+                if(focusRing) focusRing.enabled=false;
+                transform.localScale=lockedScale;
+                return;
+            }
             bool active=lastInteractable && (hovered||selected);
             bool down=lastInteractable && (pressed||submitUntil>Time.unscaledTime);
             art.color=!lastInteractable?disabledTint:down?pressedTint:active?activeTint:inactiveTint;

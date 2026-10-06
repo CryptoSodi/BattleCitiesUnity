@@ -1,0 +1,387 @@
+{
+  "createdDate": "2026-10-06",
+  "assetFamily": "Battle Cities Field Manual",
+  "approvedVisualReference": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png",
+  "technicalFrame": {
+    "engine": "Unity; import handled separately",
+    "view": "three-quarter front lower-left",
+    "lighting": "upper left",
+    "palette": "military olive/steel with restrained red details",
+    "size": [
+      1024,
+      1024
+    ],
+    "background": "transparent",
+    "subjectFit": 800,
+    "filtering": "smooth illustration; import setting not modified",
+    "mipmaps": "not modified",
+    "animation": "static",
+    "scaleNote": "UI icon scale, not world-unit scale"
+  },
+  "assets": [
+    {
+      "id": "enemy-scout",
+      "title": "Scout enemy tank",
+      "role": "Light agile enemy",
+      "file": "C:/repos/BattleCity/public/assets/headquarters/manual/enemy-scout.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "source": {
+        "kind": "generated",
+        "tool": "built-in image_gen",
+        "reference": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png",
+        "rawGeneration": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-14083212-95a5-42f4-92a0-410a3a4ad6c9.png",
+        "prompt": "Production asset for Battle Cities Field Manual. The supplied yellow Vanguard render is the approved visual style and camera reference; generate a new related object, not a recolor of the same hull.\nSTYLE LOCK: polished chunky 3D illustrated toy military hardware, physically legible beveled painted metal, restrained subtle edge wear, large readable mechanical forms, dark steel tracks and barrels, silver edges, no thick cartoon outline. Match reference light from upper left, soft self-shading, near-orthographic three-quarter view looking down roughly30degrees. Front and cannon point toward LOWER LEFT; rear extends toward upper right. Visible top, front and right side exactly as reference. Not photorealistic warfare, not flat vector, not pixel art.\nOUTPUT: one complete isolated subject centered in a1024x1024 square with generous uniform transparent padding about12% minimum on each side. Actual transparent background, clean alpha silhouette. No floor or ground plane and absolutely NO cast ground shadow, no shadow blob underneath, no reflection, no fog/glow. Self-shadows inside the object are fine. No frame, card, label, text, letters, numbers, logos, stars, watermarks, scenery, people, UI or extra separate items. Entire silhouette and barrel must fit comfortably, no cropped edges. View should read at128px.\nSUBJECT: SCOUT enemy tank. A compact lightly armored military olive-green tracked scout with low small rounded turret, short slim single cannon and a small hatch. Narrow exposed dark-steel treads with only a few clearly grouped wheels, short lightweight hull, slim sloped front. Light olive painted hull, steel fittings and two restrained dark red identification panels on turret sides. Clearly lighter and smaller in design than Vanguard, mobile and nimble. No wheels outside its tracked running gear. One tank only.",
+        "termsNote": "AI-generated from user-provided project reference; no third-party stock source."
+      },
+      "normalization": {
+        "operation": "Transparent-margin crop, proportional resize and centered transparent padding only; no repainting or recoloring.",
+        "crop": {
+          "left": 53,
+          "top": 51,
+          "width": 1156,
+          "height": 1203
+        },
+        "resized": {
+          "width": 769,
+          "height": 800
+        },
+        "padding": {
+          "left": 127,
+          "right": 128,
+          "top": 112,
+          "bottom": 112
+        },
+        "embeddedMetadata": "preserved when supported by Sharp"
+      },
+      "validation": {
+        "dimensionsPassed": true,
+        "alphaPassed": true,
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "sourceVisibleBounds": {
+          "left": 60,
+          "top": 197,
+          "width": 1143,
+          "height": 905,
+          "edgePixels": 0,
+          "transparentPercent": 57.45
+        },
+        "visibleBounds": {
+          "left": 132,
+          "top": 209,
+          "width": 760,
+          "height": 602,
+          "edgePixels": 0,
+          "transparentPercent": 71.75
+        },
+        "sha256": "fc287a5173672fd1cdfaef479035513b46e8f97a8e224f908e1b933aa44f08f8",
+        "visualReview": "Passed on cream and navy at 238, 128 and 64px canvas sizes",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "enemy-rapid",
+      "title": "Rapid enemy tank",
+      "role": "Fast cannon skirmisher enemy",
+      "file": "C:/repos/BattleCity/public/assets/headquarters/manual/enemy-rapid.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "source": {
+        "kind": "generated",
+        "tool": "built-in image_gen",
+        "reference": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png",
+        "rawGeneration": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-a615fd3f-b015-4e46-a23c-ec2e2d46f231.png",
+        "prompt": "Production asset for Battle Cities Field Manual. The supplied yellow Vanguard render is the approved visual style and camera reference; generate a new related object, not a recolor of the same hull.\nSTYLE LOCK: polished chunky 3D illustrated toy military hardware, physically legible beveled painted metal, restrained subtle edge wear, large readable mechanical forms, dark steel tracks and barrels, silver edges, no thick cartoon outline. Match reference light from upper left, soft self-shading, near-orthographic three-quarter view looking down roughly30degrees. Front and cannon point toward LOWER LEFT; rear extends toward upper right. Visible top, front and right side exactly as reference. Not photorealistic warfare, not flat vector, not pixel art.\nOUTPUT: one complete isolated subject centered in a1024x1024 square with generous uniform transparent padding about12% minimum on each side. Actual transparent background, clean alpha silhouette. No floor or ground plane and absolutely NO cast ground shadow, no shadow blob underneath, no reflection, no fog/glow. Self-shadows inside the object are fine. No frame, card, label, text, letters, numbers, logos, stars, watermarks, scenery, people, UI or extra separate items. Entire silhouette and barrel must fit comfortably, no cropped edges. View should read at128px.\nSUBJECT: RAPID enemy tank, a quick-firing skirmisher. Sleek elongated olive-green low tracked hull, narrow agile tracks, a streamlined compact turret carrying ONE visibly LONG SLIM fast cannon with chunky vented shroud and compact dark-red recoil housing at the gun root. The vented long cannon is the main identifying feature. Small rectangular side vents, longer lower profile than Scout, gun is not twin or rotary. Mid-olive paint, dark steel undercarriage, small red mechanical accent panel. Silhouette speedy and light-medium, not bulky fortress. One tank only.",
+        "termsNote": "AI-generated from user-provided project reference; no third-party stock source."
+      },
+      "normalization": {
+        "operation": "Transparent-margin crop, proportional resize and centered transparent padding only; no repainting or recoloring.",
+        "crop": {
+          "left": 29,
+          "top": 51,
+          "width": 1211,
+          "height": 1163
+        },
+        "resized": {
+          "width": 800,
+          "height": 768
+        },
+        "padding": {
+          "left": 112,
+          "right": 112,
+          "top": 128,
+          "bottom": 128
+        },
+        "embeddedMetadata": "preserved when supported by Sharp"
+      },
+      "validation": {
+        "dimensionsPassed": true,
+        "alphaPassed": true,
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "sourceVisibleBounds": {
+          "left": 36,
+          "top": 295,
+          "width": 1199,
+          "height": 735,
+          "edgePixels": 0,
+          "transparentPercent": 66.64
+        },
+        "visibleBounds": {
+          "left": 116,
+          "top": 289,
+          "width": 793,
+          "height": 486,
+          "edgePixels": 0,
+          "transparentPercent": 78.14
+        },
+        "sha256": "2d0082e2d9ba409ba86fd1b2fd2316263ac340a939483d331f914c7375eb7eec",
+        "visualReview": "Passed on cream and navy at 238, 128 and 64px canvas sizes",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "enemy-armored",
+      "title": "Armored enemy tank",
+      "role": "Medium plated enemy",
+      "file": "C:/repos/BattleCity/public/assets/headquarters/manual/enemy-armored.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "source": {
+        "kind": "generated",
+        "tool": "built-in image_gen",
+        "reference": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png",
+        "rawGeneration": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-a22f2572-1b21-41e0-b7e2-d7eba866b4e6.png",
+        "prompt": "Production asset for Battle Cities Field Manual. The supplied yellow Vanguard render is the approved visual style and camera reference; generate a new related object, not a recolor of the same hull.\nSTYLE LOCK: polished chunky 3D illustrated toy military hardware, physically legible beveled painted metal, restrained subtle edge wear, large readable mechanical forms, dark steel tracks and barrels, silver edges, no thick cartoon outline. Match reference light from upper left, soft self-shading, near-orthographic three-quarter view looking down roughly30degrees. Front and cannon point toward LOWER LEFT; rear extends toward upper right. Visible top, front and right side exactly as reference. Not photorealistic warfare, not flat vector, not pixel art.\nOUTPUT: one complete isolated subject centered in a1024x1024 square with generous uniform transparent padding about12% minimum on each side. Actual transparent background, clean alpha silhouette. No floor or ground plane and absolutely NO cast ground shadow, no shadow blob underneath, no reflection, no fog/glow. Self-shadows inside the object are fine. No frame, card, label, text, letters, numbers, logos, stars, watermarks, scenery, people, UI or extra separate items. Entire silhouette and barrel must fit comfortably, no cropped edges. View should read at128px.\nSUBJECT: ARMORED enemy tank. A medium-size military forest-green tank with distinctive layered overlapping slab armor, broad angular wedge-front hull, squared chamfered turret, thick silver-steel bolted side skirts protecting the upper tracks, and one medium-length sturdy cannon. Five clearly grouped dark road wheels per side, low planted body, red identification strip on the side of the turret. Medium olive/forest-green painted armor and brushed dark steel panels. The overlapping side armor and squared turret are the identifying silhouette. Substantial armor but still clearly a medium tank, not a huge heavy assault tank. One tank only.",
+        "termsNote": "AI-generated from user-provided project reference; no third-party stock source."
+      },
+      "normalization": {
+        "operation": "Transparent-margin crop, proportional resize and centered transparent padding only; no repainting or recoloring.",
+        "crop": {
+          "left": 19,
+          "top": 55,
+          "width": 1225,
+          "height": 1161
+        },
+        "resized": {
+          "width": 800,
+          "height": 758
+        },
+        "padding": {
+          "left": 112,
+          "right": 112,
+          "top": 133,
+          "bottom": 133
+        },
+        "embeddedMetadata": "preserved when supported by Sharp"
+      },
+      "validation": {
+        "dimensionsPassed": true,
+        "alphaPassed": true,
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "sourceVisibleBounds": {
+          "left": 24,
+          "top": 204,
+          "width": 1215,
+          "height": 896,
+          "edgePixels": 0,
+          "transparentPercent": 53.27
+        },
+        "visibleBounds": {
+          "left": 115,
+          "top": 230,
+          "width": 794,
+          "height": 585,
+          "edgePixels": 0,
+          "transparentPercent": 70.08
+        },
+        "sha256": "e0054f46008ce919cf082f753ad1199b119b7083e28cb9243adb794d9cff02f6",
+        "visualReview": "Passed on cream and navy at 238, 128 and 64px canvas sizes",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "enemy-heavy",
+      "title": "Heavy enemy tank",
+      "role": "Large assault fortress enemy",
+      "file": "C:/repos/BattleCity/public/assets/headquarters/manual/enemy-heavy.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "source": {
+        "kind": "generated",
+        "tool": "built-in image_gen",
+        "reference": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png",
+        "rawGeneration": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-d7ce8b0d-0dd7-4fc5-a5ae-d79c6cbd82ac.png",
+        "prompt": "Production asset for Battle Cities Field Manual. The supplied yellow Vanguard render is the approved visual style and camera reference; generate a new related object, not a recolor of the same hull.\nSTYLE LOCK: polished chunky 3D illustrated toy military hardware, physically legible beveled painted metal, restrained subtle edge wear, large readable mechanical forms, dark steel tracks and barrels, silver edges, no thick cartoon outline. Match reference light from upper left, soft self-shading, near-orthographic three-quarter view looking down roughly30degrees. Front and cannon point toward LOWER LEFT; rear extends toward upper right. Visible top, front and right side exactly as reference. Not photorealistic warfare, not flat vector, not pixel art.\nOUTPUT: one complete isolated subject centered in a1024x1024 square with generous uniform transparent padding about12% minimum on each side. Actual transparent background, clean alpha silhouette. No floor or ground plane and absolutely NO cast ground shadow, no shadow blob underneath, no reflection, no fog/glow. Self-shadows inside the object are fine. No frame, card, label, text, letters, numbers, logos, stars, watermarks, scenery, people, UI or extra separate items. Entire silhouette and barrel must fit comfortably, no cropped edges. View should read at128px.\nSUBJECT: HEAVY enemy tank, a large mobile assault fortress. Significantly bulkier silhouette than medium tank: very WIDE double-width deep dark-steel treads with numerous grouped wheels, massively thick dark-olive layered hull, large tall square bastion-shaped turret with stepped armor tiers, and ONE oversized thick cannon with a broad armored muzzle and chunky recoil collar. Reinforced steel front bumper, heavy rectangular armor blocks and small inset deep red panels. Design remains compact chunky arcade toy and readable, not realistic complex war machinery. Dark olive-green dominates, silver-steel edges, restrained red accents. Width and mass are the defining features. Do not add a second cannon or detached accessories. One tank only.",
+        "termsNote": "AI-generated from user-provided project reference; no third-party stock source."
+      },
+      "normalization": {
+        "operation": "Transparent-margin crop, proportional resize and centered transparent padding only; no repainting or recoloring.",
+        "crop": {
+          "left": 0,
+          "top": 130,
+          "width": 1254,
+          "height": 1124
+        },
+        "resized": {
+          "width": 800,
+          "height": 717
+        },
+        "padding": {
+          "left": 112,
+          "right": 112,
+          "top": 153,
+          "bottom": 154
+        },
+        "embeddedMetadata": "preserved when supported by Sharp"
+      },
+      "validation": {
+        "dimensionsPassed": true,
+        "alphaPassed": true,
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "sourceVisibleBounds": {
+          "left": 7,
+          "top": 169,
+          "width": 1240,
+          "height": 958,
+          "edgePixels": 0,
+          "transparentPercent": 49.43
+        },
+        "visibleBounds": {
+          "left": 117,
+          "top": 178,
+          "width": 791,
+          "height": 611,
+          "edgePixels": 0,
+          "transparentPercent": 69.09
+        },
+        "sha256": "0ebd92465070511501de45114b983c93453a8fbc4caae92499a6df7a09c1e25a",
+        "visualReview": "Passed on cream and navy at 238, 128 and 64px canvas sizes",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "cannon-module",
+      "title": "Cannon weapon module",
+      "role": "Shared cannon, twin autoloader and AP-round illustration",
+      "file": "C:/repos/BattleCity/public/assets/headquarters/manual/cannon-module.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "source": {
+        "kind": "generated",
+        "tool": "built-in image_gen",
+        "reference": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png",
+        "rawGeneration": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-060c83e4-139d-408f-8ca0-ff4502314bfd.png",
+        "prompt": "Production asset for Battle Cities Field Manual. The supplied yellow Vanguard render is the approved visual style and camera reference; generate a new related object, not a recolor of the same hull.\nSTYLE LOCK: polished chunky 3D illustrated toy military hardware, physically legible beveled painted metal, restrained subtle edge wear, large readable mechanical forms, dark steel tracks and barrels, silver edges, no thick cartoon outline. Match reference light from upper left, soft self-shading, near-orthographic three-quarter view looking down roughly30degrees. Front and cannon point toward LOWER LEFT; rear extends toward upper right. Visible top, front and right side exactly as reference. Not photorealistic warfare, not flat vector, not pixel art.\nOUTPUT: one complete isolated subject centered in a1024x1024 square with generous uniform transparent padding about12% minimum on each side. Actual transparent background, clean alpha silhouette. No floor or ground plane and absolutely NO cast ground shadow, no shadow blob underneath, no reflection, no fog/glow. Self-shadows inside the object are fine. No frame, card, label, text, letters, numbers, logos, stars, watermarks, scenery, people, UI or extra separate items. Entire silhouette and barrel must fit comfortably, no cropped edges. View should read at128px.\nSUBJECT: ONE standalone tank CANNON ASSEMBLY / weapon module, isolated WITHOUT any tank hull, tracks or turret. Long substantial silver/dark-steel barrel pointing toward lower left, thick muzzle with a clearly visible dark circular bore, collar rings, olive-green rectangular breech/recoil housing toward upper right, a small attached steel gun cradle/trunnion mount underneath, one restrained red mechanical detail. All parts form ONE coherent complete weapon module. Chunky toy engineering, recognizable on its own and matches the Vanguard's cannon design language. It is a neutral reusable weapon illustration for multiple field-manual entries. No bullets, cartridges, ammo pile, explosion, projectiles, labels, stand, floor, pedestal, or separate second gun. Generous transparent padding, complete mounting assembly visible.",
+        "termsNote": "AI-generated from user-provided project reference; no third-party stock source."
+      },
+      "normalization": {
+        "operation": "Transparent-margin crop, proportional resize and centered transparent padding only; no repainting or recoloring.",
+        "crop": {
+          "left": 33,
+          "top": 49,
+          "width": 1195,
+          "height": 1165
+        },
+        "resized": {
+          "width": 800,
+          "height": 780
+        },
+        "padding": {
+          "left": 112,
+          "right": 112,
+          "top": 122,
+          "bottom": 122
+        },
+        "embeddedMetadata": "preserved when supported by Sharp"
+      },
+      "validation": {
+        "dimensionsPassed": true,
+        "alphaPassed": true,
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "sourceVisibleBounds": {
+          "left": 42,
+          "top": 279,
+          "width": 1181,
+          "height": 697,
+          "edgePixels": 0,
+          "transparentPercent": 76.24
+        },
+        "visibleBounds": {
+          "left": 118,
+          "top": 276,
+          "width": 791,
+          "height": 467,
+          "edgePixels": 0,
+          "transparentPercent": 84
+        },
+        "sha256": "4ff20b7fb801bad446de169d99c4ea01f65c53eeb3aeb0b04a9c1c628fbd4be8",
+        "visualReview": "Passed on cream and navy at 238, 128 and 64px canvas sizes",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    }
+  ],
+  "validation": {
+    "status": "asset_checks_passed",
+    "preview": "C:/repos/BattleCity/tmp/manual-icons-20261006/contact-sheet.png",
+    "reviewedSizes": [
+      238,
+      128,
+      64
+    ],
+    "backgrounds": [
+      "cream",
+      "navy"
+    ],
+    "notes": "All five complete isolated silhouettes inspected; no text, frames, scenery or visible baked ground shadow. Consistent camera, materials and olive/steel/red family. Import and in-engine review remain with the implementing Unity chat."
+  }
+}

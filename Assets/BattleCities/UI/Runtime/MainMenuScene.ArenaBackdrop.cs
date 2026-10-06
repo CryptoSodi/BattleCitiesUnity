@@ -434,6 +434,10 @@ namespace BattleCities.UI
             var tankScreen = mainFrame.Find("Pre-battle screens");
             FitPreBattleScreen(tankScreen as RectTransform);
             LayoutShopScreen();
+            LayoutRankingScreen();
+            LayoutOperationsScreen();
+            LayoutSettingsScreen();
+            LayoutPlayerProfile();
             SetTankSelectorBackdrop(IsTvScreenOpen);
             // The hero fills the TV opening now that the old reward area is gone.
             // Center the logo and primary action as one group on each layout.

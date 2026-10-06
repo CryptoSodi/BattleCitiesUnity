@@ -101,6 +101,7 @@ namespace BattleCities.UI
             refreshRoutine = null;
             requestInFlight = false;
             browserResponses.Clear();
+            IsSigningOut = false;
         }
 
         public void ConfigureAutomaticRefresh(bool value) { automaticRefresh = value; }
@@ -210,7 +211,7 @@ namespace BattleCities.UI
                 IsWalletAuthenticated = true;
                 IsLocalGuest = false;
                 NotifyStatus("WALLET CONNECTED", ShortWallet(player.walletAddress));
-                PlayerLoaded?.Invoke(player);
+                PublishPlayer(player);
                 if (automaticRefresh) RefreshNow();
             }
             catch (Exception exception)
@@ -291,7 +292,7 @@ namespace BattleCities.UI
             IsWalletAuthenticated = false;
             IsLocalGuest = true;
             var guestName = GetOrCreateGuestName();
-            PlayerLoaded?.Invoke(new PlayerSnapshot
+            PublishPlayer(new PlayerSnapshot
             {
                 id = CurrentGuestId,
                 provider = "guest",
@@ -307,7 +308,7 @@ namespace BattleCities.UI
             yield return Request("GET", "/api/player", null, (_, json, __) => body = json);
             if ((bool?)body?["authenticated"] != true) yield break;
             var player = ParsePlayer(body["player"] as JObject);
-            if (player != null) PlayerLoaded?.Invoke(player);
+            if (player != null) PublishPlayer(player);
         }
 
         private IEnumerator LoadRound()
@@ -384,8 +385,15 @@ namespace BattleCities.UI
             NotifyStatus("LIVE RANKINGS", LastRankings.seasonName + " standings loaded.");
         }
 
+#if UNITY_EDITOR
+        // Editor verification can exercise response handling without live requests or rewards.
+        public Func<string,string,JObject,Action<long,JObject,string>,IEnumerator> EditorRequestOverride;
+#endif
         public IEnumerator Request(string method, string path, JObject payload, Action<long, JObject, string> completed)
         {
+#if UNITY_EDITOR
+            if(EditorRequestOverride!=null){yield return EditorRequestOverride(method,path,payload,completed);yield break;}
+#endif
             var url = new Uri(new Uri(baseUrl.TrimEnd('/') + "/"), path.TrimStart('/')).ToString();
 #if UNITY_WEBGL && !UNITY_EDITOR
             var id = Guid.NewGuid().ToString("N");

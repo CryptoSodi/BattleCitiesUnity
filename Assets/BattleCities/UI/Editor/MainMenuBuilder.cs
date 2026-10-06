@@ -194,6 +194,8 @@ namespace BattleCities.Editor
             t.SelectedPanel=Art("shared/panels/nav-gold");t.DarkPanel=Art("shared/panels/dark-inset");t.SilverFrame=Art("shared/panels/silver-frame");t.FocusRing=Art("shared/panels/focus-ring");t.Rounded=Art("shared/panels/round-white");
             t.NavigationIcons=new[]{"play","quarters","shop","ranking","socials"}.Select(s=>Art("reference-style-v2/shared/navigation/"+s)).ToArray();
             t.NavigationFocus=Art("reference-style-v2/shared/buttons/focus-blue");
+            t.RankingGamingIcon=Art("reference-style-v2/shared/icons/ranking/gaming");
+            t.RankingTradingIcon=Art("reference-style-v2/shared/icons/ranking/trading");
             t.SettingsIcon=Art("shared/icons/settings");t.ScoreIcon=Art("shared/icons/score-coin");t.HighScoreIcon=Art("shared/icons/high-score-shield");t.TrophyIcon=Art("shared/icons/trophy");t.TimerIcon=Art("shared/icons/timer");
             t.RewardIcons=new[]{"chest-silver-v2","chest-gold-v2","chest-bronze-v2","chest-cyan-v2"}.Select(s=>Art("shared/icons/"+s)).ToArray();
             t.PrizeCrates=new[]{"gold","orange","blue","black"}.Select(s=>Art("shared/icons/prize-crate-"+s)).ToArray();
@@ -209,7 +211,8 @@ namespace BattleCities.Editor
             {
                 string p=path.Replace('\\','/');var imp=AssetImporter.GetAtPath(p) as TextureImporter;if(imp==null)continue;
                 imp.textureType=TextureImporterType.Sprite;imp.spriteImportMode=SpriteImportMode.Single;imp.spritePixelsPerUnit=(p.EndsWith("/shared/panels/blue-frame.png")||p.EndsWith("/shared/panels/navigation-container.png")||p.EndsWith("/shared/panels/button-leaderboard-container.png"))?700:100;
-                imp.alphaIsTransparency=true;imp.mipmapEnabled=false;imp.isReadable=false;imp.filterMode=FilterMode.Bilinear;imp.wrapMode=TextureWrapMode.Clamp;
+                bool rankingTabIcon=p.Contains("/shared/icons/ranking/");
+                imp.alphaIsTransparency=true;imp.mipmapEnabled=rankingTabIcon;imp.isReadable=false;imp.filterMode=rankingTabIcon?FilterMode.Trilinear:FilterMode.Bilinear;imp.wrapMode=TextureWrapMode.Clamp;
                 imp.maxTextureSize=2048;imp.textureCompression=TextureImporterCompression.Uncompressed;
                 var settings=new TextureImporterSettings();imp.ReadTextureSettings(settings);settings.spriteMeshType=SpriteMeshType.FullRect;imp.SetTextureSettings(settings);
                 imp.spriteBorder=(p.EndsWith("/shared/panels/blue-frame.png")||p.EndsWith("/shared/panels/navigation-container.png")||p.EndsWith("/shared/panels/button-leaderboard-container.png"))?new Vector4(160,160,160,160):p.EndsWith("/shared/header/high-score-center.png")?new Vector4(160,0,160,0):p.Contains("/panels/")?new Vector4(32,32,32,32):Vector4.zero;

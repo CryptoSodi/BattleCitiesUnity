@@ -11,7 +11,7 @@ namespace BattleCities.UI
         }
         bool IsTvScreenOpen
         {
-            get {var screen=mainFrame?mainFrame.Find("Pre-battle screens"):null;return IsShopOpen||(screen&&screen.gameObject.activeSelf);}
+            get {var screen=mainFrame?mainFrame.Find("Pre-battle screens"):null;return IsPlayerProfileOpen||IsSettingsOpen||IsShopOpen||IsRankingOpen||IsOperationsOpen||(screen&&screen.gameObject.activeSelf);}
         }
         void EnsureShop()
         {
@@ -21,7 +21,10 @@ namespace BattleCities.UI
         }
         public void OpenShop()
         {
+            CloseSettingsForNavigation();
             EnsureApiClient();
+            CloseOperationsForNavigation();
+            CloseRankingForNavigation();
             if(preBattle&&preBattle.IsOpen)preBattle.Back();
             EnsureShop();shop.Open();
         }
@@ -43,10 +46,12 @@ namespace BattleCities.UI
             if(shop&&shop.IsConfigured)shop.ApplyLayout(lastPlatform);
         }
         internal void ApplyShopInventorySurface(RectTransform frame,RectTransform paper)
+        {ApplyDetailSurface(frame,paper,ref inventoryBackdropMaterial);}
+        internal void ApplyDetailSurface(RectTransform frame,RectTransform paper,ref Material material,float frameScaleMultiplier=1f)
         {
             var source=howItWorks?howItWorks.GetComponent<UnityEngine.UI.Image>():null;
             var image=frame.GetComponent<UnityEngine.UI.Image>();
-            if(source&&source.sprite){image.sprite=source.sprite;image.pixelsPerUnitMultiplier=source.pixelsPerUnitMultiplier;}
+            if(source&&source.sprite){image.sprite=source.sprite;image.pixelsPerUnitMultiplier=source.pixelsPerUnitMultiplier*frameScaleMultiplier;}
             image.enabled=true;image.type=UnityEngine.UI.Image.Type.Sliced;image.color=Color.white;
             float pixelsPerUnit=image.pixelsPerUnit*image.pixelsPerUnitMultiplier;
             var inset=new Vector4(114f,138f,113f,126f)/Mathf.Max(1f,pixelsPerUnit);
@@ -60,7 +65,7 @@ namespace BattleCities.UI
             var background=backdrop?backdrop.GetComponent<UnityEngine.UI.Image>():null;
             var television=mainFrame.Find("TV Background Viewport/TV Background")?.GetComponent<UnityEngine.UI.Image>();
             ApplyPaperBackdrop(paper,backdrop,background?background.sprite:null,television?television.material:null,
-                ref inventoryBackdropMaterial,46f/Mathf.Max(1f,pixelsPerUnit));
+                ref material,46f/Mathf.Max(1f,pixelsPerUnit));
         }
     }
 }

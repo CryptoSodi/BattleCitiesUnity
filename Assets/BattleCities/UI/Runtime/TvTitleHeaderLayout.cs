@@ -18,11 +18,18 @@ namespace BattleCities.UI
             NavigationHeight=Mathf.Min(Height-12f,49f);
             NavigationWidth=Mathf.Min(width-IconGroupWidth-32f,NavigationHeight*12f);
         }
-        public void PlaceTitle(RectTransform plate,RectTransform icon,RectTransform title,bool wideTitle=false)
+        public void PlaceTitle(RectTransform plate,RectTransform icon,RectTransform title,bool wideTitle=false,float iconHeightFraction=.76f)
         {
             MainMenuScene.Place(plate,4,4,width-8,Height);
-            if(icon)MainMenuScene.Place(icon,IconGroupWidth*.10f,Height*.12f,IconGroupWidth*.25f,Height*.76f);
-            float left=IconGroupWidth*.36f;
+            float iconLeft=IconGroupWidth*.10f+8f,iconSlotWidth=IconGroupWidth*.25f;
+            if(icon)
+            {
+                var image=icon.GetComponent<Image>();
+                float aspect=image&&image.sprite?image.sprite.rect.width/image.sprite.rect.height:1f;
+                float iconWidth=Mathf.Min(iconSlotWidth,Height*iconHeightFraction*aspect),iconHeight=iconWidth/aspect;
+                MainMenuScene.Place(icon,iconLeft+(iconSlotWidth-iconWidth)*.5f,(Height-iconHeight)*.5f,iconWidth,iconHeight);
+            }
+            float left=iconLeft+iconSlotWidth+8f;
             float textWidth=wideTitle?plate.rect.width-NavigationWidth*.25f-20f-left:IconGroupWidth*.57f;
             if(title)MainMenuScene.Place(title,left,Height*.06f,textWidth,Height*.88f);
         }

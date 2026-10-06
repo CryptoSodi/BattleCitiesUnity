@@ -281,7 +281,12 @@ namespace BattleCities.UI
                 if(preBattle.IsOpen)preBattle.Open();
             }
             if(mainFrame && mainFrame.Find("Shop screen"))EnsureShop();
+            if(mainFrame && mainFrame.Find("Ranking screen"))EnsureRanking();
+            if(mainFrame && mainFrame.Find("Operations screen"))EnsureOperations();
+            if(mainFrame && mainFrame.Find("Settings screen"))EnsureSettings();
+            if(mainFrame && mainFrame.Find("Player profile screen"))EnsurePlayerProfile();
             BindApiClient();
+            if(IsPlayerProfileOpen)profileScreen.Resume();
             ResetControllerLegendTimer();
             if(!inputActions){RefreshLayout();return;}
             liveInput=Instantiate(inputActions);
@@ -292,8 +297,14 @@ namespace BattleCities.UI
         {
             if (!Application.isPlaying) return;
             RefreshLayout();
-            if(preBattle && preBattle.IsOpen)preBattle.Open();
+            string incomingProfile=ProfileLinks.IncomingPlayer();
+            if(!string.IsNullOrEmpty(incomingProfile))OpenPlayerProfile(incomingProfile);
+            else if(IsPlayerProfileOpen){EnsurePlayerProfile();profileScreen.Resume();}
+            else if(IsSettingsOpen){EnsureSettings();settingsScreen.Open();}
+            else if(preBattle && preBattle.IsOpen)preBattle.Open();
             else if(IsShopOpen){EnsureShop();shop.Open();}
+            else if(IsRankingOpen){EnsureRanking();rankingScreen.Open();}
+            else if(IsOperationsOpen){EnsureOperations();operations.Resume();}
             else if (EventSystem.current) EventSystem.current.SetSelectedGameObject(startButton.gameObject);
         }
         private void OnDisable()
@@ -591,6 +602,10 @@ namespace BattleCities.UI
                 SetHeroVisible(!IsTvScreenOpen);
                 if(EventSystem.current)EventSystem.current.SetSelectedGameObject(previousSelection?previousSelection:startButton.gameObject);
             }
+            else if(IsPlayerProfileOpen)ClosePlayerProfile();
+            else if(IsSettingsOpen)CloseSettings();
+            else if(IsRankingOpen){EnsureRanking();rankingScreen.Back();}
+            else if(IsOperationsOpen){EnsureOperations();operations.Back();}
             else if(IsShopOpen){EnsureShop();shop.Back();}
             else if(preBattle && preBattle.IsOpen)preBattle.Back();
             else if(EventSystem.current)EventSystem.current.SetSelectedGameObject(startButton.gameObject);
@@ -601,6 +616,10 @@ namespace BattleCities.UI
             var lobby = BattleCities.Multiplayer.BattleSession.Instance ? BattleCities.Multiplayer.BattleSession.Instance.Lobby : null;
             if (lobby && lobby.Visible) return;
             if (IsModalOpen) { Psg1UiNavigation.KeepFocus(modal, closeButton); return; }
+            if (IsPlayerProfileOpen) { EnsurePlayerProfile();profileScreen.KeepControllerFocus();return; }
+            if (IsSettingsOpen) { EnsureSettings();settingsScreen.KeepControllerFocus();return; }
+            if (IsRankingOpen) { EnsureRanking();rankingScreen.KeepControllerFocus();return; }
+            if (IsOperationsOpen) { EnsureOperations();operations.KeepControllerFocus();return; }
             if (IsShopOpen) { EnsureShop();shop.KeepControllerFocus();return; }
             if (preBattle && preBattle.IsOpen) { preBattle.KeepControllerFocus(); return; }
             var online = lobby ? lobby.OpenButton : null;
@@ -623,6 +642,9 @@ namespace BattleCities.UI
         public void StartBattle()
         {
             if(loading)return;
+            CloseSettingsForNavigation();
+            CloseOperationsForNavigation();
+            CloseRankingForNavigation();
             if(IsShopOpen){EnsureShop();shop.Close(false);}
             EnsureApiClient();
             EnsurePreBattle();
@@ -649,18 +671,19 @@ namespace BattleCities.UI
         }
         public void PlayTab()
         {
+            CloseSettingsForNavigation();
+            CloseOperationsForNavigation();
+            CloseRankingForNavigation();
             if(IsShopOpen){EnsureShop();shop.Close(false);}
             if(EventSystem.current)EventSystem.current.SetSelectedGameObject(startButton.gameObject);
         }
-        public void OpenQuarters() { OpenDestination(quartersScene,"QUARTERS",3); }
-        public void OpenSocials() { OpenDestination(socialsScene,"SOCIALS",4); }
+        public void OpenQuarters() { OpenOperations(false); }
+        public void OpenSocials() { OpenOperations(true); }
         private void OpenDestination(string scene,string title,int navigationPage)
         {
             if(!string.IsNullOrWhiteSpace(scene)&&Application.CanStreamedLevelBeLoaded(scene)){SceneManager.LoadSceneAsync(scene);return;}
             ShowDialog(title,"This page has not been converted to Unity yet.\n\nYour main menu is ready. Select START to enter a battle.",navigationPage);
         }
-        public void OpenSettings() { ShowDialog("CONTROLS","WEB   Arrow keys / WASD to navigate\nEnter to select · Escape to go back\n\nPSG1   D-pad / left stick to navigate\nA to select · B to go back\n\nANDROID   Tap a button to select"); }
-        public void OpenRanking() { ShowDialog("PLAYER RANKINGS",rows.Length>0?string.Join("\n",rows):"No season rankings are available right now. Check back in a moment.",2); }
         public void ConnectWallet()
         {
             EnsureApiClient();
@@ -706,7 +729,8 @@ namespace BattleCities.UI
                 if(!walletLoginButton)walletLoginButton=walletTarget.AddComponent<Button>();
                 walletLoginButton.transition=Selectable.Transition.None;
                 walletLoginButton.onClick.RemoveListener(ConnectWallet);
-                walletLoginButton.onClick.AddListener(ConnectWallet);
+                walletLoginButton.onClick.RemoveListener(OpenOwnProfile);
+                walletLoginButton.onClick.AddListener(OpenOwnProfile);
             }
             if (apiClient.LastRankings != null) OnApiRankingsLoaded(apiClient.LastRankings);
             if (apiClient.LastRound != null) OnApiRoundLoaded(apiClient.LastRound);
@@ -721,6 +745,7 @@ namespace BattleCities.UI
             apiClient.RoundLoaded-=OnApiRoundLoaded;
             apiClient.StatusChanged-=OnApiStatusChanged;
             if(walletLoginButton)walletLoginButton.onClick.RemoveListener(ConnectWallet);
+            if(walletLoginButton)walletLoginButton.onClick.RemoveListener(OpenOwnProfile);
         }
 
         private void OnApiPlayerLoaded(MainMenuApiClient.PlayerSnapshot player)

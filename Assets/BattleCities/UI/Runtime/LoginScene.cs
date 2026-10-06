@@ -130,10 +130,15 @@ namespace BattleCities.UI
         }
         private void SetButtons(bool value)
         {
-            phantomButton.interactable = value; guestButton.interactable = value; storeButton.interactable = value;
-            if (psgPhantomButton) psgPhantomButton.interactable = value;
-            if (psgGuestButton) psgGuestButton.interactable = value;
-            if (psgStoreButton) psgStoreButton.interactable = value;
+            SetButtonAvailable(phantomButton,value); SetButtonAvailable(guestButton,value); SetButtonAvailable(storeButton,value);
+            SetButtonAvailable(psgPhantomButton,value); SetButtonAvailable(psgGuestButton,value); SetButtonAvailable(psgStoreButton,value);
+        }
+        private static void SetButtonAvailable(UnityEngine.UI.Button button,bool value)
+        {
+            if(!button)return;
+            var visual=button.GetComponent<LoginButtonState>();
+            if(visual)visual.SetInteractionLocked(!value);
+            else button.interactable=value;
         }
         private void SetStatus(string value)
         { if (statusText) statusText.text = value ?? ""; if (psgStatusText) psgStatusText.text = value ?? ""; }

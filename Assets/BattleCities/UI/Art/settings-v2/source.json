@@ -1,0 +1,374 @@
+{
+  "family": "settings-v2",
+  "createdDate": "2026-10-06",
+  "count": 5,
+  "tool": "built-in image_gen",
+  "technicalFrame": {
+    "background": "transparent",
+    "lighting": "upper-left",
+    "materials": "chunky polished illustrated toy metal",
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "animation": "static",
+    "engine": "Unity import handled separately",
+    "filtering": "smooth illustration; engine settings not modified",
+    "illustrationDimensions": [
+      1024,
+      1024
+    ],
+    "buttonDimensions": [
+      1969,
+      362
+    ]
+  },
+  "assets": [
+    {
+      "id": "mute-speaker",
+      "title": "Mute Speaker",
+      "file": "C:/repos/BattleCity/public/assets/settings-v2/mute-speaker.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-46c30b52-5ac9-40e6-bacf-54330ec97597.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-999501f4-4814-43c6-9bc3-cf39629b2f1d.png",
+        "prompt": "ROLE: Generate a completely NEW individual Settings icon for Battle Cities, matching the polished chunky 3D blue/gold/silver illustrations in its new Quarters and Socials sets. Do not crop, upscale or copy pixels from screenshot icons.\nREFERENCE1 is the current Settings concept; use the relevant row's object design and palette. REFERENCE2 Vanguard tank supplies crisp chunky beveled construction, modeled metal, subtle edge wear and upper-left lighting; do not include a tank.\nVISUAL FAMILY: rich cobalt blue/navy, warm gold and brushed silver; strong simple readable silhouette, clean illustrated toy volume, restrained small highlights and soft SELF-SHADING only. Near-frontal view with very mild three-quarter depth. Not pixel art, not flat generic vector, not photorealistic product photograph. Few details, clear at128px.\nOUTPUT: one isolated COMPLETE object/symbol on genuine transparent alpha background,1024x1024 square, centered with roughly12% clear margin on every side. No clipping, no floor, no cast ground shadow, no haze/halo, no reflection, no scene, no background fill inside negative spaces. No card frame, caption, label, text, digits, logo wordmark, watermark, QR code or UI screenshot. Preserve transparency through internal gaps. Only the inherent control symbols requested below are permitted.\nSUBJECT: a chunky glossy BLUE LOUDSPEAKER / speaker horn, oriented horizontally with its flared opening on the right, slight three-quarter view into the dark navy cone. Silver beveled lip, cobalt blue housing and short compact rear housing on left. A large raised GOLD X mute symbol floats immediately over/right of the horn opening, visually attached into one clear cohesive symbol. The X is a simple equal-arm mute cross, not a platform logo. Match the icon in the MUTE row of reference. No sound-wave arcs, no cable, no stand, no extra button.",
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 45,
+          "top": 162,
+          "width": 1165,
+          "height": 936
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 800,
+          "height": 643
+        },
+        "padding": {
+          "left": 112,
+          "right": 112,
+          "top": 190,
+          "bottom": 191
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 114,
+          "top": 193,
+          "width": 796,
+          "height": 637,
+          "edgePixels": 0,
+          "transparentPercent": 69.11
+        },
+        "sourceEdges": 0,
+        "sha256": "28abcab74ca021e99029d439c843f73b451ba536c241185d882056af4c66d6ca",
+        "visualReview": "Passed: complete silhouette and readable at216,128,64px on cream/navy",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "scanline-monitor",
+      "title": "Scanline Monitor",
+      "file": "C:/repos/BattleCity/public/assets/settings-v2/scanline-monitor.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-46c30b52-5ac9-40e6-bacf-54330ec97597.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-de9b8973-1131-4e3b-af99-9edce49456ef.png",
+        "prompt": "ROLE: Generate a completely NEW individual Settings icon for Battle Cities, matching the polished chunky 3D blue/gold/silver illustrations in its new Quarters and Socials sets. Do not crop, upscale or copy pixels from screenshot icons.\nREFERENCE1 is the current Settings concept; use the relevant row's object design and palette. REFERENCE2 Vanguard tank supplies crisp chunky beveled construction, modeled metal, subtle edge wear and upper-left lighting; do not include a tank.\nVISUAL FAMILY: rich cobalt blue/navy, warm gold and brushed silver; strong simple readable silhouette, clean illustrated toy volume, restrained small highlights and soft SELF-SHADING only. Near-frontal view with very mild three-quarter depth. Not pixel art, not flat generic vector, not photorealistic product photograph. Few details, clear at128px.\nOUTPUT: one isolated COMPLETE object/symbol on genuine transparent alpha background,1024x1024 square, centered with roughly12% clear margin on every side. No clipping, no floor, no cast ground shadow, no haze/halo, no reflection, no scene, no background fill inside negative spaces. No card frame, caption, label, text, digits, logo wordmark, watermark, QR code or UI screenshot. Preserve transparency through internal gaps. Only the inherent control symbols requested below are permitted.\nSUBJECT: a small chunky blue-and-silver CRT MONITOR, nearly square, near-front slight side depth. Thick silver beveled screen bezel with four small corner bolts, dark cobalt outer casing and gently curved dark navy glass. Inside the screen exactly FIVE bright cyan horizontal scanline bars, evenly stacked. Cyan light confined to the glass, no bloom outside the silhouette. Subtle small integrated base feet allowed, no separate stand or surface. Screen contains scanlines only, no picture, text, logo, buttons or QR.",
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 96,
+          "top": 155,
+          "width": 1082,
+          "height": 957
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 800,
+          "height": 708
+        },
+        "padding": {
+          "left": 112,
+          "right": 112,
+          "top": 158,
+          "bottom": 158
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 115,
+          "top": 161,
+          "width": 794,
+          "height": 702,
+          "edgePixels": 0,
+          "transparentPercent": 51.92
+        },
+        "sourceEdges": 0,
+        "sha256": "452e4431e92505f5266a9b0f89f0996f16bda365c0e06a1dc612be4b0a370e93",
+        "visualReview": "Passed: complete silhouette and readable at216,128,64px on cream/navy",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "account-wallet",
+      "title": "Account Wallet",
+      "file": "C:/repos/BattleCity/public/assets/settings-v2/account-wallet.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-46c30b52-5ac9-40e6-bacf-54330ec97597.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-633c3646-db55-4b36-a388-4840f9e2f076.png",
+        "prompt": "ROLE: Generate a completely NEW individual Settings icon for Battle Cities, matching the polished chunky 3D blue/gold/silver illustrations in its new Quarters and Socials sets. Do not crop, upscale or copy pixels from screenshot icons.\nREFERENCE1 is the current Settings concept; use the relevant row's object design and palette. REFERENCE2 Vanguard tank supplies crisp chunky beveled construction, modeled metal, subtle edge wear and upper-left lighting; do not include a tank.\nVISUAL FAMILY: rich cobalt blue/navy, warm gold and brushed silver; strong simple readable silhouette, clean illustrated toy volume, restrained small highlights and soft SELF-SHADING only. Near-frontal view with very mild three-quarter depth. Not pixel art, not flat generic vector, not photorealistic product photograph. Few details, clear at128px.\nOUTPUT: one isolated COMPLETE object/symbol on genuine transparent alpha background,1024x1024 square, centered with roughly12% clear margin on every side. No clipping, no floor, no cast ground shadow, no haze/halo, no reflection, no scene, no background fill inside negative spaces. No card frame, caption, label, text, digits, logo wordmark, watermark, QR code or UI screenshot. Preserve transparency through internal gaps. Only the inherent control symbols requested below are permitted.\nSUBJECT: a compact BLUE LEATHER WALLET with a chunky warm GOLD clasp strap and central silver snap button. Deep royal-blue leather body, subtle molded leather grain, neat gold stitching, navy inner edge. Slightly open folded top reveals two layered blue compartments, matching reference ACCOUNT icon. Near-front mild three-quarter angle to show thickness. Strong rounded-rectangular silhouette, polished arcade toy finish. No money sticking out, no credit cards, currency symbol, text, logos, tag or outer panel.",
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 100,
+          "top": 127,
+          "width": 1081,
+          "height": 995
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 800,
+          "height": 736
+        },
+        "padding": {
+          "left": 112,
+          "right": 112,
+          "top": 144,
+          "bottom": 144
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 115,
+          "top": 147,
+          "width": 794,
+          "height": 730,
+          "edgePixels": 0,
+          "transparentPercent": 52.06
+        },
+        "sourceEdges": 0,
+        "sha256": "c474f9970395d91a6db1febb2e0e094ca8a26b27b2d1cef5c89d1e3f59c09cf9",
+        "visualReview": "Passed: complete silhouette and readable at216,128,64px on cream/navy",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "phone-controller",
+      "title": "Phone Controller",
+      "file": "C:/repos/BattleCity/public/assets/settings-v2/phone-controller.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-46c30b52-5ac9-40e6-bacf-54330ec97597.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-30fa4ff2-ea71-4a95-b030-8431d1e079d4.png",
+        "prompt": "ROLE: Generate a completely NEW individual Settings icon for Battle Cities, matching the polished chunky 3D blue/gold/silver illustrations in its new Quarters and Socials sets. Do not crop, upscale or copy pixels from screenshot icons.\nREFERENCE1 is the current Settings concept; use the relevant row's object design and palette. REFERENCE2 Vanguard tank supplies crisp chunky beveled construction, modeled metal, subtle edge wear and upper-left lighting; do not include a tank.\nVISUAL FAMILY: rich cobalt blue/navy, warm gold and brushed silver; strong simple readable silhouette, clean illustrated toy volume, restrained small highlights and soft SELF-SHADING only. Near-frontal view with very mild three-quarter depth. Not pixel art, not flat generic vector, not photorealistic product photograph. Few details, clear at128px.\nOUTPUT: one isolated COMPLETE object/symbol on genuine transparent alpha background,1024x1024 square, centered with roughly12% clear margin on every side. No clipping, no floor, no cast ground shadow, no haze/halo, no reflection, no scene, no background fill inside negative spaces. No card frame, caption, label, text, digits, logo wordmark, watermark, QR code or UI screenshot. Preserve transparency through internal gaps. Only the inherent control symbols requested below are permitted.\nSUBJECT: a LANDSCAPE BLUE HANDHELD PHONE/GAMEPAD, clearly wider than tall, approximately1.9:1 width-to-height. Premium cobalt rounded rectangular phone shell, dark navy inset display, thin silver inner bezel, small integrated side details matching the PHONE CONTROLLER icon. On the left side of the screen, ONE large raised brushed SILVER cross-shaped D-PAD. On right, EXACTLY FOUR separate round raised GOLD face buttons arranged in a diamond: top button, right button, bottom button, left button. Screen center clean dark navy. Near-front subtle 3D depth, whole complete phone fits with generous transparent margin. No letters on buttons, no QR code, text, app content, antenna, sticks, hands, separate controllers or extra background.",
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 147,
+          "top": 147,
+          "width": 1435,
+          "height": 614
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 800,
+          "height": 342
+        },
+        "padding": {
+          "left": 112,
+          "right": 112,
+          "top": 341,
+          "bottom": 341
+        },
+        "sourceSize": {
+          "width": 1728,
+          "height": 910
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 114,
+          "top": 343,
+          "width": 796,
+          "height": 338,
+          "edgePixels": 0,
+          "transparentPercent": 75.6
+        },
+        "sourceEdges": 0,
+        "sha256": "6fe3ac16c3f6de1cca7834be3521e3f86c51740446138ffff58017aa719b660f",
+        "visualReview": "Passed: complete silhouette and readable at216,128,64px on cream/navy",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "logout-button-red",
+      "title": "Empty red logout button skin",
+      "file": "C:/repos/BattleCity/public/assets/settings-v2/logout-button-red.png",
+      "width": 1969,
+      "height": 362,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; nine-sliced UI skin",
+      "provenance": {
+        "kind": "generated recolor",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-cost-active-blue.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-5b54651a-4e79-4584-ae1c-ba2717c9deb2.png",
+        "prompt": "Precise recolor edit of the supplied Battle Cities BLUE BUTTON SKIN.\nMake an EMPTY RED VERSION of this exact button. Preserve the same horizontal silhouette, approximately5.44:1 width-to-height ratio, moderate rounded corner radii, layered edge thickness, smooth glossy molded face, top highlight path and inset lower bevel. Color-only design change: cobalt face becomes rich saturated SCARLET RED; midtone red, darker CRIMSON lower face, deep BURGUNDY outer bevel. Bright highlights remain warm-white/pale pink and crisp. Keep the same smooth surface and subtle vertical lighting gradient.\nThis is the source skin for a Unity nine-sliced LOGOUT button; do not bake any lettering into it. No LOGOUT word, no icon, no screws or bolts, no decorative frame added, no new symbols, no texture wear or scratches. The center must remain an uninterrupted plain red fill suitable for stretching. All four corners and the complete edges must be visible. Exactly ONE very wide horizontal button, no variants or comparison.\nPreserve the input's near-tight rectangular canvas composition and aspect ratio, ideally1969x362, with genuine transparent pixels only outside the rounded silhouette. No background, drop shadow, fog or glow beyond the actual button outline. No enlarged transparent canvas or giant margins. Transparent PNG asset, not a screenshot.",
+        "sourceBinding": "PreBattleArt.asset tankCostButton; guid a347cda8b6418954aad468b55353f1c1"
+      },
+      "normalization": {
+        "operation": "Transparent-margin crop and fit to original button canvas; aspect adjustment under1 percent; no recolor or repaint in code.",
+        "crop": {
+          "left": 0,
+          "top": 158,
+          "width": 2170,
+          "height": 401
+        },
+        "outputSize": [
+          1969,
+          362
+        ],
+        "embeddedProvenance": "preserved when supported"
+      },
+      "nineSlice": {
+        "suggestedSpriteBorder": {
+          "left": 128,
+          "bottom": 128,
+          "right": 128,
+          "top": 128
+        },
+        "source": "Copied from tank-cost-active-blue.png.meta; import not modified",
+        "preview": "C:/repos/BattleCity/tmp/settings-icons-v2-20261006/logout-button-nine-slice-preview.png"
+      },
+      "validation": {
+        "dimensionsPassed": true,
+        "alphaPassed": true,
+        "transparentPercent": 1.05,
+        "referenceSilhouetteIoU": 0.998674,
+        "sha256": "10220863c5461f699a05c6dd258a5caa0f864d61de9d5ae4df081c2511ddddf8",
+        "visualReview": "Passed: blue/red geometry comparison and nine-slice previews at240,400,800px wide",
+        "engineReview": "not performed; Unity chat handles import"
+      }
+    }
+  ],
+  "validation": {
+    "status": "asset_checks_passed",
+    "illustrationPreview": "C:/repos/BattleCity/tmp/settings-icons-v2-20261006/settings-v2-preview.png",
+    "illustrationReviewSizes": [
+      216,
+      128,
+      64
+    ],
+    "buttonPreview": "C:/repos/BattleCity/tmp/settings-icons-v2-20261006/logout-button-nine-slice-preview.png",
+    "buttonReviewWidths": [
+      240,
+      400,
+      800
+    ],
+    "backgrounds": [
+      "cream",
+      "navy"
+    ],
+    "notes": "Four complete transparent illustrations, no baked shadows or QR code. Empty red skin matches source canvas and corners; no lettering. Dimensions and RGBA validated. Engine import not performed."
+  }
+}

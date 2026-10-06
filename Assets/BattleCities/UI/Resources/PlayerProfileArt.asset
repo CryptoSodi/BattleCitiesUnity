@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee668574cee228e4387ffd481a10d588, type: 3}
+  m_Name: PlayerProfileArt
+  m_EditorClassIdentifier: Assembly-CSharp::BattleCities.UI.PlayerProfileArt
+  insignia: {fileID: -2526991394610456271, guid: 53b128a0be91bae44b02167ad8d5ba53, type: 3}
+  commander: {fileID: 2366079864651375950, guid: a73e3fc040577cf4192beb20fc08978c, type: 3}
+  matches: {fileID: -9979847518226051, guid: 8b0ad334de3e85249809a0ee04b7eecc, type: 3}
+  defeat: {fileID: -2249498436574778571, guid: 728a8ea988dce6343b36930f0d9390bd, type: 3}
+  victory: {fileID: -4455336866533191821, guid: d01a57a478bf26c40aa5b9063077e427, type: 3}
+  share: {fileID: 3682026532565956393, guid: fba6c7fd4072ee8499c4464f958c5dd2, type: 3}

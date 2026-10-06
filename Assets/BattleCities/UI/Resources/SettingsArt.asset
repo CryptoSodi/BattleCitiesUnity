@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ed37ef448399274990922351b808e16, type: 3}
+  m_Name: SettingsArt
+  m_EditorClassIdentifier: Assembly-CSharp::BattleCities.UI.SettingsArt
+  mute: {fileID: -6506701645286833760, guid: 6be47b6b48030b2409960a627c7c4032, type: 3}
+  scanline: {fileID: -6530727236634806902, guid: 6e10c6885b6c68a47ad658a7b253966a, type: 3}
+  account: {fileID: 6733162462073347424, guid: db1467fba009f334fa544cb95254fa4e, type: 3}
+  phone: {fileID: 2485646858544244219, guid: f8a6fdf5183839648b22491c1fb2bc29, type: 3}
+  logout: {fileID: -2089622434865414477, guid: 886f809fadef3f245b9097078ff4463e, type: 3}

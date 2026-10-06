@@ -9,7 +9,7 @@ namespace BattleCities.UI
         private void RefreshNavigationState()
         {
             if(tabs==null)return;
-            int activeIndex=IsModalOpen&&modalNavigationPage>=0?modalNavigationPage:IsShopOpen?1:0;
+            int activeIndex=IsModalOpen&&modalNavigationPage>=0?modalNavigationPage:IsPlayerProfileOpen?profileNavigationIndex:IsSettingsOpen?settingsNavigationIndex:IsOperationsOpen?(IsSocialsOpen?4:3):IsRankingOpen?2:IsShopOpen?1:0;
             for(int i=0;i<tabs.Length;i++)
                 if(tabs[i])tabs[i].GetComponent<MenuButtonVisual>()?.ConfigureNavigation(theme?theme.NavigationFocus:null,i==activeIndex);
         }

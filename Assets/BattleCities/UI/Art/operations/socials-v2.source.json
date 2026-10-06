@@ -1,0 +1,440 @@
+{
+  "family": "socials-v2",
+  "createdDate": "2026-10-06",
+  "count": 6,
+  "tool": "built-in image_gen",
+  "technicalFrame": {
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "background": "transparent",
+    "lighting": "upper-left",
+    "materials": "chunky polished illustrated toy metal",
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "animation": "static",
+    "engine": "Unity import handled separately",
+    "filtering": "smooth illustration; engine settings not modified"
+  },
+  "assets": [
+    {
+      "id": "website",
+      "title": "Website",
+      "file": "C:/repos/BattleCity/public/assets/socials-v2/website.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-7dc3c86f-8574-471c-8fd1-2b12ebd307b6.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-b51a71f4-a053-4e75-8615-97f77c777fb4.png",
+        "prompt": "ROLE: Create a completely NEW individual high-resolution Socials card illustration for Battle Cities. Do not crop, upscale, copy pixels from, or reuse an existing low-resolution icon.\nREFERENCE1 is the approved Socials concept: use the relevant card's object identity and the current blue/gold/silver toy-art family. REFERENCE2 Vanguard tank establishes the chunky modeled mechanical materials, crisp beveled edges, subtle paint wear and readable construction. It is a material reference, not a tank to include.\nFAMILY ART DIRECTION: premium polished chunky 3D illustrated arcade toy, near-frontal icon with very slight three-quarter depth, upper-left soft studio light, rich cobalt blue/navy and warm gold with silver-metal bevels. Large smooth readable shapes, restrained few bolts, clean sharp edge highlights, dark edge separation. Not pixelated, not flat vector, not hyperrealistic photography. Same object scale and camera distance across the six icons; readable at128px.\nTECHNICAL: exactly ONE coherent complete illustrated symbol centered in a1024x1024 square, genuine transparent alpha background. Generous but modest transparent margin approximately12% on all sides. All appendages fit well inside canvas. No floor, no baked ground shadow or halo; self-shading on the object only. No text, labels, words, digits, card, button, border frame, container, plaque, colored background, scene, watermark, people outside the requested symbol, particles or glow. The X platform emblem, a plus/follow symbol, and chat ellipsis are allowed only when explicitly requested below; no other lettering. No page mockup or sprite sheet. Strong complete silhouette.\nSUBJECT: rich cobalt-blue spherical globe with a chunky warm-gold meridian/equator framework, small silver joints and a large clean gold mouse cursor arrow overlapping the globe's lower-right edge. Clear blue oceans/globe surface, minimal simple latitude-longitude divisions. Near-frontal symmetrical sphere with dimensional depth. Pointer points upper-left into globe. No stand, pedestal or unrelated elements. Gold frame refers to the meridian lattice around the globe itself, NOT a surrounding card frame. Reinterpret as a fresh polished standalone illustration faithful to the concept.",
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 84,
+          "top": 69,
+          "width": 1085,
+          "height": 1096
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 792,
+          "height": 800
+        },
+        "padding": {
+          "left": 116,
+          "right": 116,
+          "top": 112,
+          "bottom": 112
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 119,
+          "top": 115,
+          "width": 786,
+          "height": 794,
+          "edgePixels": 0,
+          "transparentPercent": 57.35
+        },
+        "sourceEdges": 0,
+        "sha256": "351272fc285772a76b45672f32826544876d9f2604cfffc3ab8f0208a90988bc",
+        "visualReview": "Passed: complete silhouette and readable on cream/navy at216,128,64px",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "x-follow",
+      "title": "X Follow",
+      "file": "C:/repos/BattleCity/public/assets/socials-v2/x-follow.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-7dc3c86f-8574-471c-8fd1-2b12ebd307b6.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-2ee346e1-c4e8-47d6-8e85-b67281825f46.png",
+        "prompt": "ROLE: Create a completely NEW individual high-resolution Socials card illustration for Battle Cities. Do not crop, upscale, copy pixels from, or reuse an existing low-resolution icon.\nREFERENCE1 is the approved Socials concept: use the relevant card's object identity and the current blue/gold/silver toy-art family. REFERENCE2 Vanguard tank establishes the chunky modeled mechanical materials, crisp beveled edges, subtle paint wear and readable construction. It is a material reference, not a tank to include.\nFAMILY ART DIRECTION: premium polished chunky 3D illustrated arcade toy, near-frontal icon with very slight three-quarter depth, upper-left soft studio light, rich cobalt blue/navy and warm gold with silver-metal bevels. Large smooth readable shapes, restrained few bolts, clean sharp edge highlights, dark edge separation. Not pixelated, not flat vector, not hyperrealistic photography. Same object scale and camera distance across the six icons; readable at128px.\nTECHNICAL: exactly ONE coherent complete illustrated symbol centered in a1024x1024 square, genuine transparent alpha background. Generous but modest transparent margin approximately12% on all sides. All appendages fit well inside canvas. No floor, no baked ground shadow or halo; self-shading on the object only. No text, labels, words, digits, card, button, border frame, container, plaque, colored background, scene, watermark, people outside the requested symbol, particles or glow. The X platform emblem, a plus/follow symbol, and chat ellipsis are allowed only when explicitly requested below; no other lettering. No page mockup or sprite sheet. Strong complete silhouette.\nSUBJECT: a large unmistakable metallic silver X platform emblem in the foreground, with dark navy beveled sides. A small FRIENDLY cartoon military tank commander, olive-green helmet, amber goggles pushed above friendly visible eyes, peeking from behind the upper-right of X, head and shoulders only. On lower-right, a small round gold follow badge with a clear raised silver PLUS symbol, attached into the coherent icon. X remains the largest and clearest shape; commander is secondary. Approachable polished toy character, no weapons, no mask obscuring expression, no scary face. No text or written Follow label. Fresh individual high-resolution sculpt, not a crop of the screenshot.",
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 74,
+          "top": 58,
+          "width": 1118,
+          "height": 1133
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 789,
+          "height": 800
+        },
+        "padding": {
+          "left": 117,
+          "right": 118,
+          "top": 112,
+          "bottom": 112
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 120,
+          "top": 115,
+          "width": 784,
+          "height": 794,
+          "edgePixels": 0,
+          "transparentPercent": 57.87
+        },
+        "sourceEdges": 0,
+        "sha256": "a33d35bbe1b9c00ef6d7587aa6ffc87c7307cbac03d2bb0c65a373a96fe12d40",
+        "visualReview": "Passed: complete silhouette and readable on cream/navy at216,128,64px",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "instagram",
+      "title": "Instagram",
+      "file": "C:/repos/BattleCity/public/assets/socials-v2/instagram.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-7dc3c86f-8574-471c-8fd1-2b12ebd307b6.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-459f9c49-b314-423e-bb34-adcb15bdafc2.png",
+        "prompt": "ROLE: Create a completely NEW individual high-resolution Socials card illustration for Battle Cities. Do not crop, upscale, copy pixels from, or reuse an existing low-resolution icon.\nREFERENCE1 is the approved Socials concept: use the relevant card's object identity and the current blue/gold/silver toy-art family. REFERENCE2 Vanguard tank establishes the chunky modeled mechanical materials, crisp beveled edges, subtle paint wear and readable construction. It is a material reference, not a tank to include.\nFAMILY ART DIRECTION: premium polished chunky 3D illustrated arcade toy, near-frontal icon with very slight three-quarter depth, upper-left soft studio light, rich cobalt blue/navy and warm gold with silver-metal bevels. Large smooth readable shapes, restrained few bolts, clean sharp edge highlights, dark edge separation. Not pixelated, not flat vector, not hyperrealistic photography. Same object scale and camera distance across the six icons; readable at128px.\nTECHNICAL: exactly ONE coherent complete illustrated symbol centered in a1024x1024 square, genuine transparent alpha background. Generous but modest transparent margin approximately12% on all sides. All appendages fit well inside canvas. No floor, no baked ground shadow or halo; self-shading on the object only. No text, labels, words, digits, card, button, border frame, container, plaque, colored background, scene, watermark, people outside the requested symbol, particles or glow. The X platform emblem, a plus/follow symbol, and chat ellipsis are allowed only when explicitly requested below; no other lettering. No page mockup or sprite sheet. Strong complete silhouette.\nSUBJECT: a premium GOLD ARMORED CAMERA icon recalling Instagram. Chunky near-square gold/orange metal camera body with modest chamfered corners, small silver corner fasteners, large central multicolor glass lens with cobalt, magenta and purple concentric reflections, and a small round upper-right flash/viewfinder. A few restrained cyan/magenta trim accents reinforce Instagram palette. Near-front view with slight side depth. The body is the camera hardware, NOT a UI card or border around the image. No words, no Instagram label, no full phone, no strap beyond silhouette. Fresh detailed but readable toy camera matching the concept.",
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 98,
+          "top": 128,
+          "width": 1071,
+          "height": 999
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 800,
+          "height": 746
+        },
+        "padding": {
+          "left": 112,
+          "right": 112,
+          "top": 139,
+          "bottom": 139
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 115,
+          "top": 142,
+          "width": 794,
+          "height": 740,
+          "edgePixels": 0,
+          "transparentPercent": 47.29
+        },
+        "sourceEdges": 0,
+        "sha256": "1e0358a59e7429fafa46a40b90cb25a7686c5a270c221fd6a9fba06e77ba8228",
+        "visualReview": "Passed: complete silhouette and readable on cream/navy at216,128,64px",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "discord",
+      "title": "Discord",
+      "file": "C:/repos/BattleCity/public/assets/socials-v2/discord.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-7dc3c86f-8574-471c-8fd1-2b12ebd307b6.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-8774d3da-5224-4535-acfe-1c4b8fa60319.png",
+        "prompt": "ROLE: Create a completely NEW individual high-resolution Socials card illustration for Battle Cities. Do not crop, upscale, copy pixels from, or reuse an existing low-resolution icon.\nREFERENCE1 is the approved Socials concept: use the relevant card's object identity and the current blue/gold/silver toy-art family. REFERENCE2 Vanguard tank establishes the chunky modeled mechanical materials, crisp beveled edges, subtle paint wear and readable construction. It is a material reference, not a tank to include.\nFAMILY ART DIRECTION: premium polished chunky 3D illustrated arcade toy, near-frontal icon with very slight three-quarter depth, upper-left soft studio light, rich cobalt blue/navy and warm gold with silver-metal bevels. Large smooth readable shapes, restrained few bolts, clean sharp edge highlights, dark edge separation. Not pixelated, not flat vector, not hyperrealistic photography. Same object scale and camera distance across the six icons; readable at128px.\nTECHNICAL: exactly ONE coherent complete illustrated symbol centered in a1024x1024 square, genuine transparent alpha background. Generous but modest transparent margin approximately12% on all sides. All appendages fit well inside canvas. No floor, no baked ground shadow or halo; self-shading on the object only. No text, labels, words, digits, card, button, border frame, container, plaque, colored background, scene, watermark, people outside the requested symbol, particles or glow. The X platform emblem, a plus/follow symbol, and chat ellipsis are allowed only when explicitly requested below; no other lettering. No page mockup or sprite sheet. Strong complete silhouette.\nSUBJECT: a recognizable friendly DISCORD/controller-shaped face in a BLUE ARMORED GAMING HEADSET. Main face uses recognizable Discord gamepad silhouette: broad cobalt/periwinkle-blue rounded controller form with two simple round eyes and a friendly curved lower face, no realistic human features. Two chunky navy-blue headset earcups and arched headband surround it, with subtle silver armor plates and a few tiny gold joints; small integrated microphone tip on one side. Friendly appealing symmetrical silhouette, near-frontal. Clear Discord identity at128px, not a robot skull or generic two-eye helmet. No text, no giant border, no badge background. Fresh high-resolution illustration.",
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 9,
+          "top": 163,
+          "width": 1236,
+          "height": 846
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 800,
+          "height": 548
+        },
+        "padding": {
+          "left": 112,
+          "right": 112,
+          "top": 238,
+          "bottom": 238
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 114,
+          "top": 241,
+          "width": 796,
+          "height": 543,
+          "edgePixels": 0,
+          "transparentPercent": 70.97
+        },
+        "sourceEdges": 0,
+        "sha256": "f7f76c14ec1683625ff309229ffa62d2dddfdf33279262a3d25884bd12f5081d",
+        "visualReview": "Passed: complete silhouette and readable on cream/navy at216,128,64px",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "x-repost",
+      "title": "X Repost",
+      "file": "C:/repos/BattleCity/public/assets/socials-v2/x-repost.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-7dc3c86f-8574-471c-8fd1-2b12ebd307b6.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-e522d7ec-2ebd-4600-be51-ceacc221d32a.png",
+        "prompt": "ROLE: Create a completely NEW individual high-resolution Socials card illustration for Battle Cities. Do not crop, upscale, copy pixels from, or reuse an existing low-resolution icon.\nREFERENCE1 is the approved Socials concept: use the relevant card's object identity and the current blue/gold/silver toy-art family. REFERENCE2 Vanguard tank establishes the chunky modeled mechanical materials, crisp beveled edges, subtle paint wear and readable construction. It is a material reference, not a tank to include.\nFAMILY ART DIRECTION: premium polished chunky 3D illustrated arcade toy, near-frontal icon with very slight three-quarter depth, upper-left soft studio light, rich cobalt blue/navy and warm gold with silver-metal bevels. Large smooth readable shapes, restrained few bolts, clean sharp edge highlights, dark edge separation. Not pixelated, not flat vector, not hyperrealistic photography. Same object scale and camera distance across the six icons; readable at128px.\nTECHNICAL: exactly ONE coherent complete illustrated symbol centered in a1024x1024 square, genuine transparent alpha background. Generous but modest transparent margin approximately12% on all sides. All appendages fit well inside canvas. No floor, no baked ground shadow or halo; self-shading on the object only. No text, labels, words, digits, card, button, border frame, container, plaque, colored background, scene, watermark, people outside the requested symbol, particles or glow. The X platform emblem, a plus/follow symbol, and chat ellipsis are allowed only when explicitly requested below; no other lettering. No page mockup or sprite sheet. Strong complete silhouette.\nSUBJECT: large clear metallic silver X platform emblem encircled by TWO CHUNKY CURVED REPOST ARROWS, forming a coherent circular loop with visible negative space. Upper arrow cobalt-blue with steel bevels, lower arrow warm gold with steel bevels; arrowheads clearly follow a circular repost path in opposite halves. Small restrained metal joints make the arrows feel like toy military hardware. X stays central and unobstructed. Near-frontal, compact balanced round silhouette. Full-color AVAILABLE-state artwork; any disabled tint will be handled in the game. No text, padlocks, badges or unrelated currency. Fresh standalone illustrated symbol.",
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 102,
+          "top": 105,
+          "width": 1053,
+          "height": 1057
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 797,
+          "height": 800
+        },
+        "padding": {
+          "left": 113,
+          "right": 114,
+          "top": 112,
+          "bottom": 112
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 116,
+          "top": 115,
+          "width": 791,
+          "height": 794,
+          "edgePixels": 0,
+          "transparentPercent": 57.34
+        },
+        "sourceEdges": 0,
+        "sha256": "6c420b2de097d0d4ca8dd77a45dd5396a05083cef83d63f04a3f12a403e84bda",
+        "visualReview": "Passed: complete silhouette and readable on cream/navy at216,128,64px",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    },
+    {
+      "id": "x-comment",
+      "title": "X Comment",
+      "file": "C:/repos/BattleCity/public/assets/socials-v2/x-comment.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI illustration",
+      "provenance": {
+        "kind": "newly generated illustration",
+        "tool": "built-in image_gen",
+        "createdDate": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-7dc3c86f-8574-471c-8fd1-2b12ebd307b6.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-6e67bf54-4c24-4585-b0e5-ca06de7cc0e7.png",
+        "prompt": "ROLE: Create a completely NEW individual high-resolution Socials card illustration for Battle Cities. Do not crop, upscale, copy pixels from, or reuse an existing low-resolution icon.\nREFERENCE1 is the approved Socials concept: use the relevant card's object identity and the current blue/gold/silver toy-art family. REFERENCE2 Vanguard tank establishes the chunky modeled mechanical materials, crisp beveled edges, subtle paint wear and readable construction. It is a material reference, not a tank to include.\nFAMILY ART DIRECTION: premium polished chunky 3D illustrated arcade toy, near-frontal icon with very slight three-quarter depth, upper-left soft studio light, rich cobalt blue/navy and warm gold with silver-metal bevels. Large smooth readable shapes, restrained few bolts, clean sharp edge highlights, dark edge separation. Not pixelated, not flat vector, not hyperrealistic photography. Same object scale and camera distance across the six icons; readable at128px.\nTECHNICAL: exactly ONE coherent complete illustrated symbol centered in a1024x1024 square, genuine transparent alpha background. Generous but modest transparent margin approximately12% on all sides. All appendages fit well inside canvas. No floor, no baked ground shadow or halo; self-shading on the object only. No text, labels, words, digits, card, button, border frame, container, plaque, colored background, scene, watermark, people outside the requested symbol, particles or glow. The X platform emblem, a plus/follow symbol, and chat ellipsis are allowed only when explicitly requested below; no other lettering. No page mockup or sprite sheet. Strong complete silhouette.\nSUBJECT: large clean metallic silver X platform emblem with dark navy beveled sides, paired with a small chunky COBALT BLUE CHAT BUBBLE overlapping its lower-right side. Bubble has a short clear downward tail and THREE simple gold raised dots (ellipsis) in a horizontal line, no written text. Slight silver edge and only a couple tiny restrained metal fasteners. X dominant, chat bubble subordinate but legible; form one coherent compact silhouette, near-frontal view with mild 3D depth. Full-color AVAILABLE-state illustration, game will tint locked state. No card, padlock, extra icons or border. Fresh high-resolution toy artwork.",
+        "generationNote": "Fresh generation from user-provided current concept/style references; no old-game icon PNG was loaded or reused. No third-party stock source."
+      },
+      "normalization": {
+        "operation": "Crop transparent margins around alpha>16 bounds with a4px guard, resize proportionally and center on transparent canvas. No recolor or repaint.",
+        "crop": {
+          "left": 83,
+          "top": 182,
+          "width": 1112,
+          "height": 967
+        },
+        "subjectFit": 800,
+        "resized": {
+          "width": 800,
+          "height": 696
+        },
+        "padding": {
+          "left": 112,
+          "right": 112,
+          "top": 164,
+          "bottom": 164
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        },
+        "embeddedProvenance": "Preserved by Sharp keepMetadata where supported"
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 115,
+          "top": 167,
+          "width": 794,
+          "height": 690,
+          "edgePixels": 0,
+          "transparentPercent": 62.36
+        },
+        "sourceEdges": 0,
+        "sha256": "67a298f2888dc3bc8b974c2650ce04a1f793a02e51a94ac181e87f280bb57ca4",
+        "visualReview": "Passed: complete silhouette and readable on cream/navy at216,128,64px",
+        "engineReview": "not performed; implementing Unity chat handles import"
+      }
+    }
+  ],
+  "validation": {
+    "status": "asset_checks_passed",
+    "reviewedCanvasSizes": [
+      216,
+      128,
+      64
+    ],
+    "reviewBackgrounds": [
+      "cream",
+      "navy"
+    ],
+    "preview": "C:/repos/BattleCity/tmp/fresh-menu-icons-v2-20261006/socials-v2-preview.png",
+    "notes": "Fresh individual illustrations, complete silhouettes, transparent backgrounds and internal gaps, no visible baked shadows or halos. No text/card backplates. Three Boosts chevrons verified. Unity import and in-engine checks remain with the implementing chat."
+  }
+}

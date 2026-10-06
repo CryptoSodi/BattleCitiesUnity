@@ -83,12 +83,20 @@ namespace BattleCities.UI
             profile.elements.Clear();
             var battleScreen=mainFrame?mainFrame.Find("Pre-battle screens"):null;
             var shopScreen=mainFrame?mainFrame.Find("Shop screen"):null;
+            var rankingPage=mainFrame?mainFrame.Find("Ranking screen"):null;
+            var operationsPage=mainFrame?mainFrame.Find("Operations screen"):null;
+            var settingsPage=mainFrame?mainFrame.Find("Settings screen"):null;
+            var profilePage=mainFrame?mainFrame.Find("Player profile screen"):null;
             foreach(var rect in content.GetComponentsInChildren<RectTransform>(true))
             {
                 // Modal visibility and API-driven text contents belong to runtime behavior.
                 if(rect==content || (modal && (rect==modal || rect.IsChildOf(modal))))continue;
                 if(battleScreen && (rect==battleScreen || rect.IsChildOf(battleScreen)))continue;
                 if(shopScreen && (rect==shopScreen || rect.IsChildOf(shopScreen)))continue;
+                if(rankingPage && (rect==rankingPage || rect.IsChildOf(rankingPage)))continue;
+                if(operationsPage && (rect==operationsPage || rect.IsChildOf(operationsPage)))continue;
+                if(settingsPage && (rect==settingsPage || rect.IsChildOf(settingsPage)))continue;
+                if(profilePage && (rect==profilePage || rect.IsChildOf(profilePage)))continue;
                 profile.elements.Add(new AuthoredElement(rect));
             }
             return profile;
@@ -118,10 +126,18 @@ namespace BattleCities.UI
                 // Pre-battle controls own their layout and visibility; old scene captures may include them.
                 var battleScreen=mainFrame?mainFrame.Find("Pre-battle screens"):null;
                 var shopScreen=mainFrame?mainFrame.Find("Shop screen"):null;
+                var rankingPage=mainFrame?mainFrame.Find("Ranking screen"):null;
+                var operationsPage=mainFrame?mainFrame.Find("Operations screen"):null;
+            var settingsPage=mainFrame?mainFrame.Find("Settings screen"):null;
+            var profilePage=mainFrame?mainFrame.Find("Player profile screen"):null;
                 foreach(var element in profile.elements)
                 {
                     if(battleScreen && element.rect && (element.rect==battleScreen || element.rect.IsChildOf(battleScreen)))continue;
                     if(shopScreen && element.rect && (element.rect==shopScreen || element.rect.IsChildOf(shopScreen)))continue;
+                    if(rankingPage && element.rect && (element.rect==rankingPage || element.rect.IsChildOf(rankingPage)))continue;
+                    if(operationsPage && element.rect && (element.rect==operationsPage || element.rect.IsChildOf(operationsPage)))continue;
+                if(settingsPage && element.rect && (element.rect==settingsPage || element.rect.IsChildOf(settingsPage)))continue;
+                if(profilePage && element.rect && (element.rect==profilePage || element.rect.IsChildOf(profilePage)))continue;
                     element.Restore();
                 }
             }

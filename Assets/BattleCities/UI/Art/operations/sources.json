@@ -1,0 +1,7 @@
+{
+  "source": "BattleCity/public/assets/headquarters-v2, socials-v2, headquarters/manual",
+  "artChat": "01a094c4-7348-79f3-9b5b-13a6013430db",
+  "manualContent": "BattleCity/src/wiki/WikiData.ts",
+  "purpose": "Quarters, Treasury, Field Manual and Socials UI",
+  "importer": "OperationsArtImport; whole transparent sprites, preserved proportions"
+}

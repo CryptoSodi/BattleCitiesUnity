@@ -315,7 +315,7 @@ namespace BattleCities.UI
             Fit(label.rectTransform,new Rect(.29f,.025f,.68f,.95f));
             label.fontSize=label.fontSizeMax=TvTitleHeaderLayout.TextSize;label.fontSizeMin=12;label.enableAutoSizing=true;
             label.textWrappingMode=TextWrappingModes.NoWrap;label.alignment=TextAlignmentOptions.Center;
-            textStyles.Apply(label,ArcadeTextTreatment.WhiteButton);
+            textStyles.ApplyCleanButton(label,false);
             var arrow=back.transform.Find("Arrow") as RectTransform;
             if(!arrow){var go=new GameObject("Arrow",typeof(RectTransform),typeof(CanvasRenderer),typeof(BackTabArrow));go.layer=back.gameObject.layer;arrow=(RectTransform)go.transform;arrow.SetParent(back.transform,false);}
             Fit(arrow,new Rect(.10f,.17f,.14f,.66f));var arrowGraphic=arrow.GetComponent<BackTabArrow>();arrowGraphic.color=Color.white;arrowGraphic.raycastTarget=false;
@@ -437,8 +437,10 @@ namespace BattleCities.UI
         {
             if(!root)return;
             StyleText(root.Find("Title plate/Title")?.GetComponent<TMP_Text>(),true);
+            var backCaption=back?back.GetComponentInChildren<TMP_Text>(true):null;
             foreach(var label in root.GetComponentsInChildren<TMP_Text>(true))
             {
+                if(label==backCaption){textStyles.ApplyCleanButton(label,false);continue;}
                 if(label==continueLabel||(label.transform.parent&&label.transform.parent.name=="Cost badge"&&
                     (label.name=="Cost text"||label.name=="Locked text")))continue;
                 if(label.name=="Count")StyleText(label,true);

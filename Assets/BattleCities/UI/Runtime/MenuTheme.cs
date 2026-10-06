@@ -11,6 +11,7 @@ namespace BattleCities.UI
         public Sprite BlueFrame, CreamPanel, GoldPanel, SelectedPanel, DarkPanel, SilverFrame, FocusRing, Rounded;
         public Sprite NavigationFocus;
         public Sprite[] NavigationIcons;
+        public Sprite RankingGamingIcon, RankingTradingIcon;
         public Sprite SettingsIcon, ScoreIcon, HighScoreIcon, TrophyIcon, TimerIcon;
         public Sprite[] RewardIcons;
         public Sprite[] PrizeCrates;
