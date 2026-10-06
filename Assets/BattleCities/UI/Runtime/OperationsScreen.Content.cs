@@ -143,20 +143,20 @@ namespace BattleCities.UI
         {
             items.Add(new Item{Key="website",Title="WEBSITE",Detail="BATTLECITIES.COM",Action="VISIT WEBSITE",Icon=SocialIcon(0),Click=()=>OpenLink("https://battlecities.com","WEBSITE OPENED IN YOUR BROWSER")});
             bool connected=Yes(xStatus?["connected"]),follows=Yes(xStatus?["follows"]);
-            items.Add(new Item{Key="x-follow",Title="X FOLLOW",Detail=loading?"CHECKING STATUS...":xError!=null?"STATUS UNAVAILABLE":!xAuthenticated?"CONNECT WALLET TO BEGIN":follows?"FOLLOW VERIFIED":!connected?"CONNECT X TO BEGIN":xReady?"READY FOR VERIFICATION":"FOLLOW @BATTLECITIESHQ",Action=loading?"CHECKING...":xError!=null?"RETRY":!xAuthenticated?"CONNECT WALLET":follows?"FOLLOWED":!connected?"CONNECT X":xReady?"VERIFY FOLLOW":"FOLLOW ON X",Icon=SocialIcon(1),Click=ActFollow});
+            items.Add(new Item{Key="x-follow",Title="X FOLLOW",Completed=xError==null&&xAuthenticated&&follows,Detail=loading?"CHECKING STATUS...":xError!=null?"STATUS UNAVAILABLE":!xAuthenticated?"CONNECT WALLET TO BEGIN":follows?"FOLLOW VERIFIED":!connected?"LINK X • +5 FUEL":xReady?"VERIFY FOLLOW • +5 FUEL":"FOLLOW @BATTLECITIESHQ • +5 FUEL",Action=loading?"CHECKING...":xError!=null?"RETRY":!xAuthenticated?"CONNECT WALLET":follows?"FOLLOWED":!connected?"CONNECT X":xReady?"VERIFY FOLLOW":"FOLLOW ON X",Icon=SocialIcon(1),Click=ActFollow});
             items.Add(new Item{Key="instagram",Title="INSTAGRAM",Detail="@BATTLECITIESHQ",Action="FOLLOW INSTAGRAM",Icon=SocialIcon(2),Click=()=>OpenLink("https://www.instagram.com/battlecitieshq","INSTAGRAM OPENED IN YOUR BROWSER")});
             bool verified=Yes(discord?["verified"]),claimed=Yes(discord?["rewardClaimed"]);
-            items.Add(new Item{Key="discord",Title="DISCORD",Detail=loading?"CHECKING STATUS...":discordError!=null?"STATUS UNAVAILABLE":!discordAuthenticated?"CONNECT WALLET TO BEGIN":claimed?"REWARD CLAIMED":verified?"MEMBERSHIP VERIFIED":"JOIN AND VERIFY MEMBERSHIP",Action=loading?"CHECKING...":discordError!=null?"RETRY":!discordAuthenticated?"CONNECT WALLET":claimed?"VERIFIED":verified?"CLAIM FUEL":"JOIN & VERIFY",Icon=SocialIcon(3),Click=ActDiscord});
+            items.Add(new Item{Key="discord",Title="DISCORD",Completed=discordError==null&&discordAuthenticated&&claimed,Detail=loading?"CHECKING STATUS...":discordError!=null?"STATUS UNAVAILABLE":!discordAuthenticated?"CONNECT WALLET TO BEGIN":claimed?"COMPLETED • 5 FUEL SECURED":verified?"VERIFIED • CLAIM +5 FUEL":"JOIN AND VERIFY • +5 FUEL",Action=loading?"CHECKING...":discordError!=null?"RETRY":!discordAuthenticated?"CONNECT WALLET":claimed?"VERIFIED":verified?"CLAIM FUEL":"JOIN & VERIFY",Icon=SocialIcon(3),Click=ActDiscord});
             AddSocialTask("repost",4,xStatus?["repostTask"] as JObject,repostReady);
             AddSocialTask("comment",5,xStatus?["commentTask"] as JObject,commentReady);
         }
         void AddSocialTask(string kind,int icon,JObject task,string ready)
         {
-            bool follows=Yes(xStatus?["follows"]),claimed=Yes(task?["claimed"]),exists=task!=null;
+            bool follows=xAuthenticated&&Yes(xStatus?["follows"]),claimed=Yes(task?["claimed"]),exists=task!=null;
             string verb=kind.ToUpperInvariant();bool verify=exists&&Text(task["id"])==ready;
-            items.Add(new Item{Key="x-"+kind,Title="X "+verb,Icon=SocialIcon(icon),Locked=!follows||!exists,
-                Detail=loading?"CHECKING STATUS...":!follows?"COMPLETE X FOLLOW FIRST":!exists?"NO ACTIVE TASK":claimed?"COMPLETED • +"+Amount(task["rewardFuel"])+" FUEL":verify?"READY FOR VERIFICATION":"ACTIVE TASK • +"+Amount(task["rewardFuel"])+" FUEL",
-                Action=claimed?"COMPLETED":!follows||!exists?"LOCKED":verify?"VERIFY "+verb:verb,Click=()=>ActTask(kind)});
+            items.Add(new Item{Key="x-"+kind,Title="X "+verb,Icon=SocialIcon(icon),Locked=xError==null&&(!follows||!exists),Completed=xError==null&&follows&&claimed,
+                Detail=loading?"CHECKING STATUS...":xError!=null?"STATUS UNAVAILABLE":!follows?"COMPLETE X FOLLOW FIRST":!exists?"NO ACTIVE TASK":claimed?"COMPLETED • "+Amount(task["rewardFuel"])+" FUEL SECURED":verify?"VERIFY • +"+Amount(task["rewardFuel"])+" FUEL":"ACTIVE TASK • +"+Amount(task["rewardFuel"])+" FUEL",
+                Action=xError!=null?"RETRY":claimed?"COMPLETED":!follows||!exists?"LOCKED":verify?"VERIFY "+verb:verb,Click=()=>ActTask(kind)});
         }
     }
 }

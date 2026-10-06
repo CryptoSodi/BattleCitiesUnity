@@ -10,7 +10,7 @@ using UnityEngine.UI;
 namespace BattleCities.UI
 {
     /// <summary>TV-contained tank selection and server-confirmed deployment/loadout flow.</summary>
-    public sealed class PreBattleScreen : MonoBehaviour
+    public sealed partial class PreBattleScreen : MonoBehaviour
     {
         const float ContinueWidth=220f,Psg1ContinueWidth=280f,ContinueRosterGap=2f,FooterColumnGap=10f;
         const float ContinueHeightScale=1.2f;
@@ -29,8 +29,8 @@ namespace BattleCities.UI
             {2,3,2,1}, // Classified III
             {4,2,1,3}  // Classified IV
         };
-        static readonly string[] Items={"shield","base-defence","freeze","extra-life","upgrade","zoom-out","wipeout","speed"};
-        static readonly string[] ItemNames={"SHIELD","BASE DEFENCE","FREEZE","EXTRA LIFE","UPGRADE","ZOOM OUT","WIPEOUT","SPEED"};
+        static readonly string[] Items={"shield","base-defence","freeze","speed","upgrade","zoom-out","wipeout","extra-life"};
+        static readonly string[] ItemNames={"SHIELD","BASE DEFENCE","FREEZE","SPEED","STAR","ZOOM OUT","WIPEOUT","EXTRA LIFE"};
         static readonly string[] Slots={"active-one","active-two","active-three","active-four"};
         MenuTheme theme; MainMenuApiClient api; Action launch; Button home;
         RectTransform root,tankPage,loadoutPage;
@@ -77,13 +77,13 @@ namespace BattleCities.UI
         public bool IsConfigured=>root&&tankButtons[0]&&launch!=null;
         public void Configure(RectTransform frame,MenuTheme skin,MainMenuApiClient client,Action onLaunch,Button returnTo)
         {
-            theme=skin;api=client;launch=onLaunch;home=returnTo;
+            if(api)api.PlayerLoaded-=OnLoadoutPlayer;theme=skin;api=client;launch=onLaunch;home=returnTo;if(api)api.PlayerLoaded+=OnLoadoutPlayer;BindLoadoutIdentity();
             art=Resources.Load<PreBattleArt>("PreBattleArt");
             root=frame.Find("Pre-battle screens") as RectTransform;
             if(root)
             {
                 BindExistingView();
-                ApplyScreenSurface();
+                EnsureLoadoutView();ApplyScreenSurface();
                 ShowPage(false);
                 return;
             }
@@ -130,11 +130,11 @@ namespace BattleCities.UI
             for(int i=0;i<4;i++)
             {
                 int index=i;
-                var b=Button("Slot "+(i+1),loadoutPage,"",new Rect(.27f+(i%2)*.365f,(i/2)*.51f,.35f,.49f),()=>CycleSlot(index));
+                var b=Button("Slot "+(i+1),loadoutPage,"",new Rect(.27f+(i%2)*.365f,(i/2)*.51f,.35f,.49f),()=>ChooseLoadoutSlot(index));
                 slotButtons[i]=b;
                 Label("Slot heading",b.transform,"SLOT 0"+(i+1),new Rect(.05f,.03f,.90f,.12f),24,theme.Navy);
                 slotIcons[i]=Raw("Equipped item",b.transform,new Rect(.30f,.19f,.40f,.43f));
-                slotEmpty[i]=Label("Empty slot",b.transform,"+",new Rect(.30f,.19f,.40f,.43f),72,new Color(.25f,.38f,.48f));
+                slotEmpty[i]=Label("Empty slot",b.transform,"",new Rect(.30f,.19f,.40f,.43f),72,new Color(.25f,.38f,.48f));
                 slotNames[i]=Label("Item name",b.transform,"EMPTY",new Rect(.03f,.65f,.94f,.13f),25,theme.Navy);
                 Label("Change",b.transform,"CHANGE",new Rect(.08f,.81f,.84f,.14f),24,new Color(.03f,.32f,.65f));
             }
@@ -142,7 +142,7 @@ namespace BattleCities.UI
             status.alignment=TextAlignmentOptions.MidlineLeft;
             proceed=Button("Continue",root,"CONTINUE",new Rect(.68f,.88f,.29f,.105f),Continue);
             continueLabel=proceed.GetComponentInChildren<TMP_Text>();
-            ApplyContinueArt();
+            EnsureLoadoutView();ApplyContinueArt();
             ApplyTitleHeader();
             root.gameObject.SetActive(false);
         }
@@ -158,11 +158,11 @@ namespace BattleCities.UI
             }
             title=root.Find("Title plate/Title").GetComponent<TMP_Text>();font=ArcadeTextStyles.HeadingSdf?ArcadeTextStyles.HeadingSdf:title.font;
             foreach(var label in root.GetComponentsInChildren<TMP_Text>(true))label.font=font;
-            status=root.Find("Status").GetComponent<TMP_Text>();
+            status=(root.Find("Status")??root.Find("Fuel summary/Status")).GetComponent<TMP_Text>();
             fuel=root.Find("Fuel summary/Fuel").GetComponent<TMP_Text>();
             var backControl=root.Find("Title plate/Back container/Back")??root.Find("Back");
             back=backControl.GetComponent<Button>();
-            var continueControl=root.Find("Fuel summary/Continue")??root.Find("Continue");
+            var continueControl=root.Find("Fuel summary/Continue")??root.Find("Continue")??root.Find("Loadout/Workspace/Continue");
             proceed=continueControl.GetComponent<Button>();
             continueLabel=proceed.GetComponentInChildren<TMP_Text>(true);
             tankPage=(RectTransform)root.Find("Tank roster");
@@ -179,13 +179,13 @@ namespace BattleCities.UI
             {
                 int index=i;
                 tankButtons[i]=rosterCards.Find(Names[i]).GetComponent<Button>();
-                slotButtons[i]=loadoutPage.Find("Slot "+(i+1)).GetComponent<Button>();
+                slotButtons[i]=(loadoutPage.Find("Workspace/Slot "+(i+1))??loadoutPage.Find("Slot "+(i+1))).GetComponent<Button>();
                 var slot=slotButtons[i].transform;
                 slotNames[i]=slot.Find("Item name").GetComponent<TMP_Text>();
                 slotEmpty[i]=slot.Find("Empty slot").GetComponent<TMP_Text>();
                 slotIcons[i]=slot.Find("Equipped item bounds/Equipped item").GetComponent<RawImage>();
                 BindClick(tankButtons[i],()=>SelectTank(index));
-                BindClick(slotButtons[i],()=>CycleSlot(index));
+                BindClick(slotButtons[i],()=>ChooseLoadoutSlot(index));
             }
         }
         static void BindClick(Button button,UnityEngine.Events.UnityAction action)
@@ -321,9 +321,9 @@ namespace BattleCities.UI
             Fit(arrow,new Rect(.10f,.17f,.14f,.66f));var arrowGraphic=arrow.GetComponent<BackTabArrow>();arrowGraphic.color=Color.white;arrowGraphic.raycastTarget=false;
             var focus=back.transform.Find("Focus") as RectTransform;
             if(!focus)focus=Panel("Focus",back.transform,null,new Rect(.18f,.90f,.64f,.035f));
-            var focusImage=focus.GetComponent<Image>();focusImage.color=Color.white;
+            Fit(focus,new Rect(0,0,1,1));focus.SetAsFirstSibling();var focusImage=focus.GetComponent<Image>();focusImage.sprite=art.tankCostButton;focusImage.type=Image.Type.Sliced;TvTitleHeaderLayout.FitSkin(focusImage,layout.NavigationHeight-6);focusImage.color=Color.white;
             back.targetGraphic=focusImage;back.transition=Selectable.Transition.ColorTint;back.spriteState=default;
-            var colors=ColorBlock.defaultColorBlock;colors.normalColor=Color.clear;colors.highlightedColor=new Color(.25f,.85f,1,.8f);colors.selectedColor=new Color(.35f,.9f,1,1);colors.pressedColor=Color.white;colors.disabledColor=Color.clear;colors.fadeDuration=.08f;back.colors=colors;
+            var colors=ColorBlock.defaultColorBlock;colors.normalColor=Color.clear;colors.highlightedColor=Color.white;colors.selectedColor=Color.white;colors.pressedColor=Color.white;colors.disabledColor=Color.clear;colors.fadeDuration=.08f;back.colors=colors;
         }
         static void SetSummaryFont(Transform parent,string name,float size)
         {
@@ -352,7 +352,10 @@ namespace BattleCities.UI
         }
         void ApplyStatusPanel()
         {
+            if(inLoadout){LayoutLoadoutFooter();return;}
             var balance=(RectTransform)fuel.transform.parent;
+            foreach(var name in new[]{"Fuel can","Fuel","Fuel amount","Deployment heading","Deployment cost"}){var child=balance.Find(name);if(child)child.gameObject.SetActive(true);}
+            if(status&&status.transform.parent==balance)status.transform.SetParent(root,false);
             Fit(balance,new Rect(.015f,.103f,.97f,.089f));
             var image=balance.GetComponent<Image>();
             TvStatusFooterLayout.ApplySkin(image,art&&art.statusPanel?art.statusPanel:theme.DarkPanel);
@@ -384,11 +387,15 @@ namespace BattleCities.UI
             fuelAmount.outlineWidth=.12f;
             deploymentCost.outlineColor=new Color32(76,46,8,255);
             deploymentCost.outlineWidth=.08f;
+            if(inLoadout){ApplyLoadoutLayout();return;}
             ApplySummaryLayout();
         }
         void ApplySummaryLayout()
         {
+            if(inLoadout){LayoutLoadoutFooter();return;}
             var balance=(RectTransform)fuel.transform.parent;
+            foreach(var name in new[]{"Fuel can","Fuel","Fuel amount","Deployment heading","Deployment cost"}){var child=balance.Find(name);if(child)child.gameObject.SetActive(true);}
+            if(status&&status.transform.parent==balance)status.transform.SetParent(root,false);
             if(inLoadout&&proceed&&proceed.transform.parent!=root)proceed.transform.SetParent(root,false);
             if(inLoadout&&FillTvOpening)
                 MainMenuScene.Place(balance,PsgContentInset,PsgContentInset+ActiveHeaderHeight+PsgHeaderGap,
@@ -440,7 +447,9 @@ namespace BattleCities.UI
             var backCaption=back?back.GetComponentInChildren<TMP_Text>(true):null;
             foreach(var label in root.GetComponentsInChildren<TMP_Text>(true))
             {
+                if(loadoutPage&&label.transform.IsChildOf(loadoutPage))continue;
                 if(label==backCaption){textStyles.ApplyCleanButton(label,false);continue;}
+                if(clearSlot&&label.transform.IsChildOf(clearSlot.transform)){var skin=clearSlot.image.overrideSprite?clearSlot.image.overrideSprite:clearSlot.image.sprite;textStyles.ApplyCleanButton(label,skin==art.tankCostButtonSelected);continue;}
                 if(label==continueLabel||(label.transform.parent&&label.transform.parent.name=="Cost badge"&&
                     (label.name=="Cost text"||label.name=="Locked text")))continue;
                 if(label.name=="Count")StyleText(label,true);
@@ -504,15 +513,9 @@ namespace BattleCities.UI
         }
         void ApplyLoadoutBounds(RectTransform page)
         {
-            if(!FillTvOpening)
-            {
-                Fit(page,new Rect(.015f,.207f,.97f,.633f));
-                return;
-            }
             page.anchorMin=Vector2.zero;page.anchorMax=Vector2.one;
-            page.offsetMin=new Vector2(PsgContentInset,ContinueBottomInset+ActiveFooterHeight+PsgHeaderGap);
-            page.offsetMax=new Vector2(-PsgContentInset,
-                -(PsgContentInset+ActiveHeaderHeight+PsgHeaderGap+ActiveFooterHeight+PsgHeaderGap));
+            page.offsetMin=new Vector2(4,4+ActiveFooterHeight+8);
+            page.offsetMax=new Vector2(-4,-(4+ActiveHeaderHeight+8));
         }
         TMP_Text SummaryLabel(Transform parent,string name,Rect area,string value,float size,Color color,TextAlignmentOptions alignment)
         {
@@ -873,6 +876,7 @@ namespace BattleCities.UI
         }
         public void Open()
         {
+            CancelLoadoutRequests();
             GetComponent<MainMenuScene>()?.FitPreBattleScreen(root);
             ApplyRosterPanel();
             GetComponent<MainMenuScene>()?.SetHeroVisible(false);
@@ -882,12 +886,12 @@ namespace BattleCities.UI
             status.text="";
             Focus(tankButtons[selected]);
             rosterScroll.Reveal((RectTransform)tankButtons[selected].transform);
-            if(Application.isPlaying&&api)StartCoroutine(LoadAccount());
+            launchRequested=false;if(api&&(Application.isPlaying||EditorFixtureActive))RefreshLoadoutAccount();
         }
         public void Back()
         {
             if(busy)return;
-            if(inLoadout){ShowPage(false);status.text="FUEL PAID — CONTINUE RETURNS TO YOUR LOADOUT";Focus(proceed);return;}
+            if(inLoadout){launchRequested=false;ShowPage(false);status.text="";Focus(proceed);return;}
             root.gameObject.SetActive(false);
             GetComponent<MainMenuScene>()?.SetHeroVisible(true);
             GetComponent<MainMenuScene>()?.SetTankSelectorBackdrop(false);
@@ -898,11 +902,12 @@ namespace BattleCities.UI
             inLoadout=loadoutView;tankPage.gameObject.SetActive(!inLoadout);loadoutPage.gameObject.SetActive(inLoadout);
             ApplyLoadoutBounds(loadoutPage);
             title.text=inLoadout?"BATTLE LOADOUT":"SELECT TANK";
-            ApplyContinueArt();
+            EnsureLoadoutView();ApplyContinueArt();
             UpdateView();Navigation();
         }
         void ApplyContinueArt()
         {
+            if(inLoadout){ApplyLoadoutLayout();return;}
             ApplySummaryLayout();
             bool useSuppliedSprites=!inLoadout&&art&&art.tankCostButton&&art.tankCostButtonSelected;
             continueLabel.text=inLoadout?"START BATTLE":"CONTINUE";
@@ -969,7 +974,10 @@ namespace BattleCities.UI
             }
             if(!inLoadout)
             {
-                var balance=(RectTransform)fuel.transform.parent;
+                if(inLoadout){LayoutLoadoutFooter();return;}
+            var balance=(RectTransform)fuel.transform.parent;
+            foreach(var name in new[]{"Fuel can","Fuel","Fuel amount","Deployment heading","Deployment cost"}){var child=balance.Find(name);if(child)child.gameObject.SetActive(true);}
+            if(status&&status.transform.parent==balance)status.transform.SetParent(root,false);
                 if(buttonRect.parent!=balance)buttonRect.SetParent(balance,false);
                 TvStatusFooterLayout.PlaceAction(buttonRect);
                 if(useSuppliedSprites)proceed.image.pixelsPerUnitMultiplier=art.tankCostButton.rect.width/
@@ -978,13 +986,13 @@ namespace BattleCities.UI
             continueCaptionStyled=false;
             RefreshContinueCaption();
         }
-        void LateUpdate()=>RefreshContinueCaption();
+        void LateUpdate(){if(!IsOpen&&(busy||accountLoading))CancelLoadoutRequests();RefreshContinueCaption();if(inLoadout)RefreshLoadoutActionText();}
         void RefreshContinueCaption()
         {
             if(!proceed||!continueLabel||!continueLabel.isActiveAndEnabled)return;
             var image=proceed.image;
             var sprite=image.overrideSprite?image.overrideSprite:image.sprite;
-            bool navy=inLoadout||sprite==theme.GoldPanel||
+            bool navy=sprite==theme.GoldPanel||
                 (art&&art.tankCostButtonSelected&&sprite==art.tankCostButtonSelected);
             if(continueCaptionStyled&&navy==continueCaptionNavy)return;
             textStyles.ApplyCleanButton(continueLabel,navy);
@@ -1022,94 +1030,78 @@ namespace BattleCities.UI
                     card.colors=colors;
                 }
                 CardSelectionHighlight.Ensure(card.image).SetActivated(available&&i==selected);
-                string item=(string)loadout[Slots[i]];int at=Array.IndexOf(Items,item);
-                slotNames[i].text=at>=0?ItemNames[at]:"EMPTY";SetIcon(slotIcons[i],item);
-                slotEmpty[i].gameObject.SetActive(at<0);
+                string item=(string)loadout[Slots[i]];
+                slotNames[i].text="SLOT "+(i+1);SetIcon(slotIcons[i],item);
+                slotEmpty[i].gameObject.SetActive(false);
                 slotButtons[i].interactable=!busy;
             }
             wallet.text="WALLET\n"+(account==null?"NOT CONNECTED":"CONNECTED")+"\nBATC  "+Number(account?["tokenBalance"])+"\nSOL  "+Number(account?["solBalance"]);
             for(int i=0;i<8;i++)inventoryLabels[i].text=Number(account?["inventory"]?[Items[i]]);
             back.interactable=!busy;
             foreach(var card in classifiedButtons)if(card)card.interactable=!busy&&paidTier<0&&pendingFuel==null;
-            proceed.interactable=true;
+            proceed.interactable=!busy&&!launchRequested;RefreshLoadoutView();
             Navigation();
         }
         static string Number(JToken value)=>value==null?"0":value.ToString();
+        bool EditorFixtureActive
+        {
+            get {
+#if UNITY_EDITOR
+                return EditorStartRoutineOverride!=null;
+#else
+                return false;
+#endif
+            }
+        }
         IEnumerator LoadAccount()
         {
+            int generation=loadoutGeneration;
             yield return api.Request("GET","/api/economy/account",null,(code,body,error)=>
             {
-                if(code>=200&&code<300&&(bool?)body?["authenticated"]==true&&body["account"] is JObject data)
-                {account=data;loadout=(JObject)(data["loadout"]?.DeepClone()??new JObject());}
-                else account=null;
+                if(generation!=loadoutGeneration||!IsOpen)return;
+                accountLoading=false;inventoryRoutine=null;
+                if(code>=200&&code<300&&body?["authenticated"]?.Type==JTokenType.Boolean&&YesLoadout(body["authenticated"])&&body["account"] is JObject data&&ValidLoadoutAccount(data))
+                {
+                    account=data;inventoryUnavailable=false;
+                    var stored=OwnedDraft(data["loadout"] as JObject);loadout=loadoutDirty?OwnedDraft(loadout):stored;
+                    status.text=inLoadout?"SELECT A SLOT, THEN CHOOSE AN OWNED POWER":"";
+                }
+                else if(code==401||code>=200&&code<300&&body?["authenticated"]?.Type==JTokenType.Boolean&&!YesLoadout(body["authenticated"]))
+                {account=null;loadout=new JObject();loadoutDirty=false;inventoryUnavailable=false;status.text=inLoadout?"NO CONNECTED INVENTORY • EMPTY LOADOUT IS READY":"";}
+                else {inventoryUnavailable=true;status.text=inLoadout?"INVENTORY UNAVAILABLE • REOPEN LOADOUT TO RETRY":"";}
                 UpdateView();
             });
         }
+        static bool YesLoadout(JToken token)=>token?.Type==JTokenType.Boolean&&token.Value<bool>();
         void Continue()
         {
-            // Direct play must not depend on wallet authentication or shop availability.
-            // MainMenuScene owns the scene-loading guard, including repeated clicks.
-            StopAllCoroutines();busy=false;
-            BattlePreparation.Set(selected,api.BaseUrl);
-            status.text="DEPLOYING...";
-            launch?.Invoke();
-        }
-        IEnumerator ConfirmFuel()
-        {
-            busy=true;status.text="CONFIRMING FUEL...";UpdateView();
-            // Preserve the exact balance target across retries: a timed-out PUT must not deduct again.
-            if(pendingFuel==null)
+            if(busy||launchRequested)return;
+            if(!inLoadout)
             {
-                yield return api.Request("GET","/api/economy/account",null,(code,body,error)=>
-                {account=code>=200&&code<300&&(bool?)body?["authenticated"]==true?body["account"] as JObject:null;});
-                int available=(int?)account?["fuelBalance"]??0;
-                if(account==null||available<selected+1)
-                {busy=false;status.text=account==null?"SHOP UNAVAILABLE — TRY AGAIN LATER":"NEED "+(selected+1)+" FUEL — VISIT THE SHOP";UpdateView();yield break;}
-                pendingFuel=new JObject{{"fuelBalance",available-selected-1},{"loadout",account["loadout"]?.DeepClone()??new JObject()}};
+                ShowPage(true);if(inventoryUnavailable&&!accountLoading)RefreshLoadoutAccount();status.text=accountLoading?"LOADING INVENTORY...":inventoryUnavailable?"INVENTORY UNAVAILABLE • REOPEN LOADOUT TO RETRY":account==null?"EMPTY LOADOUT IS READY • START WHEN YOU ARE READY":"SELECT A SLOT, THEN CHOOSE AN OWNED POWER";
+                Focus(slotButtons[activeSlot]);return;
             }
-            bool success=false;
-            yield return api.Request("PUT","/api/economy/account",new JObject{{"account",pendingFuel.DeepClone()}},(code,body,error)=>
-            {
-                if(code>=200&&code<300&&(bool?)body?["authenticated"]==true&&body["account"] is JObject data&&
-                    (int?)data["fuelBalance"]==(int?)pendingFuel["fuelBalance"])
-                {account=data;loadout=(JObject)(data["loadout"]?.DeepClone()??new JObject());paidTier=selected;pendingFuel=null;success=true;}
-                else status.text="FUEL NOT CONFIRMED — CONTINUE RETRIES THE SAME REQUEST";
-            });
-            busy=false;
-            if(success){ShowPage(true);status.text="FUEL CONFIRMED — CHOOSE UP TO FOUR OWNED POWERS";Focus(slotButtons[0]);}
-            UpdateView();
-        }
-        void CycleSlot(int index)
-        {
-            if(busy||account==null)return;
-            var choices=new List<string>{null};
-            foreach(var item in Items)
-            {
-                // Extra lives are inventory, not an API-supported active power-up.
-                if(item=="extra-life")continue;
-                bool used=false;for(int j=0;j<4;j++)if(j!=index&&(string)loadout[Slots[j]]==item)used=true;
-                if(!used&&((int?)account["inventory"]?[item]??0)>0)choices.Add(item);
-            }
-            int next=(choices.IndexOf((string)loadout[Slots[index]])+1)%choices.Count;
-            if(choices[next]==null)loadout.Remove(Slots[index]);else loadout[Slots[index]]=choices[next];
-            status.text=choices.Count==1?"NO UNEQUIPPED ITEMS OWNED — EMPTY LOADOUT IS ALLOWED":"LOADOUT UPDATED";UpdateView();
+            if(accountLoading){status.text="WAITING FOR INVENTORY • PLEASE TRY START AGAIN";return;}
+            if(inventoryUnavailable&&loadout.Count>0){status.text="INVENTORY UNAVAILABLE • REOPEN LOADOUT BEFORE STARTING";return;}
+            if(account==null||!loadoutDirty){LaunchLoadoutBattle();return;}
+            StartLoadoutRoutine(SaveLoadoutAndLaunch());
         }
         IEnumerator SaveLoadoutAndLaunch()
         {
-            if(paidTier<0)yield break;
+            int generation=loadoutGeneration;var desired=(JObject)loadout.DeepClone();
             busy=true;status.text="SAVING LOADOUT...";UpdateView();bool saved=false;
-            yield return api.Request("PUT","/api/economy/account",new JObject{{"account",new JObject{{"loadout",loadout.DeepClone()}}}},(code,body,error)=>
+            yield return api.Request("PUT","/api/economy/account",new JObject{{"account",new JObject{{"loadout",desired}}}},(code,body,error)=>
             {
-                if(code>=200&&code<300&&(bool?)body?["authenticated"]==true&&body["account"] is JObject data)
-                {account=data;saved=JToken.DeepEquals(loadout,data["loadout"]);}
+                if(generation!=loadoutGeneration||!IsLoadout)return;
+                if(code>=200&&code<300&&YesLoadout(body?["authenticated"])&&body["account"] is JObject data&&ValidLoadoutAccount(data)&&JToken.DeepEquals(desired,data["loadout"]))
+                {account=data;saved=true;loadoutDirty=false;}
             });
-            busy=false;
-            if(saved){BattlePreparation.Set(paidTier,api.BaseUrl);status.text="DEPLOYING...";launch?.Invoke();}
-            else status.text="LOADOUT NOT SAVED — RETRY START BATTLE";
-            UpdateView();
+            if(generation!=loadoutGeneration||!IsLoadout)yield break;
+            busy=false;if(saved)LaunchLoadoutBattle();else {status.text="LOADOUT NOT SAVED • RETRY START BATTLE";UpdateView();}
         }
         void Navigation()
         {
+            if(inLoadout){LoadoutNavigation();return;}
             if(!inLoadout)
             {
                 bool available=!busy&&paidTier<0&&pendingFuel==null;
@@ -1192,7 +1184,7 @@ namespace BattleCities.UI
         {rect.anchorMin=new Vector2(a.x,1-a.y-a.height);rect.anchorMax=new Vector2(a.x+a.width,1-a.y);rect.offsetMin=rect.offsetMax=Vector2.zero;}
         void OnDestroy()
         {
-            textStyles.Dispose();
+            if(api)api.PlayerLoaded-=OnLoadoutPlayer;if(loadoutGlass)Destroy(loadoutGlass);textStyles.Dispose();
             if(root)Destroy(root.gameObject);
             if(ownsFont&&font)Destroy(font);
         }

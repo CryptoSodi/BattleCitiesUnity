@@ -1,0 +1,162 @@
+{
+  "family": "loadout-v2",
+  "createdDate": "2026-10-06",
+  "count": 2,
+  "status": "asset_checks_passed",
+  "technicalFrame": {
+    "engine": "Unity UI",
+    "background": "transparent",
+    "lighting": "upper-left",
+    "materials": "blue toy metal, brushed silver, gold accents",
+    "animation": "static",
+    "platformView": "elevated three-quarter, broad empty deck",
+    "socketView": "front near-orthographic",
+    "filtering": "smooth illustration; engine settings unchanged"
+  },
+  "assets": [
+    {
+      "id": "deployment-platform",
+      "title": "Deployment Platform",
+      "file": "C:/repos/BattleCity/public/assets/loadout-v2/deployment-platform.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI artwork",
+      "provenance": {
+        "kind": "new image generation",
+        "tool": "built-in image_gen",
+        "date": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-237ba909-a7cb-4628-be08-6ed660fa64e3.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-8652316e-87db-453f-864e-5cd5a3bd25cc.png",
+        "prompt": "ROLE/PURPOSE: separate empty deployment pedestal sprite for a Unity tank-loadout screen; tank will be drawn separately on top at runtime.\nBattle Cities production UI illustration, matching the supplied current loadout concept and existing tank's chunky polished toy-metal treatment. Deep royal blue/navy armor, brushed silver beveled edges and bolts, restrained gold accents, upper-left key light, subtle wear only, clean readable shapes and modest borders. Reference 1 is concept/style guidance, reference 2 guides object perspective/materials only; do not reproduce the tank or whole screen. One isolated object, complete silhouette, true transparent alpha outside, generous transparent padding on all sides. No floor, background, fog, aura, external baked drop shadow, mockup UI, text, symbols, labels, logo, watermark or multiple views.\nSUBJECT: a compact low-profile broad circular/octagonal blue metal deployment pedestal, shown as a horizontal oval in elevated three-quarter perspective. Use the loadout reference platform as the seed, but remove the entire tank, all powerup cards, their connecting wires and every other screen element. Camera looks down around 30 degrees, matching the tank reference. A broad completely empty brushed dark-silver top deck occupies most of the platform width, with only subtle perimeter panel seams and gentle material shading; no center symbol, raised object, machinery or tank-shaped shadow. The top deck must stay unobstructed and suitable for layering a separately rendered tank. Thin bevel around deck, blue armored low side wall, three short warm gold/yellow light strips embedded along the front rim, subtle cyan inset rim lighting. Four small integrated peripheral connection sockets/pads at diagonal positions around the rim can have contained cyan-lit centers. Keep these connectors low and within short attached base feet, without wires or cables extending from them. A sturdy compact silhouette, not a massive tower or elaborate sci-fi machine. No tall parts that would obscure tank treads. Keep cyan illumination tightly confined to the physical lamps and deck rim, no external glow on the transparent canvas.\nCOMPOSITION: one platform centered and fully inside a LANDSCAPE 1536x1024 transparent PNG canvas. Subject visual width about 80-85% of the canvas and visual height roughly 40-50%, a wide low base. No cropped feet or edges. Preserve tank perspective but do NOT include any tank, turret, weapon, character, powerup, button, label, plus sign, floating cable, electricity beam or scenery. High resolution crisp alpha edges, layered illustrative metallic rendering, not photorealistic.",
+        "editHistory": [
+          {
+            "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-5b3ecca1-7468-4f5c-85e6-069fb4ee5839.png",
+            "output": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-8652316e-87db-453f-864e-5cd5a3bd25cc.png",
+            "prompt": "BACKGROUND EXTRACTION / PRECISE OBJECT EDIT: preserve this exact empty Battle Cities deployment platform, its complete geometry, broad empty silver oval top, blue side armor, four cyan connection sockets, three gold light strips, camera angle, surface colors and sharp silhouette. Remove ALL diffuse haze, blue/grey fog, floor illumination, cast shadow, black opaque backdrop, gradient backdrop and glow pixels OUTSIDE the physical platform silhouette. Replace every exterior background pixel with TRUE TRANSPARENT ALPHA. No soft shadow or aura around the object, no checkerboard painted behind. Keep lights bright INSIDE their housings but their radiance must not spill beyond the object's alpha boundary. The whole object must remain centered, fully visible and uncropped on a 1536x1024 transparent canvas with comfortable padding. This is a sprite cutout for a cream UI background; any fog or semi-transparent cloud around it is unacceptable. Do not change any other content, do not add a tank, cables, text, symbols or scenery.",
+            "operation": "Transparent-background refinement; validated composited over cream"
+          }
+        ],
+        "note": "Newly generated illustration using project references. Existing tank and powerup artwork not regenerated. Embedded metadata retained where available."
+      },
+      "normalization": {
+        "operation": "Alpha-bounds crop with 4px guard, proportional resize, transparent canvas padding; no repaint or recolor",
+        "crop": {
+          "left": 20,
+          "top": 206,
+          "width": 1496,
+          "height": 630
+        },
+        "resized": {
+          "width": 1360,
+          "height": 573
+        },
+        "padding": {
+          "left": 88,
+          "top": 225,
+          "right": 88,
+          "bottom": 226
+        },
+        "sourceSize": {
+          "width": 1536,
+          "height": 1024
+        }
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 92,
+          "top": 229,
+          "width": 1352,
+          "height": 565,
+          "edgePixels": 0,
+          "transparentPercent": 62.71
+        },
+        "sha256": "b099b5670219895f3ef4a90ba1bf61761c1a6677426fa5e1a94820f10e191e08",
+        "visualReview": "passed: cream/navy compositing, silhouette, small-size legibility, exclusions",
+        "engineReview": "not performed; Unity import handled separately"
+      }
+    },
+    {
+      "id": "empty-powerup-socket",
+      "title": "Empty Powerup Socket",
+      "file": "C:/repos/BattleCity/public/assets/loadout-v2/empty-powerup-socket.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG RGBA",
+      "frames": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "collisionRole": "none; UI artwork",
+      "provenance": {
+        "kind": "new image generation",
+        "tool": "built-in image_gen",
+        "date": "2026-10-06",
+        "referenceImages": [
+          "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-237ba909-a7cb-4628-be08-6ed660fa64e3.png",
+          "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-card-vanguard.png"
+        ],
+        "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-1f5ec3a3-d341-4eb7-9c22-76bd69327083.png",
+        "prompt": "ROLE/PURPOSE: standalone empty equipment socket icon for Unity loadout powerup slot.\nBattle Cities production UI illustration, matching the supplied current loadout concept and existing tank's chunky polished toy-metal treatment. Deep royal blue/navy armor, brushed silver beveled edges and bolts, restrained gold accents, upper-left key light, subtle wear only, clean readable shapes and modest borders. Reference 1 is concept/style guidance, reference 2 guides object perspective/materials only; do not reproduce the tank or whole screen. One isolated object, complete silhouette, true transparent alpha outside, generous transparent padding on all sides. No floor, background, fog, aura, external baked drop shadow, mockup UI, text, symbols, labels, logo, watermark or multiple views.\nSUBJECT: one compact square recessed equipment bay, facing directly forward, near-orthographic so it works as a UI socket. A modest deep blue metal square rim with small chamfered corners, four silver bolts, a few tiny inset gold latch accents. Inside is a recessed deep navy empty cavity with subtle inner bevel, tidy faint panel seams and restrained military technology detail only around its perimeter. At least the middle 65% is plain uninterrupted dark navy empty space. The art should relate to the blank black/steel sockets in the loadout reference but adopt the game's current blue/silver/gold materials. Do not include the reference plus symbol. Do not draw a cross, '+' mark, X, star, tool, weapon, powerup or anything inside the empty center. Not a card with a title and not a full panel, just a square physical recessed socket.\nCOMPOSITION: one 1024x1024 square PNG with true transparent background outside the socket, whole frame inside image, roughly 12% padding each side. The central navy cavity is opaque as part of the socket. No external shadow, glow, labels, text, button, lower caption, scenery or extra frame beyond the socket itself. Clear silhouette legible at 64px. High resolution crisp alpha edges, consistent silver bolts and modest beveled blue border.",
+        "editHistory": [],
+        "note": "Newly generated illustration using project references. Existing tank and powerup artwork not regenerated. Embedded metadata retained where available."
+      },
+      "normalization": {
+        "operation": "Alpha-bounds crop with 4px guard, proportional resize, transparent canvas padding; no repaint or recolor",
+        "crop": {
+          "left": 111,
+          "top": 132,
+          "width": 1032,
+          "height": 980
+        },
+        "resized": {
+          "width": 800,
+          "height": 760
+        },
+        "padding": {
+          "left": 112,
+          "top": 132,
+          "right": 112,
+          "bottom": 132
+        },
+        "sourceSize": {
+          "width": 1254,
+          "height": 1254
+        }
+      },
+      "validation": {
+        "sizePassed": true,
+        "alphaPassed": true,
+        "visibleBounds": {
+          "left": 115,
+          "top": 135,
+          "width": 794,
+          "height": 754,
+          "edgePixels": 0,
+          "transparentPercent": 44.25
+        },
+        "sha256": "ff6e9110222e027e9298ebaca3a46f83f220d8ba3f19dcbaa10aae94fc646c62",
+        "visualReview": "passed: cream/navy compositing, silhouette, small-size legibility, exclusions",
+        "engineReview": "not performed; Unity import handled separately"
+      }
+    }
+  ],
+  "preview": "C:/repos/BattleCity/tmp/loadout-art-v2-20261006/loadout-v2-preview.png",
+  "validationSummary": {
+    "alpha": "Both exports have genuine exterior transparency, full silhouettes, and no visible baked external shadows or halos on cream/navy composites",
+    "content": "Empty platform deck with four contained cyan lamps and three gold strips; no tank, wiring, lettering or cards. Empty recessed navy socket, no plus mark or text.",
+    "nativeScaleReview": "Platform at 680px canvas width and socket at 260px/64px canvas sizes",
+    "engine": "Unity import and live scene validation remain with the implementation chat"
+  }
+}

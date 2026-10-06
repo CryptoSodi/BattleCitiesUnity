@@ -119,10 +119,20 @@ namespace BattleCities.UI
             baseUrl = apiBaseUrl.TrimEnd('/');
         }
 
+#if UNITY_EDITOR
+        public Action<IEnumerator> EditorStartRoutineOverride;
+#endif
+        private Coroutine StartMenuRefresh(IEnumerator routine)
+        {
+#if UNITY_EDITOR
+            if(EditorStartRoutineOverride!=null){EditorStartRoutineOverride(routine);return null;}
+#endif
+            return StartCoroutine(routine);
+        }
         public void RefreshNow()
         {
             if (isActiveAndEnabled && !requestInFlight && !IsWalletLoginPending)
-                menuDataRoutine = StartCoroutine(RefreshMenuData());
+                menuDataRoutine = StartMenuRefresh(RefreshMenuData());
         }
 
         public void ConnectWallet()

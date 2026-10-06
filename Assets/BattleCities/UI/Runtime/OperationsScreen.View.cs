@@ -144,7 +144,7 @@ namespace BattleCities.UI
         {
             for(int i=0;i<items.Count&&i<cards.Count;i++)
             {
-                var card=cards[i];var item=items[i];bool active=item.Key==activeCard&&!item.Locked;
+                var card=cards[i];var item=items[i];bool active=(item.Completed||item.Key==activeCard)&&!item.Locked;
                 card.Frame.sprite=item.Locked?art.tankCardUnavailable:active?art.tankCardSelected:art.tankCardAvailable;
                 card.Frame.type=Image.Type.Sliced;card.Frame.pixelsPerUnitMultiplier=4;
                 card.Action.sprite=item.Locked?art.tankCostButtonLocked:active?art.tankCostButtonSelected:art.tankCostButton;

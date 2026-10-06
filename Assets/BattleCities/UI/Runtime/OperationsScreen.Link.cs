@@ -16,16 +16,17 @@ namespace BattleCities.UI
             linkPanel=Panel("Panel",linkNotice,theme.CreamPanel);linkPanel.GetComponent<UnityEngine.UI.Image>().pixelsPerUnitMultiplier=2;
             linkHeading=Label("Title",linkPanel,"LINK YOUR ACCOUNT",new Rect(.05f,.04f,.90f,.15f),32,ArcadeTextTreatment.PrizeAmount);
             linkBody=Label("Instructions",linkPanel,"",new Rect(.07f,.23f,.86f,.48f),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);linkBody.textWrappingMode=TextWrappingModes.Normal;
-            linkOpen=Button("Open browser",linkPanel,()=>OpenLink("https://battlecities.com","LINK YOUR ACCOUNT IN THE BROWSER, THEN RETURN"));Fit((RectTransform)linkOpen.transform,new Rect(.06f,.78f,.43f,.16f));
+            linkOpen=Button("Open browser",linkPanel,()=>{if(!loading)OpenLink(linkBrowserUrl??"https://battlecities.com/#hero","LINK YOUR ACCOUNT IN THE BROWSER, THEN RETURN");});Fit((RectTransform)linkOpen.transform,new Rect(.06f,.78f,.43f,.16f));
             linkOpenCaption=Label("Label",linkOpen.transform,"OPEN BROWSER",new Rect(.04f,.04f,.92f,.92f),28,ArcadeTextTreatment.PrizeAmount);
-            linkDone=Button("Check status",linkPanel,()=>{HideLinkInstructions();Refresh();});Fit((RectTransform)linkDone.transform,new Rect(.51f,.78f,.43f,.16f));
+            linkDone=Button("Check status",linkPanel,()=>{if(loading)return;if(!IsSocialLinkPending)HideLinkInstructions();Refresh();});Fit((RectTransform)linkDone.transform,new Rect(.51f,.78f,.43f,.16f));
             linkDoneCaption=Label("Label",linkDone.transform,"CHECK STATUS",new Rect(.04f,.04f,.92f,.92f),28,ArcadeTextTreatment.PrizeAmount);
             Link(linkOpen,linkDone,linkDone,linkDone,linkDone);Link(linkDone,linkOpen,linkOpen,linkOpen,linkOpen);linkNotice.gameObject.SetActive(false);
         }
-        void ShowLinkInstructions(string provider)
+        void ShowLinkInstructions(string provider,bool native=false)
         {
             linkHeading.text="LINK "+provider.ToUpperInvariant();
-            linkBody.text="1. SIGN IN WITH THE SAME WALLET ON BATTLECITIES.COM.\n2. OPEN SOCIALS AND COMPLETE THE "+provider.ToUpperInvariant()+" LINK.\n3. RETURN HERE AND SELECT CHECK STATUS.";
+            if(!native)linkBrowserUrl="https://battlecities.com/#hero";
+            linkBody.text=native?"1. APPROVE "+provider.ToUpperInvariant()+" IN YOUR BROWSER.\n2. RETURN TO BATTLE CITIES.\n3. SELECT CHECK STATUS TO FINISH.":"1. CONNECT THE SAME WALLET ON BATTLECITIES.COM.\n2. USE BOUNTY HUB & SOCIAL MISSIONS TO LINK "+provider.ToUpperInvariant()+".\n3. RETURN HERE AND SELECT CHECK STATUS.";
             linkNotice.gameObject.SetActive(true);linkNotice.SetAsLastSibling();LayoutLinkInstructions();Focus(linkOpen);
         }
         void HideLinkInstructions(bool restoreFocus=true){if(linkNotice)linkNotice.gameObject.SetActive(false);if(restoreFocus)FocusFirst();}

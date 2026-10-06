@@ -25,7 +25,7 @@ namespace BattleCities.UI
             EnsureApiClient();
             CloseOperationsForNavigation();
             CloseRankingForNavigation();
-            if(preBattle&&preBattle.IsOpen)preBattle.Back();
+            if(preBattle&&preBattle.IsOpen)preBattle.Close(false);
             EnsureShop();shop.Open();
         }
         void LayoutShopScreen()

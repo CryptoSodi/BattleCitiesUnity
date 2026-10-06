@@ -52,21 +52,21 @@ namespace BattleCities.Editor
         public static void StartNetworkChecks(string fixtureBase)
         {
             if(!Uri.TryCreate(fixtureBase,UriKind.Absolute,out var uri)||!uri.IsLoopback)throw new ArgumentException("Fixtures must use loopback; never run mutation checks on live APIs.");
-            var menu=UnityEngine.Object.FindFirstObjectByType<MainMenuScene>();menu.StartCoroutine(NetworkChecks(menu,fixtureBase));
+            var menu=UnityEngine.Object.FindFirstObjectByType<MainMenuScene>();if(Application.isPlaying)menu.StartCoroutine(NetworkChecks(menu,fixtureBase,null));else new SocialFixturePump().Run(pump=>NetworkChecks(menu,fixtureBase,pump));
         }
         static IEnumerator WaitForData(OperationsScreen screen)
         {
             float deadline=Time.realtimeSinceStartup+25;while(screen.IsLoading&&Time.realtimeSinceStartup<deadline)yield return null;
             Check(!screen.IsLoading,"network request completed");yield return null;
         }
-        static IEnumerator NetworkChecks(MainMenuScene menu,string endpoint)
+        static IEnumerator NetworkChecks(MainMenuScene menu,string endpoint,SocialFixturePump pump)
         {
             NetworkStatus="Running";failures=checks=0;menu.OpenQuarters();var screen=menu.GetComponent<OperationsScreen>();
             var realApi=menu.GetComponent<MainMenuApiClient>();var frame=(RectTransform)screen.Root.parent;
             var theme=AssetDatabase.LoadAssetAtPath<MenuTheme>(AssetDatabase.GUIDToAssetPath(AssetDatabase.FindAssets("t:MenuTheme")[0]));
             var go=new GameObject("Operations local fixture client");go.SetActive(false);var api=go.AddComponent<MainMenuApiClient>();api.ConfigureAutomaticRefresh(false);api.ConfigureGuestFallback(false);api.Configure(endpoint+"/populated");
             bool claimed=false;
-            api.EditorRequestOverride=(method,path,payload,reply)=>Fixture(api.BaseUrl,method,path,reply,()=>claimed,()=>claimed=true);go.SetActive(true);
+            api.EditorRequestOverride=(method,path,payload,reply)=>Fixture(api.BaseUrl,method,path,reply,()=>claimed,()=>claimed=true);go.SetActive(true);if(pump!=null){screen.EditorStartRoutineOverride=pump.Start;api.EditorStartRoutineOverride=pump.Start;}
             try
             {
                 screen.Configure(menu,theme,api,frame);screen.Open();screen.OpenTreasury();yield return WaitForData(screen);
@@ -80,7 +80,7 @@ namespace BattleCities.Editor
                 api.Configure(endpoint+"/malformed");screen.Refresh();yield return WaitForData(screen);Check(Label(screen,"Body/Message/Title")=="TREASURY UNAVAILABLE","malformed response is unavailable");
                 api.Configure(endpoint+"/anonymous");screen.Refresh();yield return WaitForData(screen);Check(Label(screen,"Status/Action/Label")=="CONNECT WALLET","anonymous connection action");
                 screen.Open(true);yield return WaitForData(screen);Check(Label(screen,"Body/Scroll/Viewport/Content/Card 1/Action/Caption")=="CONNECT WALLET","social login state");
-                api.Configure(endpoint+"/unlinked");screen.Refresh();yield return WaitForData(screen);screen.Scroll.content.Find("Card 1").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();Check(screen.IsLinkNoticeOpen,"native social linking instructions");screen.Back();Check(!screen.IsLinkNoticeOpen&&screen.IsSocials,"Back closes linking instructions first");
+                api.Configure(endpoint+"/unlinked");screen.Refresh();yield return WaitForData(screen);screen.Scroll.content.Find("Card 1").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();yield return WaitForData(screen);Check(screen.IsLinkNoticeOpen,"native social linking instructions");screen.Back();Check(!screen.IsLinkNoticeOpen&&screen.IsSocials,"Back closes linking instructions first");
                 api.Configure(endpoint+"/populated");screen.Refresh();yield return WaitForData(screen);Check(Label(screen,"Body/Scroll/Viewport/Content/Card 1/Action/Caption")=="FOLLOWED","server verified follow");Check(Label(screen,"Body/Scroll/Viewport/Content/Card 4/Action/Caption")=="COMPLETED","server completed repost");
                 screen.Scroll.content.Find("Card 3").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();yield return WaitForData(screen);Check(Label(screen,"Body/Scroll/Viewport/Content/Card 3/Action/Caption")=="VERIFIED","Discord claim uses server confirmation");
                 api.Configure(endpoint+"/offline");screen.Refresh();yield return WaitForData(screen);Check(screen.Status.Contains("UNAVAILABLE"),"social API failure stays unavailable");
@@ -89,7 +89,7 @@ namespace BattleCities.Editor
             }
             finally
             {
-                screen.Close(false);screen.Configure(menu,theme,realApi,frame);screen.Open();UnityEngine.Object.Destroy(go);menu.RefreshLayout();
+                screen.Close(false);screen.EditorStartRoutineOverride=null;api.EditorStartRoutineOverride=null;screen.Configure(menu,theme,realApi,frame);screen.Open();if(Application.isPlaying)UnityEngine.Object.Destroy(go);else UnityEngine.Object.DestroyImmediate(go);menu.RefreshLayout();
                 if(NetworkStatus=="Running")NetworkStatus="Aborted; inspect Unity errors";
             }
             Debug.Log(NetworkStatus);
@@ -109,7 +109,7 @@ namespace BattleCities.Editor
             }
             else if(path=="/api/integrations/x/status")body=JObject.Parse("{\"authenticated\":true,\"connected\":true,\"follows\":true,\"repostTask\":{\"id\":\"repost-test\",\"postId\":\"1\",\"rewardFuel\":5,\"claimed\":true},\"commentTask\":{\"id\":\"comment-test\",\"postId\":\"2\",\"rewardFuel\":5,\"claimed\":false}}");
             else if(path=="/api/integrations/discord/verification")body=new JObject{["authenticated"]=true,["verified"]=true,["rewardClaimed"]=claimed()};
-            else if(path=="/api/integrations/discord/claim-reward"&&method=="POST"){claim();body=new JObject{["ok"]=true};}
+            else if(path=="/api/integrations/discord/claim-reward"&&method=="POST"){claim();body=new JObject{["ok"]=true,["granted"]=true};}
             else{reply(404,new JObject{["error"]="Unsupported fixture endpoint"},"Unsupported fixture endpoint");yield break;}
             if(empty&&body["account"] is JObject account)account["inventory"]=new JObject();
             if(mode.EndsWith("unlinked")&&path=="/api/integrations/x/status")body=new JObject{["authenticated"]=true,["connected"]=false,["follows"]=false};

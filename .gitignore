@@ -116,3 +116,6 @@ InitTestScene*.unity*
 # Generated Burst WebGL build outputs
 /Data/Plugins/lib_burst_generated.cpp
 /Data/Plugins/lib_burst_generated.wasm
+
+# Generated Unity performance test metadata
+/Assets/Resources/PerformanceTestRun*.json*

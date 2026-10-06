@@ -1,0 +1,6 @@
+-keep class com.battlecities.notifications.BattleCitiesNotifications { public *; }
+-keep interface com.battlecities.notifications.BattleCitiesNotifications$Callback { *; }
+-keep class com.battlecities.notifications.BattleCitiesMessagingService { *; }
+-keep class com.battlecities.notifications.NotificationTapActivity { *; }
+-keep class com.battlecities.notifications.NotificationPermissionActivity { *; }
+-keep class com.battlecities.notifications.NotificationImageWorker { public <init>(...); }

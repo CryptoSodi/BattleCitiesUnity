@@ -38,7 +38,7 @@ namespace BattleCities.UI
         MainMenuPlatform platform;
         static readonly string[] Categories={"tanks","weapons","powerups","enemies"};
         static readonly string[] CategoryLabels={"TANKS","WEAPONS","POWERUPS","ENEMIES"};
-        sealed class Item { public string Key,Title,Detail,Action;public Sprite Icon;public bool Locked;public UnityEngine.Events.UnityAction Click; }
+        sealed class Item { public string Key,Title,Detail,Action;public Sprite Icon;public bool Locked,Completed;public UnityEngine.Events.UnityAction Click; }
         sealed class Card { public RectTransform Rect;public Button Button;public Image Frame,Icon,Action;public TMP_Text Title,Description,Caption;public CardSelectionHighlight Highlight; }
         sealed class Stat { public RectTransform Rect;public TMP_Text Value; }
         public bool IsConfigured=>configured&&root&&menu;
@@ -54,6 +54,7 @@ namespace BattleCities.UI
         {
             CancelRequest();configured=false;if(api)api.PlayerLoaded-=OnPlayer;
             menu=owner;theme=skin;api=client;art=Resources.Load<PreBattleArt>("PreBattleArt");shopArt=Resources.Load<ShopArt>("ShopArt");illustrations=Resources.Load<OperationsArt>("OperationsArt");
+            playerIdentity=api?.LastPlayer?.walletAddress??api?.LastPlayer?.id;BindSocialProgress();
             if(illustrations&&illustrations.manual)manual=JsonUtility.FromJson<FieldManualEntries>(illustrations.manual.text).entries;
             if(api)api.PlayerLoaded+=OnPlayer;
             var old=frame.Find("Operations screen");bool open=old&&old.gameObject.activeSelf;
@@ -65,6 +66,7 @@ namespace BattleCities.UI
             if(!IsConfigured)return;
             HideLinkInstructions(false);
             page=socials?Page.Socials:Page.Quarters;history=false;category=0;activeCard=null;
+            if(socials){BindSocialProgress();socialResultMessage=null;}
             statusMessage=socials?"CHECKING SOCIAL TASKS...":"SELECT A SECTION TO CONTINUE";
             root.gameObject.SetActive(true);root.SetAsLastSibling();menu.SetHeroVisible(false);menu.SetTankSelectorBackdrop(true);
             menu.RefreshLayout();Render();ResetScroll();FocusFirst();if(socials)Refresh();
@@ -119,17 +121,18 @@ namespace BattleCities.UI
             if(index<0||index>=items.Count)return;
             var item=items[index];
             if(loading&&page==Page.Socials&&item.Key!="website"&&item.Key!="instagram")return;
+            if(item.Completed){SetStatus(item.Title+" • ALREADY COMPLETED");return;}
             if(item.Locked){SetStatus(item.Title+" • NOT AVAILABLE YET");return;}
             activeCard=item.Key;RefreshCards();item.Click?.Invoke();
         }
         void SetStatus(string text){statusMessage=text;if(status)status.text=text;}
         void OnPlayer(MainMenuApiClient.PlayerSnapshot player)
         {
-            string identity=player.walletAddress??player.id;
+            string identity=player?.walletAddress??player?.id;
             // Regular refreshes for the same player must preserve tasks awaiting verification.
             bool changed=identity!=playerIdentity;
             if(changed)
-            {playerIdentity=identity;account=null;xStatus=null;discord=null;ledger=null;treasuryAuthenticated=xAuthenticated=discordAuthenticated=false;xReady=false;repostReady=commentReady=null;}
+            {playerIdentity=identity;account=null;xStatus=null;discord=null;ledger=null;treasuryAuthenticated=xAuthenticated=discordAuthenticated=false;BindSocialProgress();}
             if(IsOpen&&(page==Page.Treasury||page==Page.Socials)&&(changed||!loading))Refresh();
         }
         void OnApplicationFocus(bool value){if(value&&IsOpen&&page==Page.Socials&&!loading)Refresh();}

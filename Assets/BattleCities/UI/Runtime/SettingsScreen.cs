@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace BattleCities.UI
 {
     /// <summary>Audio, display, account and browser phone pairing inside the shared TV.</summary>
-    public sealed class SettingsScreen : MonoBehaviour
+    public sealed partial class SettingsScreen : MonoBehaviour
     {
         MainMenuScene menu;MainMenuApiClient api;MenuTheme theme;PreBattleArt art;SettingsArt illustrations;
         RectTransform root,header,footer,body,backBar;Image titleIcon;TMP_Text title,version,accountName,phoneDescription,phoneStatus,pairCaption;
@@ -80,7 +80,7 @@ namespace BattleCities.UI
             qrLabel=Label("Label",qrFrame,"PAIRING QR",new Rect(.07f,.83f,.86f,.12f),18,ArcadeTextTreatment.PrizeAmount);
             footer=Panel("Status",root,art.statusPanel);TvStatusFooterLayout.ApplySkin(footer.GetComponent<Image>(),art.statusPanel);
             version=Label("Version",footer,"VERSION "+Application.version,new Rect(.03f,.13f,.94f,.74f),24,ArcadeTextTreatment.PrizeAmount);
-            if(api)api.PlayerLoaded+=OnPlayer;
+            ConfigureNotifications();if(api)api.PlayerLoaded+=OnPlayer;
             configured=true;root.gameObject.SetActive(open);GamePreferences.Apply();Refresh();
         }
         public void Open()
@@ -106,8 +106,8 @@ namespace BattleCities.UI
             var logoutSkin=loggedIn&&illustrations&&illustrations.logout?illustrations.logout:art.tankCostButton;
             logout.image.sprite=logoutSkin;logout.image.color=loggedIn&&illustrations&&illustrations.logout?new Color(.82f,.82f,.82f):new Color(.5f,.68f,.86f);
             logout.transform.Find("Focus").GetComponent<Image>().sprite=logoutSkin;
-            RefreshPhone();
-            Psg1UiNavigation.Rows(new Selectable[]{back},new Selectable[]{rowButtons[0]},new Selectable[]{rowButtons[1]},new Selectable[]{logout},new Selectable[]{pair});
+            RefreshPhone();RefreshNotifications();
+            Psg1UiNavigation.Rows(new Selectable[]{back},new Selectable[]{rowButtons[0]},new Selectable[]{rowButtons[1]},new Selectable[]{logout},new Selectable[]{pair},new Selectable[]{notifications});
         }
         void RefreshPhone()
         {
@@ -123,7 +123,7 @@ namespace BattleCities.UI
             Fit(phoneDescription.rectTransform,supported?new Rect(.36f,.34f,.37f,.22f):new Rect(.36f,.35f,.57f,.23f));
             Fit(phoneStatus.rectTransform,supported?new Rect(.36f,.59f,.36f,.12f):new Rect(.36f,.68f,.55f,.12f));
         }
-        void Pair(){if(phone){phone.Begin(true);RefreshPhone();}}
+        void Pair(){if(phone){phone.Begin(true);RefreshPhone();RefreshNotifications();}}
         void Logout()
         {
             if(!api||api.IsSigningOut)return;
@@ -139,7 +139,7 @@ namespace BattleCities.UI
         void Update()
         {
             if(!IsConfigured||!IsOpen)return;
-            if(Time.unscaledTime>=nextPhoneRefresh){nextPhoneRefresh=Time.unscaledTime+.1f;RefreshPhone();}
+            if(Time.unscaledTime>=nextPhoneRefresh){nextPhoneRefresh=Time.unscaledTime+.1f;RefreshPhone();RefreshNotifications();}
             rowFocus[0].SetState(false,rowButtons[0].GetComponent<SettingsRowFocus>().Focused);
             rowFocus[1].SetState(false,rowButtons[1].GetComponent<SettingsRowFocus>().Focused);
             rowFocus[2].SetState(false,logout.GetComponent<SettingsControlVisual>().Focused);
@@ -151,7 +151,7 @@ namespace BattleCities.UI
             var head=new TvTitleHeaderLayout(root);var foot=new TvStatusFooterLayout(root);
             head.PlaceTitle(header,titleIcon.rectTransform,title.rectTransform,true,iconHeightFraction:.64f);head.PlaceNavigation(header,backBar,true);
             MainMenuScene.Place(back.transform as RectTransform,3,3,backBar.rect.width-6,head.NavigationHeight-6);
-            foot.Place(footer);float top=head.Height+12,height=root.rect.height-top-foot.Height-16;
+            foot.Place(footer);LayoutNotifications();float top=head.Height+12,height=root.rect.height-top-foot.Height-16;
             MainMenuScene.Place(body,4,top,root.rect.width-8,height);
             float gap=8,rowH=(height-gap*3)/4.6f;
             for(int i=0;i<4;i++)MainMenuScene.Place(rows[i],0,i*(rowH+gap),body.rect.width,i==3?rowH*1.6f:rowH);
