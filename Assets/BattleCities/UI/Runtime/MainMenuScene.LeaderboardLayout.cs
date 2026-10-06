@@ -27,10 +27,9 @@ namespace BattleCities.UI
             float edge=Mathf.Min(.1f,inset/Mathf.Max(1f,leaderboard.rect.height));
             var heading=leaderboard.Find("Heading") as RectTransform;
             var footer=leaderboard.Find("Footer") as RectTransform;
-            FitJoinedPanel(heading,side,edge,true);
-            FitJoinedPanel(footer,side,edge,false);
-            ApplyJoinedLeaderboardGlass(heading,true,ref rankingHeadingBackdropMaterial);
-            ApplyJoinedLeaderboardGlass(footer,false,ref rankingFooterBackdropMaterial);
+            var art=Resources.Load<PreBattleArt>("PreBattleArt");
+            FitLeaderboardContainer(heading,side,edge,true,art?art.tankTitlePanel:null,4f);
+            FitLeaderboardContainer(footer,side,edge,false,art?art.statusPanel:null,3f);
             var trophy=heading?heading.Find("Trophy")?.GetComponent<Image>():null;
             if(trophy)
             {
@@ -122,27 +121,23 @@ namespace BattleCities.UI
             shadow.SetAsLastSibling();shadow.SetSiblingIndex(artwork.GetSiblingIndex());
         }
 
-        static void FitJoinedPanel(RectTransform panel,float side,float edge,bool joinTop)
+        static void FitLeaderboardContainer(RectTransform panel,float side,float edge,bool joinTop,Sprite skin,float skinScale)
         {
             if(!panel)return;
             panel.anchorMin=new Vector2(side,joinTop?panel.anchorMin.y:edge);
             panel.anchorMax=new Vector2(1f-side,joinTop?1f-edge:panel.anchorMax.y);
             panel.offsetMin=panel.offsetMax=Vector2.zero;
             var image=panel.GetComponent<Image>();
-            if(image)image.enabled=false;
-            var surface=panel.Find("Joined surface") as RectTransform;
-            if(!surface)
+            if(image&&skin)
             {
-                var go=new GameObject("Joined surface",typeof(RectTransform),typeof(JoinedLeaderboardPanel));
-                go.layer=panel.gameObject.layer;
-                surface=go.GetComponent<RectTransform>();surface.SetParent(panel,false);
+                image.enabled=true;image.sprite=skin;image.material=null;
+                image.type=Image.Type.Sliced;image.preserveAspect=false;
+                image.pixelsPerUnitMultiplier=skinScale;image.color=Color.white;image.raycastTarget=false;
             }
-            surface.anchorMin=Vector2.zero;surface.anchorMax=Vector2.one;
-            surface.offsetMin=surface.offsetMax=Vector2.zero;
-            surface.localScale=Vector3.one;
-            surface.SetAsFirstSibling();
-            var shape=surface.GetComponent<JoinedLeaderboardPanel>();
-            shape.JoinTop=joinTop;shape.raycastTarget=false;
+            foreach(var name in new[]{"Joined surface","Glass viewport"})
+            {
+                var old=panel.Find(name);if(old)old.gameObject.SetActive(false);
+            }
         }
     }
 }

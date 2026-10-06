@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BattleCities.UI
 {
-    public enum ArcadeTextTreatment { Gold, Navy, WhiteButton }
+    public enum ArcadeTextTreatment { Gold, Navy, WhiteButton, PrizeAmount }
 
     /// <summary>Shared material treatments for the menu's Barlow Condensed Bold lettering.</summary>
     public sealed class ArcadeTextStyles : IDisposable
@@ -15,6 +15,7 @@ namespace BattleCities.UI
         public static Color32 GoldOutline => new Color32(52,31,9,255);
         public static Color32 WhiteOutline => new Color32(6,33,64,255);
         public static Color32 NavyFace => new Color32(7,43,94,255);
+        public static Color32 PrizeAmountFace => new Color32(6,29,54,255);
         public static Color32 TextShadow => new Color32(5,18,36,220);
         static ArcadeTypography typography;
         static ArcadeTypography Typography=>typography?typography:typography=Resources.Load<ArcadeTypography>("ArcadeTypography");
@@ -30,6 +31,7 @@ namespace BattleCities.UI
             if(label&&HeadingSdf)label.font=HeadingSdf;
             if(!label||!label.font||!label.font.material)return;
             bool gold=treatment==ArcadeTextTreatment.Gold;
+            bool clean=treatment==ArcadeTextTreatment.PrizeAmount;
             bool outlined=gold||treatment==ArcadeTextTreatment.WhiteButton;
             var key=(label.font,treatment);
             if(!materials.TryGetValue(key,out var material)||!material)
@@ -40,7 +42,7 @@ namespace BattleCities.UI
                     hideFlags=HideFlags.DontSave
                 };
                 material.SetColor("_FaceColor",Color.white);
-                material.SetFloat("_FaceDilate",gold?.035f:outlined?.045f:.025f);
+                material.SetFloat("_FaceDilate",clean?0f:gold?.035f:outlined?.045f:.025f);
                 material.SetFloat("_OutlineWidth",gold?.28f:outlined?.24f:0f);
                 material.SetFloat("_OutlineSoftness",0f);
                 if(outlined)
@@ -62,8 +64,8 @@ namespace BattleCities.UI
                 materials[key]=material;
             }
             label.fontSharedMaterial=material;
-            label.fontStyle|=FontStyles.Bold;
-            label.color=treatment==ArcadeTextTreatment.Navy?NavyFace:Color.white;
+            if(clean)label.fontStyle=FontStyles.Normal;else label.fontStyle|=FontStyles.Bold;
+            label.color=clean?PrizeAmountFace:treatment==ArcadeTextTreatment.Navy?NavyFace:Color.white;
             label.colorGradientPreset=null;
             label.enableVertexGradient=gold;
             if(gold)
@@ -73,6 +75,12 @@ namespace BattleCities.UI
             }
             label.extraPadding=true;
             label.UpdateMeshPadding();
+        }
+
+        public void ApplyCleanButton(TMP_Text label,bool navy)
+        {
+            Apply(label,ArcadeTextTreatment.PrizeAmount);
+            if(label)label.color=navy?PrizeAmountFace:Color.white;
         }
 
         public static void ApplyGold(UnityEngine.UI.Text label,Font headingFont)

@@ -11,6 +11,8 @@ namespace BattleCities.UI
         [SerializeField] private RectTransform artwork;
         [SerializeField] private Image stateImage;
         [SerializeField] private Sprite inactiveSkin, activeSkin;
+        [SerializeField] private Sprite navigationFocusSkin;
+        [SerializeField] private UnityEngine.UI.Text navigationCaption;
         [SerializeField] private bool activePage;
         private bool selected, hovered;
         private Vector3 artworkRestScale = Vector3.one;
@@ -29,6 +31,14 @@ namespace BattleCities.UI
             stateImage=image;inactiveSkin=inactive;activeSkin=active;activePage=isActivePage;
             CaptureArtworkScale();
             Refresh();
+        }
+        public void SetActivePage(bool value) { activePage=value;Refresh(); }
+        public void ConfigureNavigation(Sprite focus,bool isActivePage)
+        {
+            navigationFocusSkin=focus;
+            navigationCaption=transform.Find("Label")?.GetComponent<UnityEngine.UI.Text>();
+            selected=EventSystem.current&&EventSystem.current.currentSelectedGameObject==gameObject;
+            SetActivePage(isActivePage);
         }
         private void Awake() { CaptureArtworkScale(); }
         private void OnEnable() { CaptureArtworkScale(); Refresh(); }
@@ -57,8 +67,22 @@ namespace BattleCities.UI
         private void Refresh()
         {
             if (focusRing) focusRing.enabled = false;
-            if(stateImage&&inactiveSkin&&activeSkin)
+            if(!stateImage||!inactiveSkin||!activeSkin)return;
+            if(!navigationFocusSkin)
+            {
                 stateImage.sprite=activePage||selected||hovered?activeSkin:inactiveSkin;
+                return;
+            }
+            bool blue=!activePage&&(selected||hovered);
+            stateImage.overrideSprite=null;
+            stateImage.sprite=activePage?activeSkin:blue?navigationFocusSkin:inactiveSkin;
+            stateImage.type=UnityEngine.UI.Image.Type.Simple;
+            if(navigationCaption)
+            {
+                navigationCaption.color=blue?Color.white:ArcadeTextStyles.PrizeAmountFace;
+                navigationCaption.fontStyle=FontStyle.Normal;
+                foreach(var effect in navigationCaption.GetComponents<UnityEngine.UI.BaseMeshEffect>())effect.enabled=false;
+            }
         }
     }
 }

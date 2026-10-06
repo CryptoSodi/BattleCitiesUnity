@@ -30,6 +30,7 @@ MonoBehaviour:
   SilverFrame: {fileID: 21300000, guid: 5071c2cc5d6e3604d90ab1d5030fc403, type: 3}
   FocusRing: {fileID: 21300000, guid: 5de3744116f97414aa7d3ff85aff21cf, type: 3}
   Rounded: {fileID: 21300000, guid: dfd7008fbd659524eb0168fee05d93e1, type: 3}
+  NavigationFocus: {fileID: 21300000, guid: d1fbd4bfebd6eaa45b62f2a5552f3f7c, type: 3}
   NavigationIcons:
   - {fileID: 21300000, guid: ceef9531171428344bcf56e527bfc0a5, type: 3}
   - {fileID: 21300000, guid: 171035bf3cd924244851eb401ea64761, type: 3}

@@ -4,6 +4,16 @@ namespace BattleCities.UI
 {
     public sealed partial class MainMenuScene
     {
+        private int modalNavigationPage=-1;
+
+        private void RefreshNavigationState()
+        {
+            if(tabs==null)return;
+            int activeIndex=IsModalOpen&&modalNavigationPage>=0?modalNavigationPage:IsShopOpen?1:0;
+            for(int i=0;i<tabs.Length;i++)
+                if(tabs[i])tabs[i].GetComponent<MenuButtonVisual>()?.ConfigureNavigation(theme?theme.NavigationFocus:null,i==activeIndex);
+        }
+
         private void ApplyNavigationTypography()
         {
             if(tabs==null)return;

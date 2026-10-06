@@ -193,6 +193,7 @@ namespace BattleCities.Editor
             t.BlueFrame=Art("shared/panels/blue-frame");t.CreamPanel=Art("shared/panels/nav-cream");t.GoldPanel=Art("shared/panels/gold-panel");
             t.SelectedPanel=Art("shared/panels/nav-gold");t.DarkPanel=Art("shared/panels/dark-inset");t.SilverFrame=Art("shared/panels/silver-frame");t.FocusRing=Art("shared/panels/focus-ring");t.Rounded=Art("shared/panels/round-white");
             t.NavigationIcons=new[]{"play","quarters","shop","ranking","socials"}.Select(s=>Art("reference-style-v2/shared/navigation/"+s)).ToArray();
+            t.NavigationFocus=Art("reference-style-v2/shared/buttons/focus-blue");
             t.SettingsIcon=Art("shared/icons/settings");t.ScoreIcon=Art("shared/icons/score-coin");t.HighScoreIcon=Art("shared/icons/high-score-shield");t.TrophyIcon=Art("shared/icons/trophy");t.TimerIcon=Art("shared/icons/timer");
             t.RewardIcons=new[]{"chest-silver-v2","chest-gold-v2","chest-bronze-v2","chest-cyan-v2"}.Select(s=>Art("shared/icons/"+s)).ToArray();
             t.PrizeCrates=new[]{"gold","orange","blue","black"}.Select(s=>Art("shared/icons/prize-crate-"+s)).ToArray();
@@ -232,6 +233,7 @@ namespace BattleCities.Editor
                 var cancel=map.AddAction("Cancel",InputActionType.Button);cancel.AddBinding("<Keyboard>/escape");cancel.AddBinding(psg?"<Gamepad>/buttonSouth":"<Gamepad>/buttonEast");
                 var point=map.AddAction("Point",InputActionType.PassThrough);point.expectedControlType="Vector2";point.AddBinding("<Mouse>/position");point.AddBinding("<Touchscreen>/touch*/position");point.AddBinding("<Pen>/position");
                 var click=map.AddAction("Click",InputActionType.PassThrough);click.expectedControlType="Button";click.AddBinding("<Mouse>/leftButton");click.AddBinding("<Touchscreen>/touch*/press");click.AddBinding("<Pen>/tip");
+                var scroll=map.AddAction("ScrollWheel",InputActionType.PassThrough);scroll.expectedControlType="Vector2";scroll.AddBinding("<Mouse>/scroll");
             }
             AssetDatabase.CreateAsset(asset,Root+"Settings/MainMenuInput.asset");return asset;
         }

@@ -501,7 +501,6 @@ namespace BattleCities.UI
         private void ApplyMenuPresentation()
         {
             LayoutLeaderboardEdges();
-            ApplyNavigationTypography();
             ArcadeTextStyles.ApplyGold(scoreLabel,theme?theme.HeadingFont:null);
             ArcadeTextStyles.ApplyGold(leaderboard?leaderboard.Find("Heading/Title")?.GetComponent<Text>():null,
                 theme?theme.HeadingFont:null);
@@ -510,6 +509,8 @@ namespace BattleCities.UI
                 theme?theme.HeadingFont:null);
             ApplyPrizeAmountTextStyle(leaderboard?leaderboard.Find("Footer/Subtitle")?.GetComponent<Text>():null);
             ArcadeTextStyles.ApplyWhiteLabels(transform,theme?theme.HeadingFont:null);
+            var availability=leaderboard?leaderboard.Find("Heading/Availability")?.GetComponent<Text>():null;
+            if(availability)availability.color=Color.white;
             // Saved scenes may still contain the old control; exclude it from every platform profile.
             var retry=leaderboard?leaderboard.Find("Scores/Retry"):null;
             if(retry)
@@ -521,6 +522,8 @@ namespace BattleCities.UI
                     button.navigation=new Navigation { mode=Navigation.Mode.None };
                 }
             }
+            ApplyNavigationTypography();
+            RefreshNavigationState();
         }
         // Navigation plates fill their slots; their reference composition is slightly wider than tall.
         private const float NavigationAspect=9f/8f;
@@ -561,6 +564,9 @@ namespace BattleCities.UI
             ClearInputReferences();
             inputModule.point=Reference(map.FindAction("Point"));
             inputModule.leftClick=Reference(map.FindAction("Click"));
+            var wheel=map.FindAction("ScrollWheel");
+            if(wheel==null){wheel=map.AddAction("ScrollWheel",InputActionType.PassThrough,"<Mouse>/scroll");wheel.expectedControlType="Vector2";}
+            inputModule.scrollWheel=Reference(wheel);
             inputModule.move=Reference(map.FindAction("Navigate"));
             inputModule.submit=Reference(map.FindAction("Submit"));
             inputModule.cancel=null;
@@ -580,6 +586,8 @@ namespace BattleCities.UI
             if(IsModalOpen)
             {
                 modal.gameObject.SetActive(false);
+                modalNavigationPage=-1;
+                RefreshNavigationState();
                 SetHeroVisible(!IsTvScreenOpen);
                 if(EventSystem.current)EventSystem.current.SetSelectedGameObject(previousSelection?previousSelection:startButton.gameObject);
             }
@@ -644,15 +652,15 @@ namespace BattleCities.UI
             if(IsShopOpen){EnsureShop();shop.Close(false);}
             if(EventSystem.current)EventSystem.current.SetSelectedGameObject(startButton.gameObject);
         }
-        public void OpenQuarters() { OpenDestination(quartersScene,"QUARTERS"); }
-        public void OpenSocials() { OpenDestination(socialsScene,"SOCIALS"); }
-        private void OpenDestination(string scene,string title)
+        public void OpenQuarters() { OpenDestination(quartersScene,"QUARTERS",3); }
+        public void OpenSocials() { OpenDestination(socialsScene,"SOCIALS",4); }
+        private void OpenDestination(string scene,string title,int navigationPage)
         {
             if(!string.IsNullOrWhiteSpace(scene)&&Application.CanStreamedLevelBeLoaded(scene)){SceneManager.LoadSceneAsync(scene);return;}
-            ShowDialog(title,"This page has not been converted to Unity yet.\n\nYour main menu is ready. Select START to enter a battle.");
+            ShowDialog(title,"This page has not been converted to Unity yet.\n\nYour main menu is ready. Select START to enter a battle.",navigationPage);
         }
         public void OpenSettings() { ShowDialog("CONTROLS","WEB   Arrow keys / WASD to navigate\nEnter to select · Escape to go back\n\nPSG1   D-pad / left stick to navigate\nA to select · B to go back\n\nANDROID   Tap a button to select"); }
-        public void OpenRanking() { ShowDialog("PLAYER RANKINGS",rows.Length>0?string.Join("\n",rows):"No season rankings are available right now. Check back in a moment."); }
+        public void OpenRanking() { ShowDialog("PLAYER RANKINGS",rows.Length>0?string.Join("\n",rows):"No season rankings are available right now. Check back in a moment.",2); }
         public void ConnectWallet()
         {
             EnsureApiClient();
@@ -663,11 +671,13 @@ namespace BattleCities.UI
             EnsureApiClient();
             if(apiClient)apiClient.ContinueAsGuest();
         }
-        private void ShowDialog(string title,string message)
+        private void ShowDialog(string title,string message,int navigationPage=-1)
         {
             previousSelection=EventSystem.current?EventSystem.current.currentSelectedGameObject:null;
             SetHeroVisible(false);
             modalTitle.text=title;modalBody.text=message;modal.gameObject.SetActive(true);modal.SetAsLastSibling();
+            modalNavigationPage=navigationPage;
+            RefreshNavigationState();
             if(EventSystem.current)EventSystem.current.SetSelectedGameObject(closeButton.gameObject);
         }
         private void EnsureApiClient()

@@ -1,0 +1,75 @@
+{
+  "asset": "C:/repos/BattleCity/art_exports/ui/main-menu-blue-focus-button.png",
+  "created_date": "2026-10-06",
+  "role": "Main menu cursor hover and keyboard/controller focus state",
+  "generation": {
+    "tool": "built-in image_gen",
+    "transparent_background": true,
+    "source_image": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-1e6c2e30-3a81-42ac-ab34-0a7bab5b3c73.png",
+    "reference_images": [
+      "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/reference-style-v2/shared/buttons/inactive.png",
+      "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/reference-style-v2/shared/buttons/active.png"
+    ],
+    "prompt": "Use case: precise-object-edit.\nCreate ONE empty BLUE FOCUS STATE of the EXACT supplied Battle Cities menu plate. This is a color-state edit, not a redesign. Image 1 is the cream resting-state plate and is the exact geometry/alpha reference. Image 2 is the gold active-state plate of the same family and confirms the matching bevel, highlights, shadow and bolt design.\n\nOUTPUT: A single square 1254 x 1254 RGBA image with genuine transparent background. Match the complete source canvas and placement. Keep the plate nearly filling the canvas with precisely the same slim transparent margins as the source. No crop, expansion, extra padding, perspective change or repositioning.\n\nCHANGE ONLY THE CREAM/GOLD PLATE COLOR:\nRecolor the entire creamy/gold face and bevels to the game's polished cobalt/royal BLUE. The broad empty center should be rich medium cobalt blue, slightly lighter toward the upper portion and smoothly darker toward the bottom. Use restrained cyan/icy blue upper-edge highlights, royal-blue central face, and deep blue/navy lower bevel shading. Preserve the source's soft painted molded-material sheen, delicate surface variation and subtle gradients. Keep the center clean and empty for separately rendered game illustrations and white captions.\n\nSTRICT INVARIANTS:\n- Exact square silhouette with short diagonal CLIPPED CORNERS gently rounded at their joins. NOT a generic rounded rectangle or pill.\n- Preserve the original thick sculpted bevel widths and their inner-border paths, including the original long near-straight inner sides and the curved transitions around the bolt areas.\n- EXACTLY FOUR metallic SILVER domed corner bolts. Same locations, diameters, ring details, dark recesses, silver/gray reflections and highlight direction as the references. Do not turn bolts blue or gold. Do not add screws.\n- Preserve the thin very dark charcoal outer backing edge and the existing short close shadow. No new external shadow or glow.\n- Keep all geometry aligned to the reference: the long top edge, bottom edge, left and right edges, clipped corners, transparent footprint, border positions and bolt centers.\n- Preserve transparent exterior, not a black-filled background.\n\nIt must look like the THIRD STATE OF THE SAME MENU BUTTON FAMILY, alongside the exact cream and gold references. Faithful illustrated Battle Cities arcade UI style. No text, captions, letters, numbers, icons, emblems, symbols, extra ornaments, header bars, mockup screens or additional plates. One empty blue plate only."
+  },
+  "validation": {
+    "status": "passed_dimensions_alpha_and_visual_review",
+    "width": 1254,
+    "height": 1254,
+    "format": "png",
+    "channels": 4,
+    "hasAlpha": true,
+    "transparentPixels": 123856,
+    "edgeTouchPixels": 0,
+    "blueAlphaBounds": {
+      "x": 16,
+      "y": 30,
+      "width": 1222,
+      "height": 1180
+    },
+    "referenceAlphaBounds": {
+      "x": 15,
+      "y": 30,
+      "width": 1224,
+      "height": 1179
+    },
+    "footprintComparisonToCream": [
+      {
+        "alphaThreshold": 16,
+        "intersectionOverUnion": 0.9984411600962195,
+        "differentPixelCount": 2226
+      },
+      {
+        "alphaThreshold": 128,
+        "intersectionOverUnion": 0.9975038754141202,
+        "differentPixelCount": 3557
+      }
+    ],
+    "footprintComparisonToGold": [
+      {
+        "alphaThreshold": 16,
+        "intersectionOverUnion": 0.9972986799222636,
+        "differentPixelCount": 3860
+      },
+      {
+        "alphaThreshold": 128,
+        "intersectionOverUnion": 0.9977054869735513,
+        "differentPixelCount": 3270
+      }
+    ],
+    "resized": false,
+    "sha256": "8b1e580476c86381c20320b48f02ed4c66c1fd0e805602999ea6c30a05098497",
+    "sourceHashes": [
+      {
+        "path": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/reference-style-v2/shared/buttons/inactive.png",
+        "sha256": "b306c7f8943179b414cac6bcb853ed136977efc5c42fc4a58e56486ddfc63228"
+      },
+      {
+        "path": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/reference-style-v2/shared/buttons/active.png",
+        "sha256": "a0e799e2392847b7fe77c81bf176398652d66d73e4aaa4f33872aae8f26e5b9c"
+      }
+    ],
+    "visualNotes": "One empty blue plate; clipped/softened corners, original bevel pattern, four silver corner bolts; no symbols or text. In-engine check pending with importer."
+  },
+  "integration": "Unity import and integration delegated to the Unity UI chat. Source cream and gold assets remain unchanged."
+}

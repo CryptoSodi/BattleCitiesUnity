@@ -11,10 +11,11 @@ namespace BattleCities.Editor
         {
             var inactive=AssetDatabase.LoadAssetAtPath<Sprite>(MainMenuBuilder.Root+"Art/reference-style-v2/shared/buttons/inactive.png");
             var active=AssetDatabase.LoadAssetAtPath<Sprite>(MainMenuBuilder.Root+"Art/reference-style-v2/shared/buttons/active.png");
+            var focus=AssetDatabase.LoadAssetAtPath<Sprite>(MainMenuBuilder.Root+"Art/reference-style-v2/shared/buttons/focus-blue.png");
             var containerPath=MainMenuBuilder.Root+"Art/reference-style-v2/shared/panels/navigation-container.png";
             ConfigureContainerImporter(containerPath);
             var container=AssetDatabase.LoadAssetAtPath<Sprite>(containerPath);
-            if(!inactive||!active||!container)throw new InvalidOperationException("Import navigation artwork first.");
+            if(!inactive||!active||!focus||!container)throw new InvalidOperationException("Import navigation artwork first.");
             var containerImage=navigation.GetComponent<Image>();
             containerImage.sprite=container;
             containerImage.type=Image.Type.Sliced;
@@ -26,7 +27,9 @@ namespace BattleCities.Editor
                 var tile=navigation.GetChild(i);
                 var image=tile.GetComponent<Image>();
                 image.type=Image.Type.Simple;image.preserveAspect=false;image.color=Color.white;
-                tile.GetComponent<MenuButtonVisual>().ConfigureSkins(image,inactive,active,i==0);
+                var visual=tile.GetComponent<MenuButtonVisual>();
+                visual.ConfigureSkins(image,inactive,active,i==0);
+                visual.ConfigureNavigation(focus,i==0);
                 MainMenuBuilder.Box((RectTransform)tile.Find("Icon"),.12f,.08f,.76f,.62f);
                 MainMenuBuilder.Box((RectTransform)tile.Find("Label"),.06f,.73f,.88f,.18f);
                 var copy=UnityEngine.Object.Instantiate(tile.gameObject);

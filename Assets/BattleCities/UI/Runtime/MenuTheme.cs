@@ -9,6 +9,7 @@ namespace BattleCities.UI
         public Font BodyFont;
         public Sprite Battlefield, PsgBattlefield, AndroidLandscapeBattlefield, AndroidPortraitBattlefield, Background, RewardGarden, Logo, PlayButton;
         public Sprite BlueFrame, CreamPanel, GoldPanel, SelectedPanel, DarkPanel, SilverFrame, FocusRing, Rounded;
+        public Sprite NavigationFocus;
         public Sprite[] NavigationIcons;
         public Sprite SettingsIcon, ScoreIcon, HighScoreIcon, TrophyIcon, TimerIcon;
         public Sprite[] RewardIcons;
