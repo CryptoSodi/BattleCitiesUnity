@@ -6,11 +6,11 @@ namespace BattleCities.Core
 {
     [Serializable] public sealed class MapData { public FieldData field; public TerrainData terrain; public GroundData ground; public MapObjectData[] objects; public MapLightData[] lights; public SpawnData spawn; public BaseData @base; }
     [Serializable] public sealed class GroundData { public Region[] regions; }
-    [Serializable] public sealed class MapObjectData { public string type, role; public float x, y, width, height, rotation; }
+    [Serializable] public sealed class MapObjectData { public bool bridge; public string type, role; public float x, y, width, height, rotation; public MapDamage damage; public MapBuildingSettings building; }
     [Serializable] public sealed class MapLightData { public float x, y, height, r, g, b, range, intensity; }
     [Serializable] public sealed class FieldData { public int widthTiles = 13, heightTiles = 13; }
     [Serializable] public sealed class TerrainData { public Region[] regions; }
-    [Serializable] public sealed class Region { public string type; public float x, y, width, height; }
+    [Serializable] public sealed class Region { public string type; public float x, y, width, height; public MapDamage damage; }
     [Serializable] public sealed class SpawnData { public SpawnGroup enemy, player; }
     [Serializable] public sealed class SpawnGroup { public Point[] locations; public EnemySpec[] list; }
     [Serializable] public sealed class EnemySpec { public string tier = "a"; public bool drop; }
@@ -65,11 +65,17 @@ namespace BattleCities.Core
         public string Type;
         public Box Bounds;
         public bool Alive = true;
+        public MapDamage Damage;
+        public int Health;
         public string PropKey, PropRole;
         public float PropRotation;
+        public int BuildingId;
+        public Box BuildingBounds;
+        public MapBuildingSettings BuildingSettings;
+        public bool IsBuildingSection => BuildingId != 0;
         public bool Brick => Type.Contains("brick");
         public bool DestructibleProp => PropKey != null && PropRole == "destructibleObstacle";
-        public bool Solid => Brick || Type == "steel" || Type == "water" ||
+        public bool Solid => Brick || Type == "steel" || BattleTerrain.BlocksTank(Type) ||
             (PropKey != null && (PropRole == "solidCover" || PropRole == "destructibleObstacle"));
         public bool StopsBullet => Brick || Type == "steel" ||
             (PropKey != null && (PropRole == "solidCover" || PropRole == "destructibleObstacle" || PropRole == "bulletBlocker"));
@@ -83,6 +89,9 @@ namespace BattleCities.Core
         public int MaxHealth => StartingHealth(Tier,Player);
         public bool Player, Drop, Alive = true, Moving;
         public float X, Y, Shield, Cooldown, Think, FireDelay, Slide, SpeedBoost;
+        public float SinkDepth;
+        public bool InQuicksand;
+        public float TerrainSpeedMultiplier => InQuicksand ? .62f-.50f*SinkDepth : 1f;
         public float ReloadDuration { get; internal set; }
         public float ReloadProgress => Cooldown<=0?1:ReloadDuration>0?Math.Max(0,Math.Min(1,1-Cooldown/ReloadDuration)):0;
         public int AiState;
@@ -156,6 +165,7 @@ namespace BattleCities.Core
         public int Remaining => wave.Length - spawned + Tanks.Count(t => !t.Player && t.Alive);
         public int TotalEnemies => wave.Length;
         public event Action<Wall> WallDestroyed;
+        public event Action<Wall> WallDamaged;
         public event Action<TankState> TankDestroyed;
         public event Action<ShotState> ShotFired;
         public event Action<ShotState> ShotImpact;
@@ -177,7 +187,7 @@ namespace BattleCities.Core
             PlayerNormalReloadSeconds=ValidReloadSeconds(normalReloadSeconds,.12f);
             PlayerUpgradedNormalReloadSeconds=ValidReloadSeconds(upgradedNormalReloadSeconds,.08f);
             Stage=stage; Width=(map.field?.widthTiles ?? 13)*64; Height=(map.field?.heightTiles ?? 13)*64;
-            foreach (var r in map.terrain?.regions ?? Array.Empty<Region>()) AddRegion(r.type, r.x,r.y,r.width,r.height);
+            foreach (var r in BattleBridgeLayout.TerrainRegions(map)) AddRegion(r.type, r.x,r.y,r.width,r.height,r.damage);
             foreach (var item in map.objects ?? Array.Empty<MapObjectData>()) AddEnvironmentObject(item);
             float bx=map.@base?.x ?? Width/2-64, by=map.@base?.y ?? Height-96;
             BaseBounds = new Box(bx+32,by+32,64,64);
@@ -194,8 +204,9 @@ namespace BattleCities.Core
             turretReloadDuration=Math.Max(.05f,reload);turretTurnDuration=Math.Max(0,turn);turretMuzzleDistance=Math.Max(16,muzzle);
             turretHealth=Math.Max(1,health);turretDeployDuration=Math.Max(.05f,deploy);
         }
-        public void AddRegion(string type, float x,float y,float w,float h)
+        public void AddRegion(string type, float x,float y,float w,float h,MapDamage damage=null)
         {
+            type=BattleTerrain.Normalize(type);
             int size=type.Contains("brick")?16:32;
             for(float py=y;py<y+h;py+=size) for(float px=x;px<x+w;px+=size)
             {
@@ -203,7 +214,7 @@ namespace BattleCities.Core
                 // Some legacy maps contain repeated regions. Stacking identical logical
                 // cells makes one shot spend its damage budget on invisible duplicates.
                 if(Terrain.Any(existing=>existing.Type==type&&existing.Bounds.X==bounds.X&&existing.Bounds.Y==bounds.Y&&existing.Bounds.W==bounds.W&&existing.Bounds.H==bounds.H))continue;
-                Terrain.Add(new Wall{Id=++nextId,Type=type,Bounds=bounds});
+                Terrain.Add(new Wall{Id=++nextId,Type=type,Bounds=bounds,Damage=damage?.Copy(),Health=damage==null?1:Math.Max(1,damage.hitPoints)});
             }
         }
         private void AddEnvironmentObject(MapObjectData item)
@@ -215,8 +226,24 @@ namespace BattleCities.Core
             if (item.width <= 0 || item.height <= 0 || item.x < 0 || item.y < 0 ||
                 item.x + item.width > Width || item.y + item.height > Height)
                 throw new ArgumentException("Environment object outside the map: " + item.type);
+            if (BattleBuildings.IsBuilding(item.type) && item.role == "solidCover")
+            {
+                int buildingId = nextId + 1;
+                var bounds = new Box(item.x, item.y, item.width, item.height);
+                var damage = item.damage ?? BattleBuildings.DefaultDamage();
+                var settings = item.building?.Copy() ?? new MapBuildingSettings();
+                for (float y = 0; y < item.height; y += BattleBuildings.SectionSize)
+                for (float x = 0; x < item.width; x += BattleBuildings.SectionSize)
+                    Terrain.Add(new Wall { Id = ++nextId, Type = "environment", PropKey = item.type,
+                        PropRole = item.role, PropRotation = item.rotation, BuildingId = buildingId,
+                        BuildingBounds = bounds, BuildingSettings = settings, Damage = damage.Copy(),
+                        Health = Math.Max(1, damage.hitPoints),
+                        Bounds = new Box(item.x+x,item.y+y,Math.Min(BattleBuildings.SectionSize,item.width-x),Math.Min(BattleBuildings.SectionSize,item.height-y)) });
+                return;
+            }
             Terrain.Add(new Wall { Id = ++nextId, Type = "environment", PropKey = item.type,
                 PropRole = item.role, PropRotation = item.rotation,
+                Damage=item.damage?.Copy(), Health=item.damage==null?1:Math.Max(1,item.damage.hitPoints),
                 Bounds = new Box(item.x, item.y, item.width, item.height) });
         }
         private int Next(int min,int max)
@@ -245,14 +272,14 @@ namespace BattleCities.Core
                 }
             }
             if(PickupType!=null){PickupTime-=dt;if(PickupTime<=0)PickupType=null;}
-            foreach(var t in Tanks) { t.Shield=Math.Max(0,t.Shield-dt);t.Cooldown=Math.Max(0,t.Cooldown-dt);t.SpeedBoost=Math.Max(0,t.SpeedBoost-dt);t.Moving=false; }
+            foreach(var t in Tanks) { t.Shield=Math.Max(0,t.Shield-dt);t.Cooldown=Math.Max(0,t.Cooldown-dt);t.SpeedBoost=Math.Max(0,t.SpeedBoost-dt);t.Moving=false;PrepareTerrain(t); }
             if(IsMultiplayer) UpdateParticipants(dt);
             else
             {
             var p=Player;
             if(p != null)
             {
-                bool icy=Terrain.Any(w=>w.Alive&&w.Type=="ice"&&w.Bounds.Overlaps(p.Bounds));
+                bool icy=TouchesSlipperyGround(p)&&!p.InQuicksand;
                 if(command.Move.HasValue) { Rotate(p,command.Move.Value);Move(p);p.Slide=icy?.5f:0; }
                 else if(p.Slide>0) {p.Slide-=dt;Move(p);}
                 p.Aim=command.Aim ?? p.Direction;
@@ -276,6 +303,7 @@ namespace BattleCities.Core
                 }
             }
             foreach(var t in Tanks) if(t.Alive&&!t.Player&&Freeze<=0) UpdateEnemy(t);
+            foreach(var t in Tanks)if(t.Alive)UpdateQuicksand(t,dt);
             UpdateMines(dt);
             UpdateTurrets(dt);
             UpdateDrones(dt);
@@ -449,12 +477,15 @@ namespace BattleCities.Core
                     if(target!=null)drone.TargetId=target.Id;
                 }
                 if(target==null&&drone.Age>=DroneLifetime){drone.Alive=false;continue;}
-                float phase=(drone.Age-1)*.9f+(drone.Id%8)*.785398f;
-                float tx=target?.X??Math.Max(12,Math.Min(Width-12,drone.AnchorX+(float)Math.Cos(phase)*64));
-                float ty=target?.Y??Math.Max(12,Math.Min(Height-12,drone.AnchorY+(float)Math.Sin(phase)*64));
-                float dx=tx-drone.X,dy=ty-drone.Y,length=(float)Math.Sqrt(dx*dx+dy*dy);
-                float travel=Math.Min(length,(target==null?75:240)*dt);
-                if(length>.001f){drone.X+=dx/length*travel;drone.Y+=dy/length*travel;}
+                // Evaluate the patrol calculation in explicit double precision and round
+                // only when storing positions. Mono otherwise retains float temporaries
+                // differently from CoreCLR, causing replay drift when patrol resumes.
+                double phase=((double)drone.Age-1)*.9f+(drone.Id%8)*(double).785398f;
+                double tx=target!=null?target.X:Math.Max(12,Math.Min(Width-12,drone.AnchorX+Math.Cos(phase)*64));
+                double ty=target!=null?target.Y:Math.Max(12,Math.Min(Height-12,drone.AnchorY+Math.Sin(phase)*64));
+                double dx=tx-drone.X,dy=ty-drone.Y,length=Math.Sqrt(dx*dx+dy*dy);
+                double travel=Math.Min(length,(target==null?75:240)*(double)dt);
+                if(length>.001){drone.X=(float)(drone.X+dx/length*travel);drone.Y=(float)(drone.Y+dy/length*travel);}
                 // The patrol radius limits acquisition only. Once locked, the drone commits
                 // to the living target until impact, even outside its patrol circle or lifetime.
                 if(target==null||DistanceSquared(drone.X,drone.Y,target.X,target.Y)>14*14)continue;
@@ -530,7 +561,7 @@ namespace BattleCities.Core
         }
         private bool Move(TankState t)
         {
-            Vector(t.Direction,out var dx,out var dy);float distance=t.Speed*StepSeconds;
+            Vector(t.Direction,out var dx,out var dy);float distance=t.Speed*t.TerrainSpeedMultiplier*StepSeconds;
             // Small steps preserve exact wall contact even during boosted movement.
             float moved=0;
             while(distance>0)
@@ -599,7 +630,8 @@ namespace BattleCities.Core
             if(!Free(Sweep(from,aligned),t))return false;
             var ahead=TankState.MovementBox(t.X+sx*shift+dx*8,t.Y+sy*shift+dy*8);
             if(!Free(Sweep(aligned,ahead),t))return false;
-            float correction=offset<=t.Speed*StepSeconds+1?offset:Math.Min(offset,t.Speed*StepSeconds),sign=Math.Sign(shift);
+            float step=t.Speed*t.TerrainSpeedMultiplier*StepSeconds;
+            float correction=t.InQuicksand?Math.Min(offset,step):offset<=step+1?offset:Math.Min(offset,step),sign=Math.Sign(shift);
             t.X+=sx*sign*correction;t.Y+=sy*sign*correction;moved=correction;
             return true;
         }
@@ -624,7 +656,7 @@ namespace BattleCities.Core
                 float step=Math.Min(1,left);s.X+=dx*step;s.Y+=dy*step;left-=step;var box=s.Bounds;
                 if(box.X<0||box.Y<0||box.Right>Width||box.Bottom>Height){ImpactShot(s);break;}
                 var wall=Terrain.FirstOrDefault(w=>w.Alive&&w.StopsBullet&&box.Overlaps(w.Bounds));
-                if(wall!=null){if(!s.PowerShot&&(wall.Brick||wall.DestructibleProp||s.WallDamage==2))DestroyWall(wall,s);ImpactShot(s,null,wall);break;}
+                if(wall!=null){if(!s.PowerShot&&(wall.Damage!=null||wall.Brick||wall.DestructibleProp||s.WallDamage==2))DestroyWall(wall,s);ImpactShot(s,null,wall);break;}
                 if(!IsPvp&&BaseAlive&&box.Overlaps(BaseBounds)){BaseAlive=false;Lost=true;ImpactShot(s);BaseDestroyed?.Invoke();break;}
                 var other=Shots.Find(b=>b!=s&&b.Alive&&ShotsOppose(s,b)&&box.Overlaps(b.Bounds));
                 if(other!=null)
@@ -706,6 +738,7 @@ namespace BattleCities.Core
         public void DestroyWall(Wall hit,ShotState shot)
         {
             if(shot.PowerShot){DestroyPowerShotRadius(hit,shot);return;}
+            if(hit.Damage!=null){ApplyAuthoredDamage(hit,shot);return;}
             if(hit.DestructibleProp){hit.Alive=false;WallDestroyed?.Invoke(hit);return;}
             bool vertical=shot.Direction==Facing.Up||shot.Direction==Facing.Down;
             float axis=vertical?shot.X:shot.Y;
@@ -719,7 +752,8 @@ namespace BattleCities.Core
             bool added=true;
             while(added){added=false;for(int i=candidates.Count-1;i>=0;i--){var w=candidates[i];if(group.Any(g=>vertical?(g.Bounds.Right==w.Bounds.X||w.Bounds.Right==g.Bounds.X):(g.Bounds.Bottom==w.Bounds.Y||w.Bounds.Bottom==g.Bounds.Y))){group.Add(w);candidates.RemoveAt(i);added=true;}}}
             foreach(var w in group.OrderBy(w=>Math.Abs((vertical?w.Bounds.X+w.Bounds.W/2:w.Bounds.Y+w.Bounds.H/2)-axis)).Take(Math.Min(shot.WallDamage,2)*4))
-                if(w.Brick||shot.WallDamage==2)
+                if(w.Damage!=null) ApplyAuthoredDamage(w,shot);
+                else if(w.Brick||shot.WallDamage==2)
                 {
                     w.Alive=false;
                     WallDestroyed?.Invoke(w);
@@ -740,11 +774,11 @@ namespace BattleCities.Core
             // Cell-center inclusion approximates a circle on the destructible grid
             // without removing a whole block for a tiny overlap at the outer edge.
             var affected=Terrain.Where(w=>w.Alive&&w.StopsBullet
-                &&(w.Brick||w.DestructibleProp||(w.Type=="steel"&&shot.WallDamage==2))
+                &&(w.Damage!=null||w.Brick||w.DestructibleProp||(w.Type=="steel"&&shot.WallDamage==2))
                 // A steel impact shrinks the whole blast; steel caught in a brick
                 // impact also resists destruction outside its smaller inner radius.
                 &&DistanceSquared(x,y,w.Bounds.X+w.Bounds.W/2,w.Bounds.Y+w.Bounds.H/2)<=(w.Type=="steel"?steelRadiusSquared:radiusSquared)).ToArray();
-            foreach(var wall in affected){wall.Alive=false;WallDestroyed?.Invoke(wall);}
+            foreach(var wall in affected){if(wall.Damage!=null)ApplyAuthoredDamage(wall,shot);else{wall.Alive=false;WallDestroyed?.Invoke(wall);}}
         }
         private static void WallImpactPoint(Wall hit,ShotState shot,out float x,out float y)
         {
@@ -772,7 +806,7 @@ namespace BattleCities.Core
             {
                 var box=new Box(x-32,y-32,64,64);
                 if(box.Overlaps(new Box(BaseBounds.X-32,BaseBounds.Y-32,128,96)))continue;
-                if(Terrain.Any(w=>w.Alive&&(w.Type=="steel"||w.Type=="water"||(w.PropKey!=null&&w.Solid))&&box.Overlaps(w.Bounds)))continue;
+                if(Terrain.Any(w=>w.Alive&&(w.Type=="steel"||BattleTerrain.BlocksTank(w.Type)||(w.PropKey!=null&&w.Solid))&&box.Overlaps(w.Bounds)))continue;
                 if(Tanks.Any(t=>t.Player&&box.Overlaps(new Box(t.X-96,t.Y-96,192,192))))continue;
                 if(enemySpawns.Any(s=>box.Overlaps(new Box(s.x,s.y,64,64)))||box.Overlaps(new Box(playerSpawn.x,playerSpawn.y,64,64)))continue;
                 positions.Add(new Point{x=x,y=y});

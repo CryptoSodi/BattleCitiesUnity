@@ -1,0 +1,8 @@
+<linker>
+  <!-- Replay hashing/serialization reflects these fields, including anonymous state snapshots. -->
+  <assembly fullname="Assembly-CSharp">
+    <type fullname="BattleCities.Core.*" preserve="all" />
+    <type fullname="BattleCities.ReplayArchive" preserve="all" />
+    <type fullname="&lt;&gt;f__AnonymousType*" preserve="all" />
+  </assembly>
+</linker>

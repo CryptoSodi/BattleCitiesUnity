@@ -1,0 +1,17 @@
+{
+  "id": "ground-patches-refined",
+  "file": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches-refined.png",
+  "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-4f7d4e48-5efb-49a6-a096-d0657e28c781.png",
+  "tool": "built-in image_gen",
+  "createdDate": "2026-10-07",
+  "references": [
+    "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches.png"
+  ],
+  "parentProvenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches.provenance.json",
+  "prompt": "Edit this exact two-row Battle Cities ground-patch MODELING SHEET. Preserve the two-column layout, ivory background, labels, view orientation, footprint rectangles and brown/orange/grey palette. Fix ONLY the excessive height and large obstructive debris so both assets unmistakably read as traversable ground.\n\nG1 MUD PATCH 3x2: replace the thick churned clay ridges and deep trench-like grooves with an ALMOST FLAT ground decal. Its whole height is only 0.025 units across a 3-unit width: nearly paper-thin. Keep two subtle tank tread imprints, but they are shallow surface-color/normal details, NOT raised walls between deep tracks. Thin irregular faded brown edge, broad smooth patches of wet/dry earth, two restrained tiny puddles. No raised lip, large stones, berm, mound or thick tile base. In three-quarter view it must visibly lie FLAT against the ground.\n\nG2 RUBBLE PATCH 2x1: remove all full-size intact brick blocks and boulder chunks. Replace with about 10 small FLAT broken orange brick shards and low grey stone flakes, maximum height 0.12 units, each visibly much smaller than a one-unit cell. At least 60 percent of the 2x1 footprint shows open ground between pieces. Low sparse debris, no mound, no whole orange cube, no obstruction-sized boulder. Its three-quarter view must read like scattered thin chips resting on the ground. Top view must show the same low debris composition, with clear gaps and clean bound containment.\n\nAll surface details remain within the shown footprint. Maintain the shared polished chunky low-poly arcade style, but no tall geometry. Do not add tanks, wheels, roads, walls, UI, new labels or anything else. The top/right views must match the flattened left/3q views. This is a precision correction for passable terrain, not a new design.",
+  "operation": "image edit: flatten traversable mud and reduce rubble height",
+  "width": 1254,
+  "height": 1254,
+  "sha256": "5ce63f70c99340459e0567056b3fcdc1245fead33b86076fd38295d51e1eb18d",
+  "status": "ready_for_modeling"
+}

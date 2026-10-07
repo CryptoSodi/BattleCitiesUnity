@@ -1,0 +1,772 @@
+{
+  "schema": "battle-cities-environment-concept-pack/v2",
+  "createdDate": "2026-10-07",
+  "status": "concept_pack_complete",
+  "scope": "Asset concept artwork and modeling handoff only; preserve level positions, footprints and existing mechanics.",
+  "styleTarget": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/STYLE-TARGET.png",
+  "handoff": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/handoff.md",
+  "notes": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/technical-notes.md",
+  "referenceRoot": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/references",
+  "referenceRoles": {
+    "originalStageConcepts": "positive art-direction references",
+    "currentUnityPreviews": "rejected-placeholder diagnostic reference only; do not reproduce their flat geometry",
+    "designSpec": "placement/footprint authority"
+  },
+  "keepExisting": [
+    "brick",
+    "steel",
+    "water",
+    "tanks",
+    "eagle"
+  ],
+  "assets": [
+    {
+      "id": "bld-harbor-warehouse-blue-3x2",
+      "sheet": "harbor-buildings",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.png",
+      "sheetRow": 1,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 3,
+        "depth": 2,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 1.25,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Broad blue barrel-vault warehouse roof; cream stone walls, recessed navy loading door, optional non-emissive utility lamp shapes, silver vent; entrance south.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.provenance.json",
+      "verticalBounds": {
+        "min": 0,
+        "max": 1.25
+      },
+      "boundsUnits": "Unity units",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "bld-harbor-warehouse-coral-3x2",
+      "sheet": "harbor-buildings",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.png",
+      "sheetRow": 2,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 3,
+        "depth": 2,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 1.2,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Coral pitched roof and short raised ridge cap; cream harbor warehouse with blue door/trim, restrained exposed stone plinth; entrance south.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.provenance.json",
+      "verticalBounds": {
+        "min": 0,
+        "max": 1.2
+      },
+      "boundsUnits": "Unity units",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "bld-harbor-store-2x3",
+      "sheet": "harbor-buildings",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.png",
+      "sheetRow": 3,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 2,
+        "depth": 3,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 1.05,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Long narrow harbor store; blue hipped roof, coral shallow recessed awning, loading door and small side window; porch and all details inset.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.provenance.json",
+      "verticalBounds": {
+        "min": 0,
+        "max": 1.05
+      },
+      "boundsUnits": "Unity units",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "bld-ranger-cabin-2x2",
+      "sheet": "logging-buildings",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/logging-buildings.png",
+      "sheetRow": 1,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 2,
+        "depth": 2,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 1.15,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Compact blue gabled roof, cream/timber walls, framed warm window and inset porch; one modest chimney.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/logging-buildings.provenance.json",
+      "verticalBounds": {
+        "min": 0,
+        "max": 1.15
+      },
+      "boundsUnits": "Unity units",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "bld-logging-hut-2x2",
+      "sheet": "logging-buildings",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/logging-buildings.png",
+      "sheetRow": 2,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 2,
+        "depth": 2,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 0.9,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Low asymmetrical shed roof, warm timber wall framing, blue metal roof, closed double timber doors; distinct from ranger cabin.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/logging-buildings.provenance.json",
+      "verticalBounds": {
+        "min": 0,
+        "max": 0.9
+      },
+      "boundsUnits": "Unity units",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "bld-sawmill-3x2",
+      "sheet": "logging-buildings",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/logging-buildings.png",
+      "sheetRow": 3,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 3,
+        "depth": 2,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 1.3,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Two connected pitched blue roof volumes on one timber mill body, short ridge ventilator, inset timber-loading recess; no saw blade or machinery protruding into roads.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/logging-buildings.provenance.json",
+      "verticalBounds": {
+        "min": 0,
+        "max": 1.3
+      },
+      "boundsUnits": "Unity units",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "bld-factory-workshop-3x2",
+      "sheet": "industrial-buildings",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.png",
+      "sheetRow": 1,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 3,
+        "depth": 2,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 1.3,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Stepped blue sawtooth roof with two small skylight bands, cream/grey walls, recessed steel workshop shutter, two short contained vents.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.provenance.json",
+      "verticalBounds": {
+        "min": 0,
+        "max": 1.3
+      },
+      "boundsUnits": "Unity units",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "bld-factory-store-2x3",
+      "sheet": "industrial-buildings",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.png",
+      "sheetRow": 2,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 2,
+        "depth": 3,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 1.15,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Long blue shallow barrel roof, narrow loading bay, low integrated rooftop service block, orange door trim; closed and self-contained.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.provenance.json",
+      "verticalBounds": {
+        "min": 0,
+        "max": 1.15
+      },
+      "boundsUnits": "Unity units",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "bld-utility-workshop-2x2",
+      "sheet": "industrial-buildings",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.png",
+      "sheetRow": 3,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 2,
+        "depth": 2,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 0.85,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Low offset blue roof, silver vent box and two inset utility panels, navy service door; industrial workshop silhouette.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.provenance.json",
+      "verticalBounds": {
+        "min": 0,
+        "max": 0.85
+      },
+      "boundsUnits": "Unity units",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "bridge-concrete-2x3",
+      "sheet": "bridges",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/bridges.png",
+      "sheetRow": 1,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 2,
+        "depth": 3,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 0.18,
+      "pivot": "XZ center at existing travel/ground plane Y=0",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Straight low concrete bridge slab; chamfered ends, inset side curb lines, stone/silver segmented edges; no arch, tall rail or posts. Travel north-south.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "verticalBounds": {
+        "min": -0.15,
+        "max": 0.03
+      },
+      "boundsUnits": "Unity units",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/bridges.provenance.json",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "bridge-timber-1x3",
+      "sheet": "bridges",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/bridges.png",
+      "sheetRow": 2,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 1,
+        "depth": 3,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 0.12,
+      "pivot": "XZ center at existing travel/ground plane Y=0",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "One-cell-wide bridge, cross-laid brown planks over two contained timber beams; metal end straps and bolts, flat unobstructed deck. Travel north-south.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "verticalBounds": {
+        "min": -0.1,
+        "max": 0.02
+      },
+      "boundsUnits": "Unity units",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/bridges.provenance.json",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "prop-log-cell-1x1",
+      "sheet": "barricades-and-barrel",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 1,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 1,
+        "depth": 1,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 0.48,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Three cut timber logs in a low compact stack, pale circular cut ends, chunky bark facets; independent cell joins side-by-side.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "verticalBounds": {
+        "min": 0,
+        "max": 0.48
+      },
+      "boundsUnits": "Unity units",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.provenance.json",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "prop-sandbag-cell-1x1",
+      "sheet": "barricades-and-barrel",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 2,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 1,
+        "depth": 1,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 0.38,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Low two-course offset tan sandbag cluster with rounded bevels, broad fabric folds and minimal seams; independent crushable cell.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "verticalBounds": {
+        "min": 0,
+        "max": 0.38
+      },
+      "boundsUnits": "Unity units",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.provenance.json",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "prop-fuel-barrel-1x1",
+      "sheet": "barricades-and-barrel",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 3,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 1,
+        "depth": 1,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 0.65,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Exactly one upright red barrel centered within cell, two broad steel hoops, recessed cap, small yellow hazard mark visible from above; no surrounding base.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "verticalBounds": {
+        "min": 0,
+        "max": 0.65
+      },
+      "boundsUnits": "Unity units",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.provenance.json",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "terrain-conveyor-north-1x4",
+      "sheet": "conveyors",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/conveyors.png",
+      "sheetRow": 1,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 1,
+        "depth": 4,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 0.06,
+      "pivot": "XZ center at existing travel/ground plane Y=0",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Ground-flush dark segmented belt with thin blue/silver side trim and four yellow chevrons facing north. Inactive/static artwork.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "verticalBounds": {
+        "min": -0.04,
+        "max": 0.02
+      },
+      "boundsUnits": "Unity units",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/conveyors.provenance.json",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "terrain-conveyor-south-1x4",
+      "sheet": "conveyors",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/conveyors.png",
+      "sheetRow": 2,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 1,
+        "depth": 4,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 0.06,
+      "pivot": "XZ center at existing travel/ground plane Y=0",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Same geometry/materials rotated 180 degrees about Y; four yellow chevrons face south. No active motion or lights.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "verticalBounds": {
+        "min": -0.04,
+        "max": 0.02
+      },
+      "boundsUnits": "Unity units",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/conveyors.provenance.json",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "terrain-mud-3x2",
+      "sheet": "ground-patches",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches-refined.png",
+      "sheetRow": 1,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 3,
+        "depth": 2,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 0.025,
+      "pivot": "XZ center at existing travel/ground plane Y=0",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Irregular shallow warm-brown wet earth with two subtle tread ruts, feathered ground edge and restrained puddles; no rectangular raised slab.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "verticalBounds": {
+        "min": -0.01,
+        "max": 0.015
+      },
+      "boundsUnits": "Unity units",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches-refined.provenance.json",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures. Use the refined shallow sheet, not the superseded original. Mud tread grooves are color/normal detail; rubble stays at or below 0.12 units."
+    },
+    {
+      "id": "terrain-rubble-2x1",
+      "sheet": "ground-patches",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches-refined.png",
+      "sheetRow": 2,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 2,
+        "depth": 1,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 0.12,
+      "pivot": "XZ center at existing travel/ground plane Y=0",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Sparse low orange brick chips and cool stone fragments with clear gaps; traversable, nothing resembling a tall barrier.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "verticalBounds": {
+        "min": 0,
+        "max": 0.12
+      },
+      "boundsUnits": "Unity units",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches-refined.provenance.json",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures. Use the refined shallow sheet, not the superseded original. Mud tread grooves are color/normal detail; rubble stays at or below 0.12 units."
+    },
+    {
+      "id": "forest-island-2x2",
+      "sheet": "forest-islands-small",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-small.png",
+      "sheetRow": 1,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 2,
+        "depth": 2,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 1.35,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Three staggered conifers with varied crown size, one low rock, tiny stump; organic outline wholly within full solid footprint.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "verticalBounds": {
+        "min": 0,
+        "max": 1.35
+      },
+      "boundsUnits": "Unity units",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-small.provenance.json",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures.",
+      "treeCount": 3
+    },
+    {
+      "id": "forest-island-2x3",
+      "sheet": "forest-islands-small",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-small.png",
+      "sheetRow": 2,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 2,
+        "depth": 3,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 1.5,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Four staggered conifers in an elongated cluster, small rock/stump detail, dense readable crowns; no uniform row of spheres.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "verticalBounds": {
+        "min": 0,
+        "max": 1.5
+      },
+      "boundsUnits": "Unity units",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-small.provenance.json",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures.",
+      "treeCount": 4
+    },
+    {
+      "id": "forest-island-3x2",
+      "sheet": "forest-islands-wide",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-wide.png",
+      "sheetRow": 1,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 3,
+        "depth": 2,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 1.5,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Four staggered conifers across a wider cluster; same tree kit as 2x3, recompose or rotate whole approved kit without anisotropic scaling.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "verticalBounds": {
+        "min": 0,
+        "max": 1.5
+      },
+      "boundsUnits": "Unity units",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-wide.provenance.json",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures.",
+      "treeCount": 4
+    },
+    {
+      "id": "forest-island-2x4",
+      "sheet": "forest-islands-wide",
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-wide.png",
+      "sheetRow": 2,
+      "views": {
+        "left": "three-quarter modeling view",
+        "right": "top-plan visual reference; north up; generated camera may retain slight tilt"
+      },
+      "footprint": {
+        "width": 2,
+        "depth": 4,
+        "units": "Unity units; 64 logical units = 1 Unity unit"
+      },
+      "maxVisualHeight": 1.55,
+      "pivot": "bottom-center at ground plane",
+      "boundsRule": "All geometry, roof/canopy overhang, lamps and trim must remain within the footprint. Footprint and height in manifest override any generated callout.",
+      "notes": "Six varied conifers grouped into two connected staggered clusters, low earthy infill and stones; canopy never crosses the rectangle.",
+      "status": "ready_for_modeling",
+      "modelingStatus": "not modeled in this task",
+      "verticalBounds": {
+        "min": 0,
+        "max": 1.55
+      },
+      "boundsUnits": "Unity units",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-wide.provenance.json",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures. Author six trees as specified and shown in the three-quarter view; top illustration resolves only five crowns and does not override the count.",
+      "treeCount": 6
+    }
+  ],
+  "images": [
+    {
+      "id": "STYLE-TARGET",
+      "file": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/STYLE-TARGET.png",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/STYLE-TARGET.provenance.json",
+      "status": "reviewed"
+    },
+    {
+      "id": "harbor-buildings",
+      "file": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.png",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.provenance.json",
+      "width": 1254,
+      "height": 1254,
+      "status": "ready_for_modeling",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "logging-buildings",
+      "file": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/logging-buildings.png",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/logging-buildings.provenance.json",
+      "width": 1254,
+      "height": 1254,
+      "status": "ready_for_modeling",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "industrial-buildings",
+      "file": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.png",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.provenance.json",
+      "width": 1254,
+      "height": 1254,
+      "status": "ready_for_modeling",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "bridges",
+      "file": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/bridges.png",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/bridges.provenance.json",
+      "width": 1254,
+      "height": 1254,
+      "status": "ready_for_modeling",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "barricades-and-barrel",
+      "file": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.provenance.json",
+      "width": 1254,
+      "height": 1254,
+      "status": "ready_for_modeling",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "conveyors",
+      "file": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/conveyors.png",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/conveyors.provenance.json",
+      "width": 1254,
+      "height": 1254,
+      "status": "ready_for_modeling",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "ground-patches",
+      "file": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches.png",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches.provenance.json",
+      "width": 1254,
+      "height": 1254,
+      "status": "superseded_not_model_target",
+      "reviewNotes": "Excessive raised mud and large rubble: replaced by ground-patches-refined.png."
+    },
+    {
+      "id": "forest-islands-small",
+      "file": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-small.png",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-small.provenance.json",
+      "width": 1254,
+      "height": 1254,
+      "status": "ready_for_modeling",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "forest-islands-wide",
+      "file": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-wide.png",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-wide.provenance.json",
+      "width": 1254,
+      "height": 1254,
+      "status": "ready_for_modeling",
+      "reviewNotes": "Reviewed for style, silhouette and modeling usefulness. Numeric footprint/height overrides generated marks. Top panels are schematic; real orthographic mesh checks remain required. Warm emission on windows only; no real-time lights or emissive exterior fixtures."
+    },
+    {
+      "id": "ground-patches-refined",
+      "file": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches-refined.png",
+      "provenance": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches-refined.provenance.json",
+      "width": 1254,
+      "height": 1254,
+      "status": "ready_for_modeling",
+      "reviewNotes": "Shallow mud and sparse low rubble reviewed. Exact numeric height limits remain authoritative."
+    }
+  ],
+  "styleTargetSelection": {
+    "status": "selected",
+    "basis": "Selected by this art task; source integration chat also selected the target and dispatched it to the 3D modeling chat."
+  },
+  "lightingRule": {
+    "source": "Saved user window-only illumination rule relayed by integration chat",
+    "emissiveAllowed": [
+      "windows only, warm and restrained"
+    ],
+    "realTimeLights": false,
+    "exteriorLanternEmission": false,
+    "conceptOverride": "Paint or omit exterior lamp details shown in concept art; they are not an instruction to add emission."
+  },
+  "counts": {
+    "assetIds": 22,
+    "selectedFamilySheets": 9,
+    "authoredRegions": 63,
+    "visualModules": 71
+  },
+  "assetIndex": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/asset-index.md",
+  "placementMap": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/placement-map.json",
+  "placementMapReadable": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/placement-map.md",
+  "overview": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/PACK-OVERVIEW.png",
+  "validation": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/validation.json",
+  "delivery": {
+    "conceptReview": "complete",
+    "engineIntegration": "not performed",
+    "scope": "Concept artwork and modeling specifications only. No Unity or gameplay source changed.",
+    "numericAuthority": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/references/Design-v1.md"
+  }
+}

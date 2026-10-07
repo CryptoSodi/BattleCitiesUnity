@@ -19,7 +19,7 @@ namespace BattleCities.UI
         RectTransform root,header,nav,footer,hero,heroPaper,metrics,battleLog,battleHeading,empty;
         TMP_Text title,nameLabel,identityLabel,recordCount,pageLabel,emptyTitle,emptyDescription;
         UnityEngine.UI.Image titleIcon,avatar;
-        UnityEngine.UI.Button back,share,previous,next,retry;
+        UnityEngine.UI.Button back,share,previous,next,retry,localReplays;
         readonly List<UnityEngine.UI.Button> battles=new List<UnityEngine.UI.Button>();
         readonly TMP_Text[] values=new TMP_Text[4],statNames=new TMP_Text[4];
         readonly RectTransform[] stats=new RectTransform[4];
@@ -127,13 +127,46 @@ namespace BattleCities.UI
         }
         public void OnProfileShareResult(string result)
         {if(!IsOpen)return;SetStatus(result=="copied"?"PROFILE LINK COPIED":result=="shared"?"PROFILE SHARED":result=="cancelled"?"SHARE CANCELLED":"PROFILE SHARE UNAVAILABLE");}
+        #if UNITY_EDITOR
+        // Exercise public WATCH responses without replacing the editor's current scene.
+        public Action<Core.BattleReplay> EditorReplayLaunchOverride;
+#endif
         public void Watch(int index)
         {
-            if(state!=ViewState.Ready||data==null||index<0||index>=data.Battles.Count)return;
+            if(!IsOpen||state!=ViewState.Ready||data==null||index<0||index>=data.Battles.Count)return;
             var battle=data.Battles[index];if(!battle.Replay){SetStatus("NO REPLAY WAS SAVED FOR THIS BATTLE");return;}
-            string url=links?links.ReplayUrl(data.Id,battle.Id):null;
-            if(string.IsNullOrEmpty(url)){SetStatus("WEB REPLAY VIEWER IS NOT CONFIGURED");return;}
-            Application.OpenURL(url);SetStatus("REPLAY REQUESTED IN YOUR BROWSER");
+            Cancel();SetStatus("LOADING REPLAY...");request=StartCoroutine(WatchRecording(generation,data.Id,battle.Id));
+        }
+        IEnumerator WatchRecording(int version,string playerId,string matchId)
+        {
+            JObject response=null;long status=0;
+            string path="/api/players/"+Uri.EscapeDataString(playerId)+"/profile/matches/"+Uri.EscapeDataString(matchId)+"/replay";
+            yield return api.Request("GET",path,null,(code,json,error)=>{status=code;if(string.IsNullOrEmpty(error))response=json;});
+            if(version!=generation||!IsOpen)yield break;
+            if(status<200||status>=300||response==null){SetStatus(status==404?"REPLAY IS NO LONGER AVAILABLE":"REPLAY COULD NOT BE LOADED; TRY AGAIN");yield break;}
+            var item=response["item"] as JObject;
+            var raw=(item?["replay"] as JObject)??((item?["replays"] as JArray)?.First as JObject);
+            if(raw==null){SetStatus("REPLAY COULD NOT BE LOADED; TRY AGAIN");yield break;}
+            string format=raw["format"]?.Type==JTokenType.String?(string)raw["format"]:null;
+            if(format==Core.BattleReplay.Format)
+            {
+                Core.BattleReplay recording=null;
+                try{recording=Core.ReplayJson.Read(raw.ToString());}
+                catch(Exception){SetStatus("REPLAY IS DAMAGED OR NEEDS A DIFFERENT GAME VERSION");}
+                if(recording!=null)
+                {
+#if UNITY_EDITOR
+                    if(EditorReplayLaunchOverride!=null){EditorReplayLaunchOverride(recording);yield break;}
+#endif
+                    ReplayBrowser.Launch(recording);
+                }
+                yield break;
+            }
+            if(format!=null&&format.StartsWith("battlecities-unity-",StringComparison.Ordinal))
+            {SetStatus("REPLAY NEEDS A DIFFERENT GAME VERSION");yield break;}
+            string url=links?links.ReplayUrl(playerId,matchId):null;
+            if(string.IsNullOrEmpty(url)){SetStatus("LEGACY WEB REPLAY VIEWER IS NOT CONFIGURED");yield break;}
+            Application.OpenURL(url);SetStatus("LEGACY REPLAY OPENED IN YOUR BROWSER");
         }
         string IdentityText()=>state==ViewState.Ready&&data!=null?data.Provider.ToUpperInvariant()+" PLAYER  •  JOINED "+data.Joined:state==ViewState.Guest?"GUEST PLAYER  •  LOCAL ACCOUNT":"PROFILE RECORD UNAVAILABLE";
         void SetStatus(string message)

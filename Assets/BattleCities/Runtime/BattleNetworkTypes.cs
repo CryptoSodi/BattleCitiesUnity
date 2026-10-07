@@ -17,12 +17,14 @@ namespace BattleCities.Multiplayer
         public float Shield;
         public float Cooldown;
         public float Slide;
+        public float SinkDepth;
+        public NetworkBool InQuicksand;
         public float SpeedBoost;
         public float ReloadDuration;
         public Facing Direction;
         public Facing Aim;
-        public static NetTankState From(TankState s) => new NetTankState { Id=s.Id, Slot=s.Slot, Tier=s.Tier, Health=s.Health, Player=s.Player, Drop=s.Drop, Alive=s.Alive, Moving=s.Moving, X=s.X, Y=s.Y, Shield=s.Shield, Cooldown=s.Cooldown, Slide=s.Slide, SpeedBoost=s.SpeedBoost, ReloadDuration=s.ReloadDuration, Direction=s.Direction, Aim=s.Aim };
-        public TankState ToState() => new TankState { Id=Id, Slot=Slot, Tier=Tier, Health=Health, Player=Player, Drop=Drop, Alive=Alive, Moving=Moving, X=X, Y=Y, Shield=Shield, Cooldown=Cooldown, Slide=Slide, SpeedBoost=SpeedBoost, ReloadDuration=ReloadDuration, Direction=Direction, Aim=Aim };
+        public static NetTankState From(TankState s) => new NetTankState { Id=s.Id, Slot=s.Slot, Tier=s.Tier, Health=s.Health, Player=s.Player, Drop=s.Drop, Alive=s.Alive, Moving=s.Moving, X=s.X, Y=s.Y, Shield=s.Shield, Cooldown=s.Cooldown, Slide=s.Slide, SinkDepth=s.SinkDepth, InQuicksand=s.InQuicksand, SpeedBoost=s.SpeedBoost, ReloadDuration=s.ReloadDuration, Direction=s.Direction, Aim=s.Aim };
+        public TankState ToState() => new TankState { Id=Id, Slot=Slot, Tier=Tier, Health=Health, Player=Player, Drop=Drop, Alive=Alive, Moving=Moving, X=X, Y=Y, Shield=Shield, Cooldown=Cooldown, Slide=Slide, SinkDepth=SinkDepth, InQuicksand=InQuicksand, SpeedBoost=SpeedBoost, ReloadDuration=ReloadDuration, Direction=Direction, Aim=Aim };
     }
     public struct NetShotState : INetworkStruct
     {

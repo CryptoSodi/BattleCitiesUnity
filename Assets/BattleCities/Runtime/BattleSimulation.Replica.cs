@@ -18,6 +18,7 @@ namespace BattleCities.Core
         public TurretState[] Turrets;
         public LandDroneState[] LandDrones;
         public bool[] TerrainAlive;
+        public int[] TerrainHealth;
         public Wall[] ExtraWalls;
     }
 
@@ -65,6 +66,11 @@ namespace BattleCities.Core
             for(int i=0;i<InitialTerrainCount;i++)
             {
                 bool alive=f.TerrainAlive[i];var wall=Terrain[i];
+                if(f.TerrainHealth!=null && i<f.TerrainHealth.Length)
+                {
+                    int health=f.TerrainHealth[i];
+                    if(wall.Health!=health){wall.Health=health;if(alive)WallDamaged?.Invoke(wall);}
+                }
                 if(wall.Alive==alive)continue;
                 wall.Alive=alive;changed=true;if(!alive)WallDestroyed?.Invoke(wall);
             }

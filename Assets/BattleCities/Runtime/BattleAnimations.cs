@@ -38,7 +38,9 @@ namespace BattleCities
             // Ignore respawn/teleport discontinuities. Pausing cannot advance the belt.
             if(dt>0&&distance>0&&distance<1)
             {
+                // Sand makes the tracks churn faster than the hull advances.
                 float localDistance=distance/Mathf.Max(.01f,transform.localScale.x);
+                if(tank.InQuicksand)localDistance/=Mathf.Max(.2f,tank.TerrainSpeedMultiplier);
                 for(int i=0;i<wheels.Length;i++)wheels[i].Rotate(Vector3.right,localDistance/radii[i]*Mathf.Rad2Deg,Space.Self);
                 treadPhase=Mathf.Repeat(treadPhase-localDistance/.1f,1);
                 foreach(var track in tracks)
@@ -60,12 +62,14 @@ namespace BattleCities
         readonly Stack<Puff> pool=new Stack<Puff>();
         readonly System.Random random=new System.Random(782);
         Material fire,smoke,shockwave,solid;
+        BattleCombatVfx combat;
         Mesh quad;
         Texture2D soft,ring;
         MaterialPropertyBlock properties;
         public int ActiveParticles=>puffs.Count;
         void Awake()
         {
+            combat=gameObject.AddComponent<BattleCombatVfx>();
             soft=new Texture2D(32,32,TextureFormat.RGBA32,false);soft.wrapMode=TextureWrapMode.Clamp;
             for(int y=0;y<32;y++)for(int x=0;x<32;x++){float a=Mathf.Clamp01(1-Vector2.Distance(new Vector2(x,y),new Vector2(15.5f,15.5f))/15.5f);soft.SetPixel(x,y,new Color(1,1,1,a*a));}soft.Apply();
             fire=MakeMaterial(true);smoke=MakeMaterial(false);
@@ -82,6 +86,7 @@ namespace BattleCities
         float R()=> (float)random.NextDouble();
         public void Burst(Vector3 position,float size)
         {
+            if(combat.Burst(position,size))return;
             for(int i=0;i<18;i++)Add(position,new Vector3(R()-.5f,R()*.9f,R()-.5f)*size*3,.25f+R()*.55f,size*(.18f+R()*.3f),i>8);
         }
         public void NormalShotExhaust(Vector3 position,Vector3 backward)
@@ -107,6 +112,7 @@ namespace BattleCities
         }
         public void MuzzleFlash(Vector3 position,Vector3 forward,Color color,float scale=1)
         {
+            if(combat.Muzzle(position,forward,scale))return;
             AddTint(position,Vector3.zero,.085f,.72f*scale,Color.Lerp(color,Color.white,.45f));
             for(int i=0;i<5;i++)AddTint(position+forward*i*.075f*scale,forward*.8f,.075f+i*.012f,(.32f-i*.04f)*scale,color);
             for(int i=0;i<6;i++)AddTint(position,(forward*(1+R()*2)+new Vector3(R()-.5f,R()-.2f,R()-.5f))*scale,.12f+R()*.07f,.06f*scale,color);
@@ -116,7 +122,15 @@ namespace BattleCities
         {Impact(position,direction,power,new Color(1,.64f,.12f));}
         public void Impact(Vector3 position,Vector3 direction,bool power,Color color,float scale=1)
         {
-            float strength=(power?1.4f:1)*scale;
+            bool authored=combat.Impact(position,direction,power,scale);
+            if(authored)return;
+            if(!power)
+            {
+                AddTint(position,Vector3.zero,.075f,.38f,Color.Lerp(color,Color.white,.75f));
+                for(int i=0;i<3;i++)Add(position,new Vector3((R()-.5f)*.4f,.4f+R()*.3f,(R()-.5f)*.4f),.3f+R()*.25f,.16f+R()*.1f,true);
+                return;
+            }
+            float strength=1.15f*scale;
             AddTint(position,Vector3.zero,.11f,1.4f*strength,Color.Lerp(color,Color.white,.7f));
             AddPuff(new Vector3(position.x,.06f,position.z),Vector3.zero,.36f,1.65f*strength,PuffKind.Ring,color);
             for(int i=0;i<12;i++)
@@ -174,9 +188,10 @@ namespace BattleCities
             properties.SetColor("_BaseColor",color);
             Graphics.DrawMesh(quad,Matrix4x4.TRS(position,rotation,Vector3.one*size),material,0,camera,0,properties,false,false,false);
         }
-        public void Clear(){foreach(var puff in puffs)pool.Push(puff);puffs.Clear();}
+        public void Clear(){foreach(var puff in puffs)pool.Push(puff);puffs.Clear();if(combat)combat.Clear();}
         public void Tick(float dt,Camera camera)
         {
+            combat.Tick(dt);
             for(int i=puffs.Count-1;i>=0;i--)
             {
                 var p=puffs[i];p.Age+=dt;if(p.Age>=p.Life){pool.Push(p);puffs.RemoveAt(i);continue;}

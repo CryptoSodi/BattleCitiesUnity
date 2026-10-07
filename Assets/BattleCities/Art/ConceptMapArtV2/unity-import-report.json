@@ -1,0 +1,314 @@
+[
+  {
+    "key": "draft_bld_harbor_warehouse_blue_3x2",
+    "assetId": "bld-harbor-warehouse-blue-3x2",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/bld-harbor-warehouse-blue-3x2.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapArtV2/GameplayPrefabs/draft_bld_harbor_warehouse_blue_3x2.prefab",
+    "triangles": 566,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 192.0,
+    "footprintHeight": 128.0
+  },
+  {
+    "key": "draft_building_blue",
+    "assetId": "bld-harbor-warehouse-blue-3x2",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/bld-harbor-warehouse-blue-3x2.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapPlaceholders/draft_building_blue.prefab",
+    "triangles": 566,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 192.0,
+    "footprintHeight": 128.0
+  },
+  {
+    "key": "draft_bld_harbor_warehouse_coral_3x2",
+    "assetId": "bld-harbor-warehouse-coral-3x2",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/bld-harbor-warehouse-coral-3x2.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapArtV2/GameplayPrefabs/draft_bld_harbor_warehouse_coral_3x2.prefab",
+    "triangles": 484,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 192.0,
+    "footprintHeight": 128.0
+  },
+  {
+    "key": "draft_building_coral",
+    "assetId": "bld-harbor-warehouse-coral-3x2",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/bld-harbor-warehouse-coral-3x2.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapPlaceholders/draft_building_coral.prefab",
+    "triangles": 484,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 192.0,
+    "footprintHeight": 128.0
+  },
+  {
+    "key": "draft_bld_harbor_store_2x3",
+    "assetId": "bld-harbor-store-2x3",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/bld-harbor-store-2x3.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapArtV2/GameplayPrefabs/draft_bld_harbor_store_2x3.prefab",
+    "triangles": 422,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 128.0,
+    "footprintHeight": 192.0
+  },
+  {
+    "key": "draft_bld_ranger_cabin_2x2",
+    "assetId": "bld-ranger-cabin-2x2",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/bld-ranger-cabin-2x2.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapArtV2/GameplayPrefabs/draft_bld_ranger_cabin_2x2.prefab",
+    "triangles": 500,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 128.0,
+    "footprintHeight": 128.0
+  },
+  {
+    "key": "draft_bld_logging_hut_2x2",
+    "assetId": "bld-logging-hut-2x2",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/bld-logging-hut-2x2.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapArtV2/GameplayPrefabs/draft_bld_logging_hut_2x2.prefab",
+    "triangles": 420,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 128.0,
+    "footprintHeight": 128.0
+  },
+  {
+    "key": "draft_bld_sawmill_3x2",
+    "assetId": "bld-sawmill-3x2",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/bld-sawmill-3x2.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapArtV2/GameplayPrefabs/draft_bld_sawmill_3x2.prefab",
+    "triangles": 424,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 192.0,
+    "footprintHeight": 128.0
+  },
+  {
+    "key": "draft_bld_factory_workshop_3x2",
+    "assetId": "bld-factory-workshop-3x2",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/bld-factory-workshop-3x2.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapArtV2/GameplayPrefabs/draft_bld_factory_workshop_3x2.prefab",
+    "triangles": 552,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 192.0,
+    "footprintHeight": 128.0
+  },
+  {
+    "key": "draft_bld_factory_store_2x3",
+    "assetId": "bld-factory-store-2x3",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/bld-factory-store-2x3.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapArtV2/GameplayPrefabs/draft_bld_factory_store_2x3.prefab",
+    "triangles": 566,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 128.0,
+    "footprintHeight": 192.0
+  },
+  {
+    "key": "draft_bld_utility_workshop_2x2",
+    "assetId": "bld-utility-workshop-2x2",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/bld-utility-workshop-2x2.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapArtV2/GameplayPrefabs/draft_bld_utility_workshop_2x2.prefab",
+    "triangles": 398,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 128.0,
+    "footprintHeight": 128.0
+  },
+  {
+    "key": "draft_bridge_concrete",
+    "assetId": "bridge-concrete-2x3",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/bridge-concrete-2x3.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapPlaceholders/draft_bridge_concrete.prefab",
+    "triangles": 236,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 128.0,
+    "footprintHeight": 192.0
+  },
+  {
+    "key": "draft_bridge_timber",
+    "assetId": "bridge-timber-1x3",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/bridge-timber-1x3.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapPlaceholders/draft_bridge_timber.prefab",
+    "triangles": 156,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 64.0,
+    "footprintHeight": 192.0
+  },
+  {
+    "key": "draft_log",
+    "assetId": "prop-log-cell-1x1",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/prop-log-cell-1x1.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapPlaceholders/draft_log.prefab",
+    "triangles": 312,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 64.0,
+    "footprintHeight": 64.0
+  },
+  {
+    "key": "draft_sandbag",
+    "assetId": "prop-sandbag-cell-1x1",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/prop-sandbag-cell-1x1.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapPlaceholders/draft_sandbag.prefab",
+    "triangles": 264,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 64.0,
+    "footprintHeight": 64.0
+  },
+  {
+    "key": "draft_barrel",
+    "assetId": "prop-fuel-barrel-1x1",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/prop-fuel-barrel-1x1.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapPlaceholders/draft_barrel.prefab",
+    "triangles": 207,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 64.0,
+    "footprintHeight": 64.0
+  },
+  {
+    "key": "draft_conveyor",
+    "assetId": "terrain-conveyor-north-1x4",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/terrain-conveyor-north-1x4.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapPlaceholders/draft_conveyor.prefab",
+    "triangles": 108,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 64.0,
+    "footprintHeight": 256.0
+  },
+  {
+    "key": "draft_conveyor_south",
+    "assetId": "terrain-conveyor-south-1x4",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/terrain-conveyor-north-1x4.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapArtV2/GameplayPrefabs/draft_conveyor_south.prefab",
+    "triangles": 108,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 64.0,
+    "footprintHeight": 256.0
+  },
+  {
+    "key": "draft_mud",
+    "assetId": "terrain-mud-3x2",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/terrain-mud-3x2.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapPlaceholders/draft_mud.prefab",
+    "triangles": 6,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 192.0,
+    "footprintHeight": 128.0
+  },
+  {
+    "key": "draft_rubble",
+    "assetId": "terrain-rubble-2x1",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/terrain-rubble-2x1.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapPlaceholders/draft_rubble.prefab",
+    "triangles": 260,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 128.0,
+    "footprintHeight": 64.0
+  },
+  {
+    "key": "draft_tree_2x2",
+    "assetId": "forest-island-2x2",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/forest-island-2x2.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapPlaceholders/draft_tree_2x2.prefab",
+    "triangles": 342,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 128.0,
+    "footprintHeight": 128.0
+  },
+  {
+    "key": "draft_tree_2x3",
+    "assetId": "forest-island-2x3",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/forest-island-2x3.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapPlaceholders/draft_tree_2x3.prefab",
+    "triangles": 434,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 128.0,
+    "footprintHeight": 192.0
+  },
+  {
+    "key": "draft_tree_3x2",
+    "assetId": "forest-island-3x2",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/forest-island-3x2.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapPlaceholders/draft_tree_3x2.prefab",
+    "triangles": 434,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 192.0,
+    "footprintHeight": 128.0
+  },
+  {
+    "key": "draft_tree_2x4",
+    "assetId": "forest-island-2x4",
+    "source": "Assets/BattleCities/Art/ConceptMapArtV2/Models/forest-island-2x4.glb",
+    "prefab": "Assets/BattleCities/Art/ConceptMapPlaceholders/draft_tree_2x4.prefab",
+    "triangles": 618,
+    "renderers": 1,
+    "materials": [
+      "StageArcade_SharedAtlas_v2-4e4d01546d53"
+    ],
+    "footprintWidth": 128.0,
+    "footprintHeight": 256.0
+  }
+]

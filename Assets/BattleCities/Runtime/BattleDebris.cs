@@ -17,7 +17,7 @@ namespace BattleCities
         readonly List<Fragment> fragments=new List<Fragment>();
         readonly System.Random random=new System.Random(917);
         Mesh chunk;
-        Material brick,steel;
+        Material brick,steel,roof,plaster;
         public int ActiveCount=>fragments.Count;
         const int Limit=160;
         void Awake()
@@ -27,6 +27,8 @@ namespace BattleCities
             source.SetActive(false);Destroy(source);
             brick=new Material(Shader.Find("Universal Render Pipeline/Lit"));brick.color=new Color(.84f,.31f,.055f);brick.SetFloat("_Smoothness",.18f);
             steel=new Material(brick);steel.color=new Color(.32f,.36f,.4f);steel.SetFloat("_Metallic",.7f);
+            roof=new Material(brick);roof.color=new Color(.08f,.27f,.72f);
+            plaster=new Material(brick);plaster.color=new Color(.66f,.61f,.45f);
         }
         float R()=> (float)random.NextDouble();
         void Launch(Mesh mesh,Material[] materials,Vector3 position,Quaternion rotation,Vector3 scale,float strength)
@@ -39,6 +41,19 @@ namespace BattleCities
         public void Wall(Vector3 position,bool metal)
         {
             for(int i=0;i<3;i++)Launch(chunk,new[]{metal?steel:brick},position+new Vector3((R()-.5f)*.18f,0,(R()-.5f)*.18f),Quaternion.Euler(R()*180,R()*180,R()*180),new Vector3(.06f+R()*.06f,.045f+R()*.04f,.05f+R()*.07f),2.4f);
+        }
+        public void Building(Vector3 position)
+        {
+            for(int i=0;i<6;i++)Launch(chunk,new[]{i%2==0?roof:plaster},position,Quaternion.Euler(R()*180,R()*180,R()*180),new Vector3(.07f+R()*.07f,.035f+R()*.04f,.07f+R()*.08f),2.8f);
+        }
+        public void Impact(Vector3 position,Vector3 direction,bool metal,bool power)
+        {
+            for(int i=0;i<(power?7:3);i++)
+            {
+                if(fragments.Count>=Limit)break;
+                Launch(chunk,new[]{metal?steel:brick},position,Quaternion.Euler(R()*180,R()*180,R()*180),new Vector3(.035f+R()*.025f,.025f+R()*.018f,.06f+R()*.045f),power?3.2f:1.8f);
+                var f=fragments[fragments.Count-1];f.Velocity-=direction*(1+R()*1.5f);f.Life=.75f+R()*.65f;
+            }
         }
         public void Tank(GameObject model,Vector3 center)
         {
@@ -70,7 +85,7 @@ namespace BattleCities
                 for(int sub=0;sub<f.Mesh.subMeshCount&&sub<f.Materials.Length;sub++)Graphics.DrawMesh(f.Mesh,matrix,f.Materials[sub],0,null,sub,null,ShadowCastingMode.On,true);
             }
         }
-        void OnDestroy(){Destroy(brick);Destroy(steel);}
+        void OnDestroy(){Destroy(brick);Destroy(steel);Destroy(roof);Destroy(plaster);}
     }
 }
 

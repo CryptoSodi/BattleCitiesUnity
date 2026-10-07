@@ -1,0 +1,1279 @@
+{
+  "field": {
+    "widthTiles": 25,
+    "heightTiles": 25
+  },
+  "terrain": {
+    "regions": [
+      {
+        "type": "water",
+        "x": 0,
+        "y": 704,
+        "width": 1600,
+        "height": 192
+      },
+      {
+        "type": "brick",
+        "x": 192,
+        "y": 192,
+        "width": 128,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 640,
+        "y": 192,
+        "width": 64,
+        "height": 192
+      },
+      {
+        "type": "brick",
+        "x": 896,
+        "y": 192,
+        "width": 64,
+        "height": 192
+      },
+      {
+        "type": "brick",
+        "x": 1280,
+        "y": 192,
+        "width": 128,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 192,
+        "y": 384,
+        "width": 64,
+        "height": 192
+      },
+      {
+        "type": "brick",
+        "x": 1344,
+        "y": 384,
+        "width": 64,
+        "height": 192
+      },
+      {
+        "type": "brick",
+        "x": 448,
+        "y": 576,
+        "width": 192,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 960,
+        "y": 576,
+        "width": 192,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 640,
+        "y": 512,
+        "width": 64,
+        "height": 128
+      },
+      {
+        "type": "brick",
+        "x": 896,
+        "y": 512,
+        "width": 64,
+        "height": 128
+      },
+      {
+        "type": "brick",
+        "x": 448,
+        "y": 960,
+        "width": 192,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 960,
+        "y": 960,
+        "width": 192,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 192,
+        "y": 1088,
+        "width": 64,
+        "height": 192
+      },
+      {
+        "type": "brick",
+        "x": 1344,
+        "y": 1088,
+        "width": 64,
+        "height": 192
+      },
+      {
+        "type": "brick",
+        "x": 448,
+        "y": 1280,
+        "width": 192,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 960,
+        "y": 1280,
+        "width": 192,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 704,
+        "y": 1152,
+        "width": 64,
+        "height": 128
+      },
+      {
+        "type": "brick",
+        "x": 832,
+        "y": 1152,
+        "width": 64,
+        "height": 128
+      },
+      {
+        "type": "steel",
+        "x": 768,
+        "y": 320,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "type": "steel",
+        "x": 320,
+        "y": 448,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "type": "steel",
+        "x": 1216,
+        "y": 448,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "type": "steel",
+        "x": 768,
+        "y": 1024,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "type": "steel",
+        "x": 320,
+        "y": 1216,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "type": "steel",
+        "x": 1216,
+        "y": 1216,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 672,
+        "y": 1440,
+        "width": 256,
+        "height": 32
+      },
+      {
+        "type": "brick",
+        "x": 672,
+        "y": 1472,
+        "width": 32,
+        "height": 128
+      },
+      {
+        "type": "brick",
+        "x": 896,
+        "y": 1472,
+        "width": 32,
+        "height": 128
+      }
+    ]
+  },
+  "ground": {
+    "regions": [
+      {
+        "type": "road",
+        "x": 0,
+        "y": 0,
+        "width": 1600,
+        "height": 1600
+      }
+    ]
+  },
+  "objects": [
+    {
+      "type": "draft_bridge_concrete",
+      "role": "groundDetail",
+      "x": 256,
+      "y": 704,
+      "width": 128,
+      "height": 192,
+      "rotation": 0,
+      "bridge": true
+    },
+    {
+      "type": "draft_bridge_timber",
+      "role": "groundDetail",
+      "x": 768,
+      "y": 704,
+      "width": 64,
+      "height": 192,
+      "rotation": 0,
+      "bridge": true
+    },
+    {
+      "type": "draft_bridge_concrete",
+      "role": "groundDetail",
+      "x": 1216,
+      "y": 704,
+      "width": 128,
+      "height": 192,
+      "rotation": 0,
+      "bridge": true
+    },
+    {
+      "type": "draft_bld_harbor_warehouse_blue_3x2",
+      "role": "solidCover",
+      "x": 384,
+      "y": 128,
+      "width": 192,
+      "height": 128,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_harbor_warehouse_coral_3x2",
+      "role": "solidCover",
+      "x": 1024,
+      "y": 128,
+      "width": 192,
+      "height": 128,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_harbor_store_2x3",
+      "role": "solidCover",
+      "x": 0,
+      "y": 320,
+      "width": 128,
+      "height": 192,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_harbor_store_2x3",
+      "role": "solidCover",
+      "x": 1472,
+      "y": 320,
+      "width": 128,
+      "height": 192,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_harbor_warehouse_blue_3x2",
+      "role": "solidCover",
+      "x": 384,
+      "y": 384,
+      "width": 192,
+      "height": 128,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_harbor_warehouse_coral_3x2",
+      "role": "solidCover",
+      "x": 1024,
+      "y": 384,
+      "width": 192,
+      "height": 128,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_harbor_warehouse_blue_3x2",
+      "role": "solidCover",
+      "x": 384,
+      "y": 1024,
+      "width": 192,
+      "height": 128,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_harbor_warehouse_coral_3x2",
+      "role": "solidCover",
+      "x": 1024,
+      "y": 1024,
+      "width": 192,
+      "height": 128,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_harbor_store_2x3",
+      "role": "solidCover",
+      "x": 0,
+      "y": 1216,
+      "width": 128,
+      "height": 192,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_harbor_store_2x3",
+      "role": "solidCover",
+      "x": 1472,
+      "y": 1216,
+      "width": 128,
+      "height": 192,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_sandbag",
+      "role": "destructibleObstacle",
+      "x": 256,
+      "y": 576,
+      "width": 64,
+      "height": 64,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 1,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      }
+    },
+    {
+      "type": "draft_sandbag",
+      "role": "destructibleObstacle",
+      "x": 1280,
+      "y": 960,
+      "width": 64,
+      "height": 64,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 1,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      }
+    }
+  ],
+  "lights": [],
+  "spawn": {
+    "player": {
+      "locations": [
+        {
+          "x": 576,
+          "y": 1536
+        }
+      ]
+    },
+    "enemy": {
+      "locations": [
+        {
+          "x": 128,
+          "y": 0
+        },
+        {
+          "x": 768,
+          "y": 0
+        },
+        {
+          "x": 1408,
+          "y": 0
+        }
+      ],
+      "list": [
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a",
+          "drop": true
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a",
+          "drop": true
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a",
+          "drop": true
+        },
+        {
+          "tier": "b"
+        },
+        {
+          "tier": "b"
+        }
+      ]
+    }
+  },
+  "base": {
+    "x": 736,
+    "y": 1504
+  },
+  "editor": {
+    "version": 1,
+    "name": "Canal Crossroads",
+    "previewStage": 1,
+    "elements": [
+      {
+        "kind": "Terrain",
+        "index": 0,
+        "id": "W01",
+        "notes": "Main east-west canal."
+      },
+      {
+        "kind": "Prop",
+        "index": 0,
+        "id": "BR01",
+        "notes": "West concrete crossing. Permanent passable bridge. Water cutout follows this footprint."
+      },
+      {
+        "kind": "Prop",
+        "index": 1,
+        "id": "BR02",
+        "notes": "Narrow optional timber shortcut; entry-bank landing anchors (12,10) and (12,14). Permanent passable bridge. Water cutout follows this footprint. Proposed 3-hit collapse and occupant rescue are not implemented."
+      },
+      {
+        "kind": "Prop",
+        "index": 2,
+        "id": "BR03",
+        "notes": "East concrete crossing. Permanent passable bridge. Water cutout follows this footprint."
+      },
+      {
+        "kind": "Prop",
+        "index": 3,
+        "id": "H01",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 4,
+        "id": "H02",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 5,
+        "id": "H03",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 6,
+        "id": "H04",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 7,
+        "id": "H05",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 8,
+        "id": "H06",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 9,
+        "id": "H07",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 10,
+        "id": "H08",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 11,
+        "id": "H09",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 12,
+        "id": "H10",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Terrain",
+        "index": 1,
+        "id": "B01",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 2,
+        "id": "B02",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 3,
+        "id": "B03",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 4,
+        "id": "B04",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 5,
+        "id": "B05",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 6,
+        "id": "B06",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 7,
+        "id": "B07",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 8,
+        "id": "B08",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 9,
+        "id": "B09",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 10,
+        "id": "B10",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 11,
+        "id": "B11",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 12,
+        "id": "B12",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 13,
+        "id": "B13",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 14,
+        "id": "B14",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 15,
+        "id": "B15",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 16,
+        "id": "B16",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 17,
+        "id": "B17",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 18,
+        "id": "B18",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 19,
+        "id": "S01",
+        "notes": "Blocks direct central shot lane."
+      },
+      {
+        "kind": "Terrain",
+        "index": 20,
+        "id": "S02",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 21,
+        "id": "S03",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 22,
+        "id": "S04",
+        "notes": "Forces a turn before base approach."
+      },
+      {
+        "kind": "Terrain",
+        "index": 23,
+        "id": "S05",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 24,
+        "id": "S06",
+        "notes": ""
+      },
+      {
+        "kind": "Prop",
+        "index": 13,
+        "id": "SB01",
+        "notes": "Half of west bridge approach remains open. One-hit destructible cover; proposed contact crush is not implemented."
+      },
+      {
+        "kind": "Prop",
+        "index": 14,
+        "id": "SB02",
+        "notes": "Half of east bridge approach remains open. One-hit destructible cover; proposed contact crush is not implemented."
+      },
+      {
+        "kind": "Terrain",
+        "index": 25,
+        "id": "HQ-N",
+        "notes": "Destructible north screen; protects HQ from direct vertical fire."
+      },
+      {
+        "kind": "Terrain",
+        "index": 26,
+        "id": "HQ-W",
+        "notes": "Left side wall; extends to field boundary."
+      },
+      {
+        "kind": "Terrain",
+        "index": 27,
+        "id": "HQ-E",
+        "notes": "Right side wall; extends to field boundary."
+      },
+      {
+        "kind": "Ground",
+        "index": 0,
+        "id": "GROUND",
+        "notes": "Default road surface."
+      },
+      {
+        "kind": "PlayerSpawn",
+        "index": 0,
+        "id": "P1",
+        "notes": "Player spawn, north facing."
+      },
+      {
+        "kind": "EnemySpawn",
+        "index": 0,
+        "id": "E1",
+        "notes": "Enemy spawn, south facing; keep two cells south clear."
+      },
+      {
+        "kind": "EnemySpawn",
+        "index": 1,
+        "id": "E2",
+        "notes": "Enemy spawn, south facing; keep two cells south clear."
+      },
+      {
+        "kind": "EnemySpawn",
+        "index": 2,
+        "id": "E3",
+        "notes": "Enemy spawn, south facing; keep two cells south clear."
+      },
+      {
+        "kind": "Base",
+        "index": 0,
+        "id": "HQ",
+        "notes": "Existing 128 x 96 base plus the three authored outer HQ guards."
+      }
+    ],
+    "artVersion": 2,
+    "buildingDamageVersion": 1
+  },
+  "concept": {
+    "designVersion": 1,
+    "designDate": "2026-10-07",
+    "rosterSource": "Maps/01 (unchanged)",
+    "placements": [
+      {
+        "id": "W01",
+        "type": "water",
+        "x": 0.0,
+        "y": 11.0,
+        "width": 25.0,
+        "height": 3.0,
+        "detail": "Main east-west canal."
+      },
+      {
+        "id": "BR01",
+        "type": "bridge_permanent",
+        "x": 4.0,
+        "y": 11.0,
+        "width": 2.0,
+        "height": 3.0,
+        "detail": "West concrete crossing."
+      },
+      {
+        "id": "BR02",
+        "type": "bridge_breakable",
+        "x": 12.0,
+        "y": 11.0,
+        "width": 1.0,
+        "height": 3.0,
+        "detail": "Narrow optional timber shortcut; entry-bank landing anchors (12,10) and (12,14)."
+      },
+      {
+        "id": "BR03",
+        "type": "bridge_permanent",
+        "x": 19.0,
+        "y": 11.0,
+        "width": 2.0,
+        "height": 3.0,
+        "detail": "East concrete crossing."
+      },
+      {
+        "id": "H01",
+        "type": "building",
+        "x": 6.0,
+        "y": 2.0,
+        "width": 3.0,
+        "height": 2.0,
+        "detail": "North-west warehouse, blue roof."
+      },
+      {
+        "id": "H02",
+        "type": "building",
+        "x": 16.0,
+        "y": 2.0,
+        "width": 3.0,
+        "height": 2.0,
+        "detail": "North-east warehouse, coral roof."
+      },
+      {
+        "id": "H03",
+        "type": "building",
+        "x": 0.0,
+        "y": 5.0,
+        "width": 2.0,
+        "height": 3.0,
+        "detail": "West harbor stores."
+      },
+      {
+        "id": "H04",
+        "type": "building",
+        "x": 23.0,
+        "y": 5.0,
+        "width": 2.0,
+        "height": 3.0,
+        "detail": "East harbor stores."
+      },
+      {
+        "id": "H05",
+        "type": "building",
+        "x": 6.0,
+        "y": 6.0,
+        "width": 3.0,
+        "height": 2.0,
+        "detail": "Canal court west."
+      },
+      {
+        "id": "H06",
+        "type": "building",
+        "x": 16.0,
+        "y": 6.0,
+        "width": 3.0,
+        "height": 2.0,
+        "detail": "Canal court east."
+      },
+      {
+        "id": "H07",
+        "type": "building",
+        "x": 6.0,
+        "y": 16.0,
+        "width": 3.0,
+        "height": 2.0,
+        "detail": "South-west depot."
+      },
+      {
+        "id": "H08",
+        "type": "building",
+        "x": 16.0,
+        "y": 16.0,
+        "width": 3.0,
+        "height": 2.0,
+        "detail": "South-east depot."
+      },
+      {
+        "id": "H09",
+        "type": "building",
+        "x": 0.0,
+        "y": 19.0,
+        "width": 2.0,
+        "height": 3.0,
+        "detail": "Lower west houses."
+      },
+      {
+        "id": "H10",
+        "type": "building",
+        "x": 23.0,
+        "y": 19.0,
+        "width": 2.0,
+        "height": 3.0,
+        "detail": "Lower east houses."
+      },
+      {
+        "id": "B01",
+        "type": "brick",
+        "x": 3.0,
+        "y": 3.0,
+        "width": 2.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "B02",
+        "type": "brick",
+        "x": 10.0,
+        "y": 3.0,
+        "width": 1.0,
+        "height": 3.0,
+        "detail": ""
+      },
+      {
+        "id": "B03",
+        "type": "brick",
+        "x": 14.0,
+        "y": 3.0,
+        "width": 1.0,
+        "height": 3.0,
+        "detail": ""
+      },
+      {
+        "id": "B04",
+        "type": "brick",
+        "x": 20.0,
+        "y": 3.0,
+        "width": 2.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "B05",
+        "type": "brick",
+        "x": 3.0,
+        "y": 6.0,
+        "width": 1.0,
+        "height": 3.0,
+        "detail": ""
+      },
+      {
+        "id": "B06",
+        "type": "brick",
+        "x": 21.0,
+        "y": 6.0,
+        "width": 1.0,
+        "height": 3.0,
+        "detail": ""
+      },
+      {
+        "id": "B07",
+        "type": "brick",
+        "x": 7.0,
+        "y": 9.0,
+        "width": 3.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "B08",
+        "type": "brick",
+        "x": 15.0,
+        "y": 9.0,
+        "width": 3.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "B09",
+        "type": "brick",
+        "x": 10.0,
+        "y": 8.0,
+        "width": 1.0,
+        "height": 2.0,
+        "detail": ""
+      },
+      {
+        "id": "B10",
+        "type": "brick",
+        "x": 14.0,
+        "y": 8.0,
+        "width": 1.0,
+        "height": 2.0,
+        "detail": ""
+      },
+      {
+        "id": "B11",
+        "type": "brick",
+        "x": 7.0,
+        "y": 15.0,
+        "width": 3.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "B12",
+        "type": "brick",
+        "x": 15.0,
+        "y": 15.0,
+        "width": 3.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "B13",
+        "type": "brick",
+        "x": 3.0,
+        "y": 17.0,
+        "width": 1.0,
+        "height": 3.0,
+        "detail": ""
+      },
+      {
+        "id": "B14",
+        "type": "brick",
+        "x": 21.0,
+        "y": 17.0,
+        "width": 1.0,
+        "height": 3.0,
+        "detail": ""
+      },
+      {
+        "id": "B15",
+        "type": "brick",
+        "x": 7.0,
+        "y": 20.0,
+        "width": 3.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "B16",
+        "type": "brick",
+        "x": 15.0,
+        "y": 20.0,
+        "width": 3.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "B17",
+        "type": "brick",
+        "x": 11.0,
+        "y": 18.0,
+        "width": 1.0,
+        "height": 2.0,
+        "detail": ""
+      },
+      {
+        "id": "B18",
+        "type": "brick",
+        "x": 13.0,
+        "y": 18.0,
+        "width": 1.0,
+        "height": 2.0,
+        "detail": ""
+      },
+      {
+        "id": "S01",
+        "type": "steel",
+        "x": 12.0,
+        "y": 5.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": "Blocks direct central shot lane."
+      },
+      {
+        "id": "S02",
+        "type": "steel",
+        "x": 5.0,
+        "y": 7.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "S03",
+        "type": "steel",
+        "x": 19.0,
+        "y": 7.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "S04",
+        "type": "steel",
+        "x": 12.0,
+        "y": 16.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": "Forces a turn before base approach."
+      },
+      {
+        "id": "S05",
+        "type": "steel",
+        "x": 5.0,
+        "y": 19.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "S06",
+        "type": "steel",
+        "x": 19.0,
+        "y": 19.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "SB01",
+        "type": "sandbag",
+        "x": 4.0,
+        "y": 9.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": "Half of west bridge approach remains open."
+      },
+      {
+        "id": "SB02",
+        "type": "sandbag",
+        "x": 20.0,
+        "y": 15.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": "Half of east bridge approach remains open."
+      },
+      {
+        "id": "HQ-N",
+        "type": "brick",
+        "x": 10.5,
+        "y": 22.5,
+        "width": 4.0,
+        "height": 0.5,
+        "detail": "Destructible north screen; protects HQ from direct vertical fire."
+      },
+      {
+        "id": "HQ-W",
+        "type": "brick",
+        "x": 10.5,
+        "y": 23.0,
+        "width": 0.5,
+        "height": 2.0,
+        "detail": "Left side wall; extends to field boundary."
+      },
+      {
+        "id": "HQ-E",
+        "type": "brick",
+        "x": 14.0,
+        "y": 23.0,
+        "width": 0.5,
+        "height": 2.0,
+        "detail": "Right side wall; extends to field boundary."
+      }
+    ],
+    "prototypeNote": "Replacement visuals. Logs use 2 HP per cell; barrels and sandbags use 1 HP. Mud/rubble speed, barrel explosions, sandbag crush, conveyor drift and timber collapse are pending.",
+    "art": {
+      "version": 2,
+      "conceptSource": "C:\\repos\\BattleCity\\art_exports\\concepts\\stages\\2026-10-07\\replacement-assets-v2\\manifest.json",
+      "modelPack": "C:\\repos\\Battle Cities Game\\blender assets\\stage-environments\\2026-10-07-replacement-v2",
+      "unityBindings": "Assets/BattleCities/Art/ConceptMapArtV2/bindings.json"
+    }
+  }
+}

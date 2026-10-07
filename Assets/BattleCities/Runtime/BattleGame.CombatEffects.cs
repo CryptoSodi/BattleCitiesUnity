@@ -86,7 +86,11 @@ namespace BattleCities
             var position = World(shot.X, shot.Y, .48f);
             if (shot.PowerShot && shotPresentation.TryGetValue(shot.Id, out var visual))
                 effects.Trail(visual.Previous, position, visual.Color, true);
-            effects.Impact(position + direction * .1f, direction, shot.PowerShot, ShotColor(shot), shot.PowerShot ? 1 : .45f);
+            // Keep the spark origin on the incoming side of the contact, clear of opaque armor.
+            position-=direction*.08f;
+            bool masonry=Simulation.Terrain.Any(w=>w.Brick&&w.Bounds.Overlaps(new Box(shot.X-18,shot.Y-18,36,36)));
+            debris.Impact(position,direction,!masonry,shot.PowerShot);
+            effects.Impact(position, direction, shot.PowerShot, ShotColor(shot), shot.PowerShot ? 1 : .75f);
         }
 
         private Material BulletMaterial(Material source, Color color)

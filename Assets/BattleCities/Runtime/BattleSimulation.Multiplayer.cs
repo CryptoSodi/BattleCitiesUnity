@@ -59,6 +59,7 @@ namespace BattleCities.Core
             if(slot<0||slot>=MaxPlayers)throw new ArgumentOutOfRangeException(nameof(slot));
             var p=Participants[slot];
             if(p.Connected==connected)return;
+            ReplayLifecycle?.Invoke(new ReplayEvent {kind="participant",slot=slot,connected=connected});
             p.Connected=connected;
             if(!connected)
             {
@@ -73,6 +74,7 @@ namespace BattleCities.Core
         public void BeginMatch()
         {
             if(Participants.Count(p=>p.Connected)<2)throw new InvalidOperationException("At least two players are required.");
+            ReplayLifecycle?.Invoke(new ReplayEvent {kind="begin"});
             MatchStarted=true;intro=2;
         }
 
@@ -115,7 +117,7 @@ namespace BattleCities.Core
                 if(command.Move.HasValue&&(int)command.Move.Value>=0&&(int)command.Move.Value<4)
                 {
                     Rotate(p,command.Move.Value);Move(p);
-                    p.Slide=Terrain.Any(w=>w.Alive&&w.Type=="ice"&&w.Bounds.Overlaps(p.Bounds))?.5f:0;
+                    p.Slide=(TouchesSlipperyGround(p)&&!p.InQuicksand)?.5f:0;
                 }
                 else if(p.Slide>0){p.Slide-=dt;Move(p);}
                 p.Aim=command.Aim.HasValue&&(int)command.Aim.Value>=0&&(int)command.Aim.Value<4?command.Aim.Value:p.Direction;

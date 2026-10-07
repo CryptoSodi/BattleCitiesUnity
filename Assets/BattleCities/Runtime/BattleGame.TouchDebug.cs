@@ -247,9 +247,9 @@ namespace BattleCities
             RowButton(content, "Equip turret", () => Simulation.EquippedSecondary = SecondaryAttack.GroundTurret);
             RowButton(content, "Equip land attack drone", () => Simulation.EquippedSecondary = SecondaryAttack.LandDrone);
             RowButton(content, "Deploy land drone for testing", () =>
-            { Simulation.EquippedSecondary = SecondaryAttack.LandDrone; Simulation.UseSecondary(); });
+            { Simulation.EquippedSecondary = SecondaryAttack.LandDrone; secondaryQueued=true; });
             RowButton(content, "Place turret for testing", () =>
-            { Simulation.EquippedSecondary = SecondaryAttack.GroundTurret; Simulation.UseSecondary(); });
+            { Simulation.EquippedSecondary = SecondaryAttack.GroundTurret; secondaryQueued=true; });
 
             RowLabel(content, "TEST POWER-UPS  (FREE)");
             for (int i = 0; i < debugPowerupTypes.Length; i++)

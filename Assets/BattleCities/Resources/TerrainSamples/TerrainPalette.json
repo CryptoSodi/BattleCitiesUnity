@@ -1,0 +1,17 @@
+{
+  "field": {"widthTiles":13,"heightTiles":13},
+  "terrain": {"regions":[
+    {"type":"water","x":128,"y":128,"width":128,"height":128},
+    {"type":"lava","x":352,"y":128,"width":128,"height":128},
+    {"type":"muddyWater","x":576,"y":128,"width":128,"height":128},
+    {"type":"ice","x":128,"y":384,"width":128,"height":160},
+    {"type":"grease","x":352,"y":384,"width":128,"height":160},
+    {"type":"quicksand","x":576,"y":384,"width":128,"height":160},
+    {"type":"jungle","x":32,"y":32,"width":64,"height":64},
+    {"type":"jungle","x":736,"y":32,"width":64,"height":64},
+    {"type":"brick","x":96,"y":288,"width":192,"height":32},
+    {"type":"brick","x":320,"y":288,"width":192,"height":32},
+    {"type":"brick","x":544,"y":288,"width":192,"height":32}
+  ]},
+  "spawn": {"player":{"locations":[{"x":608,"y":544}]},"enemy":{"locations":[{"x":32,"y":32}]}}
+}

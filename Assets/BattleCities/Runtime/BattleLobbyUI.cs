@@ -11,6 +11,7 @@ namespace BattleCities.Multiplayer
     public sealed partial class BattleLobbyUI : MonoBehaviour
     {
         private Canvas canvas;
+        private BattleGame replayGame;
         private GameObject panel;
         private UnityEngine.UI.Text heading,status,roomLabel,roster,modeLabel,regionLabel,mapLabel,quickControls;
         private UnityEngine.UI.Button open,create,join,start,rematch,leave,close,mode,region,previousMap,nextMap;
@@ -86,6 +87,9 @@ namespace BattleCities.Multiplayer
         private void Update()
         {
             if(!canvas||!Session)return;
+            if(!replayGame&&SceneManager.GetActiveScene().name=="BattleCity")replayGame=UnityEngine.Object.FindAnyObjectByType<BattleGame>();
+            if(ReplayBrowser.IsOpen||(replayGame&&replayGame.IsReplaying))
+            {open.gameObject.SetActive(false);if(Visible){panel.SetActive(false);ReleaseController();}return;}
             bool available=SceneManager.GetActiveScene().name!="Login";
             bool psgMenu=RuntimePlatformInfo.IsPsg1&&SceneManager.GetActiveScene().name=="MainMenu";
             if(psgMenu&&!mainMenuView)mainMenuView=UnityEngine.Object.FindFirstObjectByType<UI.MainMenuScene>();

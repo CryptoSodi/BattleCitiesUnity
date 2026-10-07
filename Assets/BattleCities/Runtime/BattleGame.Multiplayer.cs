@@ -15,20 +15,20 @@ namespace BattleCities
 
         public void PrepareOnline(BattleNetworkMatch match,BattleMode mode,int stage)
         {
-            NetworkMatch=match;loadingOnline=true;
+            FinishRecording();replayPlayer=null;NetworkMatch=match;loadingOnline=true;
             try
             {
                 LoadStage(stage);Simulation.ConfigureMultiplayer(mode);Simulation.RecordVisualEvents();
                 EnemyFire=true;Simulation.DisableEnemyFire=false;
                 if(mode==BattleMode.Versus&&eagle)eagle.SetActive(false);
                 shotSequence=secondarySequence=0;latestPowerShot=false;onlineSecondary=SecondaryAttack.Mine;
-                ResetPrimaryFire();paused=false;
+                ResetPrimaryFire();paused=false;StartOnlineRecording();
             }
             finally{loadingOnline=false;}
         }
         public void EndOnline()
         {
-            NetworkMatch=null;loadingOnline=false;ResetPrimaryFire();LoadStage(Stage);paused=true;
+            FinishRecording();NetworkMatch=null;loadingOnline=false;ResetPrimaryFire();LoadStage(Stage);paused=true;
         }
         public BattleNetworkInput ReadOnlineInput()
         {

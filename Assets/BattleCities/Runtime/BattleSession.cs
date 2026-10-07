@@ -17,7 +17,7 @@ namespace BattleCities.Multiplayer
     public sealed class BattleSession : MonoBehaviour, INetworkRunnerCallbacks
     {
         public const string AppId="dedb8ea5-35ab-42a2-a8af-9d5461c4d72c";
-        public const string ProtocolVersion="battlecities-2";
+        public const string ProtocolVersion="battlecities-3";
         public static BattleSession Instance {get;private set;}
         public BattleMode SelectedMode=BattleMode.Coop;
         public bool ModeLockedByLaunchFlag=>BattleLaunchOptions.HasModeFlag;
@@ -50,6 +50,7 @@ namespace BattleCities.Multiplayer
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Bootstrap()
         {
+            if(LevelEditor.LevelEditorPlaytest.IsAuthoringOrTesting)return;
             if(!Instance)new GameObject("Battle multiplayer").AddComponent<BattleSession>();
         }
         private void Awake()

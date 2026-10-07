@@ -1,0 +1,742 @@
+{
+  "spawn": {
+    "enemy": {
+      "locations": [
+        {
+          "x": 384.0,
+          "y": 0.0
+        },
+        {
+          "x": 768.0,
+          "y": 0.0
+        },
+        {
+          "x": 0.0,
+          "y": 0.0
+        }
+      ],
+      "list": [
+        {
+          "tier": "a",
+          "drop": false
+        },
+        {
+          "tier": "a",
+          "drop": false
+        },
+        {
+          "tier": "a",
+          "drop": false
+        },
+        {
+          "tier": "a",
+          "drop": true
+        },
+        {
+          "tier": "a",
+          "drop": false
+        },
+        {
+          "tier": "a",
+          "drop": false
+        },
+        {
+          "tier": "a",
+          "drop": false
+        },
+        {
+          "tier": "a",
+          "drop": false
+        },
+        {
+          "tier": "a",
+          "drop": false
+        },
+        {
+          "tier": "a",
+          "drop": false
+        },
+        {
+          "tier": "a",
+          "drop": true
+        },
+        {
+          "tier": "a",
+          "drop": false
+        },
+        {
+          "tier": "a",
+          "drop": false
+        },
+        {
+          "tier": "a",
+          "drop": false
+        },
+        {
+          "tier": "a",
+          "drop": false
+        },
+        {
+          "tier": "a",
+          "drop": false
+        },
+        {
+          "tier": "a",
+          "drop": false
+        },
+        {
+          "tier": "a",
+          "drop": true
+        },
+        {
+          "tier": "b",
+          "drop": false
+        },
+        {
+          "tier": "b",
+          "drop": false
+        }
+      ]
+    },
+    "player": {
+      "locations": [
+        {
+          "x": 256.0,
+          "y": 768.0
+        }
+      ]
+    }
+  },
+  "terrain": {
+    "regions": [
+      {
+        "type": "brick",
+        "x": 320.0,
+        "y": 64.0,
+        "width": 64.0,
+        "height": 224.0
+      },
+      {
+        "type": "brick",
+        "x": 320.0,
+        "y": 352.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "brick",
+        "x": 0.0,
+        "y": 416.0,
+        "width": 64.0,
+        "height": 32.0
+      },
+      {
+        "type": "brick",
+        "x": 128.0,
+        "y": 416.0,
+        "width": 128.0,
+        "height": 64.0
+      },
+      {
+        "type": "brick",
+        "x": 64.0,
+        "y": 544.0,
+        "width": 64.0,
+        "height": 224.0
+      },
+      {
+        "type": "brick",
+        "x": 576.0,
+        "y": 544.0,
+        "width": 64.0,
+        "height": 224.0
+      },
+      {
+        "type": "brick",
+        "x": 704.0,
+        "y": 544.0,
+        "width": 64.0,
+        "height": 224.0
+      },
+      {
+        "type": "steel",
+        "x": 0.0,
+        "y": 448.0,
+        "width": 64.0,
+        "height": 32.0
+      },
+      {
+        "type": "brick",
+        "x": 0.0,
+        "y": 64.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "brick",
+        "x": 0.0,
+        "y": 192.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "brick",
+        "x": 0.0,
+        "y": 256.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "brick",
+        "x": 0.0,
+        "y": 320.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "brick",
+        "x": 64.0,
+        "y": 64.0,
+        "width": 64.0,
+        "height": 256.0
+      },
+      {
+        "type": "brick",
+        "x": 64.0,
+        "y": 320.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "brick",
+        "x": 128.0,
+        "y": 320.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "brick",
+        "x": 192.0,
+        "y": 64.0,
+        "width": 64.0,
+        "height": 256.0
+      },
+      {
+        "type": "brick",
+        "x": 192.0,
+        "y": 320.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "brick",
+        "x": 640.0,
+        "y": 448.0,
+        "width": 64.0,
+        "height": 32.0
+      },
+      {
+        "type": "steel",
+        "x": 0.0,
+        "y": 128.0,
+        "width": 64.0,
+        "height": 64.0,
+        "damage": {
+          "hitPoints": 3,
+          "invulnerable": false,
+          "normalShots": true,
+          "powerShots": true
+        }
+      },
+      {
+        "type": "steel",
+        "x": 704.0,
+        "y": 64.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 704.0,
+        "y": 128.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 704.0,
+        "y": 192.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 768.0,
+        "y": 256.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 704.0,
+        "y": 256.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 704.0,
+        "y": 320.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 640.0,
+        "y": 320.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 576.0,
+        "y": 320.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 576.0,
+        "y": 256.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 576.0,
+        "y": 192.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 576.0,
+        "y": 128.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 576.0,
+        "y": 64.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 512.0,
+        "y": 64.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 448.0,
+        "y": 64.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 448.0,
+        "y": 128.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 384.0,
+        "y": 192.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 448.0,
+        "y": 192.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 448.0,
+        "y": 256.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 448.0,
+        "y": 320.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 448.0,
+        "y": 384.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 448.0,
+        "y": 448.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 448.0,
+        "y": 512.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 320.0,
+        "y": 512.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 320.0,
+        "y": 448.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 384.0,
+        "y": 512.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 448.0,
+        "y": 576.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 448.0,
+        "y": 640.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 384.0,
+        "y": 640.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 384.0,
+        "y": 576.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 320.0,
+        "y": 576.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 320.0,
+        "y": 640.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 256.0,
+        "y": 640.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "brick",
+        "x": 192.0,
+        "y": 544.0,
+        "width": 64.0,
+        "height": 96.0
+      },
+      {
+        "type": "brick",
+        "x": 192.0,
+        "y": 704.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "steel",
+        "x": 192.0,
+        "y": 640.0,
+        "width": 64.0,
+        "height": 64.0
+      }
+    ]
+  },
+  "field": {
+    "widthTiles": 13,
+    "heightTiles": 13
+  },
+  "ground": {
+    "regions": [
+      {
+        "type": "city",
+        "x": 0.0,
+        "y": 640.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "plaza",
+        "x": 0.0,
+        "y": 768.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "plaza",
+        "x": 64.0,
+        "y": 768.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "plaza",
+        "x": 128.0,
+        "y": 768.0,
+        "width": 64.0,
+        "height": 64.0
+      },
+      {
+        "type": "plaza",
+        "x": 192.0,
+        "y": 768.0,
+        "width": 64.0,
+        "height": 64.0
+      }
+    ]
+  },
+  "objects": [
+    {
+      "type": "forest_rock",
+      "role": "solidCover",
+      "x": 64.0,
+      "y": 640.0,
+      "width": 21.0,
+      "height": 21.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "forest_rock",
+      "role": "solidCover",
+      "x": 0.0,
+      "y": 704.0,
+      "width": 21.0,
+      "height": 21.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "forest_bush",
+      "role": "passableCover",
+      "x": 128.0,
+      "y": 704.0,
+      "width": 21.0,
+      "height": 21.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "forest_tree_a",
+      "role": "solidCover",
+      "x": 0.0,
+      "y": 448.0,
+      "width": 21.0,
+      "height": 21.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "forest_tree_a",
+      "role": "solidCover",
+      "x": 0.0,
+      "y": 512.0,
+      "width": 21.0,
+      "height": 21.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_road_junction",
+      "role": "groundDetail",
+      "x": 64.0,
+      "y": 512.0,
+      "width": 64.0,
+      "height": 64.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_road_junction",
+      "role": "groundDetail",
+      "x": 128.0,
+      "y": 512.0,
+      "width": 64.0,
+      "height": 64.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_road_junction",
+      "role": "groundDetail",
+      "x": 192.0,
+      "y": 512.0,
+      "width": 64.0,
+      "height": 64.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_road_junction",
+      "role": "groundDetail",
+      "x": 192.0,
+      "y": 448.0,
+      "width": 64.0,
+      "height": 64.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_road_junction",
+      "role": "groundDetail",
+      "x": 256.0,
+      "y": 448.0,
+      "width": 64.0,
+      "height": 64.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_road_junction",
+      "role": "groundDetail",
+      "x": 256.0,
+      "y": 384.0,
+      "width": 64.0,
+      "height": 64.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_road_junction",
+      "role": "groundDetail",
+      "x": 256.0,
+      "y": 320.0,
+      "width": 64.0,
+      "height": 64.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_road_junction",
+      "role": "groundDetail",
+      "x": 256.0,
+      "y": 256.0,
+      "width": 64.0,
+      "height": 64.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_road_junction",
+      "role": "groundDetail",
+      "x": 256.0,
+      "y": 192.0,
+      "width": 64.0,
+      "height": 64.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_road_junction",
+      "role": "groundDetail",
+      "x": 256.0,
+      "y": 128.0,
+      "width": 64.0,
+      "height": 64.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_road_junction",
+      "role": "groundDetail",
+      "x": 256.0,
+      "y": 64.0,
+      "width": 64.0,
+      "height": 64.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_road_junction",
+      "role": "groundDetail",
+      "x": 256.0,
+      "y": 0.0,
+      "width": 64.0,
+      "height": 64.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_bench",
+      "role": "solidCover",
+      "x": 384.0,
+      "y": 448.0,
+      "width": 21.0,
+      "height": 21.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_bench",
+      "role": "solidCover",
+      "x": 384.0,
+      "y": 512.0,
+      "width": 21.0,
+      "height": 21.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_bench",
+      "role": "solidCover",
+      "x": 448.0,
+      "y": 448.0,
+      "width": 21.0,
+      "height": 21.0,
+      "rotation": 0.0
+    },
+    {
+      "type": "city_bench",
+      "role": "solidCover",
+      "x": 512.0,
+      "y": 448.0,
+      "width": 21.0,
+      "height": 21.0,
+      "rotation": 0.0
+    }
+  ],
+  "lights": [],
+  "base": {
+    "x": 352.0,
+    "y": 736.0
+  },
+  "editor": {
+    "name": "Working Draft",
+    "previewStage": 1,
+    "version": 1
+  }
+}

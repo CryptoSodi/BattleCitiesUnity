@@ -91,7 +91,7 @@ $index = $index.Replace('</head>', '    <link rel="preload" as="image" href="' +
 $releaseInfo = [ordered]@{
     repository = $Repository
     release = $ReleaseTag
-    apk = "https://github.com/$Repository/releases/latest/download/BattleCities-0.1.1.apk"
+    apk = "https://github.com/$Repository/releases/latest/download/battlecities.apk"
 }
 [IO.File]::WriteAllText((Join-Path $siteDirectory 'release-info.json'), ($releaseInfo | ConvertTo-Json))
 Write-Output "Pages artifact ready: $siteDirectory"

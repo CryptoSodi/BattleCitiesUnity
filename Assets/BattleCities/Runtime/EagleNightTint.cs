@@ -22,7 +22,7 @@ namespace BattleCities
         public void SetDarkness(float darkness)
         {
             if(properties==null)properties=new MaterialPropertyBlock();
-            float brightness=Mathf.Lerp(1,.12f,Mathf.Clamp01(darkness));
+            float brightness=Mathf.Lerp(1,.28f,Mathf.Clamp01(darkness));
             foreach(var surface in surfaces)
             {
                 surface.Renderer.GetPropertyBlock(properties,surface.Slot);

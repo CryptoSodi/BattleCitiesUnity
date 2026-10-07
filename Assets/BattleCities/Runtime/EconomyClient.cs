@@ -27,6 +27,8 @@ namespace BattleCities
         private sealed class Response { public long Code;public JObject Body; }
         private async void Start()
         {
+            if(GetComponent<BattleGame>()?.IsReplaying==true){Status="Replay playback";enabled=false;return;}
+            if(LevelEditor.LevelEditorPlaytest.IsActive){Status="Level editor sandbox";enabled=false;return;}
             if(BattlePreparation.Ready)
             {
                 baseUrl=BattlePreparation.ApiUrl;

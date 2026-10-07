@@ -9,6 +9,8 @@ param(
     [ValidatePattern('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$')]
     [string]$LegacyRepository = 'CryptoSodi/BattleCitiesUnity-Releases',
     [string]$LegacyTag = 'v0.1.1',
+    [ValidatePattern('^[a-fA-F0-9]{40}$')][string]$TargetCommit,
+    [switch]$CarryForwardApk,
     [switch]$SkipLegacyApkMirror,
     [switch]$PrepareOnly
 )
@@ -30,13 +32,15 @@ $tag = "v$number"
 $projectDirectory = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $outputDirectory = Join-Path $projectDirectory "Builds/Releases/$number/Publish"
 $apkFile = (Resolve-Path -LiteralPath $ApkPath).Path
-$apkName = 'BattleCities-0.1.1.apk'
+$apkName = 'battlecities.apk'
+$legacyApkName = 'BattleCities-0.1.1.apk'
 $zipName = "BattleCities-$number-Web.zip"
 
 # Keep binaries in the ignored Builds folder; publish them as release assets.
 [IO.Directory]::CreateDirectory($outputDirectory) | Out-Null
 $webZip = Join-Path $outputDirectory $zipName
 $stagedApk = Join-Path $outputDirectory $apkName
+$compatibilityApk = Join-Path $outputDirectory $legacyApkName
 if ($PSCmdlet.ParameterSetName -eq 'Archive') {
     $sourceZip = (Resolve-Path -LiteralPath $WebArchivePath).Path
     if ($sourceZip -ne $webZip) { Copy-Item -LiteralPath $sourceZip -Destination $webZip -Force }
@@ -63,6 +67,7 @@ if ($PSCmdlet.ParameterSetName -eq 'Archive') {
     } finally { $archive.Dispose() }
 }
 if ($apkFile -ne $stagedApk) { Copy-Item -LiteralPath $apkFile -Destination $stagedApk -Force }
+Copy-Item -LiteralPath $stagedApk -Destination $compatibilityApk -Force
 
 foreach ($artifact in @($webZip, $stagedApk)) {
     $archive = [IO.Compression.ZipFile]::OpenRead($artifact)
@@ -78,7 +83,7 @@ foreach ($artifact in @($webZip, $stagedApk)) {
     } finally { $archive.Dispose() }
 }
 
-$checksums = foreach ($artifact in @($webZip, $stagedApk)) {
+$checksums = foreach ($artifact in @($webZip, $stagedApk, $compatibilityApk)) {
     '{0}  {1}' -f (Get-ReleaseSha256 $artifact),
         [IO.Path]::GetFileName($artifact)
 }
@@ -91,9 +96,12 @@ Battle Cities $number
 - Play: https://play.battlecities.com/
 - APK: https://github.com/$Repository/releases/latest/download/$apkName
 - Web archive and SHA256 checksums are attached to this release.
-- The APK asset keeps its original filename so existing download links stay compatible.
+- The APK is named battlecities.apk. A compatibility copy preserves previously distributed download links.
 "@
 [IO.File]::WriteAllText($notesFile, $notes, [Text.UTF8Encoding]::new($false))
+if ($CarryForwardApk) {
+    [IO.File]::AppendAllText($notesFile, "`nThis release builds WebGL. The existing Android APK is carried forward unchanged.`n")
+}
 Write-Output "Prepared release assets: $outputDirectory"
 if ($PrepareOnly) { return }
 if (-not $PSCmdlet.ShouldProcess($Repository, "Publish $tag and update the existing public APK link")) { return }
@@ -107,25 +115,27 @@ $existing = @(foreach ($releasePage in ($releasePages | ConvertFrom-Json)) {
 if ($existing.Count -gt 0 -and -not $existing[0].draft) {
     throw 'This release is already published. Use a new version to preserve historical release assets.'
 }
-$assets = @($webZip, $stagedApk, $checksumFile)
+$assets = @($webZip, $stagedApk, $compatibilityApk, $checksumFile)
 if ($existing.Count -gt 0) {
     Invoke-GitHub -Arguments (@('release', 'upload', $tag, '--repo', $Repository, '--clobber') + $assets) | Out-Null
     Invoke-GitHub -Arguments @('release', 'edit', $tag, '--repo', $Repository, '--notes-file', $notesFile) | Out-Null
+    if ($TargetCommit) { Invoke-GitHub -Arguments @('release', 'edit', $tag, '--repo', $Repository, '--target', $TargetCommit) | Out-Null }
 } else {
-    Invoke-GitHub -Arguments (@('release', 'create', $tag, '--repo', $Repository, '--target', 'main', '--draft',
+    $target = if ($TargetCommit) { $TargetCommit } else { 'main' }
+    Invoke-GitHub -Arguments (@('release', 'create', $tag, '--repo', $Repository, '--target', $target, '--draft',
         '--title', "Battle Cities $number", '--notes-file', $notesFile) + $assets) | Out-Null
 }
 
 if (-not $SkipLegacyApkMirror) {
     $legacyRelease = Invoke-GitHub -Arguments @('api', "repos/$LegacyRepository/releases/tags/$LegacyTag") |
         ConvertFrom-Json
-    $legacyApk = @($legacyRelease.assets | Where-Object { $_.name -eq $apkName })
+    $legacyApk = @($legacyRelease.assets | Where-Object { $_.name -eq $legacyApkName })
     $legacyDigest = if ($legacyApk.Count -gt 0) { $legacyApk[0].digest } else { $null }
     $apkDigest = 'sha256:' + (Get-ReleaseSha256 $stagedApk)
     if ($legacyDigest -ne $apkDigest) {
-        Invoke-GitHub -Arguments @('release', 'upload', $LegacyTag, $stagedApk, '--repo', $LegacyRepository, '--clobber') | Out-Null
+        Invoke-GitHub -Arguments @('release', 'upload', $LegacyTag, $compatibilityApk, '--repo', $LegacyRepository, '--clobber') | Out-Null
     }
-    Write-Output "Existing APK link preserved: https://github.com/$LegacyRepository/releases/download/$LegacyTag/$apkName"
+    Write-Output "Existing APK link preserved: https://github.com/$LegacyRepository/releases/download/$LegacyTag/$legacyApkName"
 }
 
 Invoke-GitHub -Arguments @('release', 'edit', $tag, '--repo', $Repository, '--draft=false', '--latest') | Out-Null

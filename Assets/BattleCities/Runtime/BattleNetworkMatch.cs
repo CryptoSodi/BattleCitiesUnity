@@ -41,6 +41,8 @@ namespace BattleCities.Multiplayer
         [Networked,Capacity(8)] public NetworkArray<NetTurretState> Turrets => default;
         [Networked,Capacity(4)] public NetworkArray<NetLandDroneState> LandDrones => default;
         [Networked,Capacity(TerrainWords)] public NetworkArray<uint> TerrainBits => default;
+        // Snapshot partial damage as well as destroyed cells, including for late joiners.
+        [Networked,Capacity(TerrainWords*16)] public NetworkArray<uint> TerrainHealthPairs => default;
         [Networked,Capacity(8)] public NetworkArray<NetWall> ExtraWalls => default;
         [Networked,Capacity(128)] public NetworkArray<NetBattleVisualEvent> Events => default;
         [Networked] public int EventSequence {get;set;}
@@ -87,7 +89,7 @@ namespace BattleCities.Multiplayer
 
         public override void FixedUpdateNetwork()
         {
-            if(!Object.HasStateAuthority||!BindGame())return;
+            if(!Object.HasStateAuthority||!BindGame()||!Game.ReplayReady)return;
             if(Mode==BattleMode.Coop&&Simulation.Won&&Map<35)
             {
                 if(advanceStageAt<0)advanceStageAt=Time.realtimeSinceStartup+2;
@@ -144,7 +146,7 @@ namespace BattleCities.Multiplayer
                 beginRequested=false;
                 if(PlayerCount>=2){Simulation.BeginMatch();Runner.SessionInfo.IsOpen=false;}
             }
-            Simulation.StepMultiplayer(commands);
+            Game.StepOnlineRecorded(commands);
             Publish();
         }
         private static Facing? FacingValue(int value)=>value>=0&&value<4?(Facing?)value:null;
@@ -158,6 +160,12 @@ namespace BattleCities.Multiplayer
             for(int i=0;i<4;i++)Participants.Set(i,NetBattleParticipant.From(s.Participants[i]));
             Fill(Tanks,s.Tanks,NetTankState.From);Fill(Shots,s.Shots,NetShotState.From);Fill(Mines,s.Mines,NetMineState.From);
             Fill(Drones,s.Drones,NetDroneState.From);Fill(Turrets,s.Turrets,NetTurretState.From);Fill(LandDrones,s.LandDrones,NetLandDroneState.From);
+            for(int i=0;i<s.InitialTerrainCount;i+=2)
+            {
+                uint first=(uint)Math.Max(0,Math.Min(65535,s.Terrain[i].Health));
+                uint second=i+1<s.InitialTerrainCount?(uint)Math.Max(0,Math.Min(65535,s.Terrain[i+1].Health)):0;
+                TerrainHealthPairs.Set(i/2,first|(second<<16));
+            }
             for(int word=0;word<(s.InitialTerrainCount+31)/32;word++)
             {
                 uint bits=0;
@@ -185,8 +193,8 @@ namespace BattleCities.Multiplayer
                 Tanks=Tanks.Where(t=>t.Id!=0).Select(t=>t.ToState()).ToArray(),Shots=Shots.Where(t=>t.Id!=0).Select(t=>t.ToState()).ToArray(),
                 Mines=Mines.Where(t=>t.Id!=0).Select(t=>t.ToState()).ToArray(),Drones=Drones.Where(t=>t.Id!=0).Select(t=>t.ToState()).ToArray(),
                 Turrets=Turrets.Where(t=>t.Id!=0).Select(t=>t.ToState()).ToArray(),LandDrones=LandDrones.Where(t=>t.Id!=0).Select(t=>t.ToState()).ToArray(),
-                ExtraWalls=ExtraWalls.Where(t=>t.Id!=0).Select(t=>t.ToState()).ToArray(),TerrainAlive=new bool[Simulation.InitialTerrainCount]};
-            for(int i=0;i<frame.TerrainAlive.Length;i++)frame.TerrainAlive[i]=(TerrainBits[i/32]&(1u<<(i%32)))!=0;
+                ExtraWalls=ExtraWalls.Where(t=>t.Id!=0).Select(t=>t.ToState()).ToArray(),TerrainAlive=new bool[Simulation.InitialTerrainCount],TerrainHealth=new int[Simulation.InitialTerrainCount]};
+            for(int i=0;i<frame.TerrainAlive.Length;i++){frame.TerrainAlive[i]=(TerrainBits[i/32]&(1u<<(i%32)))!=0;frame.TerrainHealth[i]=(int)((TerrainHealthPairs[i/2]>>((i%2)*16))&65535u);}
             Simulation.ApplyFrame(frame);appliedTick=StateTick;
             for(int sequence=Math.Max(appliedEvents+1,EventSequence-127);sequence<=EventSequence;sequence++)
             {

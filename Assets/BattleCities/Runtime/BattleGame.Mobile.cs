@@ -9,7 +9,7 @@ namespace BattleCities
     {
         private BattleTouchControls touchControls;
         internal bool HasTouchControls => touchControls;
-        internal bool TouchActionsAvailable => Simulation != null && Simulation.CanAcceptPlayerFire && !paused &&
+        internal bool TouchActionsAvailable => !IsReplaying && !ReplayBrowser.IsOpen && Simulation != null && Simulation.CanAcceptPlayerFire && !paused &&
             !consumePending && !showDebug && !TouchLobbyVisible && (!IsOnline || Simulation.MatchStarted);
         internal bool TouchLobbyVisible => Multiplayer.BattleSession.Instance && Multiplayer.BattleSession.Instance.Lobby.Visible;
         internal float TouchChargeProgress => primaryCharge.Progress;

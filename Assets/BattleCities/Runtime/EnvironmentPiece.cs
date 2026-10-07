@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using BattleCities.Core;
 using UnityEngine;
 
@@ -15,6 +16,16 @@ namespace BattleCities
         public GameObject DestroyedVisual;
 
         private Wall wall;
+        private BuildingDamageView building;
+
+        public void BindBuilding(IReadOnlyList<Wall> sections)
+        {
+            if (sections.Count == 0 || sections[0].PropKey != Key || sections[0].PropRole != Role)
+                throw new InvalidOperationException("Building prefab and map role disagree: " + Key);
+            building = GetComponent<BuildingDamageView>();
+            if (!building) building = gameObject.AddComponent<BuildingDamageView>();
+            building.Bind(this, sections);
+        }
 
         public void Bind(Wall state)
         {
@@ -26,6 +37,7 @@ namespace BattleCities
 
         public void RefreshVisual()
         {
+            if (building) { building.RefreshVisual(); return; }
             bool intact = wall == null || wall.Alive;
             if (IntactVisual) IntactVisual.SetActive(intact);
             if (DestroyedVisual) DestroyedVisual.SetActive(!intact);

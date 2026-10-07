@@ -1,0 +1,1288 @@
+{
+  "field": {
+    "widthTiles": 25,
+    "heightTiles": 25
+  },
+  "terrain": {
+    "regions": [
+      {
+        "type": "brick",
+        "x": 192,
+        "y": 192,
+        "width": 64,
+        "height": 192
+      },
+      {
+        "type": "brick",
+        "x": 1344,
+        "y": 192,
+        "width": 64,
+        "height": 192
+      },
+      {
+        "type": "brick",
+        "x": 576,
+        "y": 192,
+        "width": 128,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 896,
+        "y": 192,
+        "width": 128,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 576,
+        "y": 448,
+        "width": 64,
+        "height": 192
+      },
+      {
+        "type": "brick",
+        "x": 1216,
+        "y": 512,
+        "width": 64,
+        "height": 128
+      },
+      {
+        "type": "brick",
+        "x": 320,
+        "y": 704,
+        "width": 128,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 960,
+        "y": 768,
+        "width": 64,
+        "height": 128
+      },
+      {
+        "type": "brick",
+        "x": 704,
+        "y": 576,
+        "width": 128,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 768,
+        "y": 768,
+        "width": 128,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 192,
+        "y": 960,
+        "width": 64,
+        "height": 192
+      },
+      {
+        "type": "brick",
+        "x": 1344,
+        "y": 960,
+        "width": 64,
+        "height": 192
+      },
+      {
+        "type": "brick",
+        "x": 512,
+        "y": 1216,
+        "width": 128,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 960,
+        "y": 1216,
+        "width": 128,
+        "height": 64
+      },
+      {
+        "type": "steel",
+        "x": 768,
+        "y": 320,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "type": "steel",
+        "x": 192,
+        "y": 640,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "type": "steel",
+        "x": 1344,
+        "y": 704,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "type": "steel",
+        "x": 704,
+        "y": 1024,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "type": "steel",
+        "x": 832,
+        "y": 1152,
+        "width": 64,
+        "height": 64
+      },
+      {
+        "type": "brick",
+        "x": 672,
+        "y": 1440,
+        "width": 256,
+        "height": 32
+      },
+      {
+        "type": "brick",
+        "x": 672,
+        "y": 1472,
+        "width": 32,
+        "height": 128
+      },
+      {
+        "type": "brick",
+        "x": 896,
+        "y": 1472,
+        "width": 32,
+        "height": 128
+      }
+    ]
+  },
+  "ground": {
+    "regions": [
+      {
+        "type": "city",
+        "x": 0,
+        "y": 0,
+        "width": 1600,
+        "height": 1600
+      }
+    ]
+  },
+  "objects": [
+    {
+      "type": "draft_bld_factory_workshop_3x2",
+      "role": "solidCover",
+      "x": 320,
+      "y": 128,
+      "width": 192,
+      "height": 128,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_factory_workshop_3x2",
+      "role": "solidCover",
+      "x": 1024,
+      "y": 128,
+      "width": 192,
+      "height": 128,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_factory_store_2x3",
+      "role": "solidCover",
+      "x": 0,
+      "y": 384,
+      "width": 128,
+      "height": 192,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_factory_store_2x3",
+      "role": "solidCover",
+      "x": 1472,
+      "y": 384,
+      "width": 128,
+      "height": 192,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_utility_workshop_2x2",
+      "role": "solidCover",
+      "x": 320,
+      "y": 384,
+      "width": 128,
+      "height": 128,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_utility_workshop_2x2",
+      "role": "solidCover",
+      "x": 1088,
+      "y": 704,
+      "width": 128,
+      "height": 128,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_factory_workshop_3x2",
+      "role": "solidCover",
+      "x": 320,
+      "y": 1024,
+      "width": 192,
+      "height": 128,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_factory_workshop_3x2",
+      "role": "solidCover",
+      "x": 1024,
+      "y": 1024,
+      "width": 192,
+      "height": 128,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_factory_store_2x3",
+      "role": "solidCover",
+      "x": 0,
+      "y": 1280,
+      "width": 128,
+      "height": 192,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_bld_factory_store_2x3",
+      "role": "solidCover",
+      "x": 1472,
+      "y": 1280,
+      "width": 128,
+      "height": 192,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 3,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      },
+      "building": {
+        "lights": true,
+        "lightIntensity": 1.0,
+        "lightRange": 2.2
+      }
+    },
+    {
+      "type": "draft_conveyor",
+      "role": "groundDetail",
+      "x": 448,
+      "y": 512,
+      "width": 64,
+      "height": 256,
+      "rotation": 0
+    },
+    {
+      "type": "draft_conveyor",
+      "role": "groundDetail",
+      "x": 1088,
+      "y": 384,
+      "width": 64,
+      "height": 256,
+      "rotation": 180
+    },
+    {
+      "type": "draft_barrel",
+      "role": "destructibleObstacle",
+      "x": 640,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 1,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      }
+    },
+    {
+      "type": "draft_barrel",
+      "role": "destructibleObstacle",
+      "x": 640,
+      "y": 512,
+      "width": 64,
+      "height": 64,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 1,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      }
+    },
+    {
+      "type": "draft_barrel",
+      "role": "destructibleObstacle",
+      "x": 1280,
+      "y": 512,
+      "width": 64,
+      "height": 64,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 1,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      }
+    },
+    {
+      "type": "draft_barrel",
+      "role": "destructibleObstacle",
+      "x": 1280,
+      "y": 576,
+      "width": 64,
+      "height": 64,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 1,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      }
+    },
+    {
+      "type": "draft_barrel",
+      "role": "destructibleObstacle",
+      "x": 896,
+      "y": 704,
+      "width": 64,
+      "height": 64,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 1,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      }
+    },
+    {
+      "type": "draft_barrel",
+      "role": "destructibleObstacle",
+      "x": 960,
+      "y": 704,
+      "width": 64,
+      "height": 64,
+      "rotation": 0,
+      "damage": {
+        "hitPoints": 1,
+        "invulnerable": false,
+        "normalShots": true,
+        "powerShots": true
+      }
+    },
+    {
+      "type": "draft_rubble",
+      "role": "groundDetail",
+      "x": 256,
+      "y": 832,
+      "width": 128,
+      "height": 64,
+      "rotation": 0
+    },
+    {
+      "type": "draft_rubble",
+      "role": "groundDetail",
+      "x": 1152,
+      "y": 896,
+      "width": 128,
+      "height": 64,
+      "rotation": 0
+    }
+  ],
+  "lights": [],
+  "spawn": {
+    "player": {
+      "locations": [
+        {
+          "x": 576,
+          "y": 1536
+        }
+      ]
+    },
+    "enemy": {
+      "locations": [
+        {
+          "x": 128,
+          "y": 0
+        },
+        {
+          "x": 768,
+          "y": 0
+        },
+        {
+          "x": 1408,
+          "y": 0
+        }
+      ],
+      "list": [
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a",
+          "drop": true
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a",
+          "drop": true
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a"
+        },
+        {
+          "tier": "a",
+          "drop": true
+        },
+        {
+          "tier": "b"
+        },
+        {
+          "tier": "b"
+        }
+      ]
+    }
+  },
+  "base": {
+    "x": 736,
+    "y": 1504
+  },
+  "editor": {
+    "version": 1,
+    "name": "Ironworks Yard",
+    "previewStage": 2,
+    "elements": [
+      {
+        "kind": "Prop",
+        "index": 0,
+        "id": "H01",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 1,
+        "id": "H02",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 2,
+        "id": "H03",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 3,
+        "id": "H04",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 4,
+        "id": "H05",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 5,
+        "id": "H06",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 6,
+        "id": "H07",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 7,
+        "id": "H08",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 8,
+        "id": "H09",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Prop",
+        "index": 9,
+        "id": "H10",
+        "notes": "Destructible building: HP is per 32-unit section. Normal and power-shot damage affect the struck area; removed sections open passages. Warm window lights dim with damage and go out with their section. Lighting overrides are in the Inspector."
+      },
+      {
+        "kind": "Terrain",
+        "index": 0,
+        "id": "B01",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 1,
+        "id": "B02",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 2,
+        "id": "B03",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 3,
+        "id": "B04",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 4,
+        "id": "B05",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 5,
+        "id": "B06",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 6,
+        "id": "B07",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 7,
+        "id": "B08",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 8,
+        "id": "B09",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 9,
+        "id": "B10",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 10,
+        "id": "B11",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 11,
+        "id": "B12",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 12,
+        "id": "B13",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 13,
+        "id": "B14",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 14,
+        "id": "S01",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 15,
+        "id": "S02",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 16,
+        "id": "S03",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 17,
+        "id": "S04",
+        "notes": ""
+      },
+      {
+        "kind": "Terrain",
+        "index": 18,
+        "id": "S05",
+        "notes": ""
+      },
+      {
+        "kind": "Prop",
+        "index": 10,
+        "id": "C01",
+        "notes": "West belt; clear end cells (7,7) and (7,12). Direction: north. North arrows. Inactive passable belt; proposed 0.30x drift is not implemented."
+      },
+      {
+        "kind": "Prop",
+        "index": 11,
+        "id": "C02",
+        "notes": "East belt; clear end cells (17,5) and (17,10). Direction: south. South arrows. Inactive passable belt; proposed 0.30x drift is not implemented."
+      },
+      {
+        "kind": "Prop",
+        "index": 12,
+        "id": "F01",
+        "notes": "One-hit destructible model; proposed fuse, explosion and chain reaction are not implemented."
+      },
+      {
+        "kind": "Prop",
+        "index": 13,
+        "id": "F02",
+        "notes": "One-hit destructible model; proposed fuse, explosion and chain reaction are not implemented."
+      },
+      {
+        "kind": "Prop",
+        "index": 14,
+        "id": "F03",
+        "notes": "One-hit destructible model; proposed fuse, explosion and chain reaction are not implemented."
+      },
+      {
+        "kind": "Prop",
+        "index": 15,
+        "id": "F04",
+        "notes": "One-hit destructible model; proposed fuse, explosion and chain reaction are not implemented."
+      },
+      {
+        "kind": "Prop",
+        "index": 16,
+        "id": "F05",
+        "notes": "One-hit destructible model; proposed fuse, explosion and chain reaction are not implemented."
+      },
+      {
+        "kind": "Prop",
+        "index": 17,
+        "id": "F06",
+        "notes": "One-hit destructible model; proposed fuse, explosion and chain reaction are not implemented."
+      },
+      {
+        "kind": "Prop",
+        "index": 18,
+        "id": "R01",
+        "notes": "Passable rubble model; proposed 0.70x speed modifier is not implemented."
+      },
+      {
+        "kind": "Prop",
+        "index": 19,
+        "id": "R02",
+        "notes": "Passable rubble model; proposed 0.70x speed modifier is not implemented."
+      },
+      {
+        "kind": "Terrain",
+        "index": 19,
+        "id": "HQ-N",
+        "notes": "Destructible north screen; protects HQ from direct vertical fire."
+      },
+      {
+        "kind": "Terrain",
+        "index": 20,
+        "id": "HQ-W",
+        "notes": "Left side wall; extends to field boundary."
+      },
+      {
+        "kind": "Terrain",
+        "index": 21,
+        "id": "HQ-E",
+        "notes": "Right side wall; extends to field boundary."
+      },
+      {
+        "kind": "Ground",
+        "index": 0,
+        "id": "GROUND",
+        "notes": "Default city surface."
+      },
+      {
+        "kind": "PlayerSpawn",
+        "index": 0,
+        "id": "P1",
+        "notes": "Player spawn, north facing."
+      },
+      {
+        "kind": "EnemySpawn",
+        "index": 0,
+        "id": "E1",
+        "notes": "Enemy spawn, south facing; keep two cells south clear."
+      },
+      {
+        "kind": "EnemySpawn",
+        "index": 1,
+        "id": "E2",
+        "notes": "Enemy spawn, south facing; keep two cells south clear."
+      },
+      {
+        "kind": "EnemySpawn",
+        "index": 2,
+        "id": "E3",
+        "notes": "Enemy spawn, south facing; keep two cells south clear."
+      },
+      {
+        "kind": "Base",
+        "index": 0,
+        "id": "HQ",
+        "notes": "Existing 128 x 96 base plus the three authored outer HQ guards."
+      }
+    ],
+    "artVersion": 2,
+    "buildingDamageVersion": 1
+  },
+  "concept": {
+    "designVersion": 1,
+    "designDate": "2026-10-07",
+    "rosterSource": "Maps/01 (unchanged)",
+    "placements": [
+      {
+        "id": "H01",
+        "type": "building",
+        "x": 5.0,
+        "y": 2.0,
+        "width": 3.0,
+        "height": 2.0,
+        "detail": "North-west factory."
+      },
+      {
+        "id": "H02",
+        "type": "building",
+        "x": 16.0,
+        "y": 2.0,
+        "width": 3.0,
+        "height": 2.0,
+        "detail": "North-east factory."
+      },
+      {
+        "id": "H03",
+        "type": "building",
+        "x": 0.0,
+        "y": 6.0,
+        "width": 2.0,
+        "height": 3.0,
+        "detail": "West stores."
+      },
+      {
+        "id": "H04",
+        "type": "building",
+        "x": 23.0,
+        "y": 6.0,
+        "width": 2.0,
+        "height": 3.0,
+        "detail": "East stores."
+      },
+      {
+        "id": "H05",
+        "type": "building",
+        "x": 5.0,
+        "y": 6.0,
+        "width": 2.0,
+        "height": 2.0,
+        "detail": "West conveyor-side machinery."
+      },
+      {
+        "id": "H06",
+        "type": "building",
+        "x": 17.0,
+        "y": 11.0,
+        "width": 2.0,
+        "height": 2.0,
+        "detail": "East conveyor-side machinery."
+      },
+      {
+        "id": "H07",
+        "type": "building",
+        "x": 5.0,
+        "y": 16.0,
+        "width": 3.0,
+        "height": 2.0,
+        "detail": "Lower west depot."
+      },
+      {
+        "id": "H08",
+        "type": "building",
+        "x": 16.0,
+        "y": 16.0,
+        "width": 3.0,
+        "height": 2.0,
+        "detail": "Lower east depot."
+      },
+      {
+        "id": "H09",
+        "type": "building",
+        "x": 0.0,
+        "y": 20.0,
+        "width": 2.0,
+        "height": 3.0,
+        "detail": ""
+      },
+      {
+        "id": "H10",
+        "type": "building",
+        "x": 23.0,
+        "y": 20.0,
+        "width": 2.0,
+        "height": 3.0,
+        "detail": ""
+      },
+      {
+        "id": "B01",
+        "type": "brick",
+        "x": 3.0,
+        "y": 3.0,
+        "width": 1.0,
+        "height": 3.0,
+        "detail": ""
+      },
+      {
+        "id": "B02",
+        "type": "brick",
+        "x": 21.0,
+        "y": 3.0,
+        "width": 1.0,
+        "height": 3.0,
+        "detail": ""
+      },
+      {
+        "id": "B03",
+        "type": "brick",
+        "x": 9.0,
+        "y": 3.0,
+        "width": 2.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "B04",
+        "type": "brick",
+        "x": 14.0,
+        "y": 3.0,
+        "width": 2.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "B05",
+        "type": "brick",
+        "x": 9.0,
+        "y": 7.0,
+        "width": 1.0,
+        "height": 3.0,
+        "detail": ""
+      },
+      {
+        "id": "B06",
+        "type": "brick",
+        "x": 19.0,
+        "y": 8.0,
+        "width": 1.0,
+        "height": 2.0,
+        "detail": ""
+      },
+      {
+        "id": "B07",
+        "type": "brick",
+        "x": 5.0,
+        "y": 11.0,
+        "width": 2.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "B08",
+        "type": "brick",
+        "x": 15.0,
+        "y": 12.0,
+        "width": 1.0,
+        "height": 2.0,
+        "detail": ""
+      },
+      {
+        "id": "B09",
+        "type": "brick",
+        "x": 11.0,
+        "y": 9.0,
+        "width": 2.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "B10",
+        "type": "brick",
+        "x": 12.0,
+        "y": 12.0,
+        "width": 2.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "B11",
+        "type": "brick",
+        "x": 3.0,
+        "y": 15.0,
+        "width": 1.0,
+        "height": 3.0,
+        "detail": ""
+      },
+      {
+        "id": "B12",
+        "type": "brick",
+        "x": 21.0,
+        "y": 15.0,
+        "width": 1.0,
+        "height": 3.0,
+        "detail": ""
+      },
+      {
+        "id": "B13",
+        "type": "brick",
+        "x": 8.0,
+        "y": 19.0,
+        "width": 2.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "B14",
+        "type": "brick",
+        "x": 15.0,
+        "y": 19.0,
+        "width": 2.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "S01",
+        "type": "steel",
+        "x": 12.0,
+        "y": 5.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "S02",
+        "type": "steel",
+        "x": 3.0,
+        "y": 10.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "S03",
+        "type": "steel",
+        "x": 21.0,
+        "y": 11.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "S04",
+        "type": "steel",
+        "x": 11.0,
+        "y": 16.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "S05",
+        "type": "steel",
+        "x": 13.0,
+        "y": 18.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "C01",
+        "type": "conveyor",
+        "x": 7.0,
+        "y": 8.0,
+        "width": 1.0,
+        "height": 4.0,
+        "detail": "West belt; clear end cells (7,7) and (7,12). Direction: north."
+      },
+      {
+        "id": "C02",
+        "type": "conveyor",
+        "x": 17.0,
+        "y": 6.0,
+        "width": 1.0,
+        "height": 4.0,
+        "detail": "East belt; clear end cells (17,5) and (17,10). Direction: south."
+      },
+      {
+        "id": "F01",
+        "type": "barrel",
+        "x": 10.0,
+        "y": 7.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "F02",
+        "type": "barrel",
+        "x": 10.0,
+        "y": 8.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "F03",
+        "type": "barrel",
+        "x": 20.0,
+        "y": 8.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "F04",
+        "type": "barrel",
+        "x": 20.0,
+        "y": 9.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "F05",
+        "type": "barrel",
+        "x": 14.0,
+        "y": 11.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "F06",
+        "type": "barrel",
+        "x": 15.0,
+        "y": 11.0,
+        "width": 1.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "R01",
+        "type": "rubble",
+        "x": 4.0,
+        "y": 13.0,
+        "width": 2.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "R02",
+        "type": "rubble",
+        "x": 18.0,
+        "y": 14.0,
+        "width": 2.0,
+        "height": 1.0,
+        "detail": ""
+      },
+      {
+        "id": "HQ-N",
+        "type": "brick",
+        "x": 10.5,
+        "y": 22.5,
+        "width": 4.0,
+        "height": 0.5,
+        "detail": "Destructible north screen; protects HQ from direct vertical fire."
+      },
+      {
+        "id": "HQ-W",
+        "type": "brick",
+        "x": 10.5,
+        "y": 23.0,
+        "width": 0.5,
+        "height": 2.0,
+        "detail": "Left side wall; extends to field boundary."
+      },
+      {
+        "id": "HQ-E",
+        "type": "brick",
+        "x": 14.0,
+        "y": 23.0,
+        "width": 0.5,
+        "height": 2.0,
+        "detail": "Right side wall; extends to field boundary."
+      }
+    ],
+    "prototypeNote": "Replacement visuals. Logs use 2 HP per cell; barrels and sandbags use 1 HP. Mud/rubble speed, barrel explosions, sandbag crush, conveyor drift and timber collapse are pending.",
+    "art": {
+      "version": 2,
+      "conceptSource": "C:\\repos\\BattleCity\\art_exports\\concepts\\stages\\2026-10-07\\replacement-assets-v2\\manifest.json",
+      "modelPack": "C:\\repos\\Battle Cities Game\\blender assets\\stage-environments\\2026-10-07-replacement-v2",
+      "unityBindings": "Assets/BattleCities/Art/ConceptMapArtV2/bindings.json"
+    }
+  }
+}

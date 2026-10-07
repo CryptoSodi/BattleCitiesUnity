@@ -1,0 +1,2297 @@
+{
+  "scope": "Appearance mapping from the copied authoritative Design-v1.md; no runtime import or integration performed",
+  "source": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/references/Design-v1.md",
+  "sourceSha256": "bc8db61461ae512f94165220118932f339d496a9026783a294476ed5fb649291",
+  "counts": {
+    "authoredRegions": 63,
+    "visualModules": 71,
+    "uniqueAssetIds": 22
+  },
+  "conventions": {
+    "units": "Unity; 64 logical = 1 world unit",
+    "origin": "map top-left",
+    "world": "center (x+w/2,0,-(y+d/2))",
+    "yaw": "0 uses south-facing canonical facade; preserve authored scene rotation if integration has a specific equivalent orientation"
+  },
+  "placements": [
+    {
+      "map": "canal-crossroads",
+      "elementId": "BR01",
+      "kind": "bridge_permanent",
+      "rect": {
+        "x": 4,
+        "y": 11,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "West concrete crossing.",
+      "assetId": "bridge-concrete-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            5,
+            0,
+            -12.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/bridges.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "canal-crossroads",
+      "elementId": "BR02",
+      "kind": "bridge_breakable",
+      "rect": {
+        "x": 12,
+        "y": 11,
+        "width": 1,
+        "depth": 3
+      },
+      "sourceNote": "Narrow optional timber shortcut; entry-bank landing anchors (12,10) and (12,14).",
+      "assetId": "bridge-timber-1x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            12.5,
+            0,
+            -12.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/bridges.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "canal-crossroads",
+      "elementId": "BR03",
+      "kind": "bridge_permanent",
+      "rect": {
+        "x": 19,
+        "y": 11,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "East concrete crossing.",
+      "assetId": "bridge-concrete-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            20,
+            0,
+            -12.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/bridges.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "canal-crossroads",
+      "elementId": "H01",
+      "kind": "building",
+      "rect": {
+        "x": 6,
+        "y": 2,
+        "width": 3,
+        "depth": 2
+      },
+      "sourceNote": "North-west warehouse, blue roof.",
+      "assetId": "bld-harbor-warehouse-blue-3x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            7.5,
+            0,
+            -3
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            3,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "canal-crossroads",
+      "elementId": "H02",
+      "kind": "building",
+      "rect": {
+        "x": 16,
+        "y": 2,
+        "width": 3,
+        "depth": 2
+      },
+      "sourceNote": "North-east warehouse, coral roof.",
+      "assetId": "bld-harbor-warehouse-coral-3x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            17.5,
+            0,
+            -3
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            3,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "canal-crossroads",
+      "elementId": "H03",
+      "kind": "building",
+      "rect": {
+        "x": 0,
+        "y": 5,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "West harbor stores.",
+      "assetId": "bld-harbor-store-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            1,
+            0,
+            -6.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.png",
+      "sheetRow": 3,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "canal-crossroads",
+      "elementId": "H04",
+      "kind": "building",
+      "rect": {
+        "x": 23,
+        "y": 5,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "East harbor stores.",
+      "assetId": "bld-harbor-store-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            24,
+            0,
+            -6.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.png",
+      "sheetRow": 3,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "canal-crossroads",
+      "elementId": "H05",
+      "kind": "building",
+      "rect": {
+        "x": 6,
+        "y": 6,
+        "width": 3,
+        "depth": 2
+      },
+      "sourceNote": "Canal court west.",
+      "assetId": "bld-harbor-warehouse-blue-3x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            7.5,
+            0,
+            -7
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            3,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "canal-crossroads",
+      "elementId": "H06",
+      "kind": "building",
+      "rect": {
+        "x": 16,
+        "y": 6,
+        "width": 3,
+        "depth": 2
+      },
+      "sourceNote": "Canal court east.",
+      "assetId": "bld-harbor-warehouse-coral-3x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            17.5,
+            0,
+            -7
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            3,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "canal-crossroads",
+      "elementId": "H07",
+      "kind": "building",
+      "rect": {
+        "x": 6,
+        "y": 16,
+        "width": 3,
+        "depth": 2
+      },
+      "sourceNote": "South-west depot.",
+      "assetId": "bld-harbor-warehouse-blue-3x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            7.5,
+            0,
+            -17
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            3,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "canal-crossroads",
+      "elementId": "H08",
+      "kind": "building",
+      "rect": {
+        "x": 16,
+        "y": 16,
+        "width": 3,
+        "depth": 2
+      },
+      "sourceNote": "South-east depot.",
+      "assetId": "bld-harbor-warehouse-coral-3x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            17.5,
+            0,
+            -17
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            3,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "canal-crossroads",
+      "elementId": "H09",
+      "kind": "building",
+      "rect": {
+        "x": 0,
+        "y": 19,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "Lower west houses.",
+      "assetId": "bld-harbor-store-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            1,
+            0,
+            -20.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.png",
+      "sheetRow": 3,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "canal-crossroads",
+      "elementId": "H10",
+      "kind": "building",
+      "rect": {
+        "x": 23,
+        "y": 19,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "Lower east houses.",
+      "assetId": "bld-harbor-store-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            24,
+            0,
+            -20.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/harbor-buildings.png",
+      "sheetRow": 3,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "canal-crossroads",
+      "elementId": "SB01",
+      "kind": "sandbag",
+      "rect": {
+        "x": 4,
+        "y": 9,
+        "width": 1,
+        "depth": 1
+      },
+      "sourceNote": "Half of west bridge approach remains open.",
+      "assetId": "prop-sandbag-cell-1x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            4.5,
+            0,
+            -9.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "canal-crossroads",
+      "elementId": "SB02",
+      "kind": "sandbag",
+      "rect": {
+        "x": 20,
+        "y": 15,
+        "width": 1,
+        "depth": 1
+      },
+      "sourceNote": "Half of east bridge approach remains open.",
+      "assetId": "prop-sandbag-cell-1x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            20.5,
+            0,
+            -15.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "T01",
+      "kind": "tree_block",
+      "rect": {
+        "x": 0,
+        "y": 3,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "",
+      "assetId": "forest-island-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            1,
+            0,
+            -4.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-small.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "T02",
+      "kind": "tree_block",
+      "rect": {
+        "x": 23,
+        "y": 3,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "",
+      "assetId": "forest-island-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            24,
+            0,
+            -4.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-small.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "T03",
+      "kind": "tree_block",
+      "rect": {
+        "x": 5,
+        "y": 1,
+        "width": 3,
+        "depth": 2
+      },
+      "sourceNote": "",
+      "assetId": "forest-island-3x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            6.5,
+            0,
+            -2
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            3,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-wide.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "T04",
+      "kind": "tree_block",
+      "rect": {
+        "x": 17,
+        "y": 1,
+        "width": 3,
+        "depth": 2
+      },
+      "sourceNote": "",
+      "assetId": "forest-island-3x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            18.5,
+            0,
+            -2
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            3,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-wide.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "T05",
+      "kind": "tree_block",
+      "rect": {
+        "x": 5,
+        "y": 6,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "",
+      "assetId": "forest-island-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            6,
+            0,
+            -7.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-small.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "T06",
+      "kind": "tree_block",
+      "rect": {
+        "x": 18,
+        "y": 6,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "",
+      "assetId": "forest-island-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            19,
+            0,
+            -7.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-small.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "T07",
+      "kind": "tree_block",
+      "rect": {
+        "x": 8,
+        "y": 13,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "",
+      "assetId": "forest-island-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            9,
+            0,
+            -14.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-small.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "T08",
+      "kind": "tree_block",
+      "rect": {
+        "x": 15,
+        "y": 13,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "",
+      "assetId": "forest-island-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            16,
+            0,
+            -14.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-small.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "T09",
+      "kind": "tree_block",
+      "rect": {
+        "x": 0,
+        "y": 16,
+        "width": 2,
+        "depth": 4
+      },
+      "sourceNote": "",
+      "assetId": "forest-island-2x4",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            1,
+            0,
+            -18
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            4
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-wide.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "T10",
+      "kind": "tree_block",
+      "rect": {
+        "x": 23,
+        "y": 16,
+        "width": 2,
+        "depth": 4
+      },
+      "sourceNote": "",
+      "assetId": "forest-island-2x4",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            24,
+            0,
+            -18
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            4
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-wide.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "T11",
+      "kind": "tree_block",
+      "rect": {
+        "x": 5,
+        "y": 20,
+        "width": 2,
+        "depth": 2
+      },
+      "sourceNote": "",
+      "assetId": "forest-island-2x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            6,
+            0,
+            -21
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-small.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "T12",
+      "kind": "tree_block",
+      "rect": {
+        "x": 18,
+        "y": 20,
+        "width": 2,
+        "depth": 2
+      },
+      "sourceNote": "",
+      "assetId": "forest-island-2x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            19,
+            0,
+            -21
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/forest-islands-small.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "H01",
+      "kind": "building",
+      "rect": {
+        "x": 8,
+        "y": 3,
+        "width": 2,
+        "depth": 2
+      },
+      "sourceNote": "Ranger cabin.",
+      "assetId": "bld-ranger-cabin-2x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            9,
+            0,
+            -4
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/logging-buildings.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "H02",
+      "kind": "building",
+      "rect": {
+        "x": 15,
+        "y": 3,
+        "width": 2,
+        "depth": 2
+      },
+      "sourceNote": "Ranger cabin.",
+      "assetId": "bld-ranger-cabin-2x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            16,
+            0,
+            -4
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/logging-buildings.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "H03",
+      "kind": "building",
+      "rect": {
+        "x": 4,
+        "y": 11,
+        "width": 2,
+        "depth": 2
+      },
+      "sourceNote": "West logging hut.",
+      "assetId": "bld-logging-hut-2x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            5,
+            0,
+            -12
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/logging-buildings.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "H04",
+      "kind": "building",
+      "rect": {
+        "x": 19,
+        "y": 11,
+        "width": 2,
+        "depth": 2
+      },
+      "sourceNote": "East logging hut.",
+      "assetId": "bld-logging-hut-2x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            20,
+            0,
+            -12
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/logging-buildings.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "H05",
+      "kind": "building",
+      "rect": {
+        "x": 11,
+        "y": 16,
+        "width": 3,
+        "depth": 2
+      },
+      "sourceNote": "Central sawmill.",
+      "assetId": "bld-sawmill-3x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            12.5,
+            0,
+            -17
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            3,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/logging-buildings.png",
+      "sheetRow": 3,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "L01",
+      "kind": "log",
+      "rect": {
+        "x": 10,
+        "y": 3,
+        "width": 2,
+        "depth": 1
+      },
+      "sourceNote": "Optional upper-left breach.",
+      "assetId": "prop-log-cell-1x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            10.5,
+            0,
+            -3.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        },
+        {
+          "localCellOffset": [
+            1,
+            0
+          ],
+          "worldPosition": [
+            11.5,
+            0,
+            -3.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior.",
+      "assemblyNote": "Repeated 1x1 visual modules for the authored log region. Preserve current gameplay entities and cell behavior; this mapping does not rebuild the collision system."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "L02",
+      "kind": "log",
+      "rect": {
+        "x": 13,
+        "y": 3,
+        "width": 2,
+        "depth": 1
+      },
+      "sourceNote": "Optional upper-right breach.",
+      "assetId": "prop-log-cell-1x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            13.5,
+            0,
+            -3.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        },
+        {
+          "localCellOffset": [
+            1,
+            0
+          ],
+          "worldPosition": [
+            14.5,
+            0,
+            -3.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior.",
+      "assemblyNote": "Repeated 1x1 visual modules for the authored log region. Preserve current gameplay entities and cell behavior; this mapping does not rebuild the collision system."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "L03",
+      "kind": "log",
+      "rect": {
+        "x": 8,
+        "y": 9,
+        "width": 2,
+        "depth": 1
+      },
+      "sourceNote": "",
+      "assetId": "prop-log-cell-1x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            8.5,
+            0,
+            -9.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        },
+        {
+          "localCellOffset": [
+            1,
+            0
+          ],
+          "worldPosition": [
+            9.5,
+            0,
+            -9.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior.",
+      "assemblyNote": "Repeated 1x1 visual modules for the authored log region. Preserve current gameplay entities and cell behavior; this mapping does not rebuild the collision system."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "L04",
+      "kind": "log",
+      "rect": {
+        "x": 15,
+        "y": 9,
+        "width": 2,
+        "depth": 1
+      },
+      "sourceNote": "",
+      "assetId": "prop-log-cell-1x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            15.5,
+            0,
+            -9.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        },
+        {
+          "localCellOffset": [
+            1,
+            0
+          ],
+          "worldPosition": [
+            16.5,
+            0,
+            -9.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior.",
+      "assemblyNote": "Repeated 1x1 visual modules for the authored log region. Preserve current gameplay entities and cell behavior; this mapping does not rebuild the collision system."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "L05",
+      "kind": "log",
+      "rect": {
+        "x": 11,
+        "y": 13,
+        "width": 3,
+        "depth": 1
+      },
+      "sourceNote": "Central log screen, independent cells.",
+      "assetId": "prop-log-cell-1x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            11.5,
+            0,
+            -13.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        },
+        {
+          "localCellOffset": [
+            1,
+            0
+          ],
+          "worldPosition": [
+            12.5,
+            0,
+            -13.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        },
+        {
+          "localCellOffset": [
+            2,
+            0
+          ],
+          "worldPosition": [
+            13.5,
+            0,
+            -13.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior.",
+      "assemblyNote": "Repeated 1x1 visual modules for the authored log region. Preserve current gameplay entities and cell behavior; this mapping does not rebuild the collision system."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "L06",
+      "kind": "log",
+      "rect": {
+        "x": 4,
+        "y": 18,
+        "width": 2,
+        "depth": 1
+      },
+      "sourceNote": "",
+      "assetId": "prop-log-cell-1x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            4.5,
+            0,
+            -18.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        },
+        {
+          "localCellOffset": [
+            1,
+            0
+          ],
+          "worldPosition": [
+            5.5,
+            0,
+            -18.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior.",
+      "assemblyNote": "Repeated 1x1 visual modules for the authored log region. Preserve current gameplay entities and cell behavior; this mapping does not rebuild the collision system."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "L07",
+      "kind": "log",
+      "rect": {
+        "x": 19,
+        "y": 18,
+        "width": 2,
+        "depth": 1
+      },
+      "sourceNote": "",
+      "assetId": "prop-log-cell-1x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            19.5,
+            0,
+            -18.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        },
+        {
+          "localCellOffset": [
+            1,
+            0
+          ],
+          "worldPosition": [
+            20.5,
+            0,
+            -18.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior.",
+      "assemblyNote": "Repeated 1x1 visual modules for the authored log region. Preserve current gameplay entities and cell behavior; this mapping does not rebuild the collision system."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "M01",
+      "kind": "mud",
+      "rect": {
+        "x": 4,
+        "y": 9,
+        "width": 3,
+        "depth": 2
+      },
+      "sourceNote": "West shortcut.",
+      "assetId": "terrain-mud-3x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            5.5,
+            0,
+            -10
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            3,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches-refined.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "M02",
+      "kind": "mud",
+      "rect": {
+        "x": 18,
+        "y": 9,
+        "width": 3,
+        "depth": 2
+      },
+      "sourceNote": "East shortcut.",
+      "assetId": "terrain-mud-3x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            19.5,
+            0,
+            -10
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            3,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches-refined.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "R01",
+      "kind": "rubble",
+      "rect": {
+        "x": 8,
+        "y": 11,
+        "width": 2,
+        "depth": 1
+      },
+      "sourceNote": "",
+      "assetId": "terrain-rubble-2x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            9,
+            0,
+            -11.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches-refined.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "timber-ambush",
+      "elementId": "R02",
+      "kind": "rubble",
+      "rect": {
+        "x": 15,
+        "y": 11,
+        "width": 2,
+        "depth": 1
+      },
+      "sourceNote": "",
+      "assetId": "terrain-rubble-2x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            16,
+            0,
+            -11.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches-refined.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "H01",
+      "kind": "building",
+      "rect": {
+        "x": 5,
+        "y": 2,
+        "width": 3,
+        "depth": 2
+      },
+      "sourceNote": "North-west factory.",
+      "assetId": "bld-factory-workshop-3x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            6.5,
+            0,
+            -3
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            3,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "H02",
+      "kind": "building",
+      "rect": {
+        "x": 16,
+        "y": 2,
+        "width": 3,
+        "depth": 2
+      },
+      "sourceNote": "North-east factory.",
+      "assetId": "bld-factory-workshop-3x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            17.5,
+            0,
+            -3
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            3,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "H03",
+      "kind": "building",
+      "rect": {
+        "x": 0,
+        "y": 6,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "West stores.",
+      "assetId": "bld-factory-store-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            1,
+            0,
+            -7.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "H04",
+      "kind": "building",
+      "rect": {
+        "x": 23,
+        "y": 6,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "East stores.",
+      "assetId": "bld-factory-store-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            24,
+            0,
+            -7.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "H05",
+      "kind": "building",
+      "rect": {
+        "x": 5,
+        "y": 6,
+        "width": 2,
+        "depth": 2
+      },
+      "sourceNote": "West conveyor-side machinery.",
+      "assetId": "bld-utility-workshop-2x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            6,
+            0,
+            -7
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.png",
+      "sheetRow": 3,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "H06",
+      "kind": "building",
+      "rect": {
+        "x": 17,
+        "y": 11,
+        "width": 2,
+        "depth": 2
+      },
+      "sourceNote": "East conveyor-side machinery.",
+      "assetId": "bld-utility-workshop-2x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            18,
+            0,
+            -12
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.png",
+      "sheetRow": 3,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "H07",
+      "kind": "building",
+      "rect": {
+        "x": 5,
+        "y": 16,
+        "width": 3,
+        "depth": 2
+      },
+      "sourceNote": "Lower west depot.",
+      "assetId": "bld-factory-workshop-3x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            6.5,
+            0,
+            -17
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            3,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "H08",
+      "kind": "building",
+      "rect": {
+        "x": 16,
+        "y": 16,
+        "width": 3,
+        "depth": 2
+      },
+      "sourceNote": "Lower east depot.",
+      "assetId": "bld-factory-workshop-3x2",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            17.5,
+            0,
+            -17
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            3,
+            2
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "H09",
+      "kind": "building",
+      "rect": {
+        "x": 0,
+        "y": 20,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "",
+      "assetId": "bld-factory-store-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            1,
+            0,
+            -21.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "H10",
+      "kind": "building",
+      "rect": {
+        "x": 23,
+        "y": 20,
+        "width": 2,
+        "depth": 3
+      },
+      "sourceNote": "",
+      "assetId": "bld-factory-store-2x3",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            24,
+            0,
+            -21.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            3
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/industrial-buildings.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "C01",
+      "kind": "conveyor",
+      "rect": {
+        "x": 7,
+        "y": 8,
+        "width": 1,
+        "depth": 4
+      },
+      "sourceNote": "West belt; clear end cells (7,7) and (7,12). Direction: north.",
+      "assetId": "terrain-conveyor-north-1x4",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            7.5,
+            0,
+            -10
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            4
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/conveyors.png",
+      "sheetRow": 1,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior.",
+      "orientationNote": "Use the named north/south prefab variant at root yaw 0. If sharing a canonical north mesh, rotate the SOUTH variant child by 180 degrees once; do not rotate it twice."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "C02",
+      "kind": "conveyor",
+      "rect": {
+        "x": 17,
+        "y": 6,
+        "width": 1,
+        "depth": 4
+      },
+      "sourceNote": "East belt; clear end cells (17,5) and (17,10). Direction: south.",
+      "assetId": "terrain-conveyor-south-1x4",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            17.5,
+            0,
+            -8
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            4
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/conveyors.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior.",
+      "orientationNote": "Use the named north/south prefab variant at root yaw 0. If sharing a canonical north mesh, rotate the SOUTH variant child by 180 degrees once; do not rotate it twice."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "F01",
+      "kind": "barrel",
+      "rect": {
+        "x": 10,
+        "y": 7,
+        "width": 1,
+        "depth": 1
+      },
+      "sourceNote": "",
+      "assetId": "prop-fuel-barrel-1x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            10.5,
+            0,
+            -7.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 3,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "F02",
+      "kind": "barrel",
+      "rect": {
+        "x": 10,
+        "y": 8,
+        "width": 1,
+        "depth": 1
+      },
+      "sourceNote": "",
+      "assetId": "prop-fuel-barrel-1x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            10.5,
+            0,
+            -8.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 3,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "F03",
+      "kind": "barrel",
+      "rect": {
+        "x": 20,
+        "y": 8,
+        "width": 1,
+        "depth": 1
+      },
+      "sourceNote": "",
+      "assetId": "prop-fuel-barrel-1x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            20.5,
+            0,
+            -8.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 3,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "F04",
+      "kind": "barrel",
+      "rect": {
+        "x": 20,
+        "y": 9,
+        "width": 1,
+        "depth": 1
+      },
+      "sourceNote": "",
+      "assetId": "prop-fuel-barrel-1x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            20.5,
+            0,
+            -9.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 3,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "F05",
+      "kind": "barrel",
+      "rect": {
+        "x": 14,
+        "y": 11,
+        "width": 1,
+        "depth": 1
+      },
+      "sourceNote": "",
+      "assetId": "prop-fuel-barrel-1x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            14.5,
+            0,
+            -11.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 3,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "F06",
+      "kind": "barrel",
+      "rect": {
+        "x": 15,
+        "y": 11,
+        "width": 1,
+        "depth": 1
+      },
+      "sourceNote": "",
+      "assetId": "prop-fuel-barrel-1x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            15.5,
+            0,
+            -11.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            1,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/barricades-and-barrel.png",
+      "sheetRow": 3,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "R01",
+      "kind": "rubble",
+      "rect": {
+        "x": 4,
+        "y": 13,
+        "width": 2,
+        "depth": 1
+      },
+      "sourceNote": "",
+      "assetId": "terrain-rubble-2x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            5,
+            0,
+            -13.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches-refined.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    },
+    {
+      "map": "ironworks-yard",
+      "elementId": "R02",
+      "kind": "rubble",
+      "rect": {
+        "x": 18,
+        "y": 14,
+        "width": 2,
+        "depth": 1
+      },
+      "sourceNote": "",
+      "assetId": "terrain-rubble-2x1",
+      "instances": [
+        {
+          "localCellOffset": [
+            0,
+            0
+          ],
+          "worldPosition": [
+            19,
+            0,
+            -14.5
+          ],
+          "rootYawDegrees": 0,
+          "footprint": [
+            2,
+            1
+          ]
+        }
+      ],
+      "image": "C:/repos/BattleCity/art_exports/concepts/stages/2026-10-07/replacement-assets-v2/sheets/ground-patches-refined.png",
+      "sheetRow": 2,
+      "replacementRule": "Visual/model replacement only; preserve authored region ID, rectangle, colliders and existing runtime behavior."
+    }
+  ]
+}

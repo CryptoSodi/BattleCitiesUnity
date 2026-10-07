@@ -166,6 +166,10 @@ namespace BattleCities
                 else if(wall.Type=="steel")color=new Color32(174,194,204,255);
                 else if(wall.Type=="water")color=new Color32(21,143,207,255);
                 else if(wall.Type=="ice")color=new Color32(132,202,226,255);
+                else if(wall.Type==BattleTerrain.Lava)color=new Color32(247,76,15,255);
+                else if(wall.Type==BattleTerrain.MuddyWater)color=new Color32(114,91,45,255);
+                else if(wall.Type==BattleTerrain.Quicksand)color=new Color32(211,164,78,255);
+                else if(wall.Type==BattleTerrain.Grease)color=new Color32(49,47,64,255);
                 else if(wall.Type=="jungle")color=new Color32(54,133,58,255);
                 else continue;
                 PaintMapRect(state,wall.Bounds,color);
@@ -182,7 +186,7 @@ namespace BattleCities
             var map=Element<RawImage>(new Rect(x,y,size,size));map.texture=minimapTexture;map.uvRect=new Rect(0,0,1,1);map.color=new Color(1,1,1,.88f);
             Outline(new Rect(x,y,size,size),new Color(1,.68f,.05f,.86f),1.5f*scale);
         }
-        public void Draw(BattleSimulation state,EconomyClient economy,Texture2D powerupAtlas,bool consumePending,int selectedSlot=0)
+        public void Draw(BattleSimulation state,EconomyClient economy,Texture2D powerupAtlas,bool consumePending,int selectedSlot=0,bool showPowerups=true)
         {
             Initialize();cursor=0;bool narrow=Screen.width<920;float h=TopHeightPixels;
             var powerupUi=RuntimePlatformInfo.PowerupUi;bool psg1=powerupUi==PowerupUiMode.MergedTopHud;
@@ -212,7 +216,7 @@ namespace BattleCities
                 Icon(slot,enemy,i<deadCount);
             }
             Minimap(state);
-            if(!state.IsMultiplayer)
+            if(showPowerups&&!state.IsMultiplayer)
             {
                 if(psg1)Psg1Powerups(economy,powerupAtlas,consumePending,narrow,selectedSlot);
                 else if(powerupUi==PowerupUiMode.WebTopLeft)PowerupBar(economy,powerupAtlas,consumePending,true);
@@ -220,6 +224,7 @@ namespace BattleCities
             }
             while(cursor<elements.Count)elements[cursor++].gameObject.SetActive(false);
         }
+        public void SetVisible(bool visible){if(canvas)canvas.gameObject.SetActive(visible);}
         public void Dispose(){if(canvas)Object.Destroy(canvas.gameObject);if(font)Object.Destroy(font);if(roundedSprite)Object.Destroy(roundedSprite);if(roundedTexture)Object.Destroy(roundedTexture);if(minimapTexture)Object.Destroy(minimapTexture);}
     }
 }
