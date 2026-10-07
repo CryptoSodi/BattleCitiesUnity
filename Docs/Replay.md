@@ -58,5 +58,7 @@ Integrate a deployed trusted worker with the API's internal `unityReplayStore.re
 - Existing patrol-drone and multiplayer regression checks.
 - A live 1,814-tick game recording saved and reloaded, then reproduced with all state checks matching.
 - The actual C# fixture accepted by the backend replay-format validator.
+- Public profile WATCH: 260 Unity assertions passed across Web, Seeker landscape and PSG1 layouts, covering anonymous cross-player playback, controller submit versus focus, missing/damaged/incompatible responses, stale-request cancellation and own-library isolation. Run **Battle Cities → Checks → Public replay WATCH (Play mode)** in the MainMenu scene.
+- Public replay access and private evidence boundaries: backend suite passed 112 tests, with three platform-specific skips.
 
 Unity menu: **Battle Cities → Checks → Input replay**. The headless fixture generator is `--fixture <path>` for backend interoperability tests. Editor UI screenshots and temporary diagnostic data are kept in the workspace's `ReplayImplementation` folder, outside the active Unity project.
