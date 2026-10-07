@@ -1,7 +1,7 @@
 namespace BattleCities.UI
 {
     public enum ShopCurrency { Skr,Solana,Swap }
-    public enum ShopCategory { All,Fuel,Power,Packs }
+    public enum ShopCategory { All,Fuel,Power,Packs,SeasonPass }
 
     public sealed class ShopProduct
     {
@@ -29,7 +29,8 @@ namespace BattleCities.UI
             new ShopProduct("zoom-out","ZOOM OUT",375,.025m,ShopCategory.Power,"+1 ITEM",inventory:"zoom-out"),
             new ShopProduct("wipeout","WIPEOUT",600,.04m,ShopCategory.Power,"+1 ITEM",inventory:"wipeout"),
             new ShopProduct("extra-life","EXTRA LIFE",525,.035m,ShopCategory.Power,"+1 ITEM",inventory:"extra-life"),
-            new ShopProduct("starter-pack","STARTER PACK",1200,.08m,ShopCategory.Packs,"5 FUEL + 2 ITEMS",5)
+            new ShopProduct("starter-pack","STARTER PACK",1200,.08m,ShopCategory.Packs,"5 FUEL + 2 ITEMS",5),
+            new ShopProduct("season-pass","SEASON PASS",0,0m,ShopCategory.SeasonPass,"CURRENT SEASON")
         };
         public static readonly string[] InventoryIds={"shield","base-defence","freeze","speed","upgrade","zoom-out","wipeout","extra-life"};
         public static string PowerupType(string id)=>id=="base-defence"?"defence":id=="zoom-out"?"zoomout":id=="extra-life"?"life":id;

@@ -167,6 +167,14 @@ These are the user's approved typography, layout, and interaction rules as of 20
 - Align the season heading and subtitle to the left, immediately after the star/coin icon. Keep the original outer frame intact.
 - Keep the removed Retry button out of the leaderboard and controller focus order unless the user requests it again.
 
+## Live Shop checkout and Season Pass
+
+- Include SEASON PASS beside ALL / FUEL / POWER / PACKS in the Shop category bar. Reuse the current Profile winged insignia, shared card proportions, joined tab skins, clean navy/white captions, hover/focus behavior, and explicit controller navigation.
+- Prices, sales availability, current-season identity and pass ownership come from `/api/economy/catalog`. Never display authored fallback prices as live offers. SKR balances come from `skrBalance`, never the legacy BATC `tokenBalance`. Unknown inventory and balances show a dash.
+- A pass covers all eligible matches in the current season, including earlier matches played before purchase. Explain that in the checkout dialog. Cycle participation does not require the pass. Already owned passes show OWNED and cannot start another payment.
+- Quote the exact SOL/SKR amount from the API and show network fees before opening the wallet. Wallets sign the unchanged transaction; save its exact signed bytes and signature per account/API before submitting. A submission acknowledgement does not grant a purchase. Only a verified response containing the updated account confirms credit.
+- Preserve pending receipts across closure, app restart and connection loss. CHECK PAYMENT retries the same receipt before another purchase can begin. Clear it only after verified credit or a definitive unpaid/failed outcome. Account changes cancel the current dialog and cannot use another account's receipt. Back/cancel before submission never broadcasts a payment.
+
 ## Verify new screens
 
 - Check readable text, intact artwork proportions, modest padding, and alignment at the relevant Web, Seeker, and PSG1 sizes.
