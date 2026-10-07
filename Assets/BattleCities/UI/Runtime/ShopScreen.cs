@@ -11,7 +11,7 @@ using UnityEngine.UI;
 namespace BattleCities.UI
 {
     /// <summary>TV-contained supply shop using the approved tank-selection UI assets.</summary>
-    public sealed class ShopScreen : MonoBehaviour
+    public sealed partial class ShopScreen : MonoBehaviour
     {
         const float ShopCardAspect=1f;
         MainMenuScene menu;MenuTheme theme;PreBattleArt art;ShopArt shopArt;MainMenuApiClient api;
@@ -24,15 +24,15 @@ namespace BattleCities.UI
         TMP_Text itemCount,connection,skrBalance,solBalance,fuelBalance,noticeTitle,noticeBody,swapFrom,swapTo,swapBalance;
         TMP_InputField swapAmount;
         Button back,connect,swapDirection,swapAction,noticeClose;
-        readonly Button[] currencyTabs=new Button[3],filters=new Button[4];
+        readonly Button[] currencyTabs=new Button[3],filters=new Button[5];
         readonly Button[] hudTabs=new Button[4];
         readonly Image[] hudSelections=new Image[4];
         readonly TMP_Text[] currencyLabels=new TMP_Text[3];
-        readonly Image[] filterSelections=new Image[4];
-        readonly TMP_Text[] filterLabels=new TMP_Text[4];
+        readonly Image[] filterSelections=new Image[5];
+        readonly TMP_Text[] filterLabels=new TMP_Text[5];
         readonly List<ButtonCaption> buttonCaptions=new List<ButtonCaption>();
         readonly List<Image> tokenIcons=new List<Image>();
-        readonly Card[] cards=new Card[12];
+        readonly Card[] cards=new Card[13];
         readonly List<int> visible=new List<int>();
         readonly ArcadeTextStyles textStyles=new ArcadeTextStyles();
         TankRosterScroll scroll;GridLayoutGroup grid;
@@ -74,13 +74,13 @@ namespace BattleCities.UI
             var oldFilters=root.Find("Filters");if(oldFilters&&!catalog.Find("Filters"))oldFilters.SetParent(catalog,false);
             filterRow=Panel("Filters",catalog,art.tankTitlePanel);filterRow.GetComponent<Image>().pixelsPerUnitMultiplier=4;
             BuildFilters();
-            itemCount=Label("Item count",filterRow,"12 ITEMS",new Rect(.025f,.06f,.20f,.88f),TvTitleHeaderLayout.TextSize,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
+            itemCount=Label("Item count",filterRow,"13 ITEMS",new Rect(.025f,.06f,.20f,.88f),TvTitleHeaderLayout.TextSize,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
             BuildScroll();
             for(int i=0;i<cards.Length;i++)BuildCard(i);
             footer=Panel("Balances",root,art.statusPanel);TvStatusFooterLayout.ApplySkin(footer.GetComponent<Image>(),art.statusPanel);
             connect=MakeButton("Connection",footer,"CONNECT WALLET",()=>{if(api)api.ConnectWallet();});connection=connect.GetComponentInChildren<TMP_Text>();
             skrBalance=Balance("SKR",0,shopArt?shopArt.skr:null);solBalance=Balance("SOL",1,shopArt?shopArt.solana:null);fuelBalance=Balance("FUEL",2,art.fuelCan);
-            BuildSwap();BuildNotice();
+            BuildSwap();BuildNotice();BuildCheckout();
         }
         void BuildInventory()
         {
@@ -160,14 +160,14 @@ namespace BattleCities.UI
         {
             filterBar=Panel("Category bar",filterRow,art.tankCostButton);
             filterBar.GetComponent<Image>().color=new Color(.08f,.63f,.68f,1);
-            string[] categories={"ALL","FUEL","POWER","PACKS"};
-            for(int i=0;i<4;i++)
+            string[] categories={"ALL","FUEL","POWER","PACKS","SEASON PASS"};
+            for(int i=0;i<filters.Length;i++)
             {
                 // Reparent the existing controls when refreshing an already-open Shop.
                 var old=filterRow.Find(categories[i]);if(old)old.SetParent(filterBar,false);
                 int n=i;filters[i]=JoinedTab(categories[i],filterBar,()=>SetCategory((ShopCategory)n,true),out filterSelections[i],out filterLabels[i],new Rect(.035f,.025f,.93f,.95f));
             }
-            JoinedDividers(filterBar,4);
+            JoinedDividers(filterBar,filters.Length);
         }
         Button JoinedTab(string name,Transform parent,UnityEngine.Events.UnityAction action,out Image selection,out TMP_Text label,Rect textArea)
         {
@@ -189,13 +189,28 @@ namespace BattleCities.UI
         void LayoutJoinedBar(RectTransform bar,Button[] buttons,Image[] selections,float height,float cornerFraction=.36f)
         {
             float width=bar.rect.width;FitFilterSkin(bar.GetComponent<Image>(),height,cornerFraction);
+            float[] weights=buttons==filters?new[]{.65f,.8f,1f,.85f,1.65f}:null;
+            float unit=width/(weights!=null?4.95f:buttons.Length),cursor=0;
             for(int i=0;i<buttons.Length;i++)
             {
-                MainMenuScene.Place((RectTransform)buttons[i].transform,i*width/buttons.Length+3,3,width/buttons.Length-6,height-6);
+                float cell=unit*(weights!=null?weights[i]:1);
+                MainMenuScene.Place((RectTransform)buttons[i].transform,cursor+3,3,cell-6,height-6);
                 FitFilterSkin(buttons[i].targetGraphic as Image,height-6,cornerFraction);FitFilterSkin(selections[i],height-6,cornerFraction);
                 if(!buttons[i].interactable)FitFilterSkin(buttons[i].GetComponent<Image>(),height-6,cornerFraction);
+                if(i>0)MainMenuScene.Place(bar.Find("Divider "+i) as RectTransform,cursor-1.5f,height*.20f,3,height*.60f);
+                cursor+=cell;
             }
-            for(int i=1;i<buttons.Length;i++)MainMenuScene.Place(bar.Find("Divider "+i) as RectTransform,i*width/buttons.Length-1.5f,height*.20f,3,height*.60f);
+            if(buttons==filters)
+            {
+                float size=28;
+                foreach(var label in filterLabels)
+                {
+                    label.enableAutoSizing=false;label.fontSize=28;
+                    var preferred=label.GetPreferredValues(label.text);
+                    size=Mathf.Min(size,28*Mathf.Min(label.rectTransform.rect.width/Mathf.Max(1,preferred.x),label.rectTransform.rect.height/Mathf.Max(1,preferred.y)));
+                }
+                foreach(var label in filterLabels)label.fontSize=Mathf.Clamp(size,12,28);
+            }
         }
         TMP_Text Balance(string name,int index,Sprite icon)
         {
@@ -293,7 +308,7 @@ namespace BattleCities.UI
         public void Close(){Close(true);}
         public void Close(bool restoreFocus)
         {
-            if(!root)return;StopAllCoroutines();accountRequest=null;notice.gameObject.SetActive(false);root.gameObject.SetActive(false);
+            if(!root)return;CancelCheckout();StopAllCoroutines();accountRequest=null;notice.gameObject.SetActive(false);root.gameObject.SetActive(false);
             if(menu){menu.SetTankSelectorBackdrop(false);menu.RefreshLayout();if(restoreFocus&&menu.Tabs.Length>1)Focus(menu.Tabs[1]);}
         }
         public void Back(){if(notice&&notice.gameObject.activeSelf)DismissNotice();else Close();}
@@ -316,7 +331,7 @@ namespace BattleCities.UI
             footerLayout.Place(footer);TvStatusFooterLayout.PlaceAction((RectTransform)connect.transform);
             LayoutInventory(compact);
             MainMenuScene.Place(filterRow,8,7,catalog.rect.width-16,header);
-            float countWidth=Mathf.Clamp(filterRow.rect.width*.17f,84f,112f);
+            float countWidth=Mathf.Clamp(filterRow.rect.width*.13f,64f,94f);
             MainMenuScene.Place(itemCount.rectTransform,24,header*.06f,countWidth,header*.88f);
             MainMenuScene.Place(filterBar,countWidth+24f,(header-headerLayout.NavigationHeight)*.5f,
                 filterRow.rect.width-countWidth-32f,headerLayout.NavigationHeight);
@@ -337,7 +352,7 @@ namespace BattleCities.UI
         public void SetCategory(ShopCategory next,bool focus)
         {
             category=next;visible.Clear();for(int i=0;i<cards.Length;i++){bool show=category==ShopCategory.All||ShopCatalog.Products[i].Category==category;cards[i].Rect.gameObject.SetActive(show);if(show)visible.Add(i);}
-            for(int i=0;i<4;i++)
+            for(int i=0;i<filters.Length;i++)
             {
                 bool active=i==(int)category;filterSelections[i].enabled=active;
                 textStyles.ApplyCleanButton(filterLabels[i],active);
@@ -360,18 +375,18 @@ namespace BattleCities.UI
             for(int i=0;i<cards.Length;i++)
             {
                 var c=cards[i];var p=ShopCatalog.Products[i];bool active=i==selected;c.Frame.sprite=active?art.tankCardSelected:art.tankCardAvailable;SetButtonGold(c.Price,active);
-                c.PriceText.text=currency==ShopCurrency.Solana?p.SolPrice.ToString("0.###",CultureInfo.InvariantCulture)+" SOL":p.SkrPrice.ToString("N0",CultureInfo.InvariantCulture)+" SKR";
+                c.PriceText.text=LivePrice(p.Id);
                 SetSprite(c.Coin,shopArt?(currency==ShopCurrency.Solana?shopArt.solana:shopArt.skr):null);
                 int owned=p.InventoryId!=null?Count(account?["inventory"]?[p.InventoryId]):p.Category==ShopCategory.Fuel?Count(account?["fuelBalance"]):0;
-                c.Reward.text=p.Reward+"  •  OWNED "+owned;
+                c.Reward.text=p.Category==ShopCategory.SeasonPass?SeasonCaption():p.Reward+"  •  OWNED "+(account!=null?owned.ToString(CultureInfo.InvariantCulture):"—");
             }
             RefreshCardHighlights();
             RefreshPresentation();
         }
         void InspectProduct(int index)
-        {SelectProduct(index,true);var p=ShopCatalog.Products[index];ShowNotice(p.Title,p.Reward+"\n"+cards[index].PriceText.text+"\n\nPurchases are not available yet.");}
+        {if(checkoutBusy)return;SelectProduct(index,true);InspectCheckout(index);}
         void ShowNotice(string title,string body){noticeTitle.text=title;noticeBody.text=body;notice.gameObject.SetActive(true);notice.SetAsLastSibling();Focus(noticeClose);}
-        void DismissNotice(){notice.gameObject.SetActive(false);Focus(currency==ShopCurrency.Swap?swapAction:cards[selected].Price);}
+        void DismissNotice(){CancelCheckout();notice.gameObject.SetActive(false);Focus(currency==ShopCurrency.Swap?swapAction:cards[selected].Price);}
         public void RefreshArt()
         {
             shopArt=Resources.Load<ShopArt>("ShopArt");SetSprite(heading.Find("Shop icon").GetComponent<Image>(),theme.NavigationIcons[2]);
@@ -386,6 +401,7 @@ namespace BattleCities.UI
             {
                 var c=cards[i];var p=ShopCatalog.Products[i];var sprite=shopArt&&shopArt.products!=null&&i<shopArt.products.Length?shopArt.products[i]:null;
                 if(!sprite&&p.Category==ShopCategory.Fuel)sprite=art.fuelCan;
+                if(!sprite&&p.Category==ShopCategory.SeasonPass)sprite=Resources.Load<PlayerProfileArt>("PlayerProfileArt")?.insignia;
                 SetSprite(c.Art,sprite);c.Art.gameObject.SetActive(sprite);c.Fallback.gameObject.SetActive(!sprite);
                 SetSprite(c.Coin,shopArt?(currency==ShopCurrency.Solana?shopArt.solana:shopArt.skr):null);
                 if(!sprite)SetInventoryIcon(c.Fallback,p.InventoryId??"shield");c.Shadow.gameObject.SetActive(sprite);
@@ -449,17 +465,17 @@ namespace BattleCities.UI
         }
         void LateUpdate(){if(IsOpen)RefreshPresentation();}
         void RefreshSwap(){swapFrom.text=swapFromSol?"SOL":"SKR";swapTo.text=swapFromSol?"SKR":"SOL";swapBalance.text="AVAILABLE  "+(swapFromSol?solBalance.text+" SOL":skrBalance.text+" SKR");}
-        void OnPlayerLoaded(MainMenuApiClient.PlayerSnapshot player){if(isActiveAndEnabled&&IsOpen&&api&&Application.isPlaying){if(accountRequest!=null)StopCoroutine(accountRequest);accountRequest=StartCoroutine(LoadAccount());}}
+        void OnPlayerLoaded(MainMenuApiClient.PlayerSnapshot player){if(loadedOwner!=Owner){CancelCheckout();if(notice)notice.gameObject.SetActive(false);}if(isActiveAndEnabled&&IsOpen&&api&&Application.isPlaying){if(accountRequest!=null)StopCoroutine(accountRequest);accountRequest=StartCoroutine(LoadAccount());}}
         IEnumerator LoadAccount()
         {
-            yield return api.Request("GET","/api/economy/account",null,(code,body,error)=>{account=code>=200&&code<300&&(bool?)body?["authenticated"]==true?body?["account"] as JObject:null;RefreshAccount();});accountRequest=null;
+            yield return LoadLiveAccount();accountRequest=null;
         }
         void RefreshAccount()
         {
-            for(int i=0;i<8;i++)inventoryCounts[i].text=Count(account?["inventory"]?[ShopCatalog.InventoryIds[i]]).ToString(CultureInfo.InvariantCulture);
-            connection.text=account!=null?"CONNECTED":"CONNECT WALLET";
+            for(int i=0;i<8;i++)inventoryCounts[i].text=account!=null?Count(account?["inventory"]?[ShopCatalog.InventoryIds[i]]).ToString(CultureInfo.InvariantCulture):"—";
+            connection.text=api&&api.IsWalletAuthenticated?"REFRESH":"CONNECT WALLET";
             // The older tokenBalance field represents BATC; it must never be presented as SKR.
-            skrBalance.text=Amount(account?["skrBalance"],"N0");solBalance.text=Amount(account?["solBalance"],"0.000");fuelBalance.text=Count(account?["fuelBalance"]).ToString("N0",CultureInfo.InvariantCulture);UpdateCards();RefreshSwap();
+            skrBalance.text=Amount(walletBalances?["skrBalance"],"0.#########");solBalance.text=Amount(walletBalances?["solBalance"],"0.#########");fuelBalance.text=account!=null?Count(account?["fuelBalance"]).ToString("N0",CultureInfo.InvariantCulture):"—";UpdateCards();RefreshSwap();
         }
         static int Count(JToken token){return int.TryParse(token?.ToString(),NumberStyles.Integer,CultureInfo.InvariantCulture,out int n)?Math.Max(0,n):0;}
         static string Amount(JToken token,string format){return decimal.TryParse(token?.ToString(),NumberStyles.Number,CultureInfo.InvariantCulture,out var n)?Math.Max(0,n).ToString(format,CultureInfo.InvariantCulture):"—";}
@@ -470,10 +486,10 @@ namespace BattleCities.UI
             Link(back,currencyTabs[1],currencyTabs[0],connect,filters[3]);
             for(int i=0;i<2;i++)Link(currencyTabs[i],i==0?back:currencyTabs[0],i==1?back:currencyTabs[1],connect,filters[i]);
             currencyTabs[2].navigation=new Navigation{mode=Navigation.Mode.None};
-            for(int i=0;i<4;i++)Link(filters[i],filters[(i+3)%4],filters[(i+1)%4],i==3?back:currencyTabs[Math.Min(i,1)],visible.Count>0?cards[visible[Math.Min(i,Math.Min(columns,visible.Count)-1)]].Price:back);
+            for(int i=0;i<filters.Length;i++)Link(filters[i],filters[(i+filters.Length-1)%filters.Length],filters[(i+1)%filters.Length],i==filters.Length-1?back:currencyTabs[Math.Min(i,1)],visible.Count>0?cards[visible[Math.Min(i,Math.Min(columns,visible.Count)-1)]].Price:back);
             for(int at=0;at<visible.Count;at++){int row=at/columns*columns,last=Math.Min(row+columns,visible.Count)-1;var button=cards[visible[at]].Price;Link(button,cards[visible[at>row?at-1:last]].Price,cards[visible[at<last?at+1:row]].Price,at>=columns?cards[visible[at-columns]].Price:filters[Math.Min(at,3)],row+columns<visible.Count?cards[visible[Math.Min(at+columns,visible.Count-1)]].Price:connect);}
             Link(connect,back,back,currency==ShopCurrency.Swap?swapAction:visible.Count>0?cards[visible[visible.Count-1]].Price:back,back);
-            Link(swapDirection,currencyTabs[2],swapAmount,swapAmount,swapAction);Link(swapAction,swapDirection,connect,swapDirection,connect);Link(swapAmount,swapDirection,swapDirection,currencyTabs[2],swapDirection);Link(noticeClose,noticeClose,noticeClose,noticeClose,noticeClose);
+            Link(swapDirection,currencyTabs[2],swapAmount,swapAmount,swapAction);Link(swapAction,swapDirection,connect,swapDirection,connect);Link(swapAmount,swapDirection,swapDirection,currencyTabs[2],swapDirection);LinkNoticeButtons();
         }
         static void Link(Selectable target,Selectable left,Selectable right,Selectable up,Selectable down){target.navigation=new Navigation{mode=Navigation.Mode.Explicit,selectOnLeft=left,selectOnRight=right,selectOnUp=up,selectOnDown=down};}
         static void Focus(Selectable control){if(control&&EventSystem.current)EventSystem.current.SetSelectedGameObject(control.gameObject);}
@@ -504,6 +520,6 @@ namespace BattleCities.UI
             Fit(text.rectTransform,area);text.font=ArcadeTextStyles.HeadingSdf;text.text=caption;text.fontSize=text.fontSizeMax=size;text.fontSizeMin=12;text.enableAutoSizing=true;text.alignment=alignment;text.textWrappingMode=TextWrappingModes.NoWrap;text.raycastTarget=false;textStyles.Apply(text,style);return text;
         }
         static void Fit(RectTransform rect,Rect a){rect.anchorMin=new Vector2(a.x,1-a.y-a.height);rect.anchorMax=new Vector2(a.x+a.width,1-a.y);rect.offsetMin=rect.offsetMax=Vector2.zero;}
-        void OnDestroy(){if(api)api.PlayerLoaded-=OnPlayerLoaded;textStyles.Dispose();if(root){if(Application.isPlaying)Destroy(root.gameObject);else DestroyImmediate(root.gameObject);}}
+        void OnDestroy(){CancelCheckout();if(api)api.PlayerLoaded-=OnPlayerLoaded;textStyles.Dispose();if(root){if(Application.isPlaying)Destroy(root.gameObject);else DestroyImmediate(root.gameObject);}}
     }
 }
