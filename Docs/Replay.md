@@ -4,11 +4,13 @@ Every offline battle stage and every authoritative multiplayer-host round is rec
 
 ## Watching a battle
 
-- Open **Player Profile → REPLAYS**, or pause a local battle and select **REPLAYS**.
-- Select a saved recording. Playback offers Pause/Resume, Restart, 0.5× / 1× / 2× / 4× speed, and Menu. `P` pauses; `R` restarts; Escape opens the library. Controller navigation uses the existing UI input module and explicit navigation links.
-- **SYNC** downloads up to 20 recent recordings for the signed-in account. **RETRY UPLOADS** retries saved evidence and any pending match-history link using the original session and recording IDs.
-- To watch another player, open **Ranking → player → Recent Battles → WATCH**. Saved recordings linked to public match history are viewable by other players and guests. Unity recordings open in the game; older browser-engine recordings use the configured legacy viewer. A missing recording shows **NO REPLAY**. The **REPLAYS** library button appears only on your own profile.
-- Playing a recording cannot consume inventory, roll new drops, redeem currency, submit a new result, or accept live combat input.
+- Open **Player Profile → Recent Battles → WATCH**. The same public endpoint supports your own matches, other players, and guests.
+- Playback stays inside the Main Menu TV. The surrounding menu remains visible and the gameplay scene is never loaded. Pause/Resume, Restart, and 0.5× / 1× / 2× / 4× speed use the shared white footer; the shared Back tab or cancel returns to the same profile page, scroll position, and selected match.
+- Gameplay, pause/results menus, and profiles have no standalone REPLAYS button or replay library. Automatic recording and upload continue in the background.
+- A missing recording shows **NO REPLAY**. Damaged, incompatible, or legacy browser-engine recordings show an honest error; they do not open a full-screen or external viewer.
+- The TV renderer has no economy, multiplayer session, or combat input components. Playing a recording cannot consume inventory, roll new drops, redeem currency, submit a new result, or create a new recording.
+
+The lightweight `Resources/TvReplayRig.prefab` contains only the authored `BattleGame` visual settings. Rebuild it through **Battle Cities → Rebuild TV replay renderer** after changing the BattleCity scene's renderer configuration. Layer 31 is reserved for replay visuals; camera, light, reflection, and draw-call isolation prevent those visuals from appearing outside the TV. Closing playback restores other cameras' masks, disposes its render texture, and unloads its renderer scene without switching the active menu scene.
 
 ## What is saved
 

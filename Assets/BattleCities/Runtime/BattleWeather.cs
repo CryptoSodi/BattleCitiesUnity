@@ -133,6 +133,7 @@ namespace BattleCities
             SplashCount=WaterRippleCount=0;nextSplash=0;if(splashRenderer)splashRenderer.enabled=false;
         }
 
+        public bool ApplyGlobalLighting=true;
         public void Tick(float dt,float stageWidth,float stageDepth,Light sun,ReflectionProbe probe)
         {
             dt=Mathf.Max(0,dt);width=stageWidth;depth=stageDepth;age+=dt;
@@ -145,10 +146,10 @@ namespace BattleCities
             sun.color=Color.Lerp(new Color(.65f,.75f,1),Color.Lerp(new Color(1,.58f,.3f),new Color(1,.96f,.85f),Mathf.Clamp01(altitude*2)),daylight);
             sun.color=Color.Lerp(sun.color,new Color(.72f,.82f,.94f),rain*.45f);
             sun.transform.rotation=Quaternion.LookRotation(-direction,Vector3.up);sun.shadowStrength=Mathf.Lerp(.88f,.50f,rain);
-            RenderSettings.ambientMode=AmbientMode.Trilight;
+            if(ApplyGlobalLighting){RenderSettings.ambientMode=AmbientMode.Trilight;
             RenderSettings.ambientSkyColor=Color.Lerp(new Color(.26f,.32f,.45f),new Color(.48f,.58f,.70f),daylight)*storm;
             RenderSettings.ambientEquatorColor=Color.Lerp(new Color(.13f,.18f,.28f),new Color(.26f,.32f,.37f),daylight)*storm;
-            RenderSettings.ambientGroundColor=Color.Lerp(new Color(.08f,.09f,.13f),new Color(.17f,.16f,.13f),daylight);
+            RenderSettings.ambientGroundColor=Color.Lerp(new Color(.08f,.09f,.13f),new Color(.17f,.16f,.13f),daylight);}
             if(probe)probe.intensity=Mathf.Lerp(.22f,.75f,daylight)*storm;
             UpdateClouds(direction,daylight,rain);RainCount=Mathf.RoundToInt(MaxDrops*rain);
             if(!Rain)ClearPrecipitation();

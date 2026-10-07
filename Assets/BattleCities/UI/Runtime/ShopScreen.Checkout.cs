@@ -21,7 +21,7 @@ namespace BattleCities.UI
         Coroutine checkoutRoutine;
         string catalogError,loadedOwner;
         int checkoutIndex=-1,checkoutRevision;
-        bool checkoutBusy;
+        bool checkoutBusy,currencyChosen;
         string Owner=>api?.LastPlayer?.id+"|"+api?.LastPlayer?.walletAddress+"|"+api?.BaseUrl;
         string Wallet=>api?.LastPlayer?.walletAddress;
         string PendingKey
@@ -79,7 +79,18 @@ namespace BattleCities.UI
             walletBalances=null;
             if(owner==Owner&&api.IsWalletAuthenticated)yield return api.Request("GET","/api/economy/wallet-balance",null,(code,body,error)=>
             {if(owner==Owner&&code>=200&&code<300&&(bool?)body?["ok"]==true&&(string)body["walletAddress"]==Wallet)walletBalances=body;});
-            if(owner==Owner)RefreshAccount();
+            if(owner==Owner)
+            {
+                if(!currencyChosen&&currency==ShopCurrency.Skr&&!HasAvailablePurchases(ShopCurrency.Skr)&&HasAvailablePurchases(ShopCurrency.Solana))
+                    SetCurrency(ShopCurrency.Solana,false);
+                RefreshAccount();
+            }
+        }
+        bool HasAvailablePurchases(ShopCurrency value)
+        {
+            if(liveCatalog==null)return false;
+            foreach(var product in ShopCatalog.Products)if(liveCatalog.Available(product.Id,value))return true;
+            return false;
         }
         void LoadPending()
         {
@@ -112,7 +123,12 @@ namespace BattleCities.UI
             if(liveCatalog==null){ShowNotice(product.Title,catalogError??"Loading the live Shop. Please try again.");return;}
             string description=product.Category==ShopCategory.SeasonPass?PassDescription():product.Reward;
             if(product.Category==ShopCategory.SeasonPass&&liveCatalog.Owned){ShowNotice("SEASON PASS OWNED",description);return;}
-            if(!liveCatalog.Available(product.Id,currency)){ShowNotice(product.Title,description+"\n\nThis purchase is currently unavailable.");return;}
+            if(!liveCatalog.Available(product.Id,currency))
+            {
+                string reason=currency==ShopCurrency.Skr&&liveCatalog.Available(product.Id,ShopCurrency.Solana)
+                    ?"SKR purchases are unavailable for this item. Choose SOLANA to buy it.":"This purchase is currently unavailable.";
+                ShowNotice(product.Title,description+"\n\n"+reason);return;
+            }
             ShowNotice(product.Title,description+"\n\n"+LivePrice(product.Id));
             ConfigureNoticeAction(api&&api.IsWalletAuthenticated?"GET QUOTE":"CONNECT WALLET");
         }

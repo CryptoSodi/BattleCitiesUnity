@@ -162,31 +162,31 @@ namespace BattleCities
         {
             var rotation=camera.transform.rotation;
             properties.SetColor("_BaseColor",new Color(.015f,.025f,.04f,.92f));
-            Graphics.DrawMesh(quad,Matrix4x4.TRS(position,rotation,new Vector3(.76f,.075f,1)),solid,0,camera,0,properties,false,false,false);
+            Graphics.DrawMesh(quad,Matrix4x4.TRS(position,rotation,new Vector3(.76f,.075f,1)),solid,camera.gameObject.layer,camera,0,properties,false,false,false);
             int filled=Mathf.Clamp(health,0,maximum);
             float step=.69f/maximum;
             for(int i=0;i<maximum;i++)
             {
                 properties.SetColor("_BaseColor",i<filled?(health<=1?new Color(1,.2f,.12f):Color.Lerp(color,Color.white,.25f)):new Color(.16f,.18f,.21f));
                 var p=position+camera.transform.right*(-.345f+step*(i+.5f))-camera.transform.forward*.005f;
-                Graphics.DrawMesh(quad,Matrix4x4.TRS(p,rotation,new Vector3(step-.014f,.035f,1)),solid,0,camera,0,properties,false,false,false);
+                Graphics.DrawMesh(quad,Matrix4x4.TRS(p,rotation,new Vector3(step-.014f,.035f,1)),solid,camera.gameObject.layer,camera,0,properties,false,false,false);
             }
         }
         public void CooldownBar(Vector3 position,float progress,Camera camera,bool charging=false)
         {
             var rotation=camera.transform.rotation;
             properties.SetColor("_BaseColor",new Color(.015f,.025f,.04f,.92f));
-            Graphics.DrawMesh(quad,Matrix4x4.TRS(position,rotation,new Vector3(.76f,.045f,1)),solid,0,camera,0,properties,false,false,false);
+            Graphics.DrawMesh(quad,Matrix4x4.TRS(position,rotation,new Vector3(.76f,.045f,1)),solid,camera.gameObject.layer,camera,0,properties,false,false,false);
             float width=.69f*Mathf.Clamp01(progress);
             if(width<=0)return;
             properties.SetColor("_BaseColor",charging?new Color(1f,.2f,.16f,.95f):new Color(.25f,.82f,1f,.95f));
             var fill=position+camera.transform.right*(-.345f+width*.5f)-camera.transform.forward*.005f;
-            Graphics.DrawMesh(quad,Matrix4x4.TRS(fill,rotation,new Vector3(width,.021f,1)),solid,0,camera,0,properties,false,false,false);
+            Graphics.DrawMesh(quad,Matrix4x4.TRS(fill,rotation,new Vector3(width,.021f,1)),solid,camera.gameObject.layer,camera,0,properties,false,false,false);
         }
         void Draw(Vector3 position,Quaternion rotation,float size,Color color,Material material,Camera camera)
         {
             properties.SetColor("_BaseColor",color);
-            Graphics.DrawMesh(quad,Matrix4x4.TRS(position,rotation,Vector3.one*size),material,0,camera,0,properties,false,false,false);
+            Graphics.DrawMesh(quad,Matrix4x4.TRS(position,rotation,Vector3.one*size),material,camera.gameObject.layer,camera,0,properties,false,false,false);
         }
         public void Clear(){foreach(var puff in puffs)pool.Push(puff);puffs.Clear();if(combat)combat.Clear();}
         public void Tick(float dt,Camera camera)

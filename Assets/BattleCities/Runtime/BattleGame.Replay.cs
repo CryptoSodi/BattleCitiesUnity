@@ -14,7 +14,6 @@ namespace BattleCities
         private readonly Queue<ReplayEvent> replayPending=new Queue<ReplayEvent>();
         private bool replayPreparing,loadingReplay,replaySaved;
         private float replaySpeed=1;
-        private BattleReplayControls replayControls;
         public bool IsReplaying=>replayPlayer!=null||loadingReplay;
         public bool ReplayReady=>!replayPreparing;
         public string ReplayStatus {get;private set;}="";
@@ -23,7 +22,7 @@ namespace BattleCities
         private void BeginRecording(MapData map)
         {
             replayMap=ReplayJson.Copy(map);replayPending.Clear();replaySaved=false;
-            if(loadingReplay||ReplayBrowser.Pending!=null||IsOnline||LevelEditor.LevelEditorPlaytest.IsActive)return;
+            if(tvReplay||loadingReplay||IsOnline||LevelEditor.LevelEditorPlaytest.IsActive)return;
             StartReplayRecorder();
         }
         private void StartReplayRecorder()
@@ -107,7 +106,5 @@ namespace BattleCities
             {replayPlayer.Step();accumulator-=BattleSimulation.StepSeconds;}
             ReplayStatus=replayPlayer.Error??(replayPlayer.Complete?"Replay complete — state matched":"Replay");
         }
-        public void WatchLastReplay()
-        {var items=BattleReplayStore.List();if(items.Count>0)PlayReplay(items[0].replay);else ReplayStatus="No saved recordings yet";}
     }
 }

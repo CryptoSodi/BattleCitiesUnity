@@ -88,7 +88,7 @@ namespace BattleCities.Multiplayer
         {
             if(!canvas||!Session)return;
             if(!replayGame&&SceneManager.GetActiveScene().name=="BattleCity")replayGame=UnityEngine.Object.FindAnyObjectByType<BattleGame>();
-            if(ReplayBrowser.IsOpen||(replayGame&&replayGame.IsReplaying))
+            if(replayGame&&replayGame.IsReplaying)
             {open.gameObject.SetActive(false);if(Visible){panel.SetActive(false);ReleaseController();}return;}
             bool available=SceneManager.GetActiveScene().name!="Login";
             bool psgMenu=RuntimePlatformInfo.IsPsg1&&SceneManager.GetActiveScene().name=="MainMenu";

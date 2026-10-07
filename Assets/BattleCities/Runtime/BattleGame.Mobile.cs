@@ -9,7 +9,7 @@ namespace BattleCities
     {
         private BattleTouchControls touchControls;
         internal bool HasTouchControls => touchControls;
-        internal bool TouchActionsAvailable => !IsReplaying && !ReplayBrowser.IsOpen && Simulation != null && Simulation.CanAcceptPlayerFire && !paused &&
+        internal bool TouchActionsAvailable => !IsReplaying && Simulation != null && Simulation.CanAcceptPlayerFire && !paused &&
             !consumePending && !showDebug && !TouchLobbyVisible && (!IsOnline || Simulation.MatchStarted);
         internal bool TouchLobbyVisible => Multiplayer.BattleSession.Instance && Multiplayer.BattleSession.Instance.Lobby.Visible;
         internal float TouchChargeProgress => primaryCharge.Progress;
@@ -52,7 +52,7 @@ namespace BattleCities
         }
 
         private void OnDisable() { InputSystem.onDeviceChange -= GamepadDeviceChanged; ReleaseDebugController(); CancelTouchGameplay(); input?.Disable(); }
-        private void OnEnable() { InputSystem.onDeviceChange += GamepadDeviceChanged; input?.Enable(); }
+        private void OnEnable() { if(tvReplay)return;InputSystem.onDeviceChange += GamepadDeviceChanged; input?.Enable(); }
     }
 
     public static class MobileBattleOrientation

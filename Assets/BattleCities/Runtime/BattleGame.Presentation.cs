@@ -11,7 +11,7 @@ namespace BattleCities
             gameCamera.allowHDR=true;
             var cameraData=gameCamera.GetUniversalAdditionalCameraData();
             cameraData.renderPostProcessing=true;
-            cameraData.volumeLayerMask|=1;
+            if(tvReplay)cameraData.volumeLayerMask=1<<TvReplayLayer;else cameraData.volumeLayerMask|=1;
             cameraData.antialiasing=AntialiasingMode.FastApproximateAntialiasing;
             var profile=Resources.Load<VolumeProfile>("BattleLook");
             if(!profile)return;

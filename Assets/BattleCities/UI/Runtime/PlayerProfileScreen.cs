@@ -19,7 +19,7 @@ namespace BattleCities.UI
         RectTransform root,header,nav,footer,hero,heroPaper,metrics,battleLog,battleHeading,empty;
         TMP_Text title,nameLabel,identityLabel,recordCount,pageLabel,emptyTitle,emptyDescription;
         UnityEngine.UI.Image titleIcon,avatar;
-        UnityEngine.UI.Button back,share,previous,next,retry,localReplays;
+        UnityEngine.UI.Button back,share,previous,next,retry;
         readonly List<UnityEngine.UI.Button> battles=new List<UnityEngine.UI.Button>();
         readonly TMP_Text[] values=new TMP_Text[4],statNames=new TMP_Text[4];
         readonly RectTransform[] stats=new RectTransform[4];
@@ -41,7 +41,7 @@ namespace BattleCities.UI
         public UnityEngine.UI.Button ShareButton=>share;
         public void Configure(MainMenuScene owner,MenuTheme skin,MainMenuApiClient client,RectTransform frame)
         {
-            ClearStatus();Cancel();configured=false;if(api)api.PlayerLoaded-=OnPlayer;
+            CloseReplayViewer();ClearStatus();Cancel();configured=false;if(api)api.PlayerLoaded-=OnPlayer;
             menu=owner;theme=skin;api=client;art=Resources.Load<PreBattleArt>("PreBattleArt");pictures=Resources.Load<PlayerProfileArt>("PlayerProfileArt");links=Resources.Load<ProfileLinks>("ProfileLinks");
             var old=frame.Find("Player profile screen");bool open=old&&old.gameObject.activeSelf;
             root=Panel("Player profile screen",frame,null);root.GetComponent<UnityEngine.UI.Image>().raycastTarget=true;
@@ -50,16 +50,16 @@ namespace BattleCities.UI
         }
         public void Open(string playerId=null)
         {
-            ClearStatus();ownProfile=string.IsNullOrEmpty(playerId);targetId=playerId;requestedPage=1;data=null;
+            CloseReplayViewer();ClearStatus();ownProfile=string.IsNullOrEmpty(playerId);targetId=playerId;requestedPage=1;data=null;
             root.gameObject.SetActive(true);root.SetAsLastSibling();menu.SetHeroVisible(false);menu.SetTankSelectorBackdrop(true);menu.RefreshLayout();
             Refresh();Focus(back);
         }
-        public void Resume(){if(IsOpen)Refresh();}
-        public void Close(){ClearStatus();Cancel();root.gameObject.SetActive(false);}
+        public void Resume(){if(IsOpen&&!ReplayViewerOpen)Refresh();}
+        public void Close(){CloseReplayViewer();ClearStatus();Cancel();root.gameObject.SetActive(false);}
         public void Refresh()
         {
             if(!IsOpen||!api)return;
-            Cancel();request=StartCoroutine(Load(generation));
+            CloseReplayViewer();Cancel();request=StartCoroutine(Load(generation));
         }
         IEnumerator Load(int version)
         {
@@ -133,7 +133,7 @@ namespace BattleCities.UI
 #endif
         public void Watch(int index)
         {
-            if(!IsOpen||state!=ViewState.Ready||data==null||index<0||index>=data.Battles.Count)return;
+            if(!IsOpen||ReplayViewerOpen||state!=ViewState.Ready||data==null||index<0||index>=data.Battles.Count)return;
             var battle=data.Battles[index];if(!battle.Replay){SetStatus("NO REPLAY WAS SAVED FOR THIS BATTLE");return;}
             Cancel();SetStatus("LOADING REPLAY...");request=StartCoroutine(WatchRecording(generation,data.Id,battle.Id));
         }
@@ -158,15 +158,13 @@ namespace BattleCities.UI
 #if UNITY_EDITOR
                     if(EditorReplayLaunchOverride!=null){EditorReplayLaunchOverride(recording);yield break;}
 #endif
-                    ReplayBrowser.Launch(recording);
+                    try{ShowReplay(recording);}catch(Exception){SetStatus("REPLAY COULD NOT BE OPENED; TRY AGAIN");}
                 }
                 yield break;
             }
             if(format!=null&&format.StartsWith("battlecities-unity-",StringComparison.Ordinal))
             {SetStatus("REPLAY NEEDS A DIFFERENT GAME VERSION");yield break;}
-            string url=links?links.ReplayUrl(playerId,matchId):null;
-            if(string.IsNullOrEmpty(url)){SetStatus("LEGACY WEB REPLAY VIEWER IS NOT CONFIGURED");yield break;}
-            Application.OpenURL(url);SetStatus("LEGACY REPLAY OPENED IN YOUR BROWSER");
+            SetStatus("THIS RECORDING NEEDS A DIFFERENT GAME VERSION");
         }
         string IdentityText()=>state==ViewState.Ready&&data!=null?data.Provider.ToUpperInvariant()+" PLAYER  •  JOINED "+data.Joined:state==ViewState.Guest?"GUEST PLAYER  •  LOCAL ACCOUNT":"PROFILE RECORD UNAVAILABLE";
         void SetStatus(string message)
@@ -178,8 +176,9 @@ namespace BattleCities.UI
         void ClearStatus(){if(statusFeedback!=null)StopCoroutine(statusFeedback);statusFeedback=null;}
         void ResetScroll(){Canvas.ForceUpdateCanvases();scroll.StopMovement();scroll.verticalNormalizedPosition=1;}
         static void Focus(Selectable control){if(control&&EventSystem.current)EventSystem.current.SetSelectedGameObject(control.gameObject);}
-        public void KeepControllerFocus()=>Psg1UiNavigation.KeepFocus(root,back);
-        void OnDestroy(){ClearStatus();Cancel();if(api)api.PlayerLoaded-=OnPlayer;styles.Dispose();if(commanderMaterial){if(Application.isPlaying)Destroy(commanderMaterial);else DestroyImmediate(commanderMaterial);}}
+        public void KeepControllerFocus(){if(ReplayViewerOpen)Psg1UiNavigation.KeepFocus(replayView,replayPause);else Psg1UiNavigation.KeepFocus(root,back);}
+        void OnDisable(){CloseReplayViewer();ClearStatus();Cancel();}
+        void OnDestroy(){CloseReplayViewer();ClearStatus();Cancel();if(api)api.PlayerLoaded-=OnPlayer;styles.Dispose();if(commanderMaterial){if(Application.isPlaying)Destroy(commanderMaterial);else DestroyImmediate(commanderMaterial);}}
     }
     static class ProfileShareBridge
     {

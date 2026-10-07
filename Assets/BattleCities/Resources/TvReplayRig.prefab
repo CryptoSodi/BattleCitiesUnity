@@ -1,0 +1,97 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4759026517543825081
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7403567339927886277}
+  - component: {fileID: 1021250646467373463}
+  m_Layer: 0
+  m_Name: TvReplayRig
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &7403567339927886277
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4759026517543825081}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1021250646467373463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4759026517543825081}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 869e503b7fdda0149a0478e023fb3351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BattleCities.BattleGame
+  LandDroneSettings:
+    PatrolSpeedMultiplier: 0.55
+    SightAngleDegrees: 90
+    SpeedMultiplier: 1.5
+    DetectionTiles: 9
+    Lifetime: 60
+    RouteTimeout: 60
+    RepathSeconds: 0.5
+    Acceleration: 540
+    SplashTiles: 1.25
+    Health: 2
+    DirectDamage: 8
+    SplashDamage: 2
+  selectedTankShootingSettings: {fileID: 0}
+  TankModels:
+  - {fileID: -8373590566324376937, guid: 0e8cdc8cc141ace46bc000bf66f9aa1e, type: 3}
+  - {fileID: -8373590566324376937, guid: 1d1a0d44c89b2604c989094fdd9a842a, type: 3}
+  - {fileID: -8373590566324376937, guid: 981a449269f84174792ed717d3785ed8, type: 3}
+  - {fileID: -8373590566324376937, guid: a2476163ca1fe87428f3f162168f8369, type: 3}
+  BrickModel: {fileID: -2667912376685509374, guid: 5d7cf6eaa0800444ca5f9115aed760c9, type: 3}
+  SteelModel: {fileID: 4016983517406289889, guid: bfc0314c099f066498c8962ce97cd5bf, type: 3}
+  BushModel: {fileID: 3420633815697973274, guid: 5cd97f0d806aee243882070473f266c6, type: 3}
+  EagleModel: {fileID: -7984845533184138375, guid: 1571f4a52d9b2b64c8b86da2085714b2, type: 3}
+  RuinedEagleModel: {fileID: 1439209591297987686, guid: dbbb4f87da3e2de4e9b1bd156d71cdc1, type: 3}
+  MineModel: {fileID: 8771091787928289351, guid: 55326c90a4cd11a41bae92703e9c42e7, type: 3}
+  DroneModel: {fileID: 8771091787928289351, guid: 8ff676c98c2c6bd4e8f88fd69a3aa7ed, type: 3}
+  GroundTurretPrefab: {fileID: 5317015607671502981, guid: 9a58f90f303a0c64fb9d354d5f6e8623, type: 3}
+  BulletModels:
+  - {fileID: -3720851100684730563, guid: 23f8f0134c98e6344b5ca532b3f6ba48, type: 3}
+  - {fileID: -3720851100684730563, guid: 015a2a8512192124dbeb011d6d69c190, type: 3}
+  - {fileID: -3720851100684730563, guid: dacc3ae7ca2ac4d4c8c8ff15e2be880a, type: 3}
+  BrickSectionData: {fileID: 4900000, guid: 5f41ac3181ff9734e97de732e97bef94, type: 3}
+  GroundTextures:
+  - {fileID: 2800000, guid: 8f6c38c4bd07ea34d829cd94ad3827bf, type: 3}
+  - {fileID: 2800000, guid: 3bcd2c126abd16441b6b66dedc3a1d2c, type: 3}
+  - {fileID: 2800000, guid: 286ee6f062029c547bd64e2ecd2e9127, type: 3}
+  - {fileID: 2800000, guid: 5ddd69db121dde448858c5bfa4d93951, type: 3}
+  PowerupAtlas: {fileID: 2800000, guid: 568e90744418d7c44b34ccf05aad8d49, type: 3}
+  Stage: 1
+  DayCycle: 1
+  Night: 0
+  Dust: 1
+  Headlights: 1
+  AutomaticCamera: 1
+  CameraShake: 1
+  ChaseCamera: 0
+  ChaseCameraHeight: 1.65
+  ChaseCameraDistance: 2.1
+  EnemyFire: 1
+  CameraElevation: 70
+  Zoom: 1

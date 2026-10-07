@@ -69,7 +69,7 @@ namespace BattleCities
             for(int i=0;i<5;i++)Launch(chunk,new[]{steel},center,Quaternion.identity,Vector3.one*(.06f+R()*.06f),4);
         }
         public void Clear()=>fragments.Clear();
-        public void Tick(float dt)
+        public void Tick(float dt,Camera camera=null,int layer=0)
         {
             // Small substeps make the bounce stable even when a frame is slow.
             for(int i=fragments.Count-1;i>=0;i--)
@@ -82,7 +82,7 @@ namespace BattleCities
                 }
                 float shrink=Mathf.Clamp01((f.Life-f.Age)/.65f);
                 var matrix=Matrix4x4.TRS(f.Position,f.Rotation,f.Scale*shrink)*Matrix4x4.Translate(-f.Center);
-                for(int sub=0;sub<f.Mesh.subMeshCount&&sub<f.Materials.Length;sub++)Graphics.DrawMesh(f.Mesh,matrix,f.Materials[sub],0,null,sub,null,ShadowCastingMode.On,true);
+                for(int sub=0;sub<f.Mesh.subMeshCount&&sub<f.Materials.Length;sub++)Graphics.DrawMesh(f.Mesh,matrix,f.Materials[sub],layer,camera,sub,null,ShadowCastingMode.On,true);
             }
         }
         void OnDestroy(){Destroy(brick);Destroy(steel);Destroy(roof);Destroy(plaster);}

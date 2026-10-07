@@ -298,6 +298,7 @@ namespace BattleCities.UI
         public void Open(bool refreshAccount=true)
         {
             if(!IsConfigured)return;
+            currencyChosen=false;
             var tankScreen=menu.Content.Find("Main Display/Pre-battle screens");
             if(tankScreen)tankScreen.gameObject.SetActive(false);
             root.gameObject.SetActive(true);menu.SetHeroVisible(false);menu.SetTankSelectorBackdrop(true);menu.RefreshLayout();
@@ -344,7 +345,7 @@ namespace BattleCities.UI
         }
         public void SetCurrency(ShopCurrency next,bool focus)
         {
-            if(next==ShopCurrency.Swap)return;
+            if(next==ShopCurrency.Swap)return;if(focus)currencyChosen=true;
             currency=next;bool swap=currency==ShopCurrency.Swap;catalog.gameObject.SetActive(!swap);filterRow.gameObject.SetActive(!swap);swapPage.gameObject.SetActive(swap);
             for(int i=0;i<3;i++){bool active=i==(int)currency;hudSelections[i].enabled=active;textStyles.ApplyCleanButton(currencyLabels[i],active);}
             SetCategory(category,false);RefreshSwap();if(focus)Focus(currencyTabs[(int)currency]);

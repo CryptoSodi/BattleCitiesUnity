@@ -219,10 +219,21 @@ namespace BattleCities.UI
             leaderboardMessage=boardMessage;leaderboardDetail=boardDetail;inputActions=actions;inputModule=module;
             canvas=GetComponent<Canvas>();
         }
+        // A saved Editor preview must not become the player's launch page.
+        private void ResetStartupView()
+        {
+            if(mainFrame)foreach(string page in new[]{"Pre-battle screens","Shop screen","Ranking screen","Operations screen","Settings screen","Player profile screen"})
+            {
+                var screen=mainFrame.Find(page);if(screen)screen.gameObject.SetActive(false);
+            }
+            if(modal)modal.gameObject.SetActive(false);
+            profileReturnScreen=settingsReturnScreen=null;
+            SetHeroVisible(true,false);
+        }
         private void Awake()
         {
             canvas=GetComponent<Canvas>();
-            if(Application.isPlaying)EnsureApiClient();
+            if(Application.isPlaying){ResetStartupView();EnsureApiClient();}
         }
         public MainMenuLayoutSettings WebLayout => webLayout;
         public MainMenuLayoutSettings Psg1Layout => psg1Layout;
@@ -602,7 +613,7 @@ namespace BattleCities.UI
                 SetHeroVisible(!IsTvScreenOpen);
                 if(EventSystem.current)EventSystem.current.SetSelectedGameObject(previousSelection?previousSelection:startButton.gameObject);
             }
-            else if(IsPlayerProfileOpen)ClosePlayerProfile();
+            else if(IsPlayerProfileOpen){EnsurePlayerProfile();if(profileScreen.ReplayViewerOpen)profileScreen.CloseReplayViewer();else ClosePlayerProfile();}
             else if(IsSettingsOpen)CloseSettings();
             else if(IsRankingOpen){EnsureRanking();rankingScreen.Back();}
             else if(IsOperationsOpen){EnsureOperations();operations.Back();}

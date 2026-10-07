@@ -43,7 +43,7 @@ namespace BattleCities
         private int pauseStickDirection;
         public int SelectedPowerupSlot => selectedPowerup;
         private bool Psg1 => RuntimePlatformInfo.IsPsg1;
-        private bool BlockCombat => IsReplaying || ReplayBrowser.IsOpen || showDebug || Time.frameCount <= gamepadBlockedThroughFrame;
+        private bool BlockCombat => IsReplaying || showDebug || Time.frameCount <= gamepadBlockedThroughFrame;
 
         private void ConfigureGamepadBindings()
         {
@@ -65,7 +65,7 @@ namespace BattleCities
 
         private void UpdateGamepadControls()
         {
-            if(IsReplaying||ReplayBrowser.IsOpen)return;
+            if(IsReplaying)return;
             bool lobby = TouchLobbyVisible;
             if (lobby) { BlockControllerTransition(); return; }
             if (Psg1 && showDebug)
@@ -113,7 +113,7 @@ namespace BattleCities
             if (IsOnline) return new[] { "RESUME", "ONLINE LOBBY" };
             if (Simulation.Won && Stage < 35) return new[] { "NEXT STAGE", "RESTART", "MAIN MENU" };
             if (Simulation.Won || Simulation.Lost) return new[] { "RESTART", "MAIN MENU" };
-            return new[] { "RESUME", "REPLAYS", "RESTART", "ONLINE LOBBY", "DEBUG", "MAIN MENU" };
+            return new[] { "RESUME", "RESTART", "ONLINE LOBBY", "DEBUG", "MAIN MENU" };
         }
 
         private void ActivatePauseChoice(string choice)
@@ -121,7 +121,6 @@ namespace BattleCities
             BlockControllerTransition(); gamepadHelp = false;
             switch (choice)
             {
-                case "REPLAYS": ReplayBrowser.Open(this); break;
                 case "RESUME": paused = false; break;
                 case "RESTART": LoadStage(Stage); break;
                 case "NEXT STAGE": LoadStage(Stage + 1); break;

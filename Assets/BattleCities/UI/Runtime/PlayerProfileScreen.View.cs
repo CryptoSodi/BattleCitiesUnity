@@ -57,7 +57,7 @@ namespace BattleCities.UI
             battleHeading=Panel("Heading",battleLog,null);
             Label("Title",battleHeading,"RECENT BATTLES",new Rect(.018f,.02f,.38f,.43f),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
             recordCount=Label("Records",battleHeading,"",new Rect(.42f,.04f,.22f,.39f),19,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);recordCount.color=new Color32(63,89,115,255);
-            localReplays=Control("Local replays",battleHeading,"REPLAYS",()=>{if(ownProfile)ReplayBrowser.Open(null);});Fit((RectTransform)localReplays.transform,new Rect(.42f,.02f,.22f,.43f));
+            var oldLibrary=battleHeading.Find("Local replays");if(oldLibrary)oldLibrary.gameObject.SetActive(false);
             for(int i=0;i<BattleColumns.Length;i++)
             {
                 var column=Label(BattleColumns[i],battleHeading,BattleColumns[i],new Rect(BattleColumnLeft[i],.55f,BattleColumnWidth[i],.35f),20,ArcadeTextTreatment.PrizeAmount,i==0?TextAlignmentOptions.MidlineLeft:TextAlignmentOptions.Center);
@@ -87,7 +87,7 @@ namespace BattleCities.UI
             if(ready){values[0].text=data.SeasonRank.HasValue?PlayerProfileData.Format(data.SeasonRank.Value):"—";values[1].text=PlayerProfileData.Format(data.Points);values[2].text=PlayerProfileData.Format(data.Matches);values[3].text=PlayerProfileData.Format(data.BestScore);}
             statNames[0].text=ready?data.Season.ToUpperInvariant()+" RANK":"SEASON RANK";
             recordCount.text=ready?PlayerProfileData.Format(data.TotalRecords)+" RECORDS":"— RECORDS";pageLabel.text=ready?data.Page+" / "+data.TotalPages:"—";
-            localReplays.gameObject.SetActive(ownProfile);recordCount.gameObject.SetActive(!ownProfile);
+            recordCount.gameObject.SetActive(true);
             previous.interactable=ready&&data.Page>1;next.interactable=ready&&data.Page<data.TotalPages;
             retry.gameObject.SetActive(state==ViewState.Unavailable);retry.interactable=state==ViewState.Unavailable;
             foreach(var control in new[]{share,previous,next,retry})
@@ -138,14 +138,14 @@ namespace BattleCities.UI
         }
         void Navigation()
         {
-            var rows=new List<Selectable[]>{new Selectable[]{back,share},new Selectable[]{localReplays,previous,next}};
+            var rows=new List<Selectable[]>{new Selectable[]{back,share},new Selectable[]{previous,next}};
             foreach(var b in battles)rows.Add(new Selectable[]{b});if(retry.gameObject.activeSelf)rows.Add(new Selectable[]{retry});Psg1UiNavigation.Rows(rows.ToArray());
         }
         public void ApplyLayout(MainMenuPlatform platform)
         {
             if(!IsConfigured)return;
             var head=new TvTitleHeaderLayout(root);var foot=new TvStatusFooterLayout(root);
-            head.PlaceTitle(header,titleIcon.rectTransform,title.rectTransform,true);head.PlaceNavigation(header,nav,true);foot.Place(footer);
+            head.PlaceTitle(header,titleIcon.rectTransform,title.rectTransform,true);head.PlaceNavigation(header,nav,true);foot.Place(footer);if(ReplayViewerOpen)LayoutReplayViewer();
             MainMenuScene.Place((RectTransform)back.transform,3,3,nav.rect.width-6,head.NavigationHeight-6);
             float top=head.Height+12,available=root.rect.height-top-foot.Height-16,width=root.rect.width-8;
             float heroH=Mathf.Clamp(available*.15f,76f,94f);

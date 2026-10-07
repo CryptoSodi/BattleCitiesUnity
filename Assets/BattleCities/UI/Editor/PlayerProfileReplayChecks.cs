@@ -49,7 +49,7 @@ namespace BattleCities.Editor
                     menu.ApplyLayout(platform,platform==MainMenuPlatform.Web?new Vector2(1583,924):platform==MainMenuPlatform.Psg1?new Vector2(1240,1080):new Vector2(844,390));
                     Canvas.ForceUpdateCanvases();
                     var heading=page.Root.Find("Battle log/Heading");
-                    Check(!heading.Find("Local replays").gameObject.activeSelf&&heading.Find("Records").gameObject.activeSelf,platform+" other profile shows its record count, not local recordings");
+                    var library=heading.Find("Local replays");Check((!library||!library.gameObject.activeSelf)&&heading.Find("Records").gameObject.activeSelf,platform+" profile shows record count and match WATCH only");
                     Check(page.BattleButtons[0].transform.Find("Watch/Caption").GetComponent<TMP_Text>().text=="WATCH",platform+" public replay can be watched");
                     Check(page.BattleButtons[1].transform.Find("Watch/Caption").GetComponent<TMP_Text>().text=="NO REPLAY",platform+" missing recording stays unavailable");
                     EventSystem.current.SetSelectedGameObject(page.BattleButtons[0].gameObject);
@@ -65,7 +65,7 @@ namespace BattleCities.Editor
                 ExecuteEvents.Execute(page.BattleButtons[0].gameObject,new BaseEventData(EventSystem.current),ExecuteEvents.submitHandler);yield return WaitRequest(page);
                 Check(launches==1&&lastPath=="/api/players/"+Player+"/profile/matches/mtc-fixture-0/replay","anonymous WATCH uses selected player's public endpoint");
                 scenario="array";page.Watch(0);yield return WaitRequest(page);Check(launches==2,"replays array response is supported");
-                foreach(var failure in new[]{"missing","offline","empty","bad-item","bad-array","damaged","future"})
+                foreach(var failure in new[]{"missing","offline","empty","bad-item","bad-array","damaged","future","legacy"})
                 {
                     scenario=failure;int before=launches;page.Watch(0);yield return WaitRequest(page);
                     string message=page.Root.Find("Commander/Paper/Identity").GetComponent<TMP_Text>().text;
@@ -74,10 +74,10 @@ namespace BattleCities.Editor
                 scenario="slow";int previous=launches;page.Watch(0);page.Close();yield return new WaitForSecondsRealtime(.25f);
                 Check(launches==previous,"closing profile cancels pending playback");
                 scenario="native";page.Open();yield return WaitProfile(page);
-                Check(page.Data.Id==Viewer&&page.Root.Find("Battle log/Heading/Local replays").gameObject.activeSelf&&!page.Root.Find("Battle log/Heading/Records").gameObject.activeSelf,"own profile retains its replay library");
+                var ownLibrary=page.Root.Find("Battle log/Heading/Local replays");Check(page.Data.Id==Viewer&&(!ownLibrary||!ownLibrary.gameObject.activeSelf)&&page.Root.Find("Battle log/Heading/Records").gameObject.activeSelf,"own profile also uses match WATCH only");
                 scenario="slow";page.Watch(0);page.Open(Player);yield return WaitProfile(page);yield return new WaitForSecondsRealtime(.25f);
                 Check(launches==previous&&page.Data.Id==Player,"switching players cancels stale playback");
-                Check(ReplayBrowser.Pending==null,"public WATCH test leaves no pending live recording or archive");
+                Check(!page.ReplayViewerOpen,"public WATCH fixture leaves no active playback");
             }
             finally
             {
@@ -113,6 +113,7 @@ namespace BattleCities.Editor
                 var data=(JObject)replay.DeepClone();
                 if(choice=="damaged")data["simulationVersion"]="incompatible";
                 if(choice=="future")data["format"]="battlecities-unity-input-v2";
+                if(choice=="legacy")data["format"]="battlecities-web-replay-v1";
                 done(200,new JObject{["item"]=choice=="array"?new JObject{["replays"]=new JArray(data)}:new JObject{["replay"]=data}},null);yield break;
             }
             yield return null;
