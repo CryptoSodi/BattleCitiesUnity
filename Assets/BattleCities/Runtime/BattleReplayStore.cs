@@ -12,6 +12,13 @@ namespace BattleCities
     {
         public BattleReplay replay;
         public string apiUrl, ownerId, sessionId, replayId, matchId, uploadStatus="Local recording", verificationStatus="unverified";
+        public string ownerProvider;
+        public int uploadAttempts;
+        public long retryAfterUtcTicks;
+        public bool uploadStopped;
+        [JsonIgnore] public bool NeedsMatchSubmission=>replay!=null&&replay.mode=="single"&&replay.completion=="completed"&&!replay.debugUsed;
+        [JsonIgnore] public bool HasPendingUpload=>replay!=null&&!string.IsNullOrEmpty(sessionId)&&!string.IsNullOrEmpty(ownerId)&&
+            (string.IsNullOrEmpty(replayId)||(NeedsMatchSubmission&&string.IsNullOrEmpty(matchId)));
     }
     public static class BattleReplayStore
     {
@@ -42,8 +49,9 @@ namespace BattleCities
             foreach(var old in files.Skip(20))
             {
                 var item=Load(old.Name.Substring(0,old.Name.Length-5));
-                // Keep unsubmitted evidence; never prune an outstanding server session.
-                if(item!=null&&!string.IsNullOrEmpty(item.sessionId)&&string.IsNullOrEmpty(item.replayId))continue;
+                // A replay upload and its score submission are separate durable steps.
+                // Keep evidence for both pending steps, including permanent rejections.
+                if(item!=null&&item.HasPendingUpload)continue;
                 old.Delete();if(File.Exists(old.FullName+".bak"))File.Delete(old.FullName+".bak");
             }
             FlushWeb();return path;
@@ -73,7 +81,7 @@ namespace BattleCities
             try
             {
                 if(!Directory.Exists(DirectoryPath))return result;
-                foreach(var file in new DirectoryInfo(DirectoryPath).GetFiles("*.json").OrderByDescending(f=>f.LastWriteTimeUtc).Take(100))
+                foreach(var file in new DirectoryInfo(DirectoryPath).GetFiles("*.json").OrderByDescending(f=>f.LastWriteTimeUtc))
                 {var item=Load(Path.GetFileNameWithoutExtension(file.Name));if(item!=null)result.Add(item);}
             }
             catch(Exception e){LastError=e.Message;}

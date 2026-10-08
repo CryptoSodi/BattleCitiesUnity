@@ -1,2 +1,4 @@
 bin/
 obj/
+# Keep the hand-authored shared verifier project.
+!ReplayVerifier.csproj

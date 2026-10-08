@@ -39,6 +39,9 @@ namespace BattleCities
             roundedSprite=Sprite.Create(roundedTexture,new Rect(0,0,64,64),new Vector2(.5f,.5f),100,0,SpriteMeshType.FullRect,new Vector4(16,16,16,16));
             minimapTexture=new Texture2D(MinimapPixels,MinimapPixels,TextureFormat.RGBA32,false){name="Battle tactical map",filterMode=FilterMode.Point,wrapMode=TextureWrapMode.Clamp};
             minimapPixels=new Color32[MinimapPixels*MinimapPixels];
+            var fps=new GameObject("Frame rate",typeof(RectTransform),typeof(BattleFrameRateDisplay));
+            fps.transform.SetParent(canvas.transform,false);
+            fps.GetComponent<BattleFrameRateDisplay>().Initialize(roundedSprite,navy);
         }
         T Element<T>(Rect rect) where T:Graphic
         {

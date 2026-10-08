@@ -14,9 +14,11 @@ namespace BattleCities
         private readonly Queue<ReplayEvent> replayPending=new Queue<ReplayEvent>();
         private bool replayPreparing,loadingReplay,replaySaved;
         private float replaySpeed=1;
+        private string battleFuelRequestId;
         public bool IsReplaying=>replayPlayer!=null||loadingReplay;
         public bool ReplayReady=>!replayPreparing;
-        public string ReplayStatus {get;private set;}="";
+        private string replayStatus="";
+        public string ReplayStatus {get=>(replayPreparing||replaySaved&&replayArchive!=null&&!string.IsNullOrEmpty(replayArchive.sessionId))?(replayArchive?.uploadStatus??replayStatus):replayStatus;private set=>replayStatus=value;}
         public ReplayPlayer ReplayPlayback=>replayPlayer;
         public float ReplaySpeed {get=>replaySpeed;set=>replaySpeed=Mathf.Clamp(value,.25f,4);}
         private void BeginRecording(MapData map)
@@ -28,15 +30,19 @@ namespace BattleCities
         private void StartReplayRecorder()
         {
             replaySaved=false;
-            replayRecorder=new ReplayRecorder(Simulation,replayMap,Application.version);
-            replayArchive=new ReplayArchive {replay=replayRecorder.Data,apiUrl=BattlePreparation.Ready?BattlePreparation.ApiUrl:null};
+            battleFuelRequestId=BattlePreparation.Ready?BattlePreparation.FuelRequestId:null;
+            replayRecorder=new ReplayRecorder(Simulation,replayMap,Application.version,backgroundCheckpoints:true);
+            replayArchive=new ReplayArchive {replay=replayRecorder.Data,apiUrl=BattlePreparation.Ready?BattlePreparation.ApiUrl:null,
+                ownerId=BattlePreparation.Ready?BattlePreparation.OwnerId:null,ownerProvider=BattlePreparation.Ready?BattlePreparation.OwnerProvider:null};
             ReplayStatus="Recording";
             if(!string.IsNullOrEmpty(replayArchive.apiUrl))
             {
-                replayPreparing=true;var recorder=replayRecorder;
+                replayPreparing=true;
+                var notice=GetComponent<BattleConnectionNotice>();if(!notice)notice=gameObject.AddComponent<BattleConnectionNotice>();notice.Initialize(this);
+                var recorder=replayRecorder;
                 BattleReplayService.Instance.StartCoroutine(BattleReplayService.Instance.Prepare(recorder,replayArchive,
                     ()=>this&&replayRecorder==recorder&&!recorder.Finished,
-                    ()=>{if(this&&replayRecorder==recorder){replayPreparing=false;ReplayStatus=string.IsNullOrEmpty(replayArchive.sessionId)?"Recording locally":"Recording for review";}}));
+                    ()=>{if(this&&replayRecorder==recorder){replayPreparing=false;ReplayStatus=replayArchive.uploadStatus;}}));
             }
         }
         public void StartOnlineRecording()
@@ -58,6 +64,8 @@ namespace BattleCities
         {
             if(Simulation.Won||Simulation.Lost||!ReplayReady)return;
             if(Simulation.IsMultiplayer&&!Simulation.MatchStarted)return;
+            if(!string.IsNullOrEmpty(battleFuelRequestId))
+            {BattleFuelReceipt.MarkStarted(replayArchive?.apiUrl,replayArchive?.ownerId,battleFuelRequestId);battleFuelRequestId=null;}
             ApplyPendingReplayEvents();
             replayRecorder?.BeforeStep(command,online);
             if(online!=null)Simulation.StepMultiplayer(online);else Simulation.Step(command);
@@ -77,6 +85,8 @@ namespace BattleCities
             replaySaved=true;
             try
             {
+                if(replayRecorder.Error!=null)throw new InvalidOperationException(replayRecorder.Error);
+                BattleScoreCache.Record(replayArchive);
                 BattleReplayStore.Save(replayArchive);ReplayStatus=replayRecorder.Data.completion=="truncated"?"Recording limit reached; partial replay saved":"Replay saved";
                 if(!string.IsNullOrEmpty(replayArchive.sessionId))BattleReplayService.Instance.Upload(replayArchive);
             }

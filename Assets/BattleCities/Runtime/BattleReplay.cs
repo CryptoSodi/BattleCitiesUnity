@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -56,16 +58,43 @@ namespace BattleCities.Core
     {
         private sealed class StateFields : DefaultContractResolver
         {
+            private readonly bool canonical;
+            public StateFields(bool canonical = false) { this.canonical = canonical; }
             protected override IList<JsonProperty> CreateProperties(Type type,MemberSerialization memberSerialization)
             {
-                if(type.Namespace!="BattleCities.Core")return base.CreateProperties(type,memberSerialization);
-                var properties=type.GetFields(BindingFlags.Public|BindingFlags.Instance).Select(f=>base.CreateProperty(f,memberSerialization)).ToList();
-                // This is stored simulation state; the other TankState properties are derived UI values.
-                if(type==typeof(TankState))properties.Add(base.CreateProperty(type.GetProperty("ReloadDuration"),memberSerialization));
-                return properties;
+                IList<JsonProperty> properties;
+                if(type.Namespace!="BattleCities.Core")properties=base.CreateProperties(type,memberSerialization);
+                else
+                {
+                    properties=type.GetFields(BindingFlags.Public|BindingFlags.Instance).Select(f=>base.CreateProperty(f,memberSerialization)).ToList();
+                    // This is stored simulation state; the other TankState properties are derived UI values.
+                    if(type==typeof(TankState))properties.Add(base.CreateProperty(type.GetProperty("ReloadDuration"),memberSerialization));
+                }
+                if(!canonical)return properties;
+                foreach(var property in properties)
+                {
+                    if(property.Converter!=null)property.Converter=new CanonicalFallback(property.Converter);
+                    if(property.ItemConverter!=null)property.ItemConverter=new CanonicalFallback(property.ItemConverter);
+                }
+                // Json.NET caches these contracts, so property ordering is computed once per type.
+                return properties.OrderBy(p=>p.PropertyName,StringComparer.Ordinal).ToList();
+            }
+            protected override JsonContract CreateContract(Type type)
+            {
+                var contract=base.CreateContract(type);
+                if(!canonical)return contract;
+                if(contract.Converter!=null&&contract.Converter.CanWrite)contract.Converter=new CanonicalFallback(contract.Converter);
+                else if(contract is JsonDictionaryContract||contract is JsonDynamicContract||contract is JsonLinqContract||
+                    contract is JsonISerializableContract||(contract is JsonObjectContract obj&&obj.ExtensionDataGetter!=null))
+                    contract.Converter=new CanonicalFallback(null);
+                if(contract is JsonContainerContract container&&container.ItemConverter!=null)
+                    container.ItemConverter=new CanonicalFallback(container.ItemConverter);
+                return contract;
             }
         }
-        private static readonly StateFields HashFields=new StateFields();
+        private static readonly StateFields LegacyFields=new StateFields();
+        private static readonly StateFields HashFields=new StateFields(true);
+        private static readonly UTF8Encoding HashEncoding=new UTF8Encoding(false);
         public static readonly JsonSerializerSettings Settings = new JsonSerializerSettings {
             TypeNameHandling=TypeNameHandling.None, MaxDepth=64, DateParseHandling=DateParseHandling.None,
             Culture=System.Globalization.CultureInfo.InvariantCulture, FloatParseHandling=FloatParseHandling.Double
@@ -74,16 +103,77 @@ namespace BattleCities.Core
         public static T Copy<T>(T value) => JsonConvert.DeserializeObject<T>(Write(value), Settings);
         public static string Hash(object value)
         {
+            if(value==null)throw new ArgumentNullException(nameof(value));
             var serializer=JsonSerializer.Create(Settings);serializer.ContractResolver=HashFields;
-            var token=JToken.FromObject(value,serializer);
-            using(var sha=SHA256.Create())return BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes(Sort(token).ToString(Formatting.None)))).Replace("-", "").ToLowerInvariant();
+            using(var sha=SHA256.Create())
+            using(var stream=new CryptoStream(Stream.Null,sha,CryptoStreamMode.Write))
+            {
+                using(var text=new StreamWriter(stream,HashEncoding,4096,true))
+                using(var json=new StateHashWriter(text))
+                {
+                    serializer.Serialize(json,value);
+                    json.Flush();
+                    text.Flush();
+                }
+                stream.FlushFinalBlock();
+                return BitConverter.ToString(sha.Hash).Replace("-", "").ToLowerInvariant();
+            }
+        }
+        private sealed class StateHashWriter : JsonTextWriter
+        {
+            public StateHashWriter(TextWriter text):base(text)
+            {
+                Formatting=Formatting.None;
+                Culture=System.Globalization.CultureInfo.InvariantCulture;
+                CloseOutput=false;
+                ArrayPool=HashCharPool.Instance;
+            }
+            private void Float(float value)=>base.WriteValue("f32:"+unchecked((uint)BitConverter.SingleToInt32Bits(value)).ToString("x8",System.Globalization.CultureInfo.InvariantCulture));
+            public override void WriteValue(float value)=>Float(value);
+            // Match JValue's numeric storage, including its handling of signed double zero.
+            // Simulation fields are Single; these compatibility cases stay off that hot path.
+            private void LegacyFloat(JValue value)=>Float(Convert.ToSingle(value.Value,System.Globalization.CultureInfo.InvariantCulture));
+            public override void WriteValue(double value)=>LegacyFloat(new JValue(value));
+            public override void WriteValue(decimal value)=>LegacyFloat(new JValue(value));
+            public override void WriteValue(float? value){if(value.HasValue)Float(value.Value);else WriteNull();}
+            public override void WriteValue(double? value){if(value.HasValue)WriteValue(value.Value);else WriteNull();}
+            public override void WriteValue(decimal? value){if(value.HasValue)WriteValue(value.Value);else WriteNull();}
+        }
+        private sealed class HashCharPool : IArrayPool<char>
+        {
+            public static readonly HashCharPool Instance=new HashCharPool();
+            public char[] Rent(int minimumLength)=>System.Buffers.ArrayPool<char>.Shared.Rent(minimumLength);
+            public void Return(char[] array)=>System.Buffers.ArrayPool<char>.Shared.Return(array);
+        }
+        // Dictionary keys, extension data, JTokens and custom converters can emit properties
+        // outside the cached object contracts. Preserve their legacy canonical form locally;
+        // the simulation's ordinary field/array graph takes the streaming path.
+        private sealed class CanonicalFallback : JsonConverter
+        {
+            private readonly JsonConverter inner;
+            public CanonicalFallback(JsonConverter inner){this.inner=inner;}
+            public override bool CanConvert(Type type)=>true;
+            public override bool CanRead=>false;
+            public override bool CanWrite=>inner==null||inner.CanWrite;
+            public override object ReadJson(JsonReader reader,Type type,object existing,JsonSerializer serializer)=>throw new NotSupportedException();
+            public override void WriteJson(JsonWriter writer,object value,JsonSerializer serializer)
+            {
+                var legacy=JsonSerializer.Create(Settings);legacy.ContractResolver=LegacyFields;
+                JToken token;
+                if(inner==null)token=JToken.FromObject(value,legacy);
+                else
+                {
+                    using(var buffered=new JTokenWriter())
+                    {inner.WriteJson(buffered,value,legacy);token=buffered.Token;}
+                }
+                Sort(token).WriteTo(writer);
+            }
         }
         private static JToken Sort(JToken token)
         {
             if(token is JObject obj)return new JObject(obj.Properties().OrderBy(p=>p.Name,StringComparer.Ordinal).Select(p=>new JProperty(p.Name,Sort(p.Value))));
             if(token is JArray array)return new JArray(array.Select(Sort));
-            // Mono and CoreCLR print identical floats differently near small timers.
-            // Hash their exact IEEE-754 bits instead of runtime-specific decimals.
+            // Preserve the existing hash representation across Mono, CoreCLR and IL2CPP.
             if(token.Type==JTokenType.Float)
             {
                 float value=Convert.ToSingle(((JValue)token).Value,System.Globalization.CultureInfo.InvariantCulture);
@@ -174,10 +264,26 @@ namespace BattleCities.Core
     {
         public BattleReplay Data {get;}
         public bool Finished {get;private set;}
+        public string Error {get;private set;}
         private readonly BattleSimulation simulation;
-        public ReplayRecorder(BattleSimulation simulation,MapData map,string buildVersion)
+        private readonly bool backgroundCheckpoints;
+        private const int MaxPendingCheckpoints=2;
+        private readonly Queue<PendingCheckpoint> pendingCheckpoints=new Queue<PendingCheckpoint>();
+        private Task<string> lastCheckpointWork;
+        private sealed class PendingCheckpoint
+        {
+            public object snapshot;
+            public ReplayCheckpoint checkpoint;
+            public Task<string> work;
+        }
+        public ReplayRecorder(BattleSimulation simulation,MapData map,string buildVersion,bool backgroundCheckpoints=false)
         {
             this.simulation=simulation;
+#if UNITY_WEBGL && !UNITY_EDITOR
+            this.backgroundCheckpoints=false;
+#else
+            this.backgroundCheckpoints=backgroundCheckpoints;
+#endif
             if(simulation.Tick!=0)throw new InvalidOperationException("Recording must start before tick one.");
             Data=new BattleReplay { id=Guid.NewGuid().ToString("N"),createdAt=DateTime.UtcNow.ToString("O"),buildVersion=buildVersion,
                 mode=simulation.Mode==BattleMode.Offline?"single":simulation.Mode==BattleMode.Coop?"coop":"versus",seed=simulation.ReplaySeed,
@@ -211,6 +317,9 @@ namespace BattleCities.Core
         public void AfterStep()
         {
             if(Finished)return;
+            while(pendingCheckpoints.Count>0&&pendingCheckpoints.Peek().work.IsCompleted)
+                CompleteOldestCheckpoint();
+            if(Finished)return;
             Data.durationTicks=simulation.Tick;
             if(simulation.Tick%60==0)Checkpoint();
             if(simulation.Won||simulation.Lost)Finish("completed");
@@ -222,8 +331,65 @@ namespace BattleCities.Core
             Data.durationTicks=simulation.Tick;Data.events.RemoveAll(e=>e.tick>Data.durationTicks);
             Data.completion=reason;Data.claimedResult=ReplayResult.From(simulation);
             if(Data.checkpoints.Last().tick!=simulation.Tick)Checkpoint();
+            // Saving/uploading starts only after every captured checkpoint is complete.
+            while(pendingCheckpoints.Count>0&&Error==null)CompleteOldestCheckpoint();
         }
-        private void Checkpoint()=>Data.checkpoints.Add(new ReplayCheckpoint{tick=simulation.Tick,stateHash=simulation.ReplayStateHash()});
+        private void Checkpoint()
+        {
+            // Session preparation needs tick zero immediately. Browser players and the
+            // verifier retain the synchronous path; native recording opts into workers.
+            if(!backgroundCheckpoints||simulation.Tick==0)
+            {
+                Data.checkpoints.Add(new ReplayCheckpoint{tick=simulation.Tick,stateHash=simulation.ReplayStateHash()});
+                return;
+            }
+            // Bound retained snapshots and worker backlog, even if recording is driven
+            // faster than real time. No checkpoint may be skipped to recover frame time.
+            while(pendingCheckpoints.Count>=MaxPendingCheckpoints&&Error==null)CompleteOldestCheckpoint();
+            if(Error!=null)return;
+            try
+            {
+                object snapshot=simulation.CaptureReplayStateData();
+                var checkpoint=new ReplayCheckpoint{tick=simulation.Tick};
+                Data.checkpoints.Add(checkpoint);
+                // Continuations serialize work on the pool, never on Unity's context.
+                // Workers own only detached state and return a string; the game thread
+                // alone updates the replay/checkpoint list.
+                Task<string> work=lastCheckpointWork==null
+                    ?Task.Run(()=>ReplayJson.Hash(snapshot))
+                    :lastCheckpointWork.ContinueWith(_=>ReplayJson.Hash(snapshot),TaskScheduler.Default);
+                pendingCheckpoints.Enqueue(new PendingCheckpoint{snapshot=snapshot,checkpoint=checkpoint,work=work});
+                lastCheckpointWork=work;
+            }
+            catch(Exception error){FailCheckpoint(error);}
+        }
+        private void CompleteOldestCheckpoint()
+        {
+            var pending=pendingCheckpoints.Dequeue();
+            try
+            {
+                try {pending.checkpoint.stateHash=pending.work.GetAwaiter().GetResult();}
+                catch {pending.checkpoint.stateHash=ReplayJson.Hash(pending.snapshot);}
+                if(pendingCheckpoints.Count==0)lastCheckpointWork=null;
+            }
+            catch(Exception error){FailCheckpoint(error);}
+        }
+        private void FailCheckpoint(Exception error)
+        {
+            Error="Checkpoint hashing failed ("+error.GetType().Name+").";
+            Finished=true;simulation.ReplayLifecycle-=RecordEvent;
+            while(pendingCheckpoints.Count>0)
+            {
+                var abandoned=pendingCheckpoints.Dequeue().work;
+                // These detached tasks may finish after recording is abandoned.
+                // Observe failures without touching Unity or the invalid archive.
+                abandoned.ContinueWith(task=>{var observed=task.Exception;},
+                    System.Threading.CancellationToken.None,
+                    TaskContinuationOptions.OnlyOnFaulted|TaskContinuationOptions.ExecuteSynchronously,
+                    TaskScheduler.Default);
+            }
+            lastCheckpointWork=null;
+        }
         public static int Pack(Command c)=>((int?)c.Move+1??0)|(((int?)c.Aim+1??0)<<3)|(c.Fire?64:0)|(c.PowerShot?128:0)|(c.SecondaryFire?256:0);
         public static Command Unpack(int bits)=>new Command { Move=(bits&7)==0?(Facing?)null:(Facing)((bits&7)-1),Aim=((bits>>3)&7)==0?(Facing?)null:(Facing)(((bits>>3)&7)-1),Fire=(bits&64)!=0,PowerShot=(bits&128)!=0,SecondaryFire=(bits&256)!=0 };
     }

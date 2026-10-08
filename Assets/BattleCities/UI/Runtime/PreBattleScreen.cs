@@ -876,6 +876,7 @@ namespace BattleCities.UI
         }
         public void Open()
         {
+            launchStage=1;
             CancelLoadoutRequests();
             GetComponent<MainMenuScene>()?.FitPreBattleScreen(root);
             ApplyRosterPanel();
@@ -1060,9 +1061,9 @@ namespace BattleCities.UI
             {
                 if(generation!=loadoutGeneration||!IsOpen)return;
                 accountLoading=false;inventoryRoutine=null;
-                if(code>=200&&code<300&&body?["authenticated"]?.Type==JTokenType.Boolean&&YesLoadout(body["authenticated"])&&body["account"] is JObject data&&ValidLoadoutAccount(data))
+                if(code>=200&&code<300&&body?["authenticated"]?.Type==JTokenType.Boolean&&YesLoadout(body["authenticated"])&&body["account"] is JObject data&&ValidLoadoutAccount(data)&&AccountMatchesPlayer(data))
                 {
-                    account=data;inventoryUnavailable=false;
+                    account=data;inventoryUnavailable=false;RestoreFuelReceipt();
                     var stored=OwnedDraft(data["loadout"] as JObject);loadout=loadoutDirty?OwnedDraft(loadout):stored;
                     status.text=inLoadout?"SELECT A SLOT, THEN CHOOSE AN OWNED POWER":"";
                 }
@@ -1090,10 +1091,10 @@ namespace BattleCities.UI
         {
             int generation=loadoutGeneration;var desired=(JObject)loadout.DeepClone();
             busy=true;status.text="SAVING LOADOUT...";UpdateView();bool saved=false;
-            yield return api.Request("PUT","/api/economy/account",new JObject{{"account",new JObject{{"loadout",desired}}}},(code,body,error)=>
+            yield return api.Request("PUT","/api/economy/account",new JObject{{"expectedPlayerId",(string)account["playerId"]},{"account",new JObject{{"loadout",desired}}}},(code,body,error)=>
             {
                 if(generation!=loadoutGeneration||!IsLoadout)return;
-                if(code>=200&&code<300&&YesLoadout(body?["authenticated"])&&body["account"] is JObject data&&ValidLoadoutAccount(data)&&JToken.DeepEquals(desired,data["loadout"]))
+                if(code>=200&&code<300&&YesLoadout(body?["authenticated"])&&body["account"] is JObject data&&ValidLoadoutAccount(data)&&AccountMatchesPlayer(data)&&JToken.DeepEquals(desired,data["loadout"]))
                 {account=data;saved=true;loadoutDirty=false;}
             });
             if(generation!=loadoutGeneration||!IsLoadout)yield break;

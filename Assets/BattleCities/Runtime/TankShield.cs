@@ -15,7 +15,8 @@ namespace BattleCities
             field=new Material(Resources.Load<Shader>("ShieldDome"));
             energy=Transparent(new Color(.2f,.85f,1,.85f));
             shell=GameObject.CreatePrimitive(PrimitiveType.Sphere);shell.name="Magnetic shield field";
-            Destroy(shell.GetComponent<Collider>());shell.transform.SetParent(transform,false);
+            // Keep the concrete type required by CreatePrimitive in stripped builds.
+            Destroy(shell.GetComponent<SphereCollider>());shell.transform.SetParent(transform,false);
             shell.transform.localPosition=new Vector3(0,.03f,0);shell.transform.localScale=new Vector3(1.38f,1.8f,1.38f);
             var renderer=shell.GetComponent<Renderer>();renderer.sharedMaterial=field;renderer.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;renderer.receiveShadows=false;
             rings=new LineRenderer[0];for(int i=0;i<0;i++)rings[i]=Line("Magnetic ring",65,.013f);

@@ -181,7 +181,7 @@ namespace BattleCities
             Surface(panel, new Color(.025f, .07f, .12f, .96f), false, true);
             stateLabel = Label("State", panel, "PAUSED", new Vector2(0, 74), new Vector2(310, 44), 30, gold);
             resumeButton = Button("Resume", panel, new Vector2(.5f, .5f), new Vector2(0, 15), new Vector2(256, 48), "RESUME", () => game.Paused = false);
-            restartButton = Button("Restart", panel, new Vector2(.5f, .5f), new Vector2(0, -46), new Vector2(256, 48), "RESTART", () => game.LoadStage(game.Stage));
+            restartButton = Button("Restart", panel, new Vector2(.5f, .5f), new Vector2(0, -46), new Vector2(256, 48), "RESTART", () => game.RequestBattleRestart());
             nextButton = Button("Next Stage", panel, new Vector2(.5f, .5f), new Vector2(0, 15), new Vector2(256, 48), "NEXT STAGE", () => game.LoadStage(game.Stage + 1));
         }
 

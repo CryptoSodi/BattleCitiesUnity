@@ -223,6 +223,7 @@ MonoBehaviour:
     DirectDamage: 8
     SplashDamage: 2
   selectedTankShootingSettings: {fileID: 0}
+  SpeedEnemyModel: {fileID: -8373590566324376937, guid: b7798276c5162584aa0ae37a9f11882b, type: 3}
   TankModels:
   - {fileID: -8373590566324376937, guid: 0e8cdc8cc141ace46bc000bf66f9aa1e, type: 3}
   - {fileID: -8373590566324376937, guid: 1d1a0d44c89b2604c989094fdd9a842a, type: 3}
