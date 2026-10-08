@@ -5,8 +5,10 @@ $ErrorActionPreference = 'Stop'
 if (-not $Version) { $Version = Get-LocalGameVersion }
 if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw 'Use a three-part game version.' }
 if (-not $BuildOnly -and -not (Test-Path -LiteralPath $SshKey)) { throw 'Pass -SshKey or set BATTLECITIES_TEST_SSH_KEY to your existing Oracle SSH key.' }
-$editor = Assert-GameBuildReady WebGL
-if (-not $editor) { throw 'Open this Unity project to build the test profile with settings restoration.' }
+if (-not $ExistingBuildPath) {
+    $editor = Assert-GameBuildReady WebGL
+    if (-not $editor) { throw 'Open this Unity project to build the test profile with settings restoration.' }
+}
 $lock = Enter-GameAutomation
 $job = Join-Path $script:GameRoot ('Builds/TestWeb/' + [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss'))
 [IO.Directory]::CreateDirectory($job) | Out-Null

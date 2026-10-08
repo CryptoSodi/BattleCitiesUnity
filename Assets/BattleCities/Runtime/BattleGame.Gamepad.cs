@@ -122,7 +122,7 @@ namespace BattleCities
             switch (choice)
             {
                 case "RESUME": paused = false; break;
-                case "RESTART": LoadStage(Stage); break;
+                case "RESTART": RequestBattleRestart(); break;
                 case "NEXT STAGE": LoadStage(Stage + 1); break;
                 case "ONLINE LOBBY": if (Multiplayer.BattleSession.Instance) Multiplayer.BattleSession.Instance.Lobby.Show(); break;
                 case "DEBUG": showDebug = true; paused = true; break;

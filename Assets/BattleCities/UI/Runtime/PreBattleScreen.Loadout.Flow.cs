@@ -30,6 +30,7 @@ namespace BattleCities.UI
             string identity=api?api.BaseUrl+"|"+(api.LastPlayer?.walletAddress??api.LastPlayer?.id??"anonymous"):null;
             if(identity==loadoutIdentity)return;
             loadoutIdentity=identity;loadoutGeneration++;if(inventoryRoutine!=null)StopCoroutine(inventoryRoutine);inventoryRoutine=null;
+            fuelReceiptKey=null;pendingFuel=null;paidTier=-1;
             account=null;loadout=new JObject();loadoutDirty=accountLoading=inventoryUnavailable=busy=launchRequested=false;activeSlot=0;
         }
         void OnLoadoutPlayer(MainMenuApiClient.PlayerSnapshot player)
@@ -47,6 +48,7 @@ namespace BattleCities.UI
             if(token?.Type!=JTokenType.Integer)return 0;
             return int.TryParse(token.ToString(),out int count)?Math.Max(0,count):0;
         }
+        bool AccountMatchesPlayer(JObject data)=>string.IsNullOrEmpty(api.LastPlayer?.id)||(string)data?["playerId"]==api.LastPlayer.id;
         static bool ValidLoadoutAccount(JObject data)
         {
             if(!(data?["inventory"] is JObject inventory))return false;
@@ -87,15 +89,6 @@ namespace BattleCities.UI
             if(loadout.Remove(Slots[activeSlot]))loadoutDirty=true;
             status.text="SLOT 0"+(activeSlot+1)+" CLEARED";UpdateView();
             if(UnityEngine.EventSystems.EventSystem.current&&UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject==clearSlot.gameObject)Focus(slotButtons[activeSlot]);
-        }
-        void LaunchLoadoutBattle()
-        {
-            if(launchRequested)return;
-            launchRequested=true;BattlePreparation.Set(selected,api.BaseUrl);status.text="DEPLOYING...";UpdateView();
-#if UNITY_EDITOR
-            if(EditorLaunchOverride!=null){EditorLaunchOverride();return;}
-#endif
-            launch?.Invoke();
         }
         void CancelLoadoutRequests()
         {loadoutGeneration++;StopAllCoroutines();inventoryRoutine=null;accountLoading=busy=launchRequested=false;}
