@@ -7,3 +7,9 @@ StreamingAssets and does not depend on a CDN. Dependencies are pinned in the loc
 The helper asks Phantom to sign the quoted transaction. It does not broadcast.
 Unity stores the signed transaction before submitting it to the authenticated API.
 Private keys remain in the wallet.
+
+Run `npm test` after building to check real Ed25519 signatures, legacy and immutable
+wallet responses, exact quote bytes, explicit fees, and rejection of modified
+payments or changed accounts. These checks use disposable local keys and never
+broadcast a transaction. Quotes include an explicit zero priority-fee instruction;
+the standard Solana signature fee still applies.

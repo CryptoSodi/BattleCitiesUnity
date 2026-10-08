@@ -71,9 +71,19 @@ try {
     $index = [IO.File]::ReadAllText($indexPath).Replace('<title>Battle Cities</title>','<title>Battle Cities - Devnet Test</title>')
     $index = $index.Replace('</head>', '<meta name="robots" content="noindex,nofollow"><style>#test-network-badge{position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:1000;padding:4px 12px;border-radius:4px;background:#ffdb4a;color:#071d36;font:700 13px sans-serif;pointer-events:none;white-space:nowrap}</style></head>')
     $index = $index.Replace('<body>', '<body><div id="test-network-badge" hidden>TEST BUILD | SOLANA DEVNET</div><script>if(location.hostname.toLowerCase()==="test.battlecities.com"){document.getElementById("test-network-badge").hidden=false;}else{document.title="Battle Cities";}</script>')
+    # The checkout helper is a StreamingAsset, so a verified player can be reused
+    # for a wallet-only fix. Preload its content-hashed URL to avoid stale CDN copies.
+    $walletSource = Join-Path $script:GameRoot 'Assets/StreamingAssets/BattleCitiesCheckout/wallet.js'
+    $walletHash = Get-ReleaseSha256 $walletSource
+    $walletDirectory = Join-Path $site 'StreamingAssets/BattleCitiesCheckout'
+    [IO.Directory]::CreateDirectory($walletDirectory) | Out-Null
+    Copy-Item -LiteralPath $walletSource -Destination (Join-Path $walletDirectory 'wallet.js')
+    $walletName = 'wallet.' + $walletHash.Substring(0,12) + '.js'
+    Copy-Item -LiteralPath $walletSource -Destination (Join-Path $walletDirectory $walletName)
+    $index = $index.Replace('</head>', ('<script src="StreamingAssets/BattleCitiesCheckout/' + $walletName + '"></script></head>'))
     [IO.File]::WriteAllText($indexPath,$index,[Text.UTF8Encoding]::new($false))
     $commit = (Invoke-GameTool git @('rev-parse','HEAD')).Output.Trim()
-    [IO.File]::WriteAllText((Join-Path $site 'release-info.json'),([ordered]@{version=$Version;network='devnet';api='https://test.battlecities.com';networkSelection='exact-test-host';sourceCommit=$commit;builtAt=[DateTime]::UtcNow.ToString('o')} | ConvertTo-Json),[Text.UTF8Encoding]::new($false))
+    [IO.File]::WriteAllText((Join-Path $site 'release-info.json'),([ordered]@{version=$Version;network='devnet';api='https://test.battlecities.com';networkSelection='exact-test-host';walletBundleSha256=$walletHash;sourceCommit=$commit;builtAt=[DateTime]::UtcNow.ToString('o')} | ConvertTo-Json),[Text.UTF8Encoding]::new($false))
     $archive = Join-Path $job 'battlecities-devnet-web.zip'
     New-TestArchive $site $archive
     $checksum = Get-ReleaseSha256 $archive

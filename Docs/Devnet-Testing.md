@@ -55,3 +55,8 @@ reuse that database and retain test inventory. Web updates are independent.
 
 API setup creates no real wallet payments or Mainnet transfers. Confirm the
 catalog's `currency.sol.network` and web `release-info.json` are both `devnet`.
+
+The test deployment always copies the current built checkout helper and preloads
+its content-hashed StreamingAssets URL. Wallet-only fixes can reuse a previously
+verified player through `-ExistingBuildPath`; the metadata records both the
+checkout bundle checksum and publishing commit. Reload the game after deployment.
