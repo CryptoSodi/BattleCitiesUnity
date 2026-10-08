@@ -96,7 +96,7 @@ namespace BattleCities.Editor
                 const string testDefine = "BATTLECITIES_DEVNET";
                 var defines = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.WebGL)
                     .Split(';').Where(value => !string.IsNullOrWhiteSpace(value) && value != testDefine).ToList();
-                if (request.testNetwork) defines.Add(testDefine);
+                // Network selection is runtime hostname-based; remove the obsolete build override.
                 PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.WebGL, string.Join(";", defines));
             }
             else if (request.testNetwork) throw new BuildFailedException("The test deployment currently supports WebGL only.");

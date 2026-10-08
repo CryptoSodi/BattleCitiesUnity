@@ -180,7 +180,7 @@ function Invoke-GameBuild([string]$Target, [string]$Version, [int]$AndroidVersio
     $reportPath = Join-Path $jobDirectory 'build-report.json'
     $requestPath = Join-Path $jobDirectory 'build-request.json'
     $request = [ordered]@{ version = $Version; target = $Target; outputPath = $outputPath; reportPath = $reportPath;
-        androidVersionCode = $AndroidVersionCode; buildAppBundle = ($Target -eq 'Android' -and $AndroidFormat -eq 'AAB'); testNetwork = [bool]$TestNetwork }
+        androidVersionCode = $AndroidVersionCode; buildAppBundle = ($Target -eq 'Android' -and $AndroidFormat -eq 'AAB'); testNetwork = [bool]$TestNetwork; networkSelection = 'exact-test-host' }
     [IO.File]::WriteAllText($requestPath, ($request | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
     Write-Host "Building $Target $Version..."
     Write-Host "Output: $outputPath"

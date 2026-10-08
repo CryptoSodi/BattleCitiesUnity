@@ -34,9 +34,9 @@ try {
         $receiptRoot = Join-Path $script:GameRoot ("Builds/Automation/" + $buildJob)
         $request = Get-Content -LiteralPath (Join-Path $receiptRoot "build-request.json") -Raw | ConvertFrom-Json
         $report = Get-Content -LiteralPath (Join-Path $receiptRoot "build-report.json") -Raw | ConvertFrom-Json
-        if (-not $request.testNetwork -or $request.target -ne "WebGL" -or $request.version -ne $Version -or
+        if (-not $request.testNetwork -or $request.networkSelection -ne "exact-test-host" -or $request.target -ne "WebGL" -or $request.version -ne $Version -or
             [IO.Path]::GetFullPath($request.outputPath) -ne $web -or $report.result -ne "Succeeded" -or $report.totalErrors -ne 0) {
-            throw "Only a verified Devnet build can be reused."
+            throw "Only a verified build with hostname-based network selection can be reused."
         }
     } else {
     $null = Invoke-UnityEditorCommand eval_file @('--file',$saveScript)
@@ -70,10 +70,10 @@ try {
     $indexPath = Join-Path $site 'index.html'
     $index = [IO.File]::ReadAllText($indexPath).Replace('<title>Battle Cities</title>','<title>Battle Cities - Devnet Test</title>')
     $index = $index.Replace('</head>', '<meta name="robots" content="noindex,nofollow"><style>#test-network-badge{position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:1000;padding:4px 12px;border-radius:4px;background:#ffdb4a;color:#071d36;font:700 13px sans-serif;pointer-events:none;white-space:nowrap}</style></head>')
-    $index = $index.Replace('<body>', '<body><div id="test-network-badge">TEST BUILD | SOLANA DEVNET</div>')
+    $index = $index.Replace('<body>', '<body><div id="test-network-badge" hidden>TEST BUILD | SOLANA DEVNET</div><script>if(location.hostname.toLowerCase()==="test.battlecities.com"){document.getElementById("test-network-badge").hidden=false;}else{document.title="Battle Cities";}</script>')
     [IO.File]::WriteAllText($indexPath,$index,[Text.UTF8Encoding]::new($false))
     $commit = (Invoke-GameTool git @('rev-parse','HEAD')).Output.Trim()
-    [IO.File]::WriteAllText((Join-Path $site 'release-info.json'),([ordered]@{version=$Version;network='devnet';api='https://test.battlecities.com';sourceCommit=$commit;builtAt=[DateTime]::UtcNow.ToString('o')} | ConvertTo-Json),[Text.UTF8Encoding]::new($false))
+    [IO.File]::WriteAllText((Join-Path $site 'release-info.json'),([ordered]@{version=$Version;network='devnet';api='https://test.battlecities.com';networkSelection='exact-test-host';sourceCommit=$commit;builtAt=[DateTime]::UtcNow.ToString('o')} | ConvertTo-Json),[Text.UTF8Encoding]::new($false))
     $archive = Join-Path $job 'battlecities-devnet-web.zip'
     New-TestArchive $site $archive
     $checksum = Get-ReleaseSha256 $archive
