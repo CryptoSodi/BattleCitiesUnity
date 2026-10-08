@@ -174,7 +174,7 @@ namespace BattleCities.UI
                 price=ShopLiveCatalog.FormatAtomic((string)result?["amountAtomic"],currency==ShopCurrency.Solana?9:liveCatalog.SkrDecimals);
                 var bytes=Convert.FromBase64String((string)result?["transaction"]??"");
                 valid=bytes.Length>65&&bytes.Length<=1232&&bytes[0]==1&&(string)result?["currency"]==expected
-                    &&(string)result?["network"]=="mainnet-beta"&&!string.IsNullOrEmpty((string)result?["quoteToken"])
+                    &&(string)result?["network"]==MainMenuApiClient.WalletNetwork&&!string.IsNullOrEmpty((string)result?["quoteToken"])
                     &&QuoteIsCurrent(result)&&(product.Category!=ShopCategory.SeasonPass||(string)result["seasonId"]==liveCatalog.SeasonId);
             }
             catch { }

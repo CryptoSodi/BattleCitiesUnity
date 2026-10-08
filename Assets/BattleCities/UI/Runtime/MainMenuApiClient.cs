@@ -14,7 +14,13 @@ namespace BattleCities.UI
     /// </summary>
     public sealed partial class MainMenuApiClient : MonoBehaviour
     {
+#if BATTLECITIES_DEVNET
+        public const string DefaultApiBaseUrl = "https://test.battlecities.com";
+        public const string WalletNetwork = "devnet";
+#else
         public const string DefaultApiBaseUrl = "https://api.battlecities.com";
+        public const string WalletNetwork = "mainnet-beta";
+#endif
 
         [Serializable]
         public sealed class PlayerSnapshot
@@ -84,6 +90,15 @@ namespace BattleCities.UI
         private bool requestInFlight;
         private bool guestLoginAttempted;
 
+        private void Awake()
+        {
+#if BATTLECITIES_DEVNET
+            // Authored scenes retain their production URL. A test player always
+            // uses the separate test API, including after a scene transition.
+            baseUrl = DefaultApiBaseUrl;
+#endif
+        }
+
         private void OnEnable()
         {
             if (!Application.isPlaying) return;
@@ -116,6 +131,10 @@ namespace BattleCities.UI
             if (!Uri.TryCreate(apiBaseUrl, UriKind.Absolute, out var uri) ||
                 (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
                 throw new ArgumentException("API URL must be an absolute HTTP or HTTPS URL.", nameof(apiBaseUrl));
+#if BATTLECITIES_DEVNET
+            if (uri.GetLeftPart(UriPartial.Authority) != DefaultApiBaseUrl)
+                throw new ArgumentException("The Devnet build requires the test API.", nameof(apiBaseUrl));
+#endif
             baseUrl = apiBaseUrl.TrimEnd('/');
         }
 

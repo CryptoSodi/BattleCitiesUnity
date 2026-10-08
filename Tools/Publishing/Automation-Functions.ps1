@@ -168,7 +168,7 @@ function Wait-GameEditorIdle {
 }
 
 function Invoke-GameBuild([string]$Target, [string]$Version, [int]$AndroidVersionCode = 0,
-    [ValidateSet('APK', 'AAB')][string]$AndroidFormat = 'APK') {
+    [ValidateSet('APK', 'AAB')][string]$AndroidFormat = 'APK', [switch]$TestNetwork) {
     $editor = Assert-GameBuildReady $Target
     $job = [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss') + '-' + [guid]::NewGuid().ToString('N').Substring(0, 8)
     $jobDirectory = Join-Path $script:GameRoot "Builds/Automation/$job"
@@ -180,7 +180,7 @@ function Invoke-GameBuild([string]$Target, [string]$Version, [int]$AndroidVersio
     $reportPath = Join-Path $jobDirectory 'build-report.json'
     $requestPath = Join-Path $jobDirectory 'build-request.json'
     $request = [ordered]@{ version = $Version; target = $Target; outputPath = $outputPath; reportPath = $reportPath;
-        androidVersionCode = $AndroidVersionCode; buildAppBundle = ($Target -eq 'Android' -and $AndroidFormat -eq 'AAB') }
+        androidVersionCode = $AndroidVersionCode; buildAppBundle = ($Target -eq 'Android' -and $AndroidFormat -eq 'AAB'); testNetwork = [bool]$TestNetwork }
     [IO.File]::WriteAllText($requestPath, ($request | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
     Write-Host "Building $Target $Version..."
     Write-Host "Output: $outputPath"

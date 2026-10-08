@@ -18,7 +18,7 @@ namespace BattleCities.Editor
         {
             public string version, target, outputPath, reportPath;
             public int androidVersionCode;
-            public bool buildAppBundle;
+            public bool buildAppBundle, testNetwork;
         }
 
         [Serializable]
@@ -91,6 +91,15 @@ namespace BattleCities.Editor
                     throw new BuildFailedException("Save the untitled scene before running a build.");
             }
             if (!EditorSceneManager.SaveOpenScenes()) throw new BuildFailedException("Could not save the open scenes.");
+            if (request.target == "WebGL")
+            {
+                const string testDefine = "BATTLECITIES_DEVNET";
+                var defines = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.WebGL)
+                    .Split(';').Where(value => !string.IsNullOrWhiteSpace(value) && value != testDefine).ToList();
+                if (request.testNetwork) defines.Add(testDefine);
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.WebGL, string.Join(";", defines));
+            }
+            else if (request.testNetwork) throw new BuildFailedException("The test deployment currently supports WebGL only.");
             AssetDatabase.SaveAssets();
         }
 
