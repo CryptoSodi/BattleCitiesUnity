@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$Version, [string]$SshHost = 'ubuntu@129.153.16.84', [string]$SshKey = $env:BATTLECITIES_TEST_SSH_KEY, [switch]$BuildOnly)
+param([string]$Version, [string]$SshHost = 'ubuntu@129.153.16.84', [string]$SshKey = $env:BATTLECITIES_TEST_SSH_KEY, [switch]$BuildOnly, [string]$ExistingBuildPath)
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'Automation-Functions.ps1')
 if (-not $Version) { $Version = Get-LocalGameVersion }
@@ -28,6 +28,17 @@ UnityEditor.PlayerSettings.SetScriptingDefineSymbols(UnityEditor.Build.NamedBuil
 UnityEditor.AssetDatabase.SaveAssets(); return true;
 "@)
 try {
+    if ($ExistingBuildPath) {
+        $web = (Resolve-Path -LiteralPath $ExistingBuildPath).Path
+        $buildJob = Split-Path $web -Leaf
+        $receiptRoot = Join-Path $script:GameRoot ("Builds/Automation/" + $buildJob)
+        $request = Get-Content -LiteralPath (Join-Path $receiptRoot "build-request.json") -Raw | ConvertFrom-Json
+        $report = Get-Content -LiteralPath (Join-Path $receiptRoot "build-report.json") -Raw | ConvertFrom-Json
+        if (-not $request.testNetwork -or $request.target -ne "WebGL" -or $request.version -ne $Version -or
+            [IO.Path]::GetFullPath($request.outputPath) -ne $web -or $report.result -ne "Succeeded" -or $report.totalErrors -ne 0) {
+            throw "Only a verified Devnet build can be reused."
+        }
+    } else {
     $null = Invoke-UnityEditorCommand eval_file @('--file',$saveScript)
     try { $web = Invoke-GameBuild WebGL $Version -TestNetwork }
     finally {
@@ -37,6 +48,8 @@ try {
             Wait-GameEditorIdle
         }
     }
+    }
+    Add-Type -AssemblyName System.IO.Compression
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     function New-TestArchive([string]$Source, [string]$Target) {
         $archive = [IO.Compression.ZipFile]::Open($Target, [IO.Compression.ZipArchiveMode]::Create)
