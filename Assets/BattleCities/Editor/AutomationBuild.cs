@@ -84,13 +84,18 @@ namespace BattleCities.Editor
                     (string.IsNullOrEmpty(PlayerSettings.Android.keystorePass) || string.IsNullOrEmpty(PlayerSettings.Android.keyaliasPass)))
                     throw new BuildFailedException("Enter the existing keystore passwords in Unity Publishing Settings, or set the BATTLECITIES_ANDROID_*_PASSWORD environment variables before a closed-editor build.");
             }
-            for (int i = 0; i < EditorSceneManager.sceneCount; i++)
+            // Batch builds read the committed enabled scenes directly. A fresh headless
+            // Editor starts with an untitled scene, which must never open a save dialog.
+            if (!Application.isBatchMode)
             {
-                var scene = EditorSceneManager.GetSceneAt(i);
-                if (scene.isDirty && string.IsNullOrEmpty(scene.path))
-                    throw new BuildFailedException("Save the untitled scene before running a build.");
+                for (int i = 0; i < EditorSceneManager.sceneCount; i++)
+                {
+                    var scene = EditorSceneManager.GetSceneAt(i);
+                    if (scene.isDirty && string.IsNullOrEmpty(scene.path))
+                        throw new BuildFailedException("Save the untitled scene before running a build.");
+                }
+                if (!EditorSceneManager.SaveOpenScenes()) throw new BuildFailedException("Could not save the open scenes.");
             }
-            if (!EditorSceneManager.SaveOpenScenes()) throw new BuildFailedException("Could not save the open scenes.");
             if (request.target == "WebGL")
             {
                 const string testDefine = "BATTLECITIES_DEVNET";
