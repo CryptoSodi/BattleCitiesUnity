@@ -1,0 +1,24 @@
+{
+    "asset":  "Text-free native wallet button skin",
+    "generator":  "Built-in image_gen (precise-object-edit)",
+    "editTarget":  "Assets/BattleCities/UI/Art/login/phantom.png",
+    "generatedSource":  "C:/Users/tassa/.codex/generated_images/01a0fff0-6220-73a2-b157-b1000d8372db/exec-96e0af38-4c51-4fa0-b675-59391d1cf296.png",
+    "output":  "Assets/BattleCities/UI/Art/login/mobile-wallet-green.png",
+    "nativeSize":  {
+                       "height":  724,
+                       "width":  2172
+                   },
+    "prompt":  "Use case: precise-object-edit. Asset type: text-free mobile wallet skin for the EXISTING Battle Cities login button. Input image is the edit target, the original 1581 x 316 green-and-gold Phantom button. Remove ONLY the purple circular Phantom logo, its drop shadow, and ALL baked CONNECT PHANTOM lettering and its shadows. Seamlessly restore the same uninterrupted emerald green glossy metal face behind the removed logo/text. Preserve the original pill-shaped silhouette, exact wide 1581:316 proportions, gold outer frame, dark green inner bevel, four gold corner bolts, highlights, subtle green lighting and small outer shadow unchanged. Keep every rim and bolt in the same position, same scale, same polished illustrated game style. No new design, no restyling, no extra decorations. This output is a blank SKIN only; code will draw CONNECT WALLET or CONNECT JUPITER on top later. NO text, lettering, icons, logos or symbols anywhere in the center. One isolated complete button with all outside corners visible, closely framed like the original. Preserve transparent pixels outside the silhouette; true RGBA transparency, no checkerboard, no opaque rectangle, no added background. Return approximately the original 1581 x 316 native size/aspect, high quality.",
+    "notes":  [
+                  "Native generated transparent PNG; no raster post-processing.",
+                  "Transparent canvas padding is trimmed through the Unity sprite import rectangle.",
+                  "Existing button objects, native labels, input feedback and wallet flow are retained."
+              ],
+    "spriteImportRect":  {
+                             "y":  147,
+                             "width":  2166,
+                             "height":  437,
+                             "x":  0
+                         },
+    "importPaddingNote":  "Alpha \u003e= 8 content bounds with 4px outside padding; only Unity sprite sampling rect is trimmed, generated PNG pixels are unchanged."
+}

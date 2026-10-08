@@ -1,0 +1,18 @@
+{
+  "asset": "Golden Phantom wallet emblem and Web button",
+  "date": "2026-10-08",
+  "tool": "built-in image_gen",
+  "icon": "Assets/BattleCities/UI/Art/login/phantom-gold.png",
+  "webButton": "Assets/BattleCities/UI/Art/login/phantom-gold-button.png",
+  "references": [
+    "Assets/BattleCities/UI/Art/login/eagle.png",
+    "Assets/BattleCities/UI/Art/login/phantom.png"
+  ],
+  "iconPrompt": "Use case: style-transfer. Asset type: one transparent UI emblem for the existing Battle Cities wallet button. Image 1 (green button) is the subject reference: extract ONLY the familiar Phantom ghost silhouette from its purple circle. Image 2 (gold eagle) is the material and rendering style reference. Render that same recognizable Phantom ghost as a polished sculpted golden emblem matching the eagle exactly: warm yellow gold face, amber beveled edges, dark brown thin edge/shadow, crisp creamy highlights from upper left, subtly rounded raised metal form. Preserve the Phantom ghost's smooth slanted rounded head, flowing asymmetrical lower silhouette and two simple oval eye holes. Eye holes should be deep dark brown. Keep the exact ghost identity; no smile, no extra face details, no wings, no eagle anatomy. Front-facing UI illustration, generous simple shapes readable at 64 pixels. The ghost is standalone gold, without a purple circle, coin, medallion, button, label, frame, text, pedestal or background. Center the complete ghost with 8 percent clear padding on a square canvas. True RGBA transparency outside the silhouette, no checkerboard or opaque backdrop, no cast floor shadow. Return one high-resolution production icon.",
+  "webButtonPrompt": "Use case: precise-object-edit. Asset type: replacement artwork for the EXISTING Battle Cities Web wallet button. Image 1 is the edit target: its green/gold CONNECT PHANTOM button. Image 2 is the supporting insert: the new gold Phantom ghost icon. Replace ONLY the purple circular Phantom emblem in Image 1 with the standalone sculpted golden ghost from Image 2, on the green face. Remove the purple circle completely and restore the same smooth emerald green face behind it. Use the exact shape, golden material, highlights and dark brown bevel of Image 2. Size the ghost to about the former purple disk's visible height and center it in that same icon area; retain clear padding from the left bolts and the caption. Preserve every other element of Image 1: exact words CONNECT PHANTOM, original white lettering shapes, font, size, spacing, baseline, outline/shadow, original green face, wide pill-shaped silhouette, gold rim, all four bolts, lighting, highlights, all existing dimensions and positions. NO text changes and no newly designed button. Keep the exact 1581:316 overall proportions. Transparent background outside the original button shape. No purple, no circular coin or badge behind the ghost, no extra decorations. Return one complete isolated button; original corners and rim fully visible. True alpha transparency outside.",
+  "notes": [
+    "The gold ghost replaces the purple emblem on Web, Seeker, and PSG1.",
+    "Original wallet labels, button objects and API bindings are retained.",
+    "Transparent canvas margins are trimmed through Unity sprite importer metadata; source PNG alpha is preserved."
+  ]
+}

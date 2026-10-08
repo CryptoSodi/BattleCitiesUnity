@@ -23,12 +23,12 @@ namespace BattleCities.Editor
             if (EditorApplication.isPlaying) throw new InvalidOperationException("Exit Play Mode first.");
             if (SceneManager.GetActiveScene().isDirty) throw new InvalidOperationException("Save your scene changes before rebuilding Login.");
             theme = AssetDatabase.LoadAssetAtPath<MenuTheme>(Root + "Settings/ArcadeMenuTheme.asset");
-            foreach (var name in new[] { "phantom", "guest", "store", "eagle", "solana", "magicblock" })
+            foreach (var name in new[] { "phantom-gold-button", "phantom-gold", "guest", "store", "eagle", "solana", "magicblock" })
             {
                 string path = Root + "Art/login/" + name + ".png";
                 var importer = (TextureImporter)AssetImporter.GetAtPath(path);
                 importer.textureType = TextureImporterType.Sprite;
-                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.spriteImportMode = name.StartsWith("phantom-gold", StringComparison.Ordinal) ? SpriteImportMode.Multiple : SpriteImportMode.Single;
                 importer.alphaIsTransparency = true;
                 importer.mipmapEnabled = false;
                 importer.maxTextureSize = 2048;
@@ -57,7 +57,7 @@ namespace BattleCities.Editor
             var logo = Pic("Battle Cities Logo", design, theme.Logo); Box(logo.rectTransform, 0, 458, 500, 333); logo.preserveAspect = true;
             Label("Heading", design, "ENTER THE BATTLEFIELD", 0, 261, 650, 64, 49, true);
             Label("Description", design, "Sign in to record matches, protect replays, and\nprepare your scores for verified leaderboards.", 0, 180, 610, 78, 29);
-            var phantom = ArtButton("Connect Phantom", design, "phantom", 0, 63, 596);
+            var phantom = ArtButton("Connect Phantom", design, "phantom-gold-button", 0, 63, 596);
             var guest = ArtButton("Continue as Guest", design, "guest", 0, -67, 596);
             Rule(design, -190, -159, 204); Rule(design, 190, -159, 204);
             Label("Or", design, "OR", 0, -159, 90, 40, 29, true);
@@ -72,13 +72,18 @@ namespace BattleCities.Editor
             var flowGo = new GameObject("Login Flow"); flowGo.SetActive(false);
             var api = flowGo.AddComponent<MainMenuApiClient>(); api.enabled = false;
             api.ConfigureGuestFallback(false); api.ConfigureAutomaticRefresh(false);
-            flowGo.AddComponent<LoginScene>().Configure(api, phantom, guest, store, status, theme); flowGo.SetActive(true);
+            var flow = flowGo.AddComponent<LoginScene>();
+            flow.Configure(api, phantom, guest, store, status, theme);
+            flow.ConfigureMobileWalletSkin(Art("mobile-wallet-green"));
+            flow.ConfigureMobileWalletIcon(Art("phantom-gold"));
+            flowGo.SetActive(true);
             var buttons = new[] { phantom, guest, store };
             for (int i = 0; i < buttons.Length; i++) buttons[i].navigation = new Navigation { mode = Navigation.Mode.Explicit,
                 selectOnUp = buttons[(i + 2) % 3], selectOnDown = buttons[(i + 1) % 3] };
             var eventGo = new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
             eventGo.GetComponent<InputSystemUIInputModule>().AssignDefaultActions();
             Canvas.ForceUpdateCanvases(); canvasGo.AddComponent<LoginLayout>().Configure(design);
+            LoginGlassLayout.ApplyToLayout(canvasGo.GetComponent<LoginLayout>());
             EditorSceneManager.SaveScene(scene, "Assets/BattleCities/Scenes/Login.unity");
             var scenes = EditorBuildSettings.scenes.Where(s => s.path != scene.path).ToList();
             scenes.Insert(0, new EditorBuildSettingsScene(scene.path, true)); EditorBuildSettings.scenes = scenes.ToArray();

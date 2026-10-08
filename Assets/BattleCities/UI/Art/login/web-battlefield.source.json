@@ -1,0 +1,55 @@
+{
+  "asset": "Battle Cities web login battlefield background",
+  "output": "C:/repos/BattleCity/art_exports/ui/web-login-background-2026-10-08/battlefield-background.png",
+  "status": "generated_background_ready_for_import",
+  "generator": "built-in image_gen",
+  "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-e9c5b725-5fca-486d-9a6e-67eba0bde044.png",
+  "reference": "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-05dbbf94-93c2-41a6-8f01-be4c468566ae.png",
+  "prompt": "Use case: precise-object-edit.\nAsset type: production opaque background artwork for the Battle Cities Unity WEB login, intended 3840 x 2160 high-resolution 16:9 landscape PNG.\n\nEdit the supplied approved Battlefield login image into a CLEAN BACKGROUND PLATE. Remove ALL screen-space interface artwork: the entire Battle Cities logo and tagline in the upper left, the complete right-hand sign-in panel including its outer metallic border, header, lettering, icons, buttons and shadow, and the entire bottom-right navy partner/store footer. Seamlessly reconstruct the city and sky behind those removed elements. The final output must contain NO lettering, words, numbers, logos, login panel, rectangular blank panel, UI border, buttons, partner marks, store badge, icons floating in the air, watermark, or device frame. Preserve white star emblems painted on the tanks and physical blue city banners because they are part of the world.\n\nPRESERVE THE APPROVED ART AND FRAMING: same polished chunky yellow tank with riveted armor and white star, same turret and cannon angle, same dramatic low three-quarter camera, same blue-and-cream fortress city, green trees, warm sunshine, blue sky and fluffy clouds, small distant planes. Keep the hero tank's scale and placement extremely close to the reference: its full silhouette occupies roughly x=12%-54% and y=36%-82%, its cannon points diagonally up-right, both tread assemblies visible, leaving the right side available for UI. Do not move the tank to center, enlarge it, crop its cannon or tracks, or replace it with a different model. Maintain the avenue perspective and atmospheric distance, with smaller background tanks and buildings subordinate.\n\nOVERLAY-SAFE COMPOSITION: keep upper-left x=4%-30%, y=3%-37% calm, primarily soft sky and distant subdued architectural/tree forms, so our separate existing logo can sit there. Rightmost 40% should be attractive but lower-contrast environmental continuation—distant fortress architecture, trees and avenue, with no new large foreground subject—so our separate login card can cover it. Bottom-right x=40%-100%, y=86%-100% should continue the street and softly subdued foliage, with no banner-shaped object or drawn footer. These are natural scene areas, NOT solid fills, cutouts or empty rectangles. Keep scenery edge to edge.\n\nRender crisp high-resolution game illustration with carefully defined armor bevels, metal tracks and rivets, high quality stylized physically lit materials matching the reference. Depth of field only for secondary near-edge foliage and distant world, tank sharp. Opaque full-bleed 16:9; request 3840x2160 output, maximum native detail. ONE final background only.",
+  "requestedSize": "3840x2160",
+  "actualSize": {
+    "width": 1672,
+    "height": 941
+  },
+  "notes": [
+    "Background only: no logo, typography, login panel, UI frame, buttons, partner marks or store badge.",
+    "Existing Unity logo, login card and footer should be overlaid separately.",
+    "No Unity files were edited.",
+    "No upscaling or raster post-processing has been applied."
+  ],
+  "composition": {
+    "heroTankNormalizedBounds": [
+      0.12,
+      0.35,
+      0.54,
+      0.82
+    ],
+    "logoOverlayRegion": [
+      0.04,
+      0.03,
+      0.3,
+      0.37
+    ],
+    "loginCardOverlayRegion": [
+      0.6,
+      0.22,
+      0.96,
+      0.75
+    ],
+    "footerOverlayRegion": [
+      0.4,
+      0.87,
+      1,
+      1
+    ]
+  },
+  "visualValidation": {
+    "cleanBackground": true,
+    "referenceTankCompositionPreserved": true,
+    "noScreenSpaceUI": true
+  },
+  "bytes": 2352355,
+  "colorType": 2,
+  "opaque": true,
+  "sha256": "15816a37640323544fe0687deac240c317f77a106e400bab5667ad456c54fb8b"
+}

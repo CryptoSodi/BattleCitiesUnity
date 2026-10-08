@@ -1,0 +1,28 @@
+{
+  "asset": "PSG1 clean background",
+  "status": "background_ready_for_import",
+  "generator": "built-in image_gen",
+  "reference": "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-f21aa9b1-5adb-487e-9a6f-11fe5aecbb77.png",
+  "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-ca60f6b7-df34-4fa2-af94-4e2bbdc84863.png",
+  "output": "C:/repos/BattleCity/art_exports/ui/psg1-login-background-2026-10-08/psg1-login-background.png",
+  "requestedAspectRatio": "1343:1171",
+  "prompt": "Use case: precise-object-edit. Production Battle Cities login BACKGROUND ONLY. Opaque edge-to-edge PNG at maximum native detail. Preserve the reference's polished chunky yellow tank with white star, riveted armor, dark tracks, sunny blue-and-cream fortress city, leafy trees, blue sky and warm clouds, small distant planes and secondary tanks. Same illustrated game art, camera perspective and warm lighting, no new art style. Keep all hero tank parts recognizable and sharp. NO screen-space logos, lettering, text, interface frames, panels, buttons, badges, partner marks, controller legends, watermark, empty rectangles or ghost traces of removed elements. White stars physically painted on tanks and world banners remain. Only natural city/road/foliage/sky scenery. No device mockup.\nEdit THIS supplied PSG1 screen directly into a clean background-only plate. Keep its exact near-square landscape 1343:1171 proportions, approximately 1240:1080 / 31:27. Do not make this a widescreen or portrait image.\nRemove the complete upper-left Battle Cities logo and tagline, the entire lower cream/blue login panel including frame/text/icons/buttons, both partner marks, and the entire bottom D-pad/A/B controller legend. Seamlessly rebuild the natural environment behind these removed layers. No interface remnants or panel-shaped blank areas.\nLOCK THE APPROVED COMPOSITION: preserve the large yellow tank in the UPPER CENTER-RIGHT at roughly x=39%-88%, y=18%-49%, same turret, star-marked armor, pose, angle, scale and diagonally raised cannon as the reference. Keep the important tank silhouette above y=48%, where the real separate login UI will start. Restore any previously hidden lowest track edges naturally without moving the tank into the lower half. Do not enlarge the tank or put it center-bottom.\nReserve the upper-left roughly x=4%-36%, y=3%-37% for our separate logo by filling its former location with coherent subdued sky, distant fortress buildings and foliage. Preserve existing sky/planes/clouds and the fortress towers visible between the logo and tank. Existing smaller yellow background tanks remain in the world.\nFor the area previously covered by the lower card/footer, reveal continuous city avenue and warm road surface, with foliage and roadside stonework along the outer edges. The lower half must have natural scenery edge-to-edge, suitable beneath real UI, no large foreground subject. Preserve the original look of all visible source artwork closely. ONE clean PSG1 background only.",
+  "notes": [
+    "Clean background only; real logo, login controls and footer are separate overlays.",
+    "No Unity files edited.",
+    "Native generated PNG, no cropping, upscaling, or raster post-processing."
+  ],
+  "visualValidation": {
+    "noTextOrUI": true,
+    "fullHeroTankVisible": true,
+    "compositionReviewed": true
+  },
+  "actualSize": {
+    "width": 1343,
+    "height": 1171
+  },
+  "bytes": 2539788,
+  "colorType": 2,
+  "opaque": true,
+  "sha256": "649c41fd1ea91550685ddfc73e6662c20a74d38c90ff926e2388f45300ac0be7"
+}
