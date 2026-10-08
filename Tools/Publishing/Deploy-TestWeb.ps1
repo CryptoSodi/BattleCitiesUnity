@@ -68,9 +68,9 @@ try {
     $site = Join-Path $job 'site'
     & (Join-Path $PSScriptRoot 'Prepare-WebSite.ps1') -ArchivePath $rawArchive -Destination $site -ExpectedSha256 (Get-ReleaseSha256 $rawArchive)
     $indexPath = Join-Path $site 'index.html'
-    $index = [IO.File]::ReadAllText($indexPath).Replace('<title>Battle Cities</title>','<title>Battle Cities — Devnet Test</title>')
+    $index = [IO.File]::ReadAllText($indexPath).Replace('<title>Battle Cities</title>','<title>Battle Cities - Devnet Test</title>')
     $index = $index.Replace('</head>', '<meta name="robots" content="noindex,nofollow"><style>#test-network-badge{position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:1000;padding:4px 12px;border-radius:4px;background:#ffdb4a;color:#071d36;font:700 13px sans-serif;pointer-events:none;white-space:nowrap}</style></head>')
-    $index = $index.Replace('<body>', '<body><div id="test-network-badge">TEST BUILD · SOLANA DEVNET</div>')
+    $index = $index.Replace('<body>', '<body><div id="test-network-badge">TEST BUILD | SOLANA DEVNET</div>')
     [IO.File]::WriteAllText($indexPath,$index,[Text.UTF8Encoding]::new($false))
     $commit = (Invoke-GameTool git @('rev-parse','HEAD')).Output.Trim()
     [IO.File]::WriteAllText((Join-Path $site 'release-info.json'),([ordered]@{version=$Version;network='devnet';api='https://test.battlecities.com';sourceCommit=$commit;builtAt=[DateTime]::UtcNow.ToString('o')} | ConvertTo-Json),[Text.UTF8Encoding]::new($false))
