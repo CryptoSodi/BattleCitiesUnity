@@ -17,6 +17,50 @@ namespace BattleCities.Tests
         static FieldInfo GameField(string name)=>typeof(BattleGame).GetField(name,InstancePrivate)??throw new Exception("Missing gameplay fixture field: "+name);
         static string ScoreKey(string api,string owner)=>"battlecities.lastScore."+Hash128.Compute(api+"|"+owner);
 
+        // Headless release verification; leaves runtime sources and authored scenes unchanged.
+        public static void RunReleaseChecks()
+        {
+            Check(!Application.isPlaying,"Release checks must run outside Play mode.");
+            var report=new JObject { ["suiteCount"]=3,["playing"]=Application.isPlaying,
+                ["buildTarget"]=EditorUserBuildSettings.activeBuildTarget.ToString() };
+            try
+            {
+                ReplayRecoveryChecks.Run();report["replayRecovery"]="passed";
+                Run();report["gameplayStart"]="passed";
+                var previous=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+                var paths=AssetDatabase.FindAssets("MainMenu t:Scene");
+                Check(paths.Length==1,"Expected exactly one MainMenu scene for loadout checks.");
+                var scene=UnityEditor.SceneManagement.EditorSceneManager.OpenScene(
+                    AssetDatabase.GUIDToAssetPath(paths[0]),UnityEditor.SceneManagement.OpenSceneMode.Additive);
+                try
+                {
+                    UnityEngine.SceneManagement.SceneManager.SetActiveScene(scene);
+                    BattleCities.Editor.LoadoutChecks.Run();
+                    string status=BattleCities.Editor.LoadoutChecks.Status;
+                    report["loadout"]=status;
+                    Check(status.StartsWith("PASS:"),status);
+                }
+                finally
+                {
+                    UnityEngine.SceneManagement.SceneManager.SetActiveScene(previous);
+                    UnityEditor.SceneManagement.EditorSceneManager.CloseScene(scene,true);
+                }
+                report["result"]="passed";
+            }
+            catch(Exception error)
+            {
+                report["result"]="failed";report["error"]=error.ToString();throw;
+            }
+            finally
+            {
+                report["completedAt"]=DateTime.UtcNow.ToString("o");
+                string folder=System.IO.Path.Combine(Application.dataPath,"..","Builds");
+                System.IO.Directory.CreateDirectory(folder);
+                System.IO.File.WriteAllText(System.IO.Path.Combine(folder,"gameplay-checks.json"),report.ToString());
+                Debug.Log("Gameplay release checks: "+report.ToString(Newtonsoft.Json.Formatting.None));
+            }
+        }
+
         // Inactive fixture only: no scene loading, transport service, API request or real fuel key.
         [MenuItem("Battle Cities/Checks/Gameplay start and score persistence")]
         public static void Run()
