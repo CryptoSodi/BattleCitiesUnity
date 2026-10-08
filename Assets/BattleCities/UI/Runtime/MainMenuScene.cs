@@ -308,6 +308,8 @@ namespace BattleCities.UI
         {
             if (!Application.isPlaying) return;
             RefreshLayout();
+            if(BattlePreparation.TryTakeRestart(out int restartTier,out int restartStage))
+            {EnsureApiClient();EnsurePreBattle();preBattle.OpenRestart(restartTier,restartStage);return;}
             string incomingProfile=ProfileLinks.IncomingPlayer();
             if(!string.IsNullOrEmpty(incomingProfile))OpenPlayerProfile(incomingProfile);
             else if(IsPlayerProfileOpen){EnsurePlayerProfile();profileScreen.Resume();}
@@ -725,6 +727,8 @@ namespace BattleCities.UI
         {
             if(!apiClient)return;
             ResolveLeaderboardUi();
+            BattleReplayService.ResultsChanged-=OnBattleResultsChanged;
+            if(Application.isPlaying)BattleReplayService.ResultsChanged+=OnBattleResultsChanged;
             apiClient.PlayerLoaded-=OnApiPlayerLoaded;
             apiClient.RankingsLoaded-=OnApiRankingsLoaded;
             apiClient.RoundLoaded-=OnApiRoundLoaded;
@@ -750,6 +754,7 @@ namespace BattleCities.UI
 
         private void UnbindApiClient()
         {
+            BattleReplayService.ResultsChanged-=OnBattleResultsChanged;
             if(!apiClient)return;
             apiClient.PlayerLoaded-=OnApiPlayerLoaded;
             apiClient.RankingsLoaded-=OnApiRankingsLoaded;
@@ -759,11 +764,19 @@ namespace BattleCities.UI
             if(walletLoginButton)walletLoginButton.onClick.RemoveListener(OpenOwnProfile);
         }
 
+        private void OnBattleResultsChanged()
+        {
+            if(!this||!apiClient||!Application.isPlaying)return;
+            apiClient.RefreshNow();
+            var ranking=GetComponent<RankingScreen>();if(ranking&&ranking.IsOpen)ranking.RefreshData();
+        }
+
         private void OnApiPlayerLoaded(MainMenuApiClient.PlayerSnapshot player)
         {
             if(player==null)return;
-            var lastScore=PlayerPrefs.GetInt("battlecities.lastScore",0);
-            var highScore=Mathf.Max(PlayerPrefs.GetInt("battlecities.highScore",0),player.highscorePrimary);
+            if(Application.isPlaying)BattleReplayService.Instance.RetryPending();
+            var lastScore=BattleScoreCache.Last(apiClient.BaseUrl,player.id);
+            var highScore=player.highscorePrimary;
             PlayerPrefs.SetString("battlecities.playerName",player.displayName??"COMMANDER");
             PlayerPrefs.SetInt("battlecities.highScore",highScore);
             PlayerPrefs.Save();

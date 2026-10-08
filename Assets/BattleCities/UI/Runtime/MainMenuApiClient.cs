@@ -14,7 +14,31 @@ namespace BattleCities.UI
     /// </summary>
     public sealed partial class MainMenuApiClient : MonoBehaviour
     {
-        public const string DefaultApiBaseUrl = "https://api.battlecities.com";
+        public const string LiveApiBaseUrl = "https://api.battlecities.com";
+        public const string TestApiBaseUrl = "https://test.battlecities.com";
+        public static string DefaultApiBaseUrl => IsTestNetwork ? TestApiBaseUrl : LiveApiBaseUrl;
+        public static string WalletNetwork => IsTestNetwork ? "devnet" : "mainnet-beta";
+
+        public static bool IsTestNetwork
+        {
+            get
+            {
+#if UNITY_WEBGL && !UNITY_EDITOR
+                return IsTestWebUrl(Application.absoluteURL);
+#else
+                return false;
+#endif
+            }
+        }
+
+        // Parse the actual launch URL: query strings, lookalike domains and
+        // subdomains must never opt a live deployment into Devnet.
+        public static bool IsTestWebUrl(string absoluteUrl)
+        {
+            return Uri.TryCreate(absoluteUrl, UriKind.Absolute, out var uri)
+                && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp)
+                && string.Equals(uri.Host, "test.battlecities.com", StringComparison.OrdinalIgnoreCase);
+        }
 
         [Serializable]
         public sealed class PlayerSnapshot
@@ -53,7 +77,7 @@ namespace BattleCities.UI
         }
 
         [Header("Battle Cities API")]
-        [SerializeField] private string baseUrl = DefaultApiBaseUrl;
+        [SerializeField] private string baseUrl = LiveApiBaseUrl;
         [SerializeField] private bool loginAsGuestWhenAnonymous = true;
         [SerializeField] private bool automaticRefresh = true;
         [SerializeField, Min(5)] private float leaderboardRefreshSeconds = 30;
@@ -83,6 +107,15 @@ namespace BattleCities.UI
         private Coroutine menuDataRoutine;
         private bool requestInFlight;
         private bool guestLoginAttempted;
+
+        private void Awake()
+        {
+#if !UNITY_EDITOR
+            // The launch host is authoritative, including after scene changes.
+            // Native players always use the live API.
+            baseUrl = DefaultApiBaseUrl;
+#endif
+        }
 
         private void OnEnable()
         {
@@ -116,7 +149,15 @@ namespace BattleCities.UI
             if (!Uri.TryCreate(apiBaseUrl, UriKind.Absolute, out var uri) ||
                 (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
                 throw new ArgumentException("API URL must be an absolute HTTP or HTTPS URL.", nameof(apiBaseUrl));
+#if !UNITY_EDITOR
+            if (!string.Equals(uri.GetLeftPart(UriPartial.Authority), DefaultApiBaseUrl, StringComparison.OrdinalIgnoreCase)
+                || uri.AbsolutePath != "/" || !string.IsNullOrEmpty(uri.Query)
+                || !string.IsNullOrEmpty(uri.Fragment) || !string.IsNullOrEmpty(uri.UserInfo))
+                throw new ArgumentException("The API must match the network selected by the game launch host.", nameof(apiBaseUrl));
+            baseUrl = DefaultApiBaseUrl;
+#else
             baseUrl = apiBaseUrl.TrimEnd('/');
+#endif
         }
 
 #if UNITY_EDITOR

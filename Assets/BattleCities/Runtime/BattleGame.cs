@@ -112,7 +112,7 @@ namespace BattleCities
             particleMaterial.SetFloat("_Surface",1);particleMaterial.SetFloat("_Blend",0);particleMaterial.SetFloat("_SrcBlend",(float)BlendMode.SrcAlpha);particleMaterial.SetFloat("_DstBlend",(float)BlendMode.OneMinusSrcAlpha);particleMaterial.SetFloat("_ZWrite",0);particleMaterial.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");particleMaterial.renderQueue=3000;
             var tex=new Texture2D(32,32,TextureFormat.RGBA32,false);tex.name="Soft tank dust";
             for(int y=0;y<32;y++)for(int x=0;x<32;x++){float a=Mathf.Clamp01(1-Vector2.Distance(new Vector2(x,y),new Vector2(15.5f,15.5f))/15.5f);tex.SetPixel(x,y,new Color(1,1,1,a*a));}tex.Apply();particleMaterial.SetTexture("_BaseMap",tex);
-            effects=gameObject.AddComponent<BattleAnimations>();debris=gameObject.AddComponent<BattleDebris>();weather=gameObject.AddComponent<BattleWeather>();weather.ApplyGlobalLighting=!tvReplay;BuildParts();SetupLighting();if(tvReplay)PlayReplay(tvReplayData);else LoadStage(Stage);
+            effects=gameObject.AddComponent<BattleAnimations>();debris=gameObject.AddComponent<BattleDebris>();weather=gameObject.AddComponent<BattleWeather>();weather.ApplyGlobalLighting=!tvReplay;BuildParts();SetupLighting();if(tvReplay)PlayReplay(tvReplayData);else LoadStage(!tvReplay&&BattlePreparation.Ready?BattlePreparation.StartStage:Stage);
         }
         private InputAction[] Keys(string name,string[] keys,long[] stamps)
         {
@@ -251,7 +251,7 @@ namespace BattleCities
         {
             if(Simulation==null)return;float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);fps=Mathf.Lerp(fps,1/Mathf.Max(.0001f,Time.unscaledDeltaTime),.05f);
             if(!tvReplay){UpdateGamepadControls();
-            if(debug.WasPressedThisFrame()&&!IsReplaying)showDebug=!showDebug;if(restart.WasPressedThisFrame()&&!IsOnline){if(IsReplaying)RestartReplay();else LoadStage(Stage);}if(overhead.WasPressedThisFrame())CameraElevation=CameraElevation>85?70:90;
+            if(debug.WasPressedThisFrame()&&!IsReplaying)showDebug=!showDebug;if(restart.WasPressedThisFrame()&&!IsOnline)RequestBattleRestart();if(overhead.WasPressedThisFrame())CameraElevation=CameraElevation>85?70:90;
             if(Multiplayer.BattleSession.Instance&&Multiplayer.BattleSession.Instance.Lobby.Visible)paused=true;
             UpdateDayNightShortcuts(dt);
             for(int i=0;i<slots.Length;i++)if(slots[i].WasPressedThisFrame()&&!paused)UsePowerupSlot(i);
@@ -568,7 +568,7 @@ namespace BattleCities
         }
         public void UsePowerupSlot(int index)
         {
-            if(IsReplaying||IsOnline||index<0||index>=4||paused||showDebug||consumePending||!economy||!economy.Authenticated||economy.SlotCount(index)<=0||Simulation==null||!Simulation.CanAcceptPlayerFire)return;
+            if(!ReplayReady||IsReplaying||IsOnline||index<0||index>=4||paused||showDebug||consumePending||!economy||!economy.Authenticated||economy.SlotCount(index)<=0||Simulation==null||!Simulation.CanAcceptPlayerFire)return;
             consumePending=true;_ = ConsumePowerupSlot(index);
         }
         private async System.Threading.Tasks.Task ConsumePowerupSlot(int index)
