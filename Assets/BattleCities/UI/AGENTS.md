@@ -93,6 +93,8 @@ These are the user's approved typography, layout, and interaction rules as of 20
 
 - Seeker (portrait and landscape) and PSG1 require wallet sign-in. Hide guest login, remove it from controller navigation, and guard guest entry and guest-session completion on these platforms. Keep Web guest login available. Native idle status contains only the existing wallet sign-in guidance. Reclaim the guest row in the mobile layouts while preserving the original wallet button art and bindings. On PSG1, use larger, aspect-fitted Solana/MagicBlock marks (320 x 96 areas) in a balanced row inside the TV glass; preserve their proportions and a thin center divider instead of squeezing them into shallow boxes.
 
+- On the Web battlefield login card, give the OR separator its own generous row between wallet and guest sign-in: 26-unit clean navy text in a 64 x 32 area, centered between thin rules with clear horizontal padding. Keep about 53 design units between the button artwork bounds, with balanced space above and below OR. Move the guest button and existing help text down within the TV glass instead of shrinking the button artwork or enlarging the card.
+
 ## Login button feedback
 
 - Login feedback belongs to the button the player clicks or submits. During wallet/guest sign-in, keep the existing group input lock to prevent duplicate actions, but apply it through `LoginButtonState.SetInteractionLocked`: retain the untouched buttons' tint and scale and show pressed feedback only on the activated button. Do not darken or shrink every login button when sign-in begins. Restore normal per-button hover/focus/press feedback when a failed or cancelled sign-in unlocks the controls, including both standard and PSG1 layouts.

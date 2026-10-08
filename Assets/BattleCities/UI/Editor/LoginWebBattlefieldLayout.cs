@@ -78,9 +78,9 @@ namespace BattleCities.Editor
             Set(web, "Heading", 462, 179, 404, 55, 38);
             Set(web, "Description", 462, 104, 476, 64, 24);
             SetArt(web, "Connect Phantom", 462, 14, 480);
-            SetArt(web, "Continue as Guest", 462, -96, 480);
-            Set(web, "Or", 462, -44, 42, 18, 15);
-            Set(web, "Login Status", 462, -163, 474, 54, 21);
+            SetArt(web, "Continue as Guest", 462, -130, 480);
+            Set(web, "Or", 462, -60, 64, 32, 26);
+            Set(web, "Login Status", 462, -201, 474, 50, 21);
             Set(web, "Web Partner Dock", 341, -397, 910, 105);
             SetArt(web, "Solana dApp Store", 88, -397, 300);
             Set(web, "Web Solana Plate", 397, -397, 244, 77);
@@ -91,8 +91,8 @@ namespace BattleCities.Editor
             Set(web, "Store Divider", 258, -397, 2, 56);
             Hide(web, "Column Divider", "Footer Separator", "Golden Eagle", "Choose Entry");
             var rules = web.Select((p, i) => new { p, i }).Where(p => p.p.target.name == "Divider").ToArray();
-            Box(ref web[rules[0].i], 337, -44, 188, 1);
-            Box(ref web[rules[1].i], 587, -44, 188, 1);
+            Box(ref web[rules[0].i], 331, -60, 176, 1);
+            Box(ref web[rules[1].i], 593, -60, 176, 1);
             web[rules[2].i].visible = web[rules[3].i].visible = false;
             layout.ConfigureWeb(web, background.rectTransform,
                 canvas.transform.Find("Blurred Battlefield") as RectTransform,
