@@ -14,10 +14,11 @@ using UnityEngine.SceneManagement;
 
 namespace BattleCities.Multiplayer
 {
-    public sealed class BattleSession : MonoBehaviour, INetworkRunnerCallbacks
+    public sealed partial class BattleSession : MonoBehaviour, INetworkRunnerCallbacks
     {
         public const string AppId="dedb8ea5-35ab-42a2-a8af-9d5461c4d72c";
-        public const string ProtocolVersion="battlecities-3";
+        public const string ProtocolVersion="battlecities-8";
+        public static string PhotonVersion=>ProtocolVersion+(MainMenuApiClient.IsTestNetwork?"-test":"");
         public static BattleSession Instance {get;private set;}
         public BattleMode SelectedMode=BattleMode.Coop;
         public bool ModeLockedByLaunchFlag=>BattleLaunchOptions.HasModeFlag;
@@ -69,10 +70,8 @@ namespace BattleCities.Multiplayer
         {
             if(Busy||Online)return;
             if(BattleLaunchOptions.Error!=null){Status=BattleLaunchOptions.Error;Lobby.Show();return;}
-            if(Application.platform==RuntimePlatform.WebGLPlayer)
-            {Status="This host-mode build supports native PC and Android. Browser multiplayer requires a separate build.";return;}
             Busy=true;leaving=false;connectionCancelled=false;QuickMatching=quick;
-            Status=quick?"Finding a "+(SelectedMode==BattleMode.Versus?"PvP":"co-op")+" match...":"Connecting to Photon...";
+            Status=quick?"Finding a "+BattleModeRules.Label(SelectedMode)+" match...":"Connecting to Photon...";
             try
             {
                 string code=null;
@@ -87,6 +86,7 @@ namespace BattleCities.Multiplayer
                 }
                 else RoomCode="";
                 if((host||quick)&&ModeLockedByLaunchFlag)SelectedMode=BattleLaunchOptions.Mode;
+                if(BattleModeRules.IsTeamMode(SelectedMode))SelectedMap=1;
                 if((host||quick)&&(SelectedMap<1||SelectedMap>35))throw new ArgumentOutOfRangeException(nameof(SelectedMap),"Select a map from 01 to 35.");
                 connection=new CancellationTokenSource(TimeSpan.FromSeconds(35));
                 // Load before connecting so an incoming network prefab cannot be destroyed by a scene switch.
@@ -98,17 +98,17 @@ namespace BattleCities.Multiplayer
                 var game=UnityEngine.Object.FindFirstObjectByType<BattleGame>();if(game)game.Paused=true;
                 connection.Token.ThrowIfCancellationRequested();
                 var go=new GameObject("Fusion runner");go.transform.SetParent(transform);
-                Runner=go.AddComponent<NetworkRunner>();Runner.ProvideInput=true;Runner.AddCallbacks(this);
+                Runner=go.AddComponent<NetworkRunner>();Runner.ProvideInput=!BattleDedicatedServer.Requested;Runner.AddCallbacks(this);
                 var settings=PhotonAppSettings.Global.AppSettings.GetCopy();
-                settings.AppIdFusion=AppId;settings.AppVersion=ProtocolVersion;settings.FixedRegion=Region;
+                settings.AppIdFusion=AppId;settings.AppVersion=PhotonVersion;settings.FixedRegion=Region;
                 var guestId=MainMenuApiClient.CurrentGuestId;
-                var result=await Runner.StartGame(new StartGameArgs{GameMode=quick?GameMode.AutoHostOrClient:host?GameMode.Host:GameMode.Client,
+                var result=await Runner.StartGame(new StartGameArgs{GameMode=BattleDedicatedServer.Requested?GameMode.Server:quick?(BattleDedicatedServer.DedicatedOnly?GameMode.Client:GameMode.AutoHostOrClient):host?GameMode.Host:GameMode.Client,
                     SessionName=code,SessionNameGenerator=quick?(()=>Region.ToUpperInvariant()+"-"+Guid.NewGuid().ToString("N").Substring(0,6).ToUpperInvariant()):null,
-                    PlayerCount=4,IsVisible=quick,IsOpen=true,EnableClientSessionCreation=quick,
+                    ConnectionToken=connectionToken,PlayerCount=BattleModeRules.PlayerLimit(SelectedMode),IsVisible=quick,IsOpen=true,EnableClientSessionCreation=quick&&!BattleDedicatedServer.DedicatedOnly&&!BattleDedicatedServer.Requested,
                     MatchmakingMode=Photon.Realtime.MatchmakingMode.FillRoom,
                     AuthValues=string.IsNullOrEmpty(guestId)?null:new AuthenticationValues(guestId),
                     CustomPhotonAppSettings=settings,StartGameCancellationToken=connection.Token,
-                    SessionProperties=quick?new Dictionary<string,SessionProperty>{{"mode",(int)SelectedMode}}:
+                    SessionProperties=quick?new Dictionary<string,SessionProperty>{{"mode",(int)SelectedMode},{"authority",BattleDedicatedServer.Requested||BattleDedicatedServer.DedicatedOnly?"dedicated":"player"}}:
                         host?new Dictionary<string,SessionProperty>{{"mode",(int)SelectedMode},{"map",SelectedMap}}:null});
                 connection.Token.ThrowIfCancellationRequested();
                 if(!result.Ok)throw new InvalidOperationException(result.ShutdownReason.ToString());
@@ -121,7 +121,7 @@ namespace BattleCities.Multiplayer
                     Runner.Spawn(prefab);
                 }
                 Status=quick?"Waiting for players. Match starts automatically.":"Connected. Share "+RoomCode+" with your friends.";
-                Lobby.Show();
+                if(!BattleDedicatedServer.Requested)Lobby.Show();
             }
             catch(Exception e)
             {
@@ -132,7 +132,7 @@ namespace BattleCities.Multiplayer
 
         public async Task Leave()
         {
-            if(leaving)return;leaving=true;connection?.Cancel();Busy=true;
+            if(leaving)return;leaving=true;recovering=false;connection?.Cancel();Busy=true;
             await ShutdownRunner();
             var game=UnityEngine.Object.FindFirstObjectByType<BattleGame>();if(game)game.EndOnline();
             Status="Disconnected. Create or join another room.";QuickMatching=false;Busy=false;leaving=false;Lobby.Show();
@@ -145,16 +145,17 @@ namespace BattleCities.Multiplayer
         private static string FriendlyError(string reason)
         {
             if(reason.Contains("GameNotFound"))return "Room not found. Check the full code and ask the host to keep the lobby open.";
-            if(reason.Contains("GameIsFull"))return "That room already has four players.";
+            if(reason.Contains("GameIsFull"))return "That match is full.";
             if(reason.Contains("GameClosed"))return "That match has started. Ask the host to open a rematch lobby.";
             return "Could not connect: "+reason+". Check your connection and try again.";
         }
         public void OnInput(NetworkRunner runner,NetworkInput input)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if(TestInput!=null){input.Set(TestInput());return;}
+            if(TestInput!=null){var test=TestInput();if(Match&&Match.Game)Match.Game.PredictInput(ref test);input.Set(test);return;}
 #endif
-            input.Set(Match&&Match.Game?Match.Game.ReadOnlineInput():new BattleNetworkInput{Move=-1,Aim=-1,Secondary=1});
+            var value=Match&&Match.Game?Match.Game.ReadOnlineInput():new BattleNetworkInput{Move=-1,Aim=-1,Secondary=1};
+            if(Match&&Match.Game)Match.Game.PredictInput(ref value);input.Set(value);
         }
         public void OnInputMissing(NetworkRunner runner,PlayerRef player,NetworkInput input)
         { }
@@ -162,17 +163,18 @@ namespace BattleCities.Multiplayer
         public void OnPlayerLeft(NetworkRunner runner,PlayerRef player) { }
         public void OnConnectedToServer(NetworkRunner runner) { }
         public void OnConnectRequest(NetworkRunner runner,NetworkRunnerCallbackArgs.ConnectRequest request,byte[] token)
-        {if(Match&&Match.Started)request.Refuse();else request.Accept();}
+        {if(Match&&Match.Started&&!Match.CanReconnect(TokenKey(token)))request.Refuse();else request.Accept();}
         public void OnConnectFailed(NetworkRunner runner,NetAddress address,NetConnectFailedReason reason){Status=FriendlyError(reason.ToString());}
         public void OnShutdown(NetworkRunner runner,ShutdownReason reason)
         {
-            if(leaving||runner!=Runner)return;
+            if(leaving||recovering||runner!=Runner)return;
+            if(!BattleDedicatedServer.Requested&&reason!=ShutdownReason.Ok&&Match&&Match.Started){_ = Reconnect();return;}
             Runner=null;Match=null;Busy=false;QuickMatching=false;Status="Session ended: "+reason+". Create or join a new room.";
             var game=UnityEngine.Object.FindFirstObjectByType<BattleGame>();if(game)game.EndOnline();
             Lobby.Show();if(runner)Destroy(runner.gameObject);
         }
         public void OnDisconnectedFromServer(NetworkRunner runner,NetDisconnectReason reason){Status="Connection lost: "+reason;}
-        public void OnHostMigration(NetworkRunner runner,HostMigrationToken token){Status="The host left. Please create a new room.";_ = Leave();}
+        public void OnHostMigration(NetworkRunner runner,HostMigrationToken token){_ = Migrate(runner,token);}
         public void OnSessionListUpdated(NetworkRunner runner,List<SessionInfo> sessions) { }
         public void OnCustomAuthenticationResponse(NetworkRunner runner,Dictionary<string,object> data) { }
         public void OnSceneLoadDone(NetworkRunner runner) { }

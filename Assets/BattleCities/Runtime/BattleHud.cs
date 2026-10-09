@@ -178,8 +178,15 @@ namespace BattleCities
                 PaintMapRect(state,wall.Bounds,color);
             }
             PaintMapRect(state,state.BaseBounds,state.BaseAlive?new Color32(255,190,35,255):new Color32(55,55,55,255));
+            if(state.IsTeamBattle)PaintMapRect(state,state.RivalBaseBounds,state.RivalBaseAlive?new Color32(79,199,109,255):new Color32(55,55,55,255));
             if(state.PickupType!=null)PaintMapRect(state,new Box(state.PickupX-10,state.PickupY-10,20,20),new Color32(255,225,70,255));
-            foreach(var tank in state.Tanks)if(tank.Alive)PaintMapRect(state,new Box(tank.X-13,tank.Y-13,26,26),tank.Player?new Color32(255,210,35,255):new Color32(244,65,55,255));
+            foreach(var tank in state.Tanks)if(tank.Alive)PaintMapRect(state,new Box(tank.X-13,tank.Y-13,26,26),state.IsTeamBattle?(BattleSimulation.TeamForSlot(tank.Slot)==0?new Color32(255,210,35,255):new Color32(79,199,109,255)):tank.Player?new Color32(255,210,35,255):new Color32(244,65,55,255));
+            if(state.IsCaptureFlag)for(int team=0;team<2;team++)
+            {
+                var flag=state.Flags[team];
+                PaintMapRect(state,new Box(flag.X-19,flag.Y-19,38,38),new Color32(255,255,255,255));
+                PaintMapRect(state,new Box(flag.X-12,flag.Y-12,24,24),team==0?new Color32(255,210,35,255):new Color32(79,199,109,255));
+            }
             minimapTexture.SetPixels32(minimapPixels);minimapTexture.Apply(false,false);
         }
         void Minimap(BattleSimulation state)
@@ -201,16 +208,21 @@ namespace BattleCities
             int seconds=state.Tick/60;
             Text(new Rect(x+4,2,metricWidth-8,18),"TIME",cream);Text(new Rect(x+4,18,metricWidth-8,27),(seconds/60).ToString("D2")+":"+(seconds%60).ToString("D2"),cyan,true);
             x+=metricWidth;Fill(new Rect(x-7,9,1,28),gold);
-            Text(new Rect(x+4,2,metricWidth-8,18),"LIVES",cream);Text(new Rect(x+4,18,32,27),state.Lives.ToString(),gold,true);
-            for(int i=0;i<3;i++)Icon(new Rect(x+32+i*30,18,28,25),player,i>=state.Lives);
+            Text(new Rect(x+4,2,metricWidth-8,18),state.IsCaptureFlag?"RESPAWNS":"LIVES",cream);Text(new Rect(x+4,18,32,27),state.IsCaptureFlag?"∞":state.Lives.ToString(),gold,true);
+            for(int i=0;i<(state.IsCaptureFlag?0:3);i++)Icon(new Rect(x+32+i*30,18,28,25),player,i>=state.Lives);
             float enemyX=narrow?12:metricWidth*3+4,enemyY=narrow?46:4;
             Fill(new Rect(enemyX-11,9,1,narrow?0:28),gold);
             int opponents=0;
-            if(state.IsPvp)for(int i=0;i<BattleSimulation.MaxPlayers;i++)if(i!=state.LocalPlayerSlot&&state.Participants[i].Connected&&state.Participants[i].Lives>0)opponents++;
+            if(state.IsPvp)for(int i=0;i<BattleSimulation.MaxPlayers;i++)if(!state.AreAllies(i,state.LocalPlayerSlot)&&state.Participants[i].Connected&&state.Participants[i].Lives>0)opponents++;
             Text(new Rect(enemyX,enemyY,100,19),state.IsPvp?"RIVALS":"ENEMIES",cream);
             Text(new Rect(enemyX,enemyY+18,100,23),(state.IsPvp?opponents:state.Remaining).ToString()+" LEFT",new Color(1,.42f,.32f));
             float start=enemyX+100,reserved=psg1?Psg1PowerupWidth(narrow):0,available=Mathf.Max(1,Screen.width-start-10-reserved);
-            int total=state.TotalEnemies,deadCount=total-state.Remaining;
+            if(state.IsCaptureFlag)
+            {
+                Text(new Rect(start,enemyY,available,22),"FLAGS  YELLOW "+state.FlagScores[0]+" : "+state.FlagScores[1]+" GREEN",gold,true);
+                Text(new Rect(start,enemyY+22,available,19),"FIRST TO 3 · OWN FLAG MUST BE HOME",cream);
+            }
+            int total=state.IsCaptureFlag?0:state.TotalEnemies,deadCount=total-state.Remaining;
             float step=Mathf.Min(34,available/Mathf.Max(1,total));
             for(int i=0;i<total;i++)
             {

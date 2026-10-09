@@ -41,7 +41,7 @@ namespace BattleCities.Multiplayer
             var rect=(RectTransform)panel.transform;rect.anchorMin=new Vector2(.12f,.08f);rect.anchorMax=new Vector2(.88f,.92f);rect.offsetMin=rect.offsetMax=Vector2.zero;
             panel.GetComponent<UnityEngine.UI.Image>().color=Dark;
             heading=Label(panel.transform,"BATTLE TOGETHER",32,TextAnchor.MiddleCenter);Place(heading.rectTransform,.05f,.95f,.84f,.96f);
-            mode=Button(panel.transform,"CO-OP",Vector2.zero,Vector2.zero,()=>Session.SelectedMode=Session.SelectedMode==BattleMode.Coop?BattleMode.Versus:BattleMode.Coop);
+            mode=Button(panel.transform,"CO-OP",Vector2.zero,Vector2.zero,()=>Session.SelectedMode=BattleModeRules.NextOnline(Session.SelectedMode));
             Place((RectTransform)mode.transform,.06f,.47f,.75f,.83f);modeLabel=mode.GetComponentInChildren<UnityEngine.UI.Text>();
             region=Button(panel.transform,"REGION",Vector2.zero,Vector2.zero,()=>Session.Region=BattleSession.RegionCodes[(Array.IndexOf(BattleSession.RegionCodes,Session.Region)+1)%BattleSession.RegionCodes.Length]);
             Place((RectTransform)region.transform,.53f,.94f,.75f,.83f);regionLabel=region.GetComponentInChildren<UnityEngine.UI.Text>();
@@ -88,7 +88,7 @@ namespace BattleCities.Multiplayer
         {
             if(!canvas||!Session)return;
             if(!replayGame&&SceneManager.GetActiveScene().name=="BattleCity")replayGame=UnityEngine.Object.FindAnyObjectByType<BattleGame>();
-            if(replayGame&&replayGame.IsReplaying)
+            if(replayGame&&(replayGame.IsReplaying||replayGame.HasMatchResult||replayGame.ResultsVisible))
             {open.gameObject.SetActive(false);if(Visible){panel.SetActive(false);ReleaseController();}return;}
             bool available=SceneManager.GetActiveScene().name!="Login";
             bool psgMenu=RuntimePlatformInfo.IsPsg1&&SceneManager.GetActiveScene().name=="MainMenu";
@@ -134,19 +134,19 @@ namespace BattleCities.Multiplayer
             codeButton.interactable=editable;
             codeButton.GetComponentInChildren<UnityEngine.UI.Text>().text=string.IsNullOrEmpty(code.text)?"ENTER ROOM CODE":code.text;
             if(!editable&&codeKeypad.activeSelf)CloseRoomCodeKeypad();
-            modeLabel.text=connected&&match?(match.Mode==BattleMode.Coop?"CO-OP":"PVP — LAST TANK STANDING"):(Session.SelectedMode==BattleMode.Coop?"CO-OP":"PVP — LAST TANK STANDING");
+            modeLabel.text=BattleModeRules.Label(match?match.Mode:Session.SelectedMode);
             regionLabel.text="REGION: "+Session.Region.ToUpperInvariant();mapLabel.text="MAP "+(match?match.Map:Session.SelectedMap).ToString("00");
-            roomLabel.text=connected?(Session.QuickMatching?"AUTOMATIC MATCH":"ROOM  "+Session.RoomCode):"2–4 PLAYERS  •  3 LIVES EACH";
-            roster.text=match?string.Join("   ",Enumerable.Range(0,4).Where(i=>match.Players[i]!=Fusion.PlayerRef.None).Select(i=>"P"+(i+1)+(i==match.LocalSlot?" (YOU)":"")+"  ♥ "+match.Participants[i].Lives)):"Co-op: defend the base. PvP: outlast the other tanks.";
-            heading.text=ended?(match.Mode==BattleMode.Versus?(match.Winner>=0?"PLAYER "+(match.Winner+1)+" WINS":"DRAW"):(match.Won?"STAGE CLEAR":"BASE LOST / TEAM ELIMINATED")):quick?"GET READY TO BATTLE":"BATTLE TOGETHER";
-            status.text=Session.Status+(connected&&match&&!match.Started?"\n"+(Session.QuickMatching?"The match starts when two players join.":Session.IsHost?"Start when everyone has joined.":"Waiting for the host to start."):"");
+            roomLabel.text=connected?(Session.QuickMatching?"AUTOMATIC MATCH":"ROOM  "+Session.RoomCode):BattleModeRules.PlayerLimit(Session.SelectedMode)+" PLAYERS";
+            roster.text=match?string.Join("   ",Enumerable.Range(0,4).Where(i=>match.Players[i]!=Fusion.PlayerRef.None).Select(i=>"P"+(i+1)+(i==match.LocalSlot?" (YOU)":"")+"  ♥ "+match.Participants[i].Lives)):"Co-op: defend together. Brawl: destroy the enemy base. CTF: capture three flags.";
+            heading.text=ended&&BattleModeRules.IsTeamMode(match.Mode)?(match.Winner>=0?"TEAM "+(BattleSimulation.TeamForSlot(match.Winner)+1)+" WINS":"DRAW"):ended?(match.Mode==BattleMode.Versus?(match.Winner>=0?"PLAYER "+(match.Winner+1)+" WINS":"DRAW"):(match.Won?"STAGE CLEAR":"BASE LOST / TEAM ELIMINATED")):quick?"GET READY TO BATTLE":"BATTLE TOGETHER";
+            status.text=Session.Status+(connected&&match&&!match.Started?"\n"+(Session.QuickMatching?(match.RequiredPlayers==4?"The match starts when four players join.":"The match starts when two players join."):Session.IsHost?"Start when everyone has joined.":"Waiting for the host to start."):"");
             if(quick&&!ended)
             {
-                roster.text=match?match.PlayerCount+" / 4 PLAYERS CONNECTED":"SEARCHING FOR A MATCH";
-                status.text=match&&match.PlayerCount>=2?"Players found. Match starting soon...":connected?"Waiting for another player to join...":"Finding a match...";
+                roster.text=match?match.PlayerCount+" / "+match.RequiredPlayers+" PLAYERS CONNECTED":"SEARCHING FOR A MATCH";
+                status.text=match&&match.PlayerCount>=match.RequiredPlayers?"Players found. Match starting soon...":connected?(match&&match.RequiredPlayers==4?"Waiting for four players. Defend your eagle and destroy the opposing base.":"Waiting for another player to join..."):"Finding a match...";
             }
             else if(quick&&ended)status.text="Match complete.";
-            start.gameObject.SetActive(connected&&!ended&&!Session.QuickMatching);start.interactable=Session.IsHost&&match&&!match.Started&&match.PlayerCount>=2;
+            start.gameObject.SetActive(connected&&!ended&&!Session.QuickMatching);start.interactable=Session.IsHost&&match&&!match.Started&&match.PlayerCount>=match.RequiredPlayers;
             rematch.gameObject.SetActive(connected&&ended);rematch.interactable=Session.IsHost;
             leave.gameObject.SetActive(connected||Session.Busy);leave.interactable=!Session.Busy||Session.CanCancelConnection;
             leave.GetComponentInChildren<UnityEngine.UI.Text>().text=Session.CanCancelConnection?"CANCEL CONNECTION":"LEAVE ROOM";

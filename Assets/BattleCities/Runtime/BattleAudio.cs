@@ -99,8 +99,8 @@ namespace BattleCities
             bool playing=matchReady&&!game.Paused&&!simulation.Won&&!simulation.Lost;
             if(playing&&!introPlayed)
             {
-                introPlayed=true;introUntil=Time.unscaledTime+2;
-                Play("level-intro",.65f);
+                introPlayed=true;introUntil=Time.unscaledTime+(simulation.Tick<=120?2:0);
+                if(simulation.Tick<=120)Play("level-intro",.65f);
                 music.Play();
             }
             if (game && simulation != null) TrackState();

@@ -30,7 +30,7 @@ namespace BattleCities.Core
         public event Action<LandDroneState> LandDroneExploded;
         public bool LandDroneGroundFree(Box box)
         {
-            if(box.X<0||box.Y<0||box.Right>Width||box.Bottom>Height||box.Overlaps(BaseBounds))return false;
+            if(box.X<0||box.Y<0||box.Right>Width||box.Bottom>Height||TouchesBase(box))return false;
             if(Terrain.Any(w=>w.Alive&&(w.Solid||w.Type=="bush"||w.Type=="grass")&&box.Overlaps(w.Bounds)))return false;
             if(Turrets.Any(t=>t.Alive&&box.Overlaps(t.Clearance)))return false;
             return !Tanks.Any(t=>t.Alive&&t.Player&&!IsPvp&&box.Overlaps(t.MovementBounds));
@@ -64,7 +64,7 @@ namespace BattleCities.Core
             for(int i=1;i<steps;i++)
             {
                 var probe=new Box(drone.X+dx*i/steps-1,drone.Y+dy*i/steps-1,2,2);
-                if(probe.Overlaps(BaseBounds)||Terrain.Any(w=>w.Alive&&(w.StopsBullet||w.Type=="bush"||w.Type=="grass")&&probe.Overlaps(w.Bounds))
+                if(TouchesBase(probe)||Terrain.Any(w=>w.Alive&&(w.StopsBullet||w.Type=="bush"||w.Type=="grass")&&probe.Overlaps(w.Bounds))
                     ||Turrets.Any(t=>t.BlocksPath&&probe.Overlaps(t.BlockingBounds)))return false;
             }
             return true;
@@ -84,7 +84,7 @@ namespace BattleCities.Core
             }
             var obstacles=Terrain.Where(w=>w.Alive&&(w.Solid||w.Type=="bush"||w.Type=="grass")).Select(w=>w.Bounds)
                 .Concat(Turrets.Where(t=>t.Alive).Select(t=>t.Clearance))
-                .Concat(Tanks.Where(t=>t.Alive&&t.Player&&(!IsPvp||t.Slot==drone.OwnerSlot)).Select(t=>t.MovementBounds)).Concat(new[]{BaseBounds});
+                .Concat(Tanks.Where(t=>t.Alive&&t.Player&&AreAllies(t.Slot,drone.OwnerSlot)).Select(t=>t.MovementBounds)).Concat(RivalBaseAlive?new[]{BaseBounds,RivalBaseBounds}:new[]{BaseBounds});
             foreach(var obstacle in obstacles)
             {
                 int left=Math.Max(0,(int)Math.Floor((obstacle.X-LandDroneState.HalfSize)/cell));
@@ -250,7 +250,7 @@ namespace BattleCities.Core
                 if(victim.Shield>0)continue;
                 victim.Health-=Math.Max(1,hit?LandDroneSettings.DirectDamage:LandDroneSettings.SplashDamage);
                 if(victim.Drop){victim.Drop=false;DropRequested?.Invoke();}
-                if(victim.Health<=0)Kill(victim);
+                if(victim.Health<=0)Kill(victim,drone.OwnerSlot);
             }
         }
     }

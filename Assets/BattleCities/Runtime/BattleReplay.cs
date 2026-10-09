@@ -193,7 +193,7 @@ namespace BattleCities.Core
         {
             Require(r!=null&&r.format==BattleReplay.Format&&r.simulationVersion==BattleReplay.SimulationVersion,"Unsupported replay version.");
             Require(r.tickRate==60&&r.seed!=0&&r.levelNumber>=1&&r.levelNumber<=35,"Invalid replay timing or level.");
-            Require(r.mode=="single"||r.mode=="coop"||r.mode=="versus","Invalid replay mode.");
+            Require(r.mode=="single"||r.mode=="coop"||r.mode=="versus"||r.mode=="2v2"||(r.mode=="ctf"||r.mode=="ctf1v1"),"Invalid replay mode.");
             Require(r.durationTicks>0&&r.durationTicks<=BattleReplay.MaxTicks,"Invalid replay duration.");
             Require(r.completion=="completed"||r.completion=="aborted"||r.completion=="truncated","Invalid completion state.");
             Require(r.map?.field!=null&&r.config?.landDrone!=null&&r.claimedResult!=null,"Missing replay setup or result.");
@@ -223,7 +223,7 @@ namespace BattleCities.Core
             {
                 Require(e!=null&&e.tick>=last&&e.tick<=r.durationTicks,"Invalid event order.");last=e.tick;
                 Require(e.slot>=0&&e.slot<4,"Invalid event slot.");
-                Require(e.kind=="pickup"||e.kind=="powerup"||e.kind=="participant"||e.kind=="begin","Unsupported replay event.");
+                Require(e.kind=="pickup"||e.kind=="powerup"||e.kind=="participant"||e.kind=="begin"||((r.mode=="ctf"||r.mode=="ctf1v1")&&e.kind=="flagdrop"),"Unsupported replay event.");
                 if(e.kind=="pickup"||e.kind=="powerup")Require((e.kind=="pickup"&&e.value==null)||Powerups.Contains(e.value),"Invalid replay power-up.");
                 else Require(r.mode!="single","Single-player replay contains a network event.");
             }
@@ -286,7 +286,7 @@ namespace BattleCities.Core
 #endif
             if(simulation.Tick!=0)throw new InvalidOperationException("Recording must start before tick one.");
             Data=new BattleReplay { id=Guid.NewGuid().ToString("N"),createdAt=DateTime.UtcNow.ToString("O"),buildVersion=buildVersion,
-                mode=simulation.Mode==BattleMode.Offline?"single":simulation.Mode==BattleMode.Coop?"coop":"versus",seed=simulation.ReplaySeed,
+                mode=simulation.Mode==BattleMode.Offline?"single":simulation.Mode==BattleMode.Coop?"coop":simulation.Mode==BattleMode.CaptureFlagDuel?"ctf1v1":simulation.IsCaptureFlag?"ctf":simulation.IsTeamBattle?"2v2":"versus",seed=simulation.ReplaySeed,
                 levelNumber=simulation.Stage,map=ReplayJson.Copy(map),config=simulation.ReplayConfiguration() };
             // Legacy campaign JSON omits field dimensions and relies on the engine's
             // 13x13 default. Persist the resolved dimensions so evidence is self-contained.
@@ -414,7 +414,7 @@ namespace BattleCities.Core
             var c=data.config;
             var sim=new BattleSimulation(ReplayJson.Copy(data.map),data.levelNumber,c.normalReload,c.upgradedReload,c.playerTier);
             sim.ApplyReplayConfiguration(c);sim.SetReplaySeed(data.seed);
-            if(data.mode!="single")sim.ConfigureMultiplayer(data.mode=="coop"?BattleMode.Coop:BattleMode.Versus);
+            if(data.mode!="single")sim.ConfigureMultiplayer(data.mode=="coop"?BattleMode.Coop:data.mode=="ctf1v1"?BattleMode.CaptureFlagDuel:data.mode=="ctf"?BattleMode.CaptureFlag:data.mode=="2v2"?BattleMode.TeamBattle:BattleMode.Versus);
             return sim;
         }
         public bool Step()
@@ -450,6 +450,7 @@ namespace BattleCities.Core
                 case "pickup":sim.SpawnPickup(e.value);break;
                 case "powerup":sim.ApplyPowerup(e.value);break;
                 case "participant":sim.SetParticipant(e.slot,e.connected);break;
+                case "flagdrop":sim.DropCarriedFlag(e.slot);break;
                 case "begin":sim.BeginMatch();break;
                 default:throw new FormatException("Unsupported replay event.");
             }

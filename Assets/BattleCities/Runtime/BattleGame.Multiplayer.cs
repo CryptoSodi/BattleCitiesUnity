@@ -18,11 +18,12 @@ namespace BattleCities
             FinishRecording();replayPlayer=null;NetworkMatch=match;loadingOnline=true;
             try
             {
-                LoadStage(stage);Simulation.ConfigureMultiplayer(mode);Simulation.RecordVisualEvents();
+                if(BattleModeRules.IsTeamMode(mode))LoadStageMap(1,Newtonsoft.Json.JsonConvert.DeserializeObject<MapData>(Resources.Load<TextAsset>("Maps/01-team").text));
+                else LoadStage(stage);Simulation.ConfigureMultiplayer(mode);Simulation.RecordVisualEvents();
                 EnemyFire=true;Simulation.DisableEnemyFire=false;
                 if(mode==BattleMode.Versus&&eagle)eagle.SetActive(false);
                 shotSequence=secondarySequence=0;latestPowerShot=false;onlineSecondary=SecondaryAttack.Mine;
-                ResetPrimaryFire();paused=false;StartOnlineRecording();
+                ResetPrimaryFire();ResetMovementPrediction();paused=false;StartOnlineRecording();
             }
             finally{loadingOnline=false;}
         }

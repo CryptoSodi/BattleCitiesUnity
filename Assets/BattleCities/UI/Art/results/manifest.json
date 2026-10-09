@@ -1,0 +1,361 @@
+{
+  "project": "Battle Cities",
+  "purpose": "Separate runtime sprites for full-screen TV results",
+  "generationTool": "Built-in image_gen",
+  "date": "2026-10-08",
+  "status": "Complete: seven separate transparent PNG assets prepared for integration",
+  "reference": "C:/repos/BattleCity/art_exports/ui/fullscreen-tv-results-2026-10-08-v4/fullscreen-tv-results.png",
+  "requestedAssets": [
+    "commander-officer",
+    "commander-scout",
+    "commander-pilot",
+    "commander-beret",
+    "match-report",
+    "enemy-helmet",
+    "player-group"
+  ],
+  "artDirection": {
+    "style": "Polished cartoon 3D UI illustrations",
+    "portraitRim": "Compact blue/silver square rim with modest corners",
+    "background": "True transparency outside the asset; portrait interior opaque",
+    "screenRead": "32–64 px",
+    "dimensions": {
+      "portraits": "512x512",
+      "icons": "256x256"
+    },
+    "pivot": "center",
+    "normalization": "Alpha-bound crop, small safety padding, aspect-preserving fit and PNG export",
+    "integration": "No Unity code changes; importing chat handles integration"
+  },
+  "assets": [
+    {
+      "id": "commander-officer",
+      "file": "commander-officer.png",
+      "kind": "portrait",
+      "prompt": "Use case: stylized-concept. Production raster UI sprite for Battle Cities Unity results, not a full-page mockup. Style reference: the supplied full-screen results concept. Polished colorful cartoon 3D illustrated mobile game style, clean silhouettes, broad readable forms, small bevels, soft top-left highlights, navy edge definition. Must remain clear at 32–64 screen pixels. Output ONE isolated asset, centered, on true transparent background, no white/checkerboard/black backdrop, no text, letters, numbers, labels, watermarks or other UI elements. Tight useful framing with only a very small transparent safety margin. No long cast shadow outside the sprite. SUBJECT: one distinct confident young adult olive officer commander portrait. Head and shoulders, slightly turned toward viewer left, warm medium skin, brown eyes, strong expressive brow, neat dark hair, olive uniform collar. Rounded deep olive officer helmet with one readable raised GOLD STAR centered above forehead, subtle brown leather chin straps. Clearly a different character from the green scout. PORTRAIT FRAME: square with modest rounded corners, narrow cobalt-blue outer rim, silver bevel and thin navy inner border exactly like the four portrait thumbnails in the concept, not the gold profile frame. Rim occupies about 5% of width, identical width on all four sides. Dark moss/navy illustration backing INSIDE the frame only, opaque portrait interior and true alpha outside. Fill about 96% of a square canvas. Entire frame intact. No medals, rank digits, badges or caption.",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-819d57fe-d8f8-491c-b148-daa38eacddd9.png",
+      "references": [
+        "C:/repos/BattleCity/art_exports/ui/fullscreen-tv-results-2026-10-08-v4/fullscreen-tv-results.png"
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sourceTool": "Built-in image_gen",
+      "approvalStatus": "Prepared for Unity integration inspection",
+      "output": {
+        "path": "C:/repos/BattleCity/art_exports/ui/results-runtime-2026-10-08/commander-officer.png",
+        "width": 512,
+        "height": 512,
+        "bytes": 524372,
+        "sha256": "e1014ef643ca088971e94bcc05bd6645103ff10b09a64b763029a9fbc717fa4e",
+        "alphaBounds": {
+          "left": 6,
+          "top": 8,
+          "width": 487,
+          "height": 496,
+          "transparentPixels": 38022,
+          "partiallyTransparentPixels": 222478
+        }
+      },
+      "sourceDimensions": {
+        "width": 1254,
+        "height": 1254
+      },
+      "sourceCrop": {
+        "left": 43,
+        "top": 17,
+        "width": 1197,
+        "height": 1187
+      },
+      "processing": "Sharp: alpha-bound crop, aspect-preserving resize, transparent safety padding, lossless PNG",
+      "status": "Exported; alpha/dimensions validated; native-scale preview visually inspected"
+    },
+    {
+      "id": "commander-scout",
+      "file": "commander-scout.png",
+      "kind": "portrait",
+      "prompt": "Use case: precise-object-edit. Input 1 is the EDIT TARGET and the approved portrait-frame family seed; input 2 is the full results concept for overall game style. Create ONE square Battle Cities commander portrait PNG with true transparency OUTSIDE the rim. Replace only the character and clothing INSIDE input 1's frame. Preserve the same square canvas, exact cobalt-blue outer rim, silver bevel, navy inner border, rim thickness, modest corner shape, lighting, backing color, crop and portrait scale. Keep the entire rim intact with the same small transparent safety margin. Polished colorful cartoon 3D illustrated game portrait, expressive large eyes, broad readable shapes for a 32–64 pixel thumbnail. No text, lettering, rank numeral, labels, medals, badges outside the helmet, watermark, backdrop or other objects. Interior remains opaque. NEW CHARACTER: a distinct young adult green-helmet scout, cheerful rounder face, warm tan skin, brown eyes, short auburn hair. Bright grassy-green rounded scout helmet, small utilitarian silver goggles resting ON TOP of the helmet forehead band, no gold star or officer insignia. Green collar and modest brown chin straps. Face oriented slightly toward viewer LEFT to distinguish it from the officer. Head-and-shoulders at the same scale as the officer.",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-41cd001e-861a-43f6-914b-664c5e4775f8.png",
+      "references": [
+        "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-819d57fe-d8f8-491c-b148-daa38eacddd9.png",
+        "C:/repos/BattleCity/art_exports/ui/fullscreen-tv-results-2026-10-08-v4/fullscreen-tv-results.png"
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sourceTool": "Built-in image_gen",
+      "approvalStatus": "Prepared for Unity integration inspection",
+      "output": {
+        "path": "C:/repos/BattleCity/art_exports/ui/results-runtime-2026-10-08/commander-scout.png",
+        "width": 512,
+        "height": 512,
+        "bytes": 530277,
+        "sha256": "d225c3201d7f503c897c1f5bcde6371f3b0f9c9785bb5016d08bbb7e41dc9277",
+        "alphaBounds": {
+          "left": 23,
+          "top": 14,
+          "width": 483,
+          "height": 469,
+          "transparentPixels": 41868,
+          "partiallyTransparentPixels": 218748
+        }
+      },
+      "sourceDimensions": {
+        "width": 1254,
+        "height": 1254
+      },
+      "sourceCrop": {
+        "left": 0,
+        "top": 61,
+        "width": 1209,
+        "height": 1169
+      },
+      "processing": "Sharp: alpha-bound crop, aspect-preserving resize, transparent safety padding, lossless PNG",
+      "status": "Exported; alpha/dimensions validated; native-scale preview visually inspected"
+    },
+    {
+      "id": "commander-pilot",
+      "file": "commander-pilot.png",
+      "kind": "portrait",
+      "prompt": "Use case: precise-object-edit. Input 1 is the EDIT TARGET and the approved portrait-frame family seed; input 2 is the full results concept for overall game style. Create ONE square Battle Cities commander portrait PNG with true transparency OUTSIDE the rim. Replace only the character and clothing INSIDE input 1's frame. Preserve the same square canvas, exact cobalt-blue outer rim, silver bevel, navy inner border, rim thickness, modest corner shape, lighting, backing color, crop and portrait scale. Keep the entire rim intact with the same small transparent safety margin. Polished colorful cartoon 3D illustrated game portrait, expressive large eyes, broad readable shapes for a 32–64 pixel thumbnail. No text, lettering, rank numeral, labels, medals, badges outside the helmet, watermark, backdrop or other objects. Interior remains opaque. NEW CHARACTER: a distinct young adult pilot with deeper brown skin, calm focused expression, slightly square face, dark eyes. Brown leather aviator helmet with LARGE SILVER-FRAMED blue-glass GOGGLES resting on the forehead, visible thick black padding and warm tan leather seams. Brown pilot collar. No army helmet or gold star. Face near frontal, head-and-shoulders at the same scale as the officer. This must clearly read as the leather-and-goggles character from the results concept.",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-402264d4-23e6-4abd-9b45-9f04b0441a7e.png",
+      "references": [
+        "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-819d57fe-d8f8-491c-b148-daa38eacddd9.png",
+        "C:/repos/BattleCity/art_exports/ui/fullscreen-tv-results-2026-10-08-v4/fullscreen-tv-results.png"
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sourceTool": "Built-in image_gen",
+      "approvalStatus": "Prepared for Unity integration inspection",
+      "output": {
+        "path": "C:/repos/BattleCity/art_exports/ui/results-runtime-2026-10-08/commander-pilot.png",
+        "width": 512,
+        "height": 512,
+        "bytes": 573989,
+        "sha256": "2a157fb89914c8db16b17f32bd337fd46313f59e11df7630c088404eab234680",
+        "alphaBounds": {
+          "left": 7,
+          "top": 23,
+          "width": 497,
+          "height": 483,
+          "transparentPixels": 29079,
+          "partiallyTransparentPixels": 231724
+        }
+      },
+      "sourceDimensions": {
+        "width": 1254,
+        "height": 1254
+      },
+      "sourceCrop": {
+        "left": 43,
+        "top": 20,
+        "width": 1168,
+        "height": 1174
+      },
+      "processing": "Sharp: alpha-bound crop, aspect-preserving resize, transparent safety padding, lossless PNG",
+      "status": "Exported; alpha/dimensions validated; native-scale preview visually inspected"
+    },
+    {
+      "id": "commander-beret",
+      "file": "commander-beret.png",
+      "kind": "portrait",
+      "prompt": "Use case: precise-object-edit. Input 1 is the EDIT TARGET and the approved portrait-frame family seed; input 2 is the full results concept for overall game style. Create ONE square Battle Cities commander portrait PNG with true transparency OUTSIDE the rim. Replace only the character and clothing INSIDE input 1's frame. Preserve the same square canvas, exact cobalt-blue outer rim, silver bevel, navy inner border, rim thickness, modest corner shape, lighting, backing color, crop and portrait scale. Keep the entire rim intact with the same small transparent safety margin. Polished colorful cartoon 3D illustrated game portrait, expressive large eyes, broad readable shapes for a 32–64 pixel thumbnail. No text, lettering, rank numeral, labels, medals, badges outside the helmet, watermark, backdrop or other objects. Interior remains opaque. NEW CHARACTER: a distinct confident young adult female commander with fair warm skin, green eyes, short wavy copper-red hair and a small friendly smile. Bright RED BERET worn to one side with one tiny round gold pin, dark red fabric shading. Olive uniform collar. No helmet or goggles. Face oriented slightly toward viewer RIGHT. Head-and-shoulders at the same scale as the officer; the red beret must be the clear readable identity at small sizes.",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-7c8c729d-38f8-43de-9705-00b2a638b728.png",
+      "references": [
+        "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-819d57fe-d8f8-491c-b148-daa38eacddd9.png",
+        "C:/repos/BattleCity/art_exports/ui/fullscreen-tv-results-2026-10-08-v4/fullscreen-tv-results.png"
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sourceTool": "Built-in image_gen",
+      "approvalStatus": "Prepared for Unity integration inspection",
+      "output": {
+        "path": "C:/repos/BattleCity/art_exports/ui/results-runtime-2026-10-08/commander-beret.png",
+        "width": 512,
+        "height": 512,
+        "bytes": 538876,
+        "sha256": "84cb7ff5c70b88e8cab68dc5ce01469f2ae0a1413527c0cc16c9a287f865eda7",
+        "alphaBounds": {
+          "left": 12,
+          "top": 6,
+          "width": 487,
+          "height": 500,
+          "transparentPixels": 36683,
+          "partiallyTransparentPixels": 224189
+        }
+      },
+      "sourceDimensions": {
+        "width": 1254,
+        "height": 1254
+      },
+      "sourceCrop": {
+        "left": 44,
+        "top": 0,
+        "width": 1164,
+        "height": 1196
+      },
+      "processing": "Sharp: alpha-bound crop, aspect-preserving resize, transparent safety padding, lossless PNG",
+      "status": "Exported; alpha/dimensions validated; native-scale preview visually inspected"
+    },
+    {
+      "id": "match-report",
+      "file": "match-report.png",
+      "kind": "icon",
+      "prompt": "Use case: stylized-concept. Production raster UI sprite for Battle Cities Unity results, not a full-page mockup. Style reference: the supplied full-screen results concept. Polished colorful cartoon 3D illustrated mobile game style, clean silhouettes, broad readable forms, small bevels, soft top-left highlights, navy edge definition. Must remain clear at 32–64 screen pixels. Output ONE isolated asset, centered, on true transparent background, no white/checkerboard/black backdrop, no text, letters, numbers, labels, watermarks or other UI elements. Tight useful framing with only a very small transparent safety margin. No long cast shadow outside the sprite. SUBJECT: single BLUE CLIPBOARD match-report icon from the concept. Straight-on frontal upright clipboard; compact cobalt blue board with softly rounded corners and small silver bevel, a raised dark-blue clip at the top. Three broad pale-blue or cream horizontal report bars and a few simple square check marks, graphical shapes only not letters. Subtle gold highlight at clip hinge, blue is dominant. No enclosing tile, square portrait frame, or panel. Entire clipboard including clip visible. Near-square usable silhouette.",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-67a1e968-ac2c-4878-90af-60a2af927bde.png",
+      "references": [
+        "C:/repos/BattleCity/art_exports/ui/fullscreen-tv-results-2026-10-08-v4/fullscreen-tv-results.png"
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sourceTool": "Built-in image_gen",
+      "approvalStatus": "Prepared for Unity integration inspection",
+      "output": {
+        "path": "C:/repos/BattleCity/art_exports/ui/results-runtime-2026-10-08/match-report.png",
+        "width": 256,
+        "height": 256,
+        "bytes": 73648,
+        "sha256": "647e9bf42016a9444fc55a2366f3b9f08b292f3bb9124f065c404ca40f91ffd7",
+        "alphaBounds": {
+          "left": 38,
+          "top": 4,
+          "width": 205,
+          "height": 240,
+          "transparentPixels": 26400,
+          "partiallyTransparentPixels": 38480
+        }
+      },
+      "sourceDimensions": {
+        "width": 1254,
+        "height": 1254
+      },
+      "sourceCrop": {
+        "left": 25,
+        "top": 54,
+        "width": 1151,
+        "height": 1184
+      },
+      "processing": "Sharp: alpha-bound crop, aspect-preserving resize, transparent safety padding, lossless PNG",
+      "status": "Exported; alpha/dimensions validated; native-scale preview visually inspected"
+    },
+    {
+      "id": "enemy-helmet",
+      "file": "enemy-helmet.png",
+      "kind": "icon",
+      "prompt": "Use case: stylized-concept. Production raster UI sprite for Battle Cities Unity results, not a full-page mockup. Style reference: the supplied full-screen results concept. Polished colorful cartoon 3D illustrated mobile game style, clean silhouettes, broad readable forms, small bevels, soft top-left highlights, navy edge definition. Must remain clear at 32–64 screen pixels. Output ONE isolated asset, centered, on true transparent background, no white/checkerboard/black backdrop, no text, letters, numbers, labels, watermarks or other UI elements. Tight useful framing with only a very small transparent safety margin. No long cast shadow outside the sprite. SUBJECT: single SILVER ENEMY HELMET icon matching the match-report sidebar in the concept. Straight-on three-quarter frontal small armored rounded steel helmet with two short side-mounted cheek guards and a dark navy opening/visor underneath; bright silver rounded crown, subtle seams/rivets, pale blue metal highlights and dark blue underside. Readable compact helmet silhouette, not a skull or human portrait. No tall horns or decoration, no long attachments. No enclosing tile or frame. Entire helmet intact.",
+      "source": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-08ecfd55-4d11-4a01-b67b-e21d7c4f7a68.png",
+      "references": [
+        "C:/repos/BattleCity/art_exports/ui/fullscreen-tv-results-2026-10-08-v4/fullscreen-tv-results.png"
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sourceTool": "Built-in image_gen",
+      "approvalStatus": "Prepared for Unity integration inspection",
+      "output": {
+        "path": "C:/repos/BattleCity/art_exports/ui/results-runtime-2026-10-08/enemy-helmet.png",
+        "width": 256,
+        "height": 256,
+        "bytes": 83030,
+        "sha256": "323e100aa781c6b63c73fe23f8cf0e55ae61d91bc96c9786a90b2ee59e156104",
+        "alphaBounds": {
+          "left": 12,
+          "top": 20,
+          "width": 238,
+          "height": 218,
+          "transparentPixels": 36815,
+          "partiallyTransparentPixels": 28218
+        }
+      },
+      "sourceDimensions": {
+        "width": 1316,
+        "height": 1195
+      },
+      "sourceCrop": {
+        "left": 0,
+        "top": 43,
+        "width": 1278,
+        "height": 1136
+      },
+      "processing": "Sharp: alpha-bound crop, aspect-preserving resize, transparent safety padding, lossless PNG",
+      "status": "Exported; alpha/dimensions validated; native-scale preview visually inspected"
+    },
+    {
+      "id": "player-group",
+      "file": "player-group.png",
+      "kind": "icon",
+      "source": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/reference-style-v2/shared/navigation/socials.png",
+      "prompt": null,
+      "references": [],
+      "provenance": "Reused existing project artwork: the approved blue/gold Socials navigation icon.",
+      "discardedGeneratedCandidates": [
+        "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-49071a3f-844d-4a7f-81e0-0e6d4a397fca.png",
+        "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-798c9be3-6ccf-4d71-be9c-5fd2cd7a54fd.png"
+      ],
+      "reason": "Existing project icon matches the concept and avoids the generated candidates' ambient halo.",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sourceTool": "Existing project artwork",
+      "approvalStatus": "Prepared for Unity integration inspection",
+      "output": {
+        "path": "C:/repos/BattleCity/art_exports/ui/results-runtime-2026-10-08/player-group.png",
+        "width": 256,
+        "height": 256,
+        "bytes": 91982,
+        "sha256": "c1eb6aa9ccf0dfe130e2cad6e61042575545c199af7e7adeda58a75563dad59f",
+        "alphaBounds": {
+          "left": 4,
+          "top": 28,
+          "width": 248,
+          "height": 199,
+          "transparentPixels": 29241,
+          "partiallyTransparentPixels": 35752
+        }
+      },
+      "sourceDimensions": {
+        "width": 420,
+        "height": 339
+      },
+      "sourceCrop": {
+        "left": 4,
+        "top": 4,
+        "width": 412,
+        "height": 331
+      },
+      "processing": "Sharp: alpha-bound crop, aspect-preserving resize, transparent safety padding, lossless PNG",
+      "status": "Exported; alpha/dimensions validated; native-scale preview visually inspected"
+    }
+  ],
+  "notes": [
+    "Six assets generated with the built-in image_gen tool.",
+    "Player-group reuses the existing approved Socials navigation sprite.",
+    "Raw generation paths retained in provenance; final sprites live in this folder.",
+    "No Unity code or project assets modified."
+  ],
+  "validation": {
+    "tool": "Sharp metadata and RGBA alpha inspection",
+    "transparency": true,
+    "dimensions": true,
+    "fullAlphaBoundsSaved": true,
+    "nativeScalePreview": "preview-native-scale.png",
+    "previewSizes": [
+      144,
+      64,
+      32
+    ],
+    "visualReview": "Distinct commander identities and consistent blue/silver rim; clipboard, helmet and player-group silhouettes readable on cream and navy. Unity in-engine verification remains with the integrating chat.",
+    "totalAssetBytes": 2416174,
+    "unityCodeModified": false
+  }
+}

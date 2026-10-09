@@ -32,7 +32,7 @@ namespace BattleCities
             replaySaved=false;
             battleFuelRequestId=BattlePreparation.Ready?BattlePreparation.FuelRequestId:null;
             replayRecorder=new ReplayRecorder(Simulation,replayMap,Application.version,backgroundCheckpoints:true);
-            replayArchive=new ReplayArchive {replay=replayRecorder.Data,apiUrl=BattlePreparation.Ready?BattlePreparation.ApiUrl:null,
+            replayArchive=new ReplayArchive {replay=replayRecorder.Data,apiUrl=BattlePreparation.Ready&&!Simulation.IsTeamBattle?BattlePreparation.ApiUrl:null,
                 ownerId=BattlePreparation.Ready?BattlePreparation.OwnerId:null,ownerProvider=BattlePreparation.Ready?BattlePreparation.OwnerProvider:null};
             ReplayStatus="Recording";
             if(!string.IsNullOrEmpty(replayArchive.apiUrl))
@@ -45,6 +45,7 @@ namespace BattleCities
                     ()=>{if(this&&replayRecorder==recorder){replayPreparing=false;ReplayStatus=replayArchive.uploadStatus;}}));
             }
         }
+        public void StopRecordingForRecovery(){FinishRecording();ReplayStatus="Recovered match: recording unavailable for this round.";}
         public void StartOnlineRecording()
         { if(NetworkMatch&&NetworkMatch.Object.HasStateAuthority)StartReplayRecorder(); }
         private void QueueReplayEvent(ReplayEvent e)

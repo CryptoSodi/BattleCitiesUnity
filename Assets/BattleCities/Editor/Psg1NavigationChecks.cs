@@ -33,7 +33,7 @@ namespace BattleCities.Editor
             => Begin(Screens(), "login, home, dialogs, tank grid, lobby/keypad, debug, pause and return to menu");
 
         public static void RunResults()
-            => Begin(ResultScreens(), "stage clear, next stage, restart, game over, final stage and return to menu");
+            => Begin(ResultScreens(), "full-screen results, next stage, game over, final stage and return to menu");
 
         static void Begin(IEnumerator routine, string description)
         {
@@ -122,28 +122,34 @@ namespace BattleCities.Editor
                 LandDrones = sim.LandDrones.ToArray(), TerrainAlive = sim.Terrain.Select(w => w.Alive).ToArray(),
                 ExtraWalls = sim.Terrain.Skip(sim.InitialTerrainCount).ToArray() });
         }
+        static IEnumerator ResultReady()
+        {
+            float until=Time.unscaledTime+.4f;while(Time.unscaledTime<until)yield return null;
+            var results=UnityEngine.Object.FindAnyObjectByType<BattleResultsScreen>();
+            Check(results,"Full-screen result screen is visible");
+            Check(Selected&&Selected.name=="Continue","Continue receives initial focus");
+            Reachable(results.GetComponentsInChildren<Selectable>());
+        }
         static IEnumerator ResultScreens()
         {
             yield return Scene("BattleCity");
-            var game = UnityEngine.Object.FindFirstObjectByType<BattleGame>();
-            game.LoadStage(1); ResultFrame(game, true); yield return null;
+            var game=UnityEngine.Object.FindAnyObjectByType<BattleGame>();
+            game.LoadStage(1);ResultFrame(game,true);yield return ResultReady();
             yield return Tap(AndroidKeyCode.ButtonB);
-            Check(game.Stage == 2 && !game.Simulation.Won, "Stage clear A starts next stage");
-            ResultFrame(game, false); yield return null;
-            yield return Tap(AndroidKeyCode.ButtonB);
-            Check(game.Stage == 2 && !game.Simulation.Lost, "Game over A restarts stage");
-            ResultFrame(game, false); yield return null;
-            yield return Tap(AndroidKeyCode.ButtonA); yield return null;
-            Check(SceneManager.GetActiveScene().name == "MainMenu", "Game over B returns to menu");
-            yield return Scene("BattleCity"); game = UnityEngine.Object.FindFirstObjectByType<BattleGame>();
-            game.LoadStage(35); ResultFrame(game, true); yield return null;
-            yield return Direction(1); yield return Tap(AndroidKeyCode.ButtonB); yield return null;
-            Check(SceneManager.GetActiveScene().name == "MainMenu", "Final stage down/A returns to menu without stage 36");
-            yield return Scene("BattleCity"); game = UnityEngine.Object.FindFirstObjectByType<BattleGame>();
-            ResultFrame(game, true); yield return null;
-            yield return Tap(AndroidKeyCode.ButtonA); yield return null;
-            Check(SceneManager.GetActiveScene().name == "MainMenu", "Stage clear B returns to menu");
+            Check(game.Stage==2&&!game.Simulation.Won,"Stage clear A starts next stage");
+            ResultFrame(game,false);yield return ResultReady();
+            yield return Tap(AndroidKeyCode.ButtonB);yield return null;
+            Check(SceneManager.GetActiveScene().name=="MainMenu","Defeat Continue returns to menu");
+            yield return Scene("BattleCity");game=UnityEngine.Object.FindAnyObjectByType<BattleGame>();
+            game.LoadStage(35);ResultFrame(game,true);yield return ResultReady();
+            yield return Tap(AndroidKeyCode.ButtonB);yield return null;
+            Check(SceneManager.GetActiveScene().name=="MainMenu","Final-stage Continue returns to menu without stage 36");
+            yield return Scene("BattleCity");game=UnityEngine.Object.FindAnyObjectByType<BattleGame>();
+            ResultFrame(game,true);yield return ResultReady();
+            yield return Tap(AndroidKeyCode.ButtonA);yield return null;
+            Check(SceneManager.GetActiveScene().name=="MainMenu","Results B returns to menu");
         }
+
         static IEnumerator Screens()
         {
             yield return Scene("Login");

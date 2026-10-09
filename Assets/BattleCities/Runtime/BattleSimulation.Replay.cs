@@ -21,10 +21,10 @@ namespace BattleCities.Core
         // Include hidden timers, RNG, entity order, pathfinding history, terrain damage and
         // participant state. Local camera slot, UI text and visual event buffers are excluded.
         public string ReplayStateHash()=>ReplayJson.Hash(ReplayStateData());
-        public object ReplayStateData()=>ReplayStateData(false);
+        public object ReplayStateData()=>IsCaptureFlag?(object)new {state=ReplayStateData(false),RivalBaseAlive,RivalBaseBounds,teamSpawnCounts,teamSpawnTimers,Flags,FlagScores}:IsTeamBattle?(object)new {state=ReplayStateData(false),RivalBaseAlive,RivalBaseBounds,teamSpawnCounts,teamSpawnTimers}:ReplayStateData(false);
         // Capture on the simulation thread. The returned graph is exclusively owned
         // by the checkpoint worker; it contains no mutable simulation references.
-        public object CaptureReplayStateData()=>ReplayStateData(true);
+        public object CaptureReplayStateData()=>IsCaptureFlag?(object)new {state=ReplayStateData(true),RivalBaseAlive,RivalBaseBounds,teamSpawnCounts=(int[])teamSpawnCounts.Clone(),teamSpawnTimers=(float[])teamSpawnTimers.Clone(),Flags=Flags.Select(f=>f.Copy()).ToArray(),FlagScores=(int[])FlagScores.Clone()}:IsTeamBattle?(object)new {state=ReplayStateData(true),RivalBaseAlive,RivalBaseBounds,teamSpawnCounts=(int[])teamSpawnCounts.Clone(),teamSpawnTimers=(float[])teamSpawnTimers.Clone()}:ReplayStateData(true);
         private object ReplayStateData(bool detached)=>new {
             Tick,Stage,Width,Height,Score,offlineLives,BaseAlive,Lost,Won,Mode,MatchStarted,WinnerSlot,DisableEnemyFire,
             Freeze,ZoomOut,defenceTimer,offlineSecondary,offlineSecondaryCooldown,playerMoveIntent,

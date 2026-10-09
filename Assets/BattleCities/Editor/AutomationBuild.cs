@@ -93,6 +93,11 @@ namespace BattleCities.Editor
             if (!EditorSceneManager.SaveOpenScenes()) throw new BuildFailedException("Could not save the open scenes.");
             if (request.target == "WebGL")
             {
+                PhotonMultiplayerSetup.Configure();
+                MultiplayerChunkSetup.Configure();
+                var fusionConfig=Fusion.NetworkProjectConfig.Global;
+                fusionConfig.AllowClientServerModesInWebGL=true;
+                Fusion.Editor.NetworkProjectConfigUtilities.SaveGlobalConfig(fusionConfig);
                 const string testDefine = "BATTLECITIES_DEVNET";
                 var defines = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.WebGL)
                     .Split(';').Where(value => !string.IsNullOrWhiteSpace(value) && value != testDefine).ToList();
