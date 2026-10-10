@@ -32,7 +32,10 @@ namespace BattleCities
             replaySaved=false;
             battleFuelRequestId=BattlePreparation.Ready?BattlePreparation.FuelRequestId:null;
             replayRecorder=new ReplayRecorder(Simulation,replayMap,Application.version,backgroundCheckpoints:true);
-            replayArchive=new ReplayArchive {replay=replayRecorder.Data,apiUrl=BattlePreparation.Ready&&!Simulation.IsTeamBattle?BattlePreparation.ApiUrl:null,
+            // Guests keep battle recordings locally. Do not probe the browser's API cookie here:
+            // it may still belong to a previously connected wallet in this browser profile.
+            bool walletRecording=BattlePreparation.Ready&&BattlePreparation.OwnerProvider=="wallet";
+            replayArchive=new ReplayArchive {replay=replayRecorder.Data,apiUrl=walletRecording&&!Simulation.IsTeamBattle?BattlePreparation.ApiUrl:null,
                 ownerId=BattlePreparation.Ready?BattlePreparation.OwnerId:null,ownerProvider=BattlePreparation.Ready?BattlePreparation.OwnerProvider:null};
             ReplayStatus="Recording";
             if(!string.IsNullOrEmpty(replayArchive.apiUrl))

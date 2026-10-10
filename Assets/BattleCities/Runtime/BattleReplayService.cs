@@ -113,7 +113,8 @@ namespace BattleCities
                 string owner=Text(identity?["id"]),provider=Text(identity?["provider"]);
                 if(string.IsNullOrEmpty(owner)||!string.IsNullOrEmpty(expectedOwner)&&owner!=expectedOwner||walletRequired&&provider!="wallet")
                 {
-                    archive.uploadStatus="Wallet account changed or unavailable. Return to the menu and reconnect the recording account.";
+                    archive.uploadStatus=walletRequired?"Wallet account changed or unavailable. Return to the menu and reconnect the recording account.":
+                        "Recording account changed or unavailable. Return to the menu and reconnect the recording account.";
                     yield return AwaitPreparationExit(current);yield break;
                 }
                 archive.ownerId=owner;archive.ownerProvider=provider;walletRequired=provider=="wallet";
@@ -134,7 +135,8 @@ namespace BattleCities
                     if(!Authenticated(sessionPlayer)||Text(currentIdentity?["id"])!=archive.ownerId||
                         walletRequired&&Text(currentIdentity?["provider"])!="wallet")
                     {
-                        archive.uploadStatus="Wallet account changed or expired. Return to the menu and reconnect the recording account.";
+                        archive.uploadStatus=walletRequired?"Wallet account changed or expired. Return to the menu and reconnect the recording account.":
+                            "Recording account changed or expired. Return to the menu and reconnect the recording account.";
                         yield return AwaitPreparationExit(current);yield break;
                     }
                 }
