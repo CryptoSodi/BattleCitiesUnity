@@ -113,10 +113,13 @@ namespace BattleCities.Editor
         {
             string path = Environment.GetEnvironmentVariable("BATTLECITIES_BUILD_REQUEST");
             if (string.IsNullOrWhiteSpace(path)) throw new BuildFailedException("BATTLECITIES_BUILD_REQUEST is missing.");
-            ConfigureFromFile(path);
-            var request = ReadRequest(path);
             var scenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path).ToArray();
             if (scenes.Length == 0) throw new BuildFailedException("No enabled scenes in Build Settings.");
+            // A fresh batch Editor starts with an untitled scene. Open a configured
+            // scene before the shared save step, which cannot show a save dialog here.
+            if (Application.isBatchMode) EditorSceneManager.OpenScene(scenes[0], OpenSceneMode.Single);
+            ConfigureFromFile(path);
+            var request = ReadRequest(path);
             Directory.CreateDirectory(Path.GetDirectoryName(request.outputPath));
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
