@@ -108,19 +108,21 @@ function Get-GameEditor {
     $instances = @($discovery.data.instances | Where-Object {
         [IO.Path]::GetFullPath($_.projectPath).TrimEnd('\', '/') -eq $script:GameRoot.TrimEnd('\', '/') -and $_.isRunning
     })
-    if ($instances.Count -gt 1) { throw 'More than one editor is running this project. Close the duplicate editor.' }
-    if ($instances.Count -eq 1) {
-        if (-not $instances[0].pipelineServer -or -not $instances[0].pipelineServer.isReachable) {
-            throw 'Unity is open but its Pipeline server is unavailable. Fix compilation errors or close Unity before running this script.'
-        }
-        return $instances[0]
-    }
-    # Never start a second Editor against an already-open project just because Pipeline was unavailable.
     $running = @(Get-CimInstance Win32_Process -Filter "Name = 'Unity.exe'" | Where-Object {
         $_.CommandLine -and $_.CommandLine.Replace('\', '/').IndexOf($script:GameRoot.Replace('\', '/'), [StringComparison]::OrdinalIgnoreCase) -ge 0
     })
-    if ($running.Count) { throw 'Unity is open without a reachable Pipeline connection. Enable Pipeline or close Unity and rerun.' }
-    return $null
+    # Pipeline discovery can retain a stale running record after the Editor exits.
+    # Trust a matching OS process before blocking the documented batch build path.
+    if ($running.Count -eq 0) {
+        if ($instances.Count) { Write-Host 'Ignoring a stale Unity Pipeline entry; no Editor process is using this project.' }
+        return $null
+    }
+    if ($running.Count -gt 1) { throw 'More than one editor is running this project. Close the duplicate editor.' }
+    if ($instances.Count -ne 1) { throw 'Unity is open without a reachable Pipeline connection. Enable Pipeline or close Unity and rerun.' }
+    if (-not $instances[0].pipelineServer -or -not $instances[0].pipelineServer.isReachable) {
+        throw 'Unity is open but its Pipeline server is unavailable. Fix compilation errors or close Unity before running this script.'
+    }
+    return $instances[0]
 }
 
 function Assert-GameBuildReady([string]$Target) {
