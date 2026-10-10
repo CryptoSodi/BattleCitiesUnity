@@ -11,7 +11,14 @@ native players use Mainnet and `https://api.battlecities.com`. The build profile
 query parameters and saved scene URL cannot enable Devnet. Payment quotes must
 match the selected network. Editor defaults are live, with API fixture overrides
 available for local verification. Mainnet payout and BATC drop workers stay disabled.
-SKR checkout stays unavailable until a Devnet test mint is configured.
+SKR checkout on the test site uses the configured Devnet test mint.
+
+The Devnet test mint used for SKR is `feptDFpEGgFvxDwveWD6opDUCet5ve3f3WHPTBvBLvh`
+(6 decimals, Token-2022 program
+`TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb`). Fresh test API provisioning sets
+these values automatically. Existing test server configuration is preserved.
+Configure SKR prices in the test admin before testing purchases; prices are not
+included in this mint setup.
 
 Enable Phantom's Testnet Mode and select **Solana Devnet**. Fund the wallet with
 test SOL from https://faucet.solana.com/. Wallet sign-in is message signing;
