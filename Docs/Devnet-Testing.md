@@ -17,8 +17,11 @@ The Devnet test mint used for SKR is `feptDFpEGgFvxDwveWD6opDUCet5ve3f3WHPTBvBLv
 (6 decimals, Token-2022 program
 `TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb`). Fresh test API provisioning sets
 these values automatically. Existing test server configuration is preserved.
-Configure SKR prices in the test admin before testing purchases; prices are not
-included in this mint setup.
+When no SKR price is configured, the test catalog uses the existing BATC item
+amounts: fuel-one 150, fuel-five 600, fuel-twenty 1800, shield 300,
+base-defence 375, freeze 450, speed 450, upgrade 675, zoom-out 375,
+wipeout 600, extra-life 525 and starter-pack 1200. These Devnet-only defaults
+do not change live shop pricing.
 
 Enable Phantom's Testnet Mode and select **Solana Devnet**. Fund the wallet with
 test SOL from https://faucet.solana.com/. Wallet sign-in is message signing;
