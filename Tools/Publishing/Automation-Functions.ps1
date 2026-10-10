@@ -108,9 +108,12 @@ function Get-GameEditor {
     $instances = @($discovery.data.instances | Where-Object {
         [IO.Path]::GetFullPath($_.projectPath).TrimEnd('\', '/') -eq $script:GameRoot.TrimEnd('\', '/') -and $_.isRunning
     })
-    $running = @(Get-CimInstance Win32_Process -Filter "Name = 'Unity.exe'" | Where-Object {
+    $projectProcesses = @(Get-CimInstance Win32_Process -Filter "Name = 'Unity.exe'" | Where-Object {
         $_.CommandLine -and $_.CommandLine.Replace('\', '/').IndexOf($script:GameRoot.Replace('\', '/'), [StringComparison]::OrdinalIgnoreCase) -ge 0
     })
+    # Unity starts worker processes with the same project path. Count only root Editor processes.
+    $projectProcessIds = @($projectProcesses | ForEach-Object { [int]$_.ProcessId })
+    $running = @($projectProcesses | Where-Object { $projectProcessIds -notcontains [int]$_.ParentProcessId })
     # Pipeline discovery can retain a stale running record after the Editor exits.
     # Trust a matching OS process before blocking the documented batch build path.
     if ($running.Count -eq 0) {
