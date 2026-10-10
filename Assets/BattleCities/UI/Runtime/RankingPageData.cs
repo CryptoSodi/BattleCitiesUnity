@@ -9,6 +9,7 @@ namespace BattleCities.UI
     {
         public string Id, Label, Status;
         public bool IsCycle;
+        public bool IsAllTime => Id == "all";
         public DateTimeOffset? EndsAt;
     }
 
