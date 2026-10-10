@@ -35,10 +35,22 @@ namespace BattleCities.UI
         }
         void OnLoadoutPlayer(MainMenuApiClient.PlayerSnapshot player)
         {string previous=loadoutIdentity;BindLoadoutIdentity();if(previous!=loadoutIdentity&&IsOpen){RefreshLoadoutAccount();UpdateView();}}
+        bool UsesLocalGuestLoadout => api && !api.IsAuthenticated && !WalletNeedsAccount &&
+            (api.IsLocalGuest || api.LastPlayer?.provider == "guest");
+        void PrepareLocalGuestLoadout()
+        {
+            loadoutGeneration++;if(inventoryRoutine!=null)StopCoroutine(inventoryRoutine);inventoryRoutine=null;
+            account=null;loadout=new JObject();loadoutDirty=accountLoading=inventoryUnavailable=false;
+            // Forget only in-memory wallet state; keep any persisted paid receipt for its owner.
+            fuelReceiptKey=null;pendingFuel=null;paidTier=-1;
+            status.text=inLoadout?"EMPTY LOADOUT IS READY • START WHEN YOU ARE READY":"";
+        }
         public void RefreshLoadoutAccount()
         {
             if(!api||busy)return;
-            BindLoadoutIdentity();loadoutGeneration++;if(inventoryRoutine!=null)StopCoroutine(inventoryRoutine);
+            BindLoadoutIdentity();
+            if(UsesLocalGuestLoadout){PrepareLocalGuestLoadout();UpdateView();return;}
+            loadoutGeneration++;if(inventoryRoutine!=null)StopCoroutine(inventoryRoutine);
             accountLoading=true;inventoryUnavailable=false;status.text="LOADING INVENTORY...";UpdateView();
             inventoryRoutine=StartLoadoutRoutine(LoadAccount());
         }

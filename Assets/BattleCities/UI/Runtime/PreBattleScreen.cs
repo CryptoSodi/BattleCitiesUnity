@@ -1082,6 +1082,7 @@ namespace BattleCities.UI
                 ShowPage(true);if(inventoryUnavailable&&!accountLoading)RefreshLoadoutAccount();status.text=accountLoading?"LOADING INVENTORY...":inventoryUnavailable?"INVENTORY UNAVAILABLE • REOPEN LOADOUT TO RETRY":account==null?"EMPTY LOADOUT IS READY • START WHEN YOU ARE READY":"SELECT A SLOT, THEN CHOOSE AN OWNED POWER";
                 Focus(slotButtons[activeSlot]);return;
             }
+            if(UsesLocalGuestLoadout){LaunchLoadoutBattle();return;}
             if(accountLoading){status.text="WAITING FOR INVENTORY • PLEASE TRY START AGAIN";return;}
             if(inventoryUnavailable&&loadout.Count>0){status.text="INVENTORY UNAVAILABLE • REOPEN LOADOUT BEFORE STARTING";return;}
             if(account==null||!loadoutDirty){LaunchLoadoutBattle();return;}
