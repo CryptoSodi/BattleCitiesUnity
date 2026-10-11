@@ -41,7 +41,8 @@ namespace BattleCities.Editor
             api.ConfigureAutomaticRefresh(false);api.ConfigureGuestFallback(false);api.Configure("http://127.0.0.1:18763");
             var map=Newtonsoft.Json.JsonConvert.DeserializeObject<MapData>(Resources.Load<TextAsset>("Maps/01").text);
             var simulation=new BattleSimulation(map);var recorder=new ReplayRecorder(simulation,map,"tv-test");
-            for(int i=0;i<180;i++){recorder.BeforeStep(default);simulation.Step(default);recorder.AfterStep();}
+            var pickup=new ReplayEvent{kind="pickup",value="freeze"};recorder.RecordEvent(pickup);ReplayPlayer.ApplyEvent(simulation,pickup);
+            for(int i=0;i<180;i++){var command=new Command{Fire=i==89,PowerShot=i==89};recorder.BeforeStep(command);simulation.Step(command);recorder.AfterStep();}
             recorder.Finish("aborted");var recording=recorder.Data;
             api.EditorRequestOverride=(method,path,payload,done)=>Reply(method,path,payload,done,recording);
             var cameraRoot=new GameObject("Hidden menu capture camera",typeof(Camera));SceneManager.MoveGameObjectToScene(cameraRoot,scene);
@@ -77,6 +78,15 @@ namespace BattleCities.Editor
                 game.Paused=true;int tick=game.Simulation.Tick;yield return null;yield return null;
                 Check(game.Simulation.Tick==tick,"pause stops simulation");
                 Check(game.GetComponentsInChildren<Transform>().All(t=>t.gameObject.layer==BattleGame.TvReplayLayer),"all replay models and effects are isolated from menu cameras");
+                while(game.Simulation.Tick<60&&!game.ReplayPlayback.Complete&&game.ReplayPlayback.Error==null)game.ReplayPlayback.Step();
+                Check(game.ReplayPlayback.ChargeProgress(0)>.45f,"recorded power shot restores its pre-fire charge buildup");
+                Check(game.ReplayPlayback.ChargeProgress(1)==0,"charge stays on the recorded player's slot");
+                Check(game.Simulation.PickupType=="freeze","recorded pickup is present for TV rendering");
+                yield return null;yield return null;
+                var weather=game.GetComponent<BattleWeather>();float weatherAge=weather.PresentationAge;
+                yield return null;yield return null;
+                Check(weather.PresentationAge==weatherAge,"paused replay freezes the weather/effect presentation clock");
+                Check(typeof(BattleAnimations).GetField("pickupQuad",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(game.GetComponent<BattleAnimations>())!=null,"pickup icon is submitted to the replay camera instead of the live HUD");
                 foreach(var size in new[]{new Vector2Int(1583,924),new Vector2Int(844,390),new Vector2Int(1240,1080)})
                 {
                     var platform=size.x==1583?MainMenuPlatform.Web:size.x==844?MainMenuPlatform.AndroidLandscape:MainMenuPlatform.Psg1;
@@ -84,8 +94,17 @@ namespace BattleCities.Editor
                     Check(page.ReplayView.IsChildOf(page.Root)&&page.ReplayView.rect.size==page.Root.rect.size,platform+" replay stays in profile TV bounds");
                     var picture=page.ReplayView.Find("Viewport/Battle picture").GetComponent<RawImage>();
                     Check(picture.texture==game.TvReplayCamera.targetTexture,platform+" picture uses isolated replay camera");
+                    var buttons=page.ReplayView.Find("Status").GetComponentsInChildren<Button>();
+                    Check(buttons.All(b=>b.image.type==Image.Type.Sliced&&Mathf.Abs(b.image.pixelsPerUnitMultiplier-b.image.sprite.rect.width/(b.image.rectTransform.rect.width*b.image.pixelsPerUnit))<.001f),platform+" footer buttons match Shop's width-based slicing");
+                    Check(buttons.All(b=>b.transform.Find("Focus").GetComponent<Image>().sprite.name.Contains("gold")||b.transform.Find("Focus").GetComponent<Image>().sprite!=b.image.sprite),platform+" action focus uses the separate gold skin");
                 }
-                game.RestartReplay();game.Paused=true;Check(game.Simulation.Tick==0,"restart resets the saved match");
+                var footer=page.ReplayView.Find("Status") as RectTransform;var originalSize=footer.sizeDelta;
+                footer.sizeDelta+=new Vector2(80,0);yield return null;yield return null;
+                Check(footer.GetComponentsInChildren<Button>().All(b=>Mathf.Abs(b.image.pixelsPerUnitMultiplier-b.image.sprite.rect.width/(b.image.rectTransform.rect.width*b.image.pixelsPerUnit))<.001f),"runtime resize refits replay actions without reopening WATCH");
+                footer.sizeDelta=originalSize;yield return null;yield return null;
+                while(game.Simulation.Tick<90&&!game.ReplayPlayback.Complete&&game.ReplayPlayback.Error==null)game.ReplayPlayback.Step();
+                Check(game.ReplayPlayback.ChargeProgress(0)==0,"charge glow stops when the recorded shot fires");
+                game.RestartReplay();game.Paused=true;Check(game.ReplayPlayback.ChargeProgress(0)==0,"restart resets charge presentation");Check(game.Simulation.Tick==0,"restart resets the saved match");
                 game.ReplaySpeed=4;game.Paused=false;
                 timeout=Time.realtimeSinceStartup+4;while(!game.ReplayPlayback.Complete&&game.ReplayPlayback.Error==null&&Time.realtimeSinceStartup<timeout)yield return null;
                 Check(game.ReplayPlayback.Complete&&game.ReplayPlayback.Error==null,"TV playback reproduces recorded final state");

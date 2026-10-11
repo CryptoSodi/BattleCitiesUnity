@@ -212,7 +212,7 @@ namespace BattleCities.UI
             Place((RectTransform)footer.Find("Shells"),fw*.035f,5,fh*.9f,fh-10);Place((RectTransform)footer.Find("Team label"),fw*.125f,4,fw*.14f,fh-8);
             Place(teamTotal.rectTransform,fw*.265f,0,fw*.08f,fh);Place(status.rectTransform,fw*.39f,5,fw*.34f,fh-10);
             Place((RectTransform)footer.Find("Divider left"),fw*.365f,fh*.18f,1,fh*.64f);Place((RectTransform)footer.Find("Divider right"),fw*.735f,fh*.18f,1,fh*.64f);
-            Canvas.ForceUpdateCanvases();lastSize=new Vector2(Screen.width,Screen.height);lastSafe=safe;
+            Canvas.ForceUpdateCanvases();FitButtonSkin(share);FitButtonSkin(next);lastSize=new Vector2(Screen.width,Screen.height);lastSafe=safe;
         }
 
         void Update()
@@ -261,10 +261,21 @@ namespace BattleCities.UI
             var label=Label("Caption",rect,text,30);Fit(label.rectTransform,.05f,.05f,.90f,.90f);styles.ApplyCleanButton(label,false);
             return button;
         }
+        void LateUpdate()
+        {
+            if(!canvas)return;
+            FitButtonSkin(share);FitButtonSkin(next);
+            RefreshButtonCaption(share,ref shareCaptionNavy);RefreshButtonCaption(next,ref nextCaptionNavy);
+        }
         static void FitButtonSkin(Button button)
         {
             var image=button.image;image.type=Image.Type.Sliced;image.preserveAspect=false;
-            image.pixelsPerUnitMultiplier=image.sprite.rect.width/(Mathf.Max(1,((RectTransform)button.transform).rect.width)*Mathf.Max(.01f,image.pixelsPerUnit));
+            var rect=image.rectTransform.rect;float ppu=Mathf.Max(.01f,image.pixelsPerUnit);
+            float widthScale=image.sprite.rect.width/(Mathf.Max(1,rect.width)*ppu);
+            // Wide header/footer actions must retain the shared compact corners.
+            // Cap the width-derived border by the actual height after Canvas layout.
+            float cornerScale=image.sprite.border.x/(Mathf.Max(1,rect.height*.22f)*ppu);
+            image.pixelsPerUnitMultiplier=Mathf.Max(widthScale,cornerScale);
         }
         void RefreshButtonCaption(Button button,ref bool? previous)
         {

@@ -115,7 +115,14 @@ namespace BattleCities.Editor
                 foreach(var t in host.GetComponentsInChildren<Transform>(true))t.gameObject.layer=30;
                 target.Create();camera.targetTexture=target;canvas.renderMode=RenderMode.ScreenSpaceCamera;canvas.worldCamera=camera;canvas.planeDistance=1;
                 canvas.GetComponent<CanvasScaler>().enabled=false;canvas.scaleFactor=height/900f;
-                Canvas.ForceUpdateCanvases();screen.RefreshLayout();Canvas.ForceUpdateCanvases();camera.Render();RenderTexture.active=target;
+                Canvas.ForceUpdateCanvases();screen.RefreshLayout();Canvas.ForceUpdateCanvases();
+                foreach(var button in screen.GetComponentsInChildren<Button>())
+                {
+                    var skin=button.image;float corner=skin.sprite.border.x/(skin.pixelsPerUnit*skin.pixelsPerUnitMultiplier);
+                    Check(skin.type==Image.Type.Sliced&&corner<=skin.rectTransform.rect.height*.22f+.01f,button.name+" keeps shared compact corners at "+name);
+                    Check(button.spriteState.highlightedSprite==button.spriteState.selectedSprite&&button.spriteState.pressedSprite==button.spriteState.selectedSprite,"action states share the approved gold skin");
+                }
+                camera.Render();RenderTexture.active=target;
                 image=new Texture2D(width,height,TextureFormat.RGB24,false);image.ReadPixels(new Rect(0,0,width,height),0,0);image.Apply();
                 string directory=Path.GetFullPath("Temp/ResultsPreviews");Directory.CreateDirectory(directory);string path=Path.Combine(directory,name+".png");File.WriteAllBytes(path,image.EncodeToPNG());return path;
             }

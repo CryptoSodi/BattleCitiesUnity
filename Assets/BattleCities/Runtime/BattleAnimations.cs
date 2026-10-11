@@ -61,7 +61,8 @@ namespace BattleCities
         readonly List<Puff> puffs=new List<Puff>();
         readonly Stack<Puff> pool=new Stack<Puff>();
         readonly System.Random random=new System.Random(782);
-        Material fire,smoke,shockwave,solid;
+        Material fire,smoke,shockwave,solid,pickupIcon,pickupStar;
+        Mesh pickupQuad;
         BattleCombatVfx combat;
         Mesh quad;
         Texture2D soft,ring;
@@ -188,6 +189,27 @@ namespace BattleCities
             properties.SetColor("_BaseColor",color);
             Graphics.DrawMesh(quad,Matrix4x4.TRS(position,rotation,Vector3.one*size),material,camera.gameObject.layer,camera,0,properties,false,false,false);
         }
+        // Replay pickups must be part of its render texture, not the live IMGUI HUD.
+        public void Pickup(Vector3 position,Texture atlas,Rect uv,Texture star,float time,Camera camera)
+        {
+            if(!pickupIcon)
+            {
+                pickupIcon=MakeMaterial(false);pickupStar=MakeMaterial(false);
+                pickupIcon.SetInt("_ZTest",(int)UnityEngine.Rendering.CompareFunction.Always);
+                pickupStar.SetInt("_ZTest",(int)UnityEngine.Rendering.CompareFunction.Always);
+                pickupQuad=Instantiate(quad);pickupQuad.name="Replay pickup atlas quad";
+            }
+            pickupIcon.SetTexture("_BaseMap",atlas);pickupStar.SetTexture("_BaseMap",star);
+            pickupQuad.uv=new[]{new Vector2(uv.xMin,uv.yMin),new Vector2(uv.xMax,uv.yMin),new Vector2(uv.xMax,uv.yMax),new Vector2(uv.xMin,uv.yMax)};
+            properties.SetColor("_BaseColor",Color.white);
+            Graphics.DrawMesh(pickupQuad,Matrix4x4.TRS(position,camera.transform.rotation,Vector3.one*1.1f),pickupIcon,camera.gameObject.layer,camera,0,properties,false,false,false);
+            for(int i=0;i<6;i++)
+            {
+                float angle=time*1.7f+i*Mathf.PI/3,pulse=(Mathf.Sin(time*4+i*2)+1)*.5f;
+                var point=position+camera.transform.right*(Mathf.Cos(angle)*.715f)+camera.transform.up*(Mathf.Sin(angle)*.638f);
+                Draw(point,camera.transform.rotation,.14f+.11f*pulse,new Color(1,1,1,.55f+.45f*pulse),pickupStar,camera);
+            }
+        }
         public void Clear(){foreach(var puff in puffs)pool.Push(puff);puffs.Clear();if(combat)combat.Clear();}
         public void Tick(float dt,Camera camera)
         {
@@ -204,7 +226,7 @@ namespace BattleCities
                 Draw(p.Position,isRing?Quaternion.Euler(90,0,0):camera.transform.rotation,size,color,isSmoke?smoke:isRing?shockwave:fire,camera);
             }
         }
-        void OnDestroy(){Destroy(fire);Destroy(smoke);Destroy(shockwave);Destroy(solid);Destroy(quad);Destroy(soft);Destroy(ring);}
+        void OnDestroy(){Destroy(pickupIcon);Destroy(pickupStar);Destroy(pickupQuad);Destroy(fire);Destroy(smoke);Destroy(shockwave);Destroy(solid);Destroy(quad);Destroy(soft);Destroy(ring);}
     }
 }
 

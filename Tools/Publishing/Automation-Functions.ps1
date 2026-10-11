@@ -80,7 +80,10 @@ function Get-NextAndroidVersionCode {
 function Get-LatestGameRelease {
     $null = Get-GameProgram gh
     $null = Invoke-GameTool gh @('auth', 'status')
-    return (Invoke-GameJson gh @('api', "repos/$script:GameRepository/releases/latest"))
+    $releases = Invoke-GameJson gh @('api', "repos/$script:GameRepository/releases?per_page=100")
+    $web = @($releases | Where-Object { -not $_.draft -and -not $_.prerelease -and @($_.assets | Where-Object name -Like 'BattleCities-*-Web.zip').Count -gt 0 })
+    if (-not $web.Count) { throw 'No published web release was found.' }
+    return $web[0]
 }
 
 function Get-SuggestedWebVersion($LatestRelease) {
@@ -284,6 +287,9 @@ function Invoke-GameCommitPush([string]$Message) {
 }
 
 function Get-CarriedGameApk($LatestRelease, [string]$Version) {
+    # Web versioning follows web releases; APK carry-forward follows the latest APK release.
+    $current = Invoke-GameJson gh @('api', "repos/$script:GameRepository/releases/latest")
+    if (@($current.assets | Where-Object name -eq 'battlecities.apk').Count -eq 1) { $LatestRelease = $current }
     $asset = @($LatestRelease.assets | Where-Object { $_.name -eq 'battlecities.apk' })
     if ($asset.Count -eq 0) { $asset = @($LatestRelease.assets | Where-Object { $_.name -eq 'BattleCities-0.1.1.apk' }) }
     if ($asset.Count -ne 1) { throw 'The previous release has no stable APK asset. Supply -ApkPath explicitly.' }

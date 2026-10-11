@@ -438,6 +438,25 @@ namespace BattleCities.Core
             }
             return Error==null;
         }
+        // Hold input was never part of v1 recordings. Reconstruct only the final
+        // second before a recorded power shot, stopping at any intervening shot.
+        // Cosmetic only: commands, simulation state and checkpoint hashes stay intact.
+        public float ChargeProgress(int slot)
+        {
+            if(slot<0||slot>=4||Complete||Error!=null)return 0;
+            int now=Simulation.Tick,window=Data.tickRate;
+            for(int i=runIndex;i<Data.inputs.Count;i++)
+            {
+                var run=Data.inputs[i];
+                int next=Math.Max(now+1,run.tick);
+                if(next>=run.tick+run.count)continue;
+                if(next>now+window)break;
+                int bits=run.commands[slot];
+                if((bits&64)==0)continue;
+                return (bits&128)!=0?Math.Max(0,1f-(float)(next-now)/window):0;
+            }
+            return 0;
+        }
         private void Check()
         {
             if(checkpointIndex>=Data.checkpoints.Count||Data.checkpoints[checkpointIndex].tick!=Simulation.Tick)return;

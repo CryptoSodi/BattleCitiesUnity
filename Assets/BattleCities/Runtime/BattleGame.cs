@@ -277,15 +277,15 @@ namespace BattleCities
             }
             else secondaryQueued=false;
             if(SystemInfo.graphicsDeviceType==GraphicsDeviceType.Null)return;
+            float presentationDt=!IsOnline&&(paused||consumePending)?0:dt*(IsReplaying?replaySpeed:1);
             SyncMines();
-            SyncTurrets(!IsOnline&&(paused||consumePending)?0:dt);
+            SyncTurrets(presentationDt);
             SyncDrones();
             SyncLandDrones();
             if(terrainDirty)RebuildTerrain();
             foreach(var batch in batches)Graphics.DrawMeshInstanced(batch.Part.Mesh,batch.Part.Submesh,batch.Part.Material,batch.Matrices,batch.Matrices.Length,null,ShadowCastingMode.On,true,tvReplay?TvReplayLayer:0,tvReplay?gameCamera:null);
-            float presentationDt=!IsOnline&&(paused||consumePending)?0:dt;
             foreach(var surface in terrainSurfaces)surface.Tick(presentationDt);
-            SyncActors(presentationDt);SyncFlags();effects.Tick(presentationDt,gameCamera);debris.Tick(presentationDt,tvReplay?gameCamera:null,tvReplay?TvReplayLayer:0);UpdateLighting(dt);UpdateCamera(dt);if(tvReplay)IsolateTvReplayVisuals();
+            SyncActors(presentationDt);SyncFlags();effects.Tick(presentationDt,gameCamera);debris.Tick(presentationDt,tvReplay?gameCamera:null,tvReplay?TvReplayLayer:0);UpdateLighting(IsReplaying?presentationDt:dt);UpdateCamera(IsReplaying?presentationDt:dt);if(tvReplay){DrawTvReplayPickup();IsolateTvReplayVisuals();}
         }
         private void UpdateLighting(float dt)
         {
@@ -362,7 +362,7 @@ namespace BattleCities
             var noise=a.Dust.noise;noise.enabled=true;noise.strength=.16f;noise.frequency=.45f;noise.scrollSpeed=.18f;noise.damping=true;
             var color=a.Dust.colorOverLifetime;color.enabled=true;var gradient=new Gradient();gradient.SetKeys(new[]{new GradientColorKey(new Color(.88f,.78f,.58f),0),new GradientColorKey(new Color(.54f,.45f,.34f),1)},new[]{new GradientAlphaKey(0,0),new GradientAlphaKey(.58f,.08f),new GradientAlphaKey(.3f,.48f),new GradientAlphaKey(0,1)});color.color=gradient;
             var dustRenderer=a.Dust.GetComponent<ParticleSystemRenderer>();dustRenderer.sharedMaterial=particleMaterial;dustRenderer.renderMode=ParticleSystemRenderMode.Billboard;dustRenderer.sortingFudge=2;dustRenderer.maxParticleSize=.35f;
-            a.Dust.Play();a.Animation=a.Model.AddComponent<TankAnimation>();a.Animation.Initialize();a.Shield=a.Root.AddComponent<TankShield>();return a;
+            if(tvReplay)a.Dust.Pause();else a.Dust.Play();a.Animation=a.Model.AddComponent<TankAnimation>();a.Animation.Initialize();a.Shield=a.Root.AddComponent<TankShield>();return a;
         }
         private void SyncActors(float dt)
         {
@@ -377,11 +377,12 @@ namespace BattleCities
                 bool local=t==Simulation.Player;
                 a.Animation.Tick(t,dt);a.Shield.Tick(t.Shield,dt);
                 effects.HealthBar(World(pose.X,pose.Y,.4f)+gameCamera.transform.up*.64f,t.Health,t.MaxHealth,a.Color,gameCamera);
-                float charge=IsOnline&&t.Player&&t.Slot>=0&&t.Slot!=NetworkMatch.LocalSlot?
+                float charge=replayPlayer!=null&&t.Player?replayPlayer.ChargeProgress(Mathf.Max(0,t.Slot)):IsOnline&&t.Player&&t.Slot>=0&&t.Slot!=NetworkMatch.LocalSlot?
                     NetworkMatch.ChargeProgress[t.Slot]:primaryCharge.IsCharging&&local?primaryCharge.Progress:0;
                 if(local)effects.CooldownBar(World(pose.X,pose.Y,.4f)+gameCamera.transform.up*.575f,charge>0?1-charge:t.ReloadProgress,gameCamera,charge>0);
                 if(t.Player&&charge>0)foreach(var muzzle in a.Muzzles)effects.ProjectileGlow(muzzle.position,a.Color,true,gameCamera,.35f+charge*.65f);
                 var travel=Quaternion.Euler(0,(int)t.Direction*90,0)*Vector3.forward;a.Dust.transform.localPosition=-travel*.52f+Vector3.up*.06f;a.Dust.transform.localRotation=Quaternion.Euler(0,(int)t.Direction*90,0);var emission=a.Dust.emission;emission.rateOverTime=Dust&&t.Moving&&!t.InQuicksand?45:0;
+                if(tvReplay&&dt>0)a.Dust.Simulate(dt,false,false,false);
             }
             foreach(var id in actors.Keys.Where(id=>!living.Contains(id)).ToArray()){Destroy(actors[id].Root);actors.Remove(id);}
             SyncProjectiles(dt);
@@ -484,7 +485,7 @@ namespace BattleCities
         private void OnGUI()
         {
             if(Simulation==null||tvReplay)return;
-            if(HasMatchResult||ResultsVisible){hud.SetVisible(false);return;}
+            if(!ReplayReady||HasMatchResult||ResultsVisible){hud.SetVisible(false);return;}
             hud.SetVisible(true);
             hud.Draw(Simulation,IsOnline||IsReplaying?null:economy,PowerupAtlas,consumePending,selectedPowerup,!IsReplaying);
             if(IsReplaying)return;
@@ -512,13 +513,13 @@ namespace BattleCities
             GUI.enabled=previousEnabled;
             if(!string.IsNullOrEmpty(Simulation.SecondaryStatus))GUI.Label(new Rect(180,Screen.height-secondaryBottom+2,Screen.width-200,44),Simulation.SecondaryStatus);
             }
-            if(economy&&showDebug)GUI.Label(new Rect(12,Screen.height-84,650,24),consumePending?"Confirming power-upÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦":economy.Status);
+            if(economy&&showDebug)GUI.Label(new Rect(12,Screen.height-84,650,24),consumePending?"Confirming power-upÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦":economy.Status);
             if(Simulation.PickupType!=null){var screen=gameCamera.WorldToScreenPoint(World(Simulation.PickupX,Simulation.PickupY,.7f));float size=Mathf.Clamp(Vector3.Distance(gameCamera.WorldToScreenPoint(World(Simulation.PickupX+67,Simulation.PickupY,.7f)),screen),96,144);var r=new Rect(screen.x-size/2,Screen.height-screen.y-size/2,size,size);if(PowerupAtlas&&BattleHud.TryPowerupUv(Simulation.PickupType,out var uv))GUI.DrawTextureWithTexCoords(r,PowerupAtlas,uv);else GUI.Box(r,Simulation.PickupType);pickupSparkles.Draw(r,Simulation.Tick*BattleSimulation.StepSeconds);}
-            if(!HasTouchControls&&!Psg1)GUI.Label(new Rect(12,Screen.height-28,Screen.width-24,24),"WASD drive   ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢   Arrows aim   ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢   Space: tap / hold + release   ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢   P pause   ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢   R restart   ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢   C camera");
+            if(!HasTouchControls&&!Psg1)GUI.Label(new Rect(12,Screen.height-28,Screen.width-24,24),"WASD drive   ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢   Arrows aim   ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢   Space: tap / hold + release   ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢   P pause   ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢   R restart   ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢   C camera");
             DrawPsg1Controls();
             if(!HasTouchControls&&!Psg1&&!IsOnline&&(paused||Simulation.Lost||Simulation.Won)){GUI.Box(new Rect(Screen.width/2-130,Screen.height/2-35,260,70),(paused?"PAUSED":Simulation.Won?"STAGE CLEAR":"GAME OVER")+"\nR: Restart");if(Simulation.Won&&Stage<35&&GUI.Button(new Rect(Screen.width/2-65,Screen.height/2+45,130,30),"Next stage"))LoadStage(Stage+1);}
             if(IsOnline||!showDebug||RuntimePlatformInfo.IsPsg1)return;
-            GUILayout.BeginArea(new Rect(Mathf.Max(8,Screen.width-282),92,270,Mathf.Max(120,Screen.height-132)),"Battle Cities ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ Debug",GUI.skin.window);
+            GUILayout.BeginArea(new Rect(Mathf.Max(8,Screen.width-282),92,270,Mathf.Max(120,Screen.height-132)),"Battle Cities ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Debug",GUI.skin.window);
             debugScroll=GUILayout.BeginScrollView(debugScroll);
             ChaseCamera=GUILayout.Toggle(ChaseCamera,"Chase shooting camera (arrows aim, LMB / Space fire)");
             if(ChaseCamera)
@@ -528,8 +529,8 @@ namespace BattleCities
             }
             GUILayout.Label("Stage "+requestedStage);requestedStage=Mathf.RoundToInt(GUILayout.HorizontalSlider(requestedStage,1,35));if(GUILayout.Button("Load stage "+requestedStage))LoadStage(requestedStage);
             weather.Cycle=GUILayout.Toggle(weather.Cycle,"Day/night cycle");weather.Rain=GUILayout.Toggle(weather.Rain,"Rain");weather.Clouds=GUILayout.Toggle(weather.Clouds,"Drifting clouds");GUILayout.Label("Time of day");weather.TimeOfDay=GUILayout.HorizontalSlider(weather.TimeOfDay,0,1);GUILayout.Label("Rain intensity");weather.RainIntensity=GUILayout.HorizontalSlider(weather.RainIntensity,0,1);Headlights=GUILayout.Toggle(Headlights,"Tank headlights");Dust=GUILayout.Toggle(Dust,"Tank trail dust");EnemyFire=GUILayout.Toggle(EnemyFire,"Enemy shooting");
-            AutomaticCamera=GUILayout.Toggle(AutomaticCamera,"Automatic camera");CameraShake=GUILayout.Toggle(CameraShake,"Camera shake");GUILayout.Label("Elevation "+CameraElevation.ToString("F0")+"Ãƒâ€šÃ‚Â°");CameraElevation=GUILayout.HorizontalSlider(CameraElevation,40,89.9f);GUILayout.Label("Zoom");Zoom=GUILayout.HorizontalSlider(Zoom,.7f,2);
-            GUILayout.Label("FPS "+fps.ToString("F0")+" ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ Terrain batches "+batches.Count);GUILayout.Label("Manual camera: middle-drag / wheel");DrawDebugPowerups();GUILayout.EndScrollView();GUILayout.EndArea();
+            AutomaticCamera=GUILayout.Toggle(AutomaticCamera,"Automatic camera");CameraShake=GUILayout.Toggle(CameraShake,"Camera shake");GUILayout.Label("Elevation "+CameraElevation.ToString("F0")+"ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°");CameraElevation=GUILayout.HorizontalSlider(CameraElevation,40,89.9f);GUILayout.Label("Zoom");Zoom=GUILayout.HorizontalSlider(Zoom,.7f,2);
+            GUILayout.Label("FPS "+fps.ToString("F0")+" ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Terrain batches "+batches.Count);GUILayout.Label("Manual camera: middle-drag / wheel");DrawDebugPowerups();GUILayout.EndScrollView();GUILayout.EndArea();
         }
         private void DrawDebugPowerups()
         {
