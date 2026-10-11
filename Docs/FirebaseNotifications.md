@@ -3,9 +3,9 @@
 The Android Unity client uses Firebase Cloud Messaging directly through
 `BattleCitiesNotifications.androidlib`. It does not require the old Capacitor app.
 
-- Android package: `com.battlecities.solanaconsole`.
+- Android package: `com.battlecities.game`.
 - Firebase project: `battle-cities-84acd`.
-- Firebase Android app: `1:295482350041:android:8bc8bd10a22300e1fce1c8`.
+- Firebase Android app: `1:295482350041:android:5bbfcd1d539a6786fce1c8` (Battle Cities Android).
 - Client configuration: `Assets/BattleCities/Notifications/google-services.json`.
 - Notification channel: `battle-cities-notifications`.
 - Device registration: `POST https://api.battlecities.com/api/notifications/devices`.

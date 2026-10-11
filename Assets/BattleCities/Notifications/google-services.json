@@ -7,9 +7,9 @@
     "client":  [
                    {
                        "client_info":  {
-                                           "mobilesdk_app_id":  "1:295482350041:android:8bc8bd10a22300e1fce1c8",
+                                           "mobilesdk_app_id":  "1:295482350041:android:5bbfcd1d539a6786fce1c8",
                                            "android_client_info":  {
-                                                                       "package_name":  "com.battlecities.solanaconsole"
+                                                                       "package_name":  "com.battlecities.game"
                                                                    }
                                        },
                        "oauth_client":  [
