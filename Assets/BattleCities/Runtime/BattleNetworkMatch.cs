@@ -9,12 +9,14 @@ namespace BattleCities.Multiplayer
 {
     public struct BattleNetworkInput : INetworkInput
     {
-        public int Move, Aim, ShotSequence, SecondarySequence, Secondary;
+        public int Sequence, Move, Aim, ShotSequence, SecondarySequence, Secondary;
         public NetworkBool ChargeHeld, PowerRequested;
     }
 
-    public sealed class BattleNetworkMatch : NetworkBehaviour
+    public sealed partial class BattleNetworkMatch : NetworkBehaviour
     {
+        [Networked,Capacity(2)] public NetworkArray<NetBattleFlag> Flags => default;
+        [Networked,Capacity(2)] public NetworkArray<int> FlagScores => default;
         public const int TerrainWords=512;
         [Networked] public int Map {get;set;}
         [Networked] public BattleMode Mode {get;set;}
@@ -27,13 +29,17 @@ namespace BattleCities.Multiplayer
         [Networked] public NetworkBool Won {get;set;}
         [Networked] public NetworkBool Lost {get;set;}
         [Networked] public NetworkBool BaseAlive {get;set;}
+        [Networked] public NetworkBool RivalBaseAlive {get;set;}
+        public int RequiredPlayers=>BattleModeRules.PlayerLimit(Mode);
         [Networked] public float Freeze {get;set;}
         [Networked] public float ZoomOut {get;set;}
         [Networked] public NetworkString<_16> Pickup {get;set;}
         [Networked] public Vector3 PickupPositionTime {get;set;}
         [Networked,Capacity(4)] public NetworkArray<PlayerRef> Players => default;
+        [Networked,Capacity(4)] public NetworkArray<int> AcknowledgedInput => default;
         [Networked,Capacity(4)] public NetworkArray<float> ChargeProgress => default;
         [Networked,Capacity(4)] public NetworkArray<NetBattleParticipant> Participants => default;
+        [Networked,Capacity(4)] public NetworkArray<NetBattleResultStats> ResultStats => default;
         [Networked,Capacity(16)] public NetworkArray<NetTankState> Tanks => default;
         [Networked,Capacity(96)] public NetworkArray<NetShotState> Shots => default;
         [Networked,Capacity(20)] public NetworkArray<NetMineState> Mines => default;
@@ -42,7 +48,7 @@ namespace BattleCities.Multiplayer
         [Networked,Capacity(4)] public NetworkArray<NetLandDroneState> LandDrones => default;
         [Networked,Capacity(TerrainWords)] public NetworkArray<uint> TerrainBits => default;
         // Snapshot partial damage as well as destroyed cells, including for late joiners.
-        [Networked,Capacity(TerrainWords*16)] public NetworkArray<uint> TerrainHealthPairs => default;
+        
         [Networked,Capacity(8)] public NetworkArray<NetWall> ExtraWalls => default;
         [Networked,Capacity(128)] public NetworkArray<NetBattleVisualEvent> Events => default;
         [Networked] public int EventSequence {get;set;}
@@ -54,7 +60,7 @@ namespace BattleCities.Multiplayer
         private int appliedRound=-1,appliedTick=-1,appliedEvents;
         private bool beginRequested,rematchRequested;
         private float quickStartAt=-1;
-        private float advanceStageAt=-1;
+        private bool advanceStageRequested;
         private readonly Dictionary<int,Command> commands=new Dictionary<int,Command>();
         private readonly int[] shotSequences=new int[4],secondarySequences=new int[4];
         private readonly float[] chargeSeconds=new float[4];
@@ -64,9 +70,10 @@ namespace BattleCities.Multiplayer
             BattleSession.Instance.Attach(this);
             if(Object.HasStateAuthority)
             {
-                Map=BattleSession.Instance.SelectedMap;Mode=BattleSession.Instance.SelectedMode;Round=1;
+                if(!Runner.IsResume){Map=BattleSession.Instance.SelectedMap;Mode=BattleSession.Instance.SelectedMode;Round=1;}
             }
             BindGame();
+            if(Object.HasStateAuthority){if(Runner.IsResume)restorePending=true;else SpawnChunks();}
         }
 
         private bool BindGame()
@@ -86,42 +93,34 @@ namespace BattleCities.Multiplayer
 
         public void RequestStart(){if(Object.HasStateAuthority)beginRequested=true;}
         public void RequestRematch(){if(Object.HasStateAuthority)rematchRequested=true;}
+        public void RequestNextStage(){if(Object.HasStateAuthority)advanceStageRequested=true;}
 
         public override void FixedUpdateNetwork()
         {
-            if(!Object.HasStateAuthority||!BindGame()||!Game.ReplayReady)return;
-            if(Mode==BattleMode.Coop&&Simulation.Won&&Map<35)
+            if(!Object.HasStateAuthority||!BindGame()||!Game.ReplayReady||!HasChunks)return;
+            if(restorePending){restorePending=false;RestoreMigration();}
+            if(advanceStageRequested&&Mode==BattleMode.Coop&&Simulation.Won&&Map<35)
             {
-                if(advanceStageAt<0)advanceStageAt=Time.realtimeSinceStartup+2;
-                if(Time.realtimeSinceStartup>=advanceStageAt)
-                {
-                    Map++;BattleSession.Instance.SelectedMap=Map;
-                    Round++;EventSequence=0;advanceStageAt=-1;quickStartAt=-1;
-                    rematchRequested=false;BindGame();beginRequested=true;
-                }
+                Map++;BattleSession.Instance.SelectedMap=Map;
+                Round++;EventSequence=0;quickStartAt=-1;
+                rematchRequested=false;BindGame();beginRequested=true;
             }
-            else advanceStageAt=-1;
+            advanceStageRequested=false;
             if(rematchRequested)
             {
                 rematchRequested=false;quickStartAt=-1;Round++;EventSequence=0;BindGame();Runner.SessionInfo.IsOpen=true;
             }
-            var active=Runner.ActivePlayers.ToArray();
-            for(int i=0;i<4;i++)
-            {
-                if(Players[i]!=PlayerRef.None&&!active.Contains(Players[i])){Players.Set(i,PlayerRef.None);Simulation.SetParticipant(i,false);}
-            }
-            foreach(var player in active)
-            {
-                if(Enumerable.Range(0,4).Any(i=>Players[i]==player))continue;
-                for(int i=0;i<4;i++)if(Players[i]==PlayerRef.None){Players.Set(i,player);shotSequences[i]=secondarySequences[i]=0;chargeSeconds[i]=0;break;}
-            }
+            UpdateMembership();
+            if(Time.realtimeSinceStartup<recoveryReadyAt)return;
             commands.Clear();
             for(int slot=0;slot<4;slot++)
             {
                 if(Players[slot]==PlayerRef.None){chargeSeconds[slot]=0;ChargeProgress.Set(slot,0);continue;}
                 Simulation.SetParticipant(slot,true);
                 if(!Runner.TryGetInputForPlayer<BattleNetworkInput>(Players[slot],out var input)){chargeSeconds[slot]=0;ChargeProgress.Set(slot,0);continue;}
+                AcknowledgedInput.Set(slot,input.Sequence);
                 if(input.ChargeHeld)chargeSeconds[slot]=Mathf.Min(ChargedFireInput.ChargeDuration,chargeSeconds[slot]+Runner.DeltaTime);
+                if(!inputInitialized[slot]){shotSequences[slot]=input.ShotSequence;secondarySequences[slot]=input.SecondarySequence;inputInitialized[slot]=true;}
                 bool fire=input.ShotSequence!=shotSequences[slot];
                 bool secondary=input.SecondarySequence!=secondarySequences[slot];
                 shotSequences[slot]=input.ShotSequence;secondarySequences[slot]=input.SecondarySequence;
@@ -134,7 +133,7 @@ namespace BattleCities.Multiplayer
             }
             if(BattleSession.Instance.QuickMatching&&!Simulation.MatchStarted)
             {
-                if(PlayerCount<2)quickStartAt=-1;
+                if(PlayerCount<RequiredPlayers)quickStartAt=-1;
                 else
                 {
                     if(quickStartAt<0)quickStartAt=Time.realtimeSinceStartup+5;
@@ -144,27 +143,29 @@ namespace BattleCities.Multiplayer
             if(beginRequested)
             {
                 beginRequested=false;
-                if(PlayerCount>=2){Simulation.BeginMatch();Runner.SessionInfo.IsOpen=false;}
+                if(PlayerCount>=RequiredPlayers){Simulation.BeginMatch();Runner.SessionInfo.IsOpen=true;Runner.SessionInfo.IsVisible=false;}
             }
             Game.StepOnlineRecorded(commands);
             Publish();
+            UpdateRecoverySnapshot();
         }
         private static Facing? FacingValue(int value)=>value>=0&&value<4?(Facing?)value:null;
 
         private void Publish()
         {
             var s=Simulation;
-            StateTick=s.Tick;Score=s.Score;Winner=s.WinnerSlot;Started=s.MatchStarted;Won=s.Won;Lost=s.Lost;BaseAlive=s.BaseAlive;
+            for(int i=0;i<2;i++){Flags.Set(i,NetBattleFlag.From(s.Flags[i]));FlagScores.Set(i,s.FlagScores[i]);}
+            StateTick=s.Tick;Score=s.Score;Winner=s.WinnerSlot;Started=s.MatchStarted;Won=s.Won;Lost=s.Lost;BaseAlive=s.BaseAlive;RivalBaseAlive=s.RivalBaseAlive;
             SpawnedEnemies=s.TotalEnemies-s.Remaining+s.Tanks.Count(t=>!t.Player&&t.Alive);
             Freeze=s.Freeze;ZoomOut=s.ZoomOut;Pickup=s.PickupType??"";PickupPositionTime=new Vector3(s.PickupX,s.PickupY,s.PickupTime);
-            for(int i=0;i<4;i++)Participants.Set(i,NetBattleParticipant.From(s.Participants[i]));
+            for(int i=0;i<4;i++){Participants.Set(i,NetBattleParticipant.From(s.Participants[i]));ResultStats.Set(i,NetBattleResultStats.From(s.ResultStats[i]));}
             Fill(Tanks,s.Tanks,NetTankState.From);Fill(Shots,s.Shots,NetShotState.From);Fill(Mines,s.Mines,NetMineState.From);
             Fill(Drones,s.Drones,NetDroneState.From);Fill(Turrets,s.Turrets,NetTurretState.From);Fill(LandDrones,s.LandDrones,NetLandDroneState.From);
             for(int i=0;i<s.InitialTerrainCount;i+=2)
             {
                 uint first=(uint)Math.Max(0,Math.Min(65535,s.Terrain[i].Health));
                 uint second=i+1<s.InitialTerrainCount?(uint)Math.Max(0,Math.Min(65535,s.Terrain[i+1].Health)):0;
-                TerrainHealthPairs.Set(i/2,first|(second<<16));
+                SetHealthPair(i/2,first|(second<<16));
             }
             for(int word=0;word<(s.InitialTerrainCount+31)/32;word++)
             {
@@ -184,18 +185,20 @@ namespace BattleCities.Multiplayer
 
         public override void Render()
         {
-            if(!BindGame()||Object.HasStateAuthority)return;
+            if(!BindGame()||Object.HasStateAuthority||!HasChunks)return;
             // Also apply lobby membership while the simulation clock is stopped.
             if(appliedTick==StateTick&&Started)return;
-            var frame=new BattleFrame{Tick=StateTick,Score=Score,SpawnedEnemies=SpawnedEnemies,WinnerSlot=Winner,Started=Started,Won=Won,Lost=Lost,BaseAlive=BaseAlive,
+            var frame=new BattleFrame{Flags=Enumerable.Range(0,2).Select(i=>Flags[i].ToState()).ToArray(),FlagScores=Enumerable.Range(0,2).Select(i=>FlagScores[i]).ToArray(),Tick=StateTick,Score=Score,SpawnedEnemies=SpawnedEnemies,WinnerSlot=Winner,Started=Started,Won=Won,Lost=Lost,BaseAlive=BaseAlive,RivalBaseAlive=RivalBaseAlive,
                 Freeze=Freeze,ZoomOut=ZoomOut,PickupType=Pickup.ToString().Length==0?null:Pickup.ToString(),PickupX=PickupPositionTime.x,PickupY=PickupPositionTime.y,PickupTime=PickupPositionTime.z,
                 Participants=Enumerable.Range(0,4).Select(i=>Participants[i].ToState()).ToArray(),
+                ResultStats=Enumerable.Range(0,4).Select(i=>ResultStats[i].ToState()).ToArray(),
                 Tanks=Tanks.Where(t=>t.Id!=0).Select(t=>t.ToState()).ToArray(),Shots=Shots.Where(t=>t.Id!=0).Select(t=>t.ToState()).ToArray(),
                 Mines=Mines.Where(t=>t.Id!=0).Select(t=>t.ToState()).ToArray(),Drones=Drones.Where(t=>t.Id!=0).Select(t=>t.ToState()).ToArray(),
                 Turrets=Turrets.Where(t=>t.Id!=0).Select(t=>t.ToState()).ToArray(),LandDrones=LandDrones.Where(t=>t.Id!=0).Select(t=>t.ToState()).ToArray(),
                 ExtraWalls=ExtraWalls.Where(t=>t.Id!=0).Select(t=>t.ToState()).ToArray(),TerrainAlive=new bool[Simulation.InitialTerrainCount],TerrainHealth=new int[Simulation.InitialTerrainCount]};
-            for(int i=0;i<frame.TerrainAlive.Length;i++){frame.TerrainAlive[i]=(TerrainBits[i/32]&(1u<<(i%32)))!=0;frame.TerrainHealth[i]=(int)((TerrainHealthPairs[i/2]>>((i%2)*16))&65535u);}
+            for(int i=0;i<frame.TerrainAlive.Length;i++){frame.TerrainAlive[i]=(TerrainBits[i/32]&(1u<<(i%32)))!=0;frame.TerrainHealth[i]=(int)((HealthPair(i/2)>>((i%2)*16))&65535u);}
             Simulation.ApplyFrame(frame);appliedTick=StateTick;
+            if(LocalSlot>=0)Game.ReconcileMovement(AcknowledgedInput[LocalSlot]);
             for(int sequence=Math.Max(appliedEvents+1,EventSequence-127);sequence<=EventSequence;sequence++)
             {
                 var e=Events[sequence%128];if(e.Sequence==sequence)Simulation.PlayVisualEvent(e.ToState());

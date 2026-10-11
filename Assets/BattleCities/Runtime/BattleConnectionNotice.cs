@@ -12,7 +12,12 @@ namespace BattleCities
     {
         BattleGame game;
         GameObject surface;
-        TMP_Text message;
+        TMP_Text message,heading,caption;
+        RectTransform safeArea,frame,content,header,footer;
+        PreBattleArt art;
+        bool? captionGold;
+        Vector2 lastCanvasSize;
+        Rect lastSafe;
         Button back;
         float waitingSince;
         readonly ArcadeTextStyles styles=new ArcadeTextStyles();
@@ -46,25 +51,59 @@ namespace BattleCities
         }
         void Build()
         {
-            var art=Resources.Load<PreBattleArt>("PreBattleArt");
+            art=Resources.Load<PreBattleArt>("PreBattleArt");
+            var theme=Resources.Load<BattleResultsArt>("BattleResultsArt").theme;
             surface=new GameObject("Battle connection",typeof(RectTransform),typeof(Canvas),typeof(CanvasScaler),typeof(GraphicRaycaster));
             surface.transform.SetParent(transform,false);
             var canvas=surface.GetComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceOverlay;canvas.sortingOrder=500;
             var scale=surface.GetComponent<CanvasScaler>();scale.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scale.referenceResolution=new Vector2(1280,720);scale.matchWidthOrHeight=.5f;
-            var shade=Panel("Backdrop",surface.transform,Vector2.zero,Vector2.zero,null,new Color(0,.03f,.08f,.55f));
-            shade.rectTransform.anchorMin=Vector2.zero;shade.rectTransform.anchorMax=Vector2.one;shade.rectTransform.offsetMin=shade.rectTransform.offsetMax=Vector2.zero;
-            var paper=Panel("Connection status",surface.transform,Vector2.zero,new Vector2(580,230),art?art.statusPanel:null,new Color(1,.97f,.89f));
-            var title=Panel("Title",paper.transform,new Vector2(0,83),new Vector2(554,46),art?art.tankTitlePanel:null,new Color(.04f,.3f,.7f));
-            Text("Heading",title.transform,"CONNECTING BATTLE",Vector2.zero,new Vector2(516,40),30,true);
-            message=Text("Message",paper.transform,"Connecting...",new Vector2(0,9),new Vector2(520,80),26,false);
-            var button=Panel("Main menu",paper.transform,new Vector2(0,-74),new Vector2(220,46),art?art.tankCostButton:null,Color.white);
-            back=button.gameObject.AddComponent<Button>();back.targetGraphic=button;
-            var colors=back.colors;colors.highlightedColor=colors.selectedColor=new Color(.65f,.9f,1);colors.pressedColor=new Color(1,.74f,.2f);back.colors=colors;
+            var shade=Panel("Backdrop",surface.transform,Vector2.zero,Vector2.zero,null,new Color(0,.03f,.08f,.65f));
+            Stretch(shade.rectTransform);
+            safeArea=Rect("Safe area",surface.transform,Vector2.zero,Vector2.zero);
+            frame=Panel("TV frame",safeArea,Vector2.zero,new Vector2(760,320),theme.BlueFrame,Color.white).rectTransform;
+            frame.GetComponent<Image>().pixelsPerUnitMultiplier=3;
+            content=Panel("Connection status",frame,Vector2.zero,Vector2.zero,theme.CreamPanel,Color.white).rectTransform;
+            Stretch(content);content.offsetMin=Vector2.one*10;content.offsetMax=Vector2.one*-10;
+            content.GetComponent<Image>().pixelsPerUnitMultiplier=3;
+            header=Panel("Title",content,Vector2.zero,Vector2.zero,art.tankTitlePanel,Color.white).rectTransform;
+            header.GetComponent<Image>().pixelsPerUnitMultiplier=4;
+            heading=Text("Heading",header,"CONNECTING BATTLE",Vector2.zero,Vector2.zero,28,false);
+            styles.Apply(heading,ArcadeTextTreatment.Gold);heading.alignment=TextAlignmentOptions.MidlineLeft;
+            message=Text("Message",content,"Connecting...",Vector2.zero,Vector2.zero,27,false);
+            footer=Panel("Footer",content,Vector2.zero,Vector2.zero,art.statusPanel,Color.white).rectTransform;
+            TvStatusFooterLayout.ApplySkin(footer.GetComponent<Image>(),art.statusPanel);
+            var button=Panel("Main menu",footer,Vector2.zero,Vector2.zero,art.tankCostButton,Color.white);
+            back=button.gameObject.AddComponent<Button>();back.targetGraphic=button;back.transition=Selectable.Transition.SpriteSwap;
+            back.spriteState=new SpriteState{highlightedSprite=art.tankCostButtonSelected,selectedSprite=art.tankCostButtonSelected,pressedSprite=art.tankCostButtonSelected,disabledSprite=art.tankCostButtonLocked};
             back.navigation=new Navigation{mode=Navigation.Mode.Explicit,selectOnUp=back,selectOnDown=back,selectOnLeft=back,selectOnRight=back};
             back.onClick.AddListener(()=>SceneManager.LoadScene("MainMenu"));
-            Text("Label",button.transform,"MAIN MENU",Vector2.zero,new Vector2(190,40),28,true);
+            caption=Text("Label",button.transform,"MAIN MENU",Vector2.zero,Vector2.zero,28,true);
+            Stretch(caption.rectTransform);caption.rectTransform.offsetMin=new Vector2(6,2);caption.rectTransform.offsetMax=new Vector2(-6,-2);
+            Layout();
             surface.SetActive(false);
+        }
+        static void Stretch(RectTransform rect)
+        {rect.anchorMin=Vector2.zero;rect.anchorMax=Vector2.one;rect.offsetMin=rect.offsetMax=Vector2.zero;}
+        void LateUpdate()
+        {
+            if(!surface||!surface.activeSelf)return;
+            if(lastCanvasSize!=((RectTransform)surface.transform).rect.size||lastSafe!=Screen.safeArea)Layout();
+            bool gold=back.image.overrideSprite==art.tankCostButtonSelected;
+            if(captionGold!=gold){captionGold=gold;styles.ApplyCleanButton(caption,gold);}
+        }
+        void Layout()
+        {
+            var safe=Screen.safeArea;float sw=Mathf.Max(1,Screen.width),sh=Mathf.Max(1,Screen.height);
+            safeArea.anchorMin=new Vector2(safe.xMin/sw,safe.yMin/sh);safeArea.anchorMax=new Vector2(safe.xMax/sw,safe.yMax/sh);safeArea.offsetMin=safeArea.offsetMax=Vector2.zero;
+            Canvas.ForceUpdateCanvases();
+            frame.sizeDelta=new Vector2(Mathf.Min(760,Mathf.Max(1,safeArea.rect.width-24)),Mathf.Min(320,Mathf.Max(1,safeArea.rect.height-24)));
+            var top=new TvTitleHeaderLayout(content);top.PlaceTitle(header,null,null);
+            MainMenuScene.Place(heading.rectTransform,28,4,header.rect.width-56,top.Height-8);
+            var bottom=new TvStatusFooterLayout(content);bottom.Place(footer);TvStatusFooterLayout.PlaceAction(back.image.rectTransform);
+            MainMenuScene.Place(message.rectTransform,24,top.Height+18,content.rect.width-48,Mathf.Max(1,content.rect.height-top.Height-bottom.Height-36));
+            Canvas.ForceUpdateCanvases();TvTitleHeaderLayout.FitSkin(back.image,back.image.rectTransform.rect.height);
+            lastCanvasSize=((RectTransform)surface.transform).rect.size;lastSafe=safe;
         }
         void OnDestroy(){styles.Dispose();}
     }

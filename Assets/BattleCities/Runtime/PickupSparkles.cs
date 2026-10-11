@@ -20,6 +20,7 @@ namespace BattleCities
             }
             star.Apply();
         }
+        public Texture2D Texture=>star;
         public void Draw(Rect icon,float time)
         {
             var previous=GUI.color;

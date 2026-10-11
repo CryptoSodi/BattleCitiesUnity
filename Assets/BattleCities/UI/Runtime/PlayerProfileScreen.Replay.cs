@@ -18,6 +18,7 @@ namespace BattleCities.UI
         BattleGame replayGame;
         GameObject replayReturnFocus;
         float replayReturnScroll;
+        readonly List<Image> replayButtonSkins=new List<Image>();
         readonly List<GameObject> replayHidden=new List<GameObject>();
         public bool ReplayViewerOpen=>replayView&&replayView.gameObject.activeSelf;
         public BattleGame ReplayGame=>replayGame;
@@ -74,6 +75,15 @@ namespace BattleCities.UI
             replayPause=Control("Pause",replayFooter,"PAUSE",()=>{if(replayGame)replayGame.Paused=!replayGame.Paused;});Fit((RectTransform)replayPause.transform,new Rect(.50f,.11f,.15f,.78f));
             replaySpeed=Control("Speed",replayFooter,"1X",()=>{if(replayGame)replayGame.ReplaySpeed=replayGame.ReplaySpeed>=4?.5f:replayGame.ReplaySpeed*2;});Fit((RectTransform)replaySpeed.transform,new Rect(.665f,.11f,.085f,.78f));
             replayRestart=Control("Restart",replayFooter,"RESTART",()=>{if(replayGame)replayGame.RestartReplay();});TvStatusFooterLayout.PlaceAction((RectTransform)replayRestart.transform);
+            foreach(var button in new[]{replayPause,replaySpeed,replayRestart})
+            {
+                button.image.color=Color.white;
+                var gold=button.transform.Find("Focus").GetComponent<Image>();
+                gold.sprite=art.tankCostButtonSelected;gold.color=Color.white;
+            }
+            foreach(var skin in replayView.GetComponentsInChildren<Image>(true))
+                if(skin.sprite==art.tankCostButton||skin.sprite==art.tankCostButtonSelected||skin.sprite==art.tankCostButtonLocked)
+                    replayButtonSkins.Add(skin);
             Psg1UiNavigation.Rows(new Selectable[]{replayBack},new Selectable[]{replayPause,replaySpeed,replayRestart});
         }
         void LayoutReplayViewer()
@@ -86,8 +96,36 @@ namespace BattleCities.UI
             int width=1280,height=Mathf.Clamp(Mathf.RoundToInt(width/aspect),256,1280);
             if(!replayTexture){replayTexture=new RenderTexture(width,height,24,RenderTextureFormat.ARGB32){name="Profile match TV",antiAliasing=1};replayTexture.Create();}
             else if(replayTexture.width!=width||replayTexture.height!=height){replayTexture.Release();replayTexture.width=width;replayTexture.height=height;replayTexture.Create();}
+            Canvas.ForceUpdateCanvases();
+            RefreshReplayButtonSkins();
             replayImage.texture=replayTexture;
             if(replayGame&&replayGame.TvReplayCamera)replayGame.TvReplayCamera.aspect=(float)width/height;
+        }
+        // Layout/Canvas resizing and focus can happen after WATCH's initial layout.
+        // Keep all base/focus/disabled skins at the same approved scale.
+        void LateUpdate()
+        {
+            if(ReplayViewerOpen)RefreshReplayButtonSkins();
+        }
+        void RefreshReplayButtonSkins()
+        {
+            foreach(var image in replayButtonSkins)
+            {
+                if(!image||!image.sprite)continue;
+                image.type=Image.Type.Sliced;
+                bool footer=image.transform.IsChildOf(replayFooter);
+                if(footer)
+                {
+                    float width=image.rectTransform.rect.width;
+                    if(width>0)image.pixelsPerUnitMultiplier=art.tankCostButton.rect.width/(width*Mathf.Max(.01f,image.pixelsPerUnit));
+                }
+                else TvTitleHeaderLayout.FitSkin(image,Mathf.Max(20,image.rectTransform.rect.height));
+            }
+            foreach(var button in new[]{replayPause,replaySpeed,replayRestart})
+            {
+                var visual=button.GetComponent<SettingsControlVisual>();
+                styles.ApplyCleanButton(button.transform.Find("Caption").GetComponent<TMP_Text>(),visual.Focused);
+            }
         }
         void Update()
         {
@@ -104,7 +142,7 @@ namespace BattleCities.UI
             {
                 replayPause.interactable=canPause;
                 replayPause.image.sprite=canPause?art.tankCostButton:art.tankCostButtonLocked;
-                replayPause.image.color=canPause?new Color(.5f,.68f,.86f):Color.white;
+                replayPause.image.color=Color.white;
                 replayPause.GetComponent<SettingsControlVisual>().Refresh();
                 Psg1UiNavigation.Rows(new Selectable[]{replayBack},new Selectable[]{replayPause,replaySpeed,replayRestart});
             }

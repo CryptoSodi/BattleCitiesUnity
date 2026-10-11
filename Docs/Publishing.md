@@ -112,3 +112,27 @@ The publishing script keeps this exact distributed URL updated by default:
 https://github.com/CryptoSodi/BattleCitiesUnity-Releases/releases/download/v0.1.1/BattleCities-0.1.1.apk
 
 Do not delete that release or change its APK filename. `-SkipLegacyApkMirror` is available only when an explicit publication should leave that compatibility link on its current build. The old web site also remains available at https://cryptosodi.github.io/BattleCitiesUnity-Releases/.
+
+## Signed Android-only production releases
+
+Run Tools/Publishing/Build-SignedAndroid.ps1 -Version 1.0.0 -VersionCode 1.
+The shared Unity automation exports ARM64 IL2CPP without passwords, assembles the
+release APK, and signs via apksigner stdin using the existing Windows DPAPI files
+under D:/keys. Run under the Windows account that created those credentials.
+No new key is generated. Passwords never enter Unity, source, command arguments,
+build requests or generated Gradle files.
+
+Outputs and receipts: Builds/Android/<version>-v<code>/<timestamp>.
+Package: sol.battle.cities, a separate application from com.battlecities.game.
+Check the publishing console's highest version code before each release.
+
+After merging the release PR, run Publish-Android.ps1 with -ApkPath,
+-VerificationPath and -TargetCommit. It validates the receipt and artifact checksum,
+publishes android-v<version>-<code>, and preserves battlecities.apk and the legacy
+compatibility filename/link. The release is marked latest for the stable APK URL.
+Android-only tags skip Pages. No web archive is attached and no API is deployed.
+Web version selection and manual Pages defaults select a release with a web ZIP.
+
+Verification covers package/version, ARM64/non-debuggable release, APK signatures,
+16 KB zip alignment, original certificate, and source/compiled Firebase values.
+Hardware installation, wallet handoff, gameplay and push delivery require device checks.

@@ -56,6 +56,7 @@ namespace BattleCities.Tests
         }
         public static void Run()
         {
+            ReplayHashChecks.Run();
             for(int bits=0;bits<=511;bits++)if((bits&7)<=4&&((bits>>3)&7)<=4)Check(ReplayRecorder.Pack(ReplayRecorder.Unpack(bits))==bits,"Input bit packing changed");
             foreach(var mode in new[]{BattleMode.Offline,BattleMode.Coop,BattleMode.Versus})
             {

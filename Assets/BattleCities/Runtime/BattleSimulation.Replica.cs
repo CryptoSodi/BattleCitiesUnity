@@ -6,11 +6,14 @@ namespace BattleCities.Core
     // Presentation state only. Clients never feed this back into authoritative combat.
     public sealed class BattleFrame
     {
+        public BattleFlag[] Flags;
+        public int[] FlagScores;
         public int Tick, Score, WinnerSlot, SpawnedEnemies;
-        public bool Started, Won, Lost, BaseAlive;
+        public bool Started, Won, Lost, BaseAlive, RivalBaseAlive;
         public float Freeze, ZoomOut, PickupX, PickupY, PickupTime;
         public string PickupType;
         public BattleParticipant[] Participants;
+        public BattleResultStats[] ResultStats;
         public TankState[] Tanks;
         public ShotState[] Shots;
         public MineState[] Mines;
@@ -55,12 +58,15 @@ namespace BattleCities.Core
 
         public void ApplyFrame(BattleFrame f)
         {
+            if(f.Flags!=null)for(int i=0;i<2;i++)Flags[i]=f.Flags[i].Copy();
+            if(f.FlagScores!=null)Array.Copy(f.FlagScores,FlagScores,2);
             Tick=f.Tick;Score=f.Score;WinnerSlot=f.WinnerSlot;MatchStarted=f.Started;Won=f.Won;Lost=f.Lost;spawned=f.SpawnedEnemies;
             intro=f.Started?Math.Max(0,2-f.Tick*StepSeconds):2;
             Freeze=f.Freeze;ZoomOut=f.ZoomOut;PickupType=f.PickupType;PickupX=f.PickupX;PickupY=f.PickupY;PickupTime=f.PickupTime;
-            if(BaseAlive&&!f.BaseAlive&&!IsPvp)BaseDestroyed?.Invoke();
-            BaseAlive=f.BaseAlive;
-            for(int i=0;i<MaxPlayers;i++)Participants[i]=f.Participants[i];
+            if(BaseAlive&&!f.BaseAlive&&Mode!=BattleMode.Versus)BaseDestroyed?.Invoke();
+            if(RivalBaseAlive&&!f.RivalBaseAlive)RivalBaseDestroyed?.Invoke();
+            RivalBaseAlive=f.RivalBaseAlive;BaseAlive=f.BaseAlive;
+            for(int i=0;i<MaxPlayers;i++){Participants[i]=f.Participants[i];if(f.ResultStats!=null&&i<f.ResultStats.Length)ResultStats[i]=f.ResultStats[i].Copy();}
             Replace(Tanks,f.Tanks);Replace(Shots,f.Shots);Replace(Mines,f.Mines);Replace(Drones,f.Drones);Replace(Turrets,f.Turrets);Replace(LandDrones,f.LandDrones);
             bool changed=false;
             for(int i=0;i<InitialTerrainCount;i++)

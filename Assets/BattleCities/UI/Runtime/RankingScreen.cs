@@ -126,6 +126,7 @@ namespace BattleCities.UI
         {
             options.Clear();
             if(!trading)options.Add(new RankingPeriod{Id="cycle",Label="CURRENT CYCLE",IsCycle=true});
+            if(!trading)options.Add(new RankingPeriod{Id="all",Label="ALL TIME"});
             options.AddRange(seasons);BuildPeriodRows();
         }
         void OnPlayer(MainMenuApiClient.PlayerSnapshot player){if(IsOpen)RefreshData();}
@@ -150,17 +151,18 @@ namespace BattleCities.UI
             periodCaption.text=selectedPeriod.Label;
             tableTitle.text=selectedPeriod.IsCycle?"LIVE PLAYER RANKINGS":(trading?"TRADING":"GAMING")+" • "+selectedPeriod.Label;
             historyPeriod.text=selectedPeriod.Label;
-            eligibilityText.text=trading?"TRADING STANDINGS\nMONTHLY SEASONS":selectedPeriod.IsCycle?"CYCLE: ALL PLAYERS\nSEASON: PASS HOLDERS":"SEASON PASS SCORES\nALSO EARN IN THE CYCLE";
+            eligibilityText.text=trading?"TRADING STANDINGS\nMONTHLY SEASONS":selectedPeriod.IsAllTime?"ALL RECORDED MATCHES\nNO SEASON PASS REQUIRED":selectedPeriod.IsCycle?"CYCLE: ALL PLAYERS\nSEASON: PASS HOLDERS":"SEASON PASS SCORES\nALSO EARN IN THE CYCLE";
             BuildRankingRows();
             bool noRows=snapshot==null||snapshot.Rows.Count==0;empty.gameObject.SetActive(noRows);
             emptyTitle.text=loading?"LOADING RANKINGS":error!=null?"RANKINGS UNAVAILABLE":trading?"NO TRADERS RANKED YET":"NO PLAYERS RANKED YET";
-            emptyDetail.text=loading?"Fetching the selected standings…":error!=null?"Choose this period again to retry.":trading?"Trading standings will appear here.":selectedPeriod.IsCycle?"Play a ranked match to join this cycle.":"Season pass holders build their score here.";
+            emptyDetail.text=loading?"Fetching the selected standings…":error!=null?"Choose this period again to retry.":trading?"Trading standings will appear here.":selectedPeriod.IsAllTime?"Play a ranked match to join the standings.":selectedPeriod.IsCycle?"Play a ranked match to join this cycle.":"Season pass holders build their score here.";
             RefreshFooter();ConfigureNavigation();
         }
         void RefreshFooter()
         {
             if(!rankValue)return;
             rankValue.text=snapshot==null?"—":snapshot.MyRank is int rank?"#"+rank.ToString(CultureInfo.InvariantCulture):"UNRANKED";
+            if(selectedPeriod.IsAllTime){countdown.text="ALL TIME • ALL RECORDED MATCHES";return;}
             string rule=selectedPeriod.IsCycle?"TOP 10 EVERY "+(snapshot?.IntervalMinutes??30)+" MINUTES":"MONTHLY SEASON PAYOUT";
             string status;
             if(snapshot?.EndsAt==null)status=loading?"LOADING…":"TIME UNAVAILABLE";

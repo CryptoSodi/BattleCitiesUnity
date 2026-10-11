@@ -31,8 +31,11 @@ namespace BattleCities
         {
             replaySaved=false;
             battleFuelRequestId=BattlePreparation.Ready?BattlePreparation.FuelRequestId:null;
-            replayRecorder=new ReplayRecorder(Simulation,replayMap,Application.version);
-            replayArchive=new ReplayArchive {replay=replayRecorder.Data,apiUrl=BattlePreparation.Ready?BattlePreparation.ApiUrl:null,
+            replayRecorder=new ReplayRecorder(Simulation,replayMap,Application.version,backgroundCheckpoints:true);
+            // Guests keep battle recordings locally. Do not probe the browser's API cookie here:
+            // it may still belong to a previously connected wallet in this browser profile.
+            bool walletRecording=BattlePreparation.Ready&&BattlePreparation.OwnerProvider=="wallet";
+            replayArchive=new ReplayArchive {replay=replayRecorder.Data,apiUrl=walletRecording&&!Simulation.IsTeamBattle?BattlePreparation.ApiUrl:null,
                 ownerId=BattlePreparation.Ready?BattlePreparation.OwnerId:null,ownerProvider=BattlePreparation.Ready?BattlePreparation.OwnerProvider:null};
             ReplayStatus="Recording";
             if(!string.IsNullOrEmpty(replayArchive.apiUrl))
@@ -45,6 +48,7 @@ namespace BattleCities
                     ()=>{if(this&&replayRecorder==recorder){replayPreparing=false;ReplayStatus=replayArchive.uploadStatus;}}));
             }
         }
+        public void StopRecordingForRecovery(){FinishRecording();ReplayStatus="Recovered match: recording unavailable for this round.";}
         public void StartOnlineRecording()
         { if(NetworkMatch&&NetworkMatch.Object.HasStateAuthority)StartReplayRecorder(); }
         private void QueueReplayEvent(ReplayEvent e)
@@ -85,6 +89,7 @@ namespace BattleCities
             replaySaved=true;
             try
             {
+                if(replayRecorder.Error!=null)throw new InvalidOperationException(replayRecorder.Error);
                 BattleScoreCache.Record(replayArchive);
                 BattleReplayStore.Save(replayArchive);ReplayStatus=replayRecorder.Data.completion=="truncated"?"Recording limit reached; partial replay saved":"Replay saved";
                 if(!string.IsNullOrEmpty(replayArchive.sessionId))BattleReplayService.Instance.Upload(replayArchive);

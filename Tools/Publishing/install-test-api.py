@@ -31,6 +31,9 @@ if not envFile.exists():
         'BATTLECITY_DATABASE_SSL=disable','BATTLECITY_ENVIRONMENT=devnet','BATTLECITY_SOLANA_NETWORK=devnet',
         'BATTLECITY_SOLANA_RPC_URL=https://api.devnet.solana.com',
         'BATTLECITY_SHOP_SOLANA_RPC_URL=https://api.devnet.solana.com',
+        'BATTLECITY_SKR_MINT=feptDFpEGgFvxDwveWD6opDUCet5ve3f3WHPTBvBLvh',
+        'BATTLECITY_SKR_DECIMALS=6',
+        'BATTLECITY_SKR_TOKEN_PROGRAM=TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb',
         'BATTLECITY_SHOP_QUOTE_SECRET='+secrets.token_hex(32),
         'BATTLECITY_COMPETITIONS_WORKER_ENABLED=0', 'BATTLECITY_DROP_REWARDS_ENABLED=0',
     ])+'\n')

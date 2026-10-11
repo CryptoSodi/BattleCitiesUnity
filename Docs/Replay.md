@@ -27,6 +27,19 @@ The versioned `battlecities-unity-input-v1` format stores:
 
 Content and state hashing sort object keys ordinally and preserve array order. Floating point values are represented in the hash input as `"f32:<eight lowercase IEEE-754 hex digits>"`; stored simulation fields are hashed, excluding derived presentation properties. This avoids Mono/CoreCLR decimal-format differences. Payload hashes used by the API are separate server-computed hashes of the uploaded JSON. Increment `BattleReplay.SimulationVersion` whenever gameplay rules or hashing semantics change, and retain compatible verifier binaries for historical recordings.
 
+
+## Checkpoint hashing performance
+
+The checkpoint hasher streams canonical JSON through a buffered UTF-8 writer into SHA256. Cached contracts sort typed-object fields once per type; arrays keep their original order. This avoids building and sorting two complete JSON trees and allocating a complete JSON string and UTF-8 byte array for each checkpoint. Dictionaries, extension data, JTokens and custom converters retain a local canonicalization fallback.
+
+Hash contents, the `f32:` representation, simulation version and checkpoint schedule are unchanged. Native gameplay recording captures a detached state graph synchronously at the checkpoint boundary, then hashes it on a worker. Every mutable nested entity, collection, terrain setting and route point is copied; workers never read live simulation state or call Unity APIs. Only the game thread writes checkpoint results, in capture order.
+
+The worker queue retains at most two snapshots and processes hashes sequentially. If a recorder is driven faster than its worker, it waits for the oldest checkpoint instead of dropping evidence or growing memory without bound. Tick zero and reseeding remain synchronous. Finish drains all pending work before score caching, saving or uploading; a failed hash retries the same detached snapshot synchronously, and an unrecoverable error prevents the archive from being saved or submitted. WebGL players and the standalone verifier use synchronous hashing. Replay verification and result checks remain enabled.
+
+`ReplayHashChecks` compares the streaming hash with an independent copy of the previous algorithm, including all 35 evolving maps, single-player/co-op/versus states, field selection, Unicode and escaping, cultures, dictionary order, converters, signed zero and non-finite floats. It also checks snapshot mutation isolation and background-recorder ordering, reseeding, queue backpressure and finalization across all three modes. It runs through both the Unity **Input replay** check and the standalone verifier's `--self-test` command. Timing numbers must be measured separately on the target device; passing compatibility checks is not evidence of a frame-rate improvement.
+
+Android players request 60 FPS before the first scene loads. Simulation and replay timing remain fixed at 60 ticks per second; checkpoint scheduling follows simulation ticks. Actual rendering performance depends on the device and scene.
+
 ## Backend and verification boundary
 
 The client requests `POST /api/replay-sessions` before its first simulation tick when an API/account is available. It applies the issued seed and binds the recording to the session's mode, level/content/config hashes, tick rate, build and simulator version. Failure leaves a local recording. Completed archives upload to `POST /api/replays/unity`, idempotently by session ID. A completed, debug-free single-player recording then links through `POST /api/matches/submit`; match-link failures are independently retriable.

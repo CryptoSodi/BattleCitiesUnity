@@ -805,7 +805,7 @@ namespace BattleCities.UI
             emptyTrophy = leaderboard.Find("Scores/Empty state trophy")?.gameObject;
             if (rankingTitle) rankingTitle.text = "PLAYER RANKINGS";
             if (matchesColumn) matchesColumn.text = "MATCHES";
-            if (rankingFooter) rankingFooter.text = "SEASON STANDINGS";
+            if (rankingFooter) rankingFooter.text = "CYCLE STANDINGS";
             if (rankingFooterSubtitle)
             {
                 rankingFooterSubtitle.resizeTextForBestFit = true;
@@ -819,10 +819,15 @@ namespace BattleCities.UI
 
         private void OnApiRankingsLoaded(MainMenuApiClient.RankingsSnapshot snapshot)
         {
+            // Season standings are pass-gated. They must never replace the public cycle board.
+        }
+
+        private void RenderCycleRankings(MainMenuApiClient.RoundSnapshot snapshot)
+        {
             var ranked = snapshot?.rows;
             var hasRows = ranked != null && ranked.Length > 0;
             if (rankingAvailability) rankingAvailability.text = snapshot == null ? "RANKINGS UNAVAILABLE" :
-                "LIVE  •  " + (string.IsNullOrWhiteSpace(snapshot.seasonName) ? "CURRENT SEASON" : snapshot.seasonName.ToUpperInvariant());
+                "LIVE  •  CURRENT CYCLE";
             if (emptyTrophy)
             {
                 emptyTrophy.SetActive(!hasRows);
@@ -837,7 +842,7 @@ namespace BattleCities.UI
             if (leaderboardDetail)
             {
                 leaderboardDetail.gameObject.SetActive(!hasRows);
-                leaderboardDetail.text = snapshot == null ? "Waiting for live player standings." : "Play a ranked match to join the standings.";
+                leaderboardDetail.text = snapshot == null ? "Waiting for live player standings." : "Play a ranked match to join this cycle.";
             }
             rows = hasRows ? new string[ranked.Length] : Array.Empty<string>();
             if (hasRows && scoresPanel) EnsureRankingCells(ranked.Length);
@@ -895,6 +900,7 @@ namespace BattleCities.UI
         private void OnApiRoundLoaded(MainMenuApiClient.RoundSnapshot snapshot)
         {
             roundSnapshot = snapshot;
+            RenderCycleRankings(snapshot);
             hasRoundEnd = snapshot != null && DateTimeOffset.TryParse(snapshot.endsAt,
                 CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out roundEndsAt);
             if (roundHeading) roundHeading.text = "TOP 10 EVERY 30 MINUTES";

@@ -18,7 +18,8 @@ namespace BattleCities.Editor
         {
             public string version, target, outputPath, reportPath;
             public int androidVersionCode;
-            public bool buildAppBundle, testNetwork;
+            public bool buildAppBundle, testNetwork, exportAndroidProject;
+            public string androidApplicationId;
         }
 
         [Serializable]
@@ -42,7 +43,7 @@ namespace BattleCities.Editor
             if (request.target == "Android")
             {
                 string extension = request.buildAppBundle ? ".aab" : ".apk";
-                if (!string.Equals(Path.GetExtension(request.outputPath), extension, StringComparison.OrdinalIgnoreCase))
+                if (!request.exportAndroidProject && !string.Equals(Path.GetExtension(request.outputPath), extension, StringComparison.OrdinalIgnoreCase))
                     throw new BuildFailedException("Android output must have the " + extension + " extension for the selected format.");
             }
             return request;
@@ -72,10 +73,25 @@ namespace BattleCities.Editor
             {
                 if (request.androidVersionCode < 1)
                     throw new BuildFailedException("Android version code must be positive.");
+                if (!string.IsNullOrEmpty(request.androidApplicationId))
+                    PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, request.androidApplicationId);
                 PlayerSettings.Android.bundleVersionCode = request.androidVersionCode;
                 EditorUserBuildSettings.buildAppBundle = request.buildAppBundle;
-                EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
+                EditorUserBuildSettings.exportAsGoogleAndroidProject = request.exportAndroidProject;
                 // Keep the project's existing signing identity. Never write passwords into a request file.
+                if (request.exportAndroidProject)
+                {
+                    // Export without passwords; the release signer reads DPAPI credentials through stdin.
+                    PlayerSettings.Android.useCustomKeystore = true;
+                    PlayerSettings.Android.keystoreName = "D:/keys/battle-cities-dappstore.keystore";
+                    PlayerSettings.Android.keyaliasName = "battle-cities";
+                    PlayerSettings.Android.keystorePass = "";
+                    PlayerSettings.Android.keyaliasPass = "";
+                    PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+                    PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
+                }
+                else
+                {
                 string storePassword = Environment.GetEnvironmentVariable("BATTLECITIES_ANDROID_KEYSTORE_PASSWORD");
                 string aliasPassword = Environment.GetEnvironmentVariable("BATTLECITIES_ANDROID_KEY_ALIAS_PASSWORD");
                 if (!string.IsNullOrEmpty(storePassword)) PlayerSettings.Android.keystorePass = storePassword;
@@ -83,6 +99,7 @@ namespace BattleCities.Editor
                 if (PlayerSettings.Android.useCustomKeystore &&
                     (string.IsNullOrEmpty(PlayerSettings.Android.keystorePass) || string.IsNullOrEmpty(PlayerSettings.Android.keyaliasPass)))
                     throw new BuildFailedException("Enter the existing keystore passwords in Unity Publishing Settings, or set the BATTLECITIES_ANDROID_*_PASSWORD environment variables before a closed-editor build.");
+                }
             }
             // Batch builds read the committed enabled scenes directly. A fresh headless
             // Editor starts with an untitled scene, which must never open a save dialog.
@@ -98,6 +115,11 @@ namespace BattleCities.Editor
             }
             if (request.target == "WebGL")
             {
+                PhotonMultiplayerSetup.Configure();
+                MultiplayerChunkSetup.Configure();
+                var fusionConfig=Fusion.NetworkProjectConfig.Global;
+                fusionConfig.AllowClientServerModesInWebGL=true;
+                Fusion.Editor.NetworkProjectConfigUtilities.SaveGlobalConfig(fusionConfig);
                 const string testDefine = "BATTLECITIES_DEVNET";
                 var defines = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.WebGL)
                     .Split(';').Where(value => !string.IsNullOrWhiteSpace(value) && value != testDefine).ToList();
@@ -113,10 +135,13 @@ namespace BattleCities.Editor
         {
             string path = Environment.GetEnvironmentVariable("BATTLECITIES_BUILD_REQUEST");
             if (string.IsNullOrWhiteSpace(path)) throw new BuildFailedException("BATTLECITIES_BUILD_REQUEST is missing.");
-            ConfigureFromFile(path);
-            var request = ReadRequest(path);
             var scenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path).ToArray();
             if (scenes.Length == 0) throw new BuildFailedException("No enabled scenes in Build Settings.");
+            // A fresh batch Editor starts with an untitled scene. Open a configured
+            // scene before the shared save step, which cannot show a save dialog here.
+            if (Application.isBatchMode) EditorSceneManager.OpenScene(scenes[0], OpenSceneMode.Single);
+            ConfigureFromFile(path);
+            var request = ReadRequest(path);
             Directory.CreateDirectory(Path.GetDirectoryName(request.outputPath));
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {

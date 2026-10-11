@@ -22,6 +22,7 @@ namespace BattleCities.Editor
             root.AddComponent<EconomyClient>();
             string[] tanks={"image-built-tank","tracked-upgrade","twin-cannon-ground-up","heavy-fourview"};
             game.TankModels=tanks.Select(t=>Model("Art/Tanks/"+t+"/tank.glb")).ToArray();
+            game.SpeedEnemyModel=Model("Art/Tanks/wheeled-scout/tank.glb");
             game.BrickModel=Model("Art/Terrain/Brick/brick-block.glb");game.SteelModel=Model("Art/Terrain/Steel/steel-brick.glb");game.BushModel=Model("Art/Terrain/Bush/bush.glb");
             game.MineModel=Model("Art/Deployables/ArcadeMine/mine.glb");
             game.DroneModel=Model("Art/Deployables/WingDrone/wing-drone.glb");

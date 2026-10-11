@@ -18,10 +18,10 @@ namespace BattleCities
         private readonly Dictionary<string, Material> bulletPaint = new Dictionary<string, Material>();
         private readonly Dictionary<string, Material> deployablePaint = new Dictionary<string, Material>();
 
-        private static string TankTint(TankState tank) => tank.Player ? (tank.Slot<0?"#f3bf32":new[]{"#f3bf32","#4fc76d","#df689a","#88ce68"}[tank.Slot]) : tank.Drop ? "#f0d7c0" :
+        private string TankTint(TankState tank) => Simulation!=null&&Simulation.IsTeamBattle&&tank.Slot>=0 ? (BattleSimulation.TeamForSlot(tank.Slot)==0?"#f3bf32":"#4fc76d") : tank.Player ? (tank.Slot<0?"#f3bf32":new[]{"#f3bf32","#4fc76d","#df689a","#88ce68"}[tank.Slot]) : tank.Drop ? "#f0d7c0" :
             new[] { "#c55343", "#769995", "#9296b5", "#736d82" }[tank.Tier];
 
-        private static Color PlayerColor(int slot)
+        private Color PlayerColor(int slot)
         {
             ColorUtility.TryParseHtmlString(TankTint(new TankState { Player=true, Slot=slot }),out var color);
             return color;

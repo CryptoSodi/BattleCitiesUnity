@@ -42,11 +42,13 @@ namespace BattleCities.Editor
             void Check(bool okay,string label){if(!okay)throw new Exception("Loadout: "+label);checks++;}
             var menu=UnityEngine.Object.FindFirstObjectByType<MainMenuScene>();menu.StartBattle();var screen=menu.GetComponent<PreBattleScreen>();var api=menu.GetComponent<MainMenuApiClient>();
             var previousRequest=api.EditorRequestOverride;var previousStart=screen.EditorStartRoutineOverride;var previousLaunch=screen.EditorLaunchOverride;
-            var previousPlayer=api.LastPlayer;bool previousWallet=api.IsWalletAuthenticated;
+            var previousPlayer=api.LastPlayer;bool previousWallet=api.IsWalletAuthenticated,previousAuthenticated=api.IsAuthenticated,previousGuest=api.IsLocalGuest;
             void SetFixturePlayer(bool wallet)
             {
                 typeof(MainMenuApiClient).GetProperty("LastPlayer").SetValue(api,new MainMenuApiClient.PlayerSnapshot{id="loadout-fixture",provider=wallet?"wallet":"guest",walletAddress=wallet?"loadout-fixture-wallet":null});
                 typeof(MainMenuApiClient).GetProperty("IsWalletAuthenticated").SetValue(api,wallet);
+                typeof(MainMenuApiClient).GetProperty("IsAuthenticated").SetValue(api,wallet);
+                typeof(MainMenuApiClient).GetProperty("IsLocalGuest").SetValue(api,!wallet);
             }
             var input=UnityEngine.Object.FindFirstObjectByType<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();bool enabled=input&&input.enabled;if(input)input.enabled=false;
             var fixture=new Fixture();api.EditorRequestOverride=fixture.Request;screen.EditorStartRoutineOverride=pump.Start;screen.EditorLaunchOverride=()=>launched++;
@@ -114,11 +116,33 @@ namespace BattleCities.Editor
                 Check(launched==launchBefore+1&&fixture.Fuel==6&&fixture.FuelDebits==1&&fixture.FuelRequests==2&&fixture.FuelRequestIds[1]==closedRequest,"reopening resolves the same pending charge and launches once");
 
                 yield return StartCase(new Fixture{Anonymous=true});launchBefore=launched;
+                typeof(MainMenuApiClient).GetProperty("IsLocalGuest").SetValue(api,true);
                 proceed.onClick.Invoke();yield return Wait(screen);
                 Check(launched==launchBefore&&fixture.FuelRequests==0&&screen.LoadoutStatus.Contains("ACCOUNT UNAVAILABLE"),"wallet with expired account session cannot fall back to unpaid guest play");
                 yield return StartCase(new Fixture{FailRead=true});launchBefore=launched;
                 proceed.onClick.Invoke();yield return Wait(screen);
                 Check(launched==launchBefore&&fixture.FuelRequests==0&&screen.LoadoutStatus.Contains("UNAVAILABLE"),"unavailable wallet account with empty loadout cannot launch unpaid");
+                screen.Close(false);fixture=new Fixture{FailRead=true};api.EditorRequestOverride=fixture.Request;SetFixturePlayer(false);
+                screen.EditorResetLoadoutFixture();screen.Open();yield return Wait(screen);proceed.onClick.Invoke();
+                screen.RefreshLoadoutAccount();yield return Wait(screen);
+                Check(fixture.AccountReads==0&&!screen.IsInventoryLoading&&screen.LoadoutStatus.Contains("EMPTY LOADOUT IS READY"),"local guest skips unavailable server economy on open and refresh");
+                screen.ChooseLoadoutSlot(0);screen.EquipLoadoutPower("shield");
+                Check(screen.EquippedPower(0)==null,"offline guest cannot equip server inventory");
+                launchBefore=launched;proceed.onClick.Invoke();proceed.onClick.Invoke();yield return Wait(screen);
+                Check(launched==launchBefore+1&&fixture.AccountReads==0&&fixture.FuelRequests==0&&fixture.Saves==0,"offline local guest launches once without account, save or Fuel requests");
+                Check(BattlePreparation.OwnerProvider=="guest"&&BattlePreparation.OwnerId=="loadout-fixture"&&string.IsNullOrEmpty(BattlePreparation.FuelRequestId),"guest launch has guest ownership and no wallet Fuel receipt");
+
+                yield return StartCase(new Fixture());
+                screen.ChooseLoadoutSlot(0);screen.EquipLoadoutPower("shield");int walletReads=fixture.AccountReads;
+                SetFixturePlayer(false);screen.RefreshLoadoutAccount();yield return Wait(screen);
+                Check(fixture.AccountReads==walletReads&&screen.EquippedPower(0)==null,"switching to guest clears wallet draft and ignores a stale authenticated economy response");
+                screen.EquipLoadoutPower("shield");Check(screen.EquippedPower(0)==null,"guest cannot use stale wallet inventory");
+                launchBefore=launched;proceed.onClick.Invoke();yield return Wait(screen);
+                Check(launched==launchBefore+1&&fixture.FuelRequests==0&&fixture.Saves==0&&BattlePreparation.OwnerProvider=="guest"&&string.IsNullOrEmpty(BattlePreparation.FuelRequestId),"stale wallet data cannot charge or own a local guest battle");
+                SetFixturePlayer(true);screen.RefreshLoadoutAccount();yield return Wait(screen);
+                Check(fixture.AccountReads==walletReads+1,"switching back to wallet reloads the authoritative account");
+                screen.ChooseLoadoutSlot(0);screen.EquipLoadoutPower("shield");launchBefore=launched;proceed.onClick.Invoke();yield return Wait(screen);
+                Check(launched==launchBefore+1&&fixture.Saves==1&&fixture.FuelDebits==1&&fixture.Fuel==6&&BattlePreparation.OwnerProvider=="wallet"&&!string.IsNullOrEmpty(BattlePreparation.FuelRequestId),"wallet after guest still saves owned loadout and requires a confirmed Fuel debit");
                 CheckFuelReceiptPersistence(Check);
                 Status="PASS: "+checks+" Loadout checks";Debug.Log(Status);
             }
@@ -126,6 +150,7 @@ namespace BattleCities.Editor
             {
                 screen.Close(false);api.EditorRequestOverride=previousRequest;screen.EditorStartRoutineOverride=previousStart;screen.EditorLaunchOverride=previousLaunch;
                 typeof(MainMenuApiClient).GetProperty("LastPlayer").SetValue(api,previousPlayer);typeof(MainMenuApiClient).GetProperty("IsWalletAuthenticated").SetValue(api,previousWallet);
+                typeof(MainMenuApiClient).GetProperty("IsAuthenticated").SetValue(api,previousAuthenticated);typeof(MainMenuApiClient).GetProperty("IsLocalGuest").SetValue(api,previousGuest);
                 screen.EditorResetLoadoutFixture();screen.Open();Proceed(screen).onClick.Invoke();menu.RefreshLayout();if(input)input.enabled=enabled;
                 if(Status=="Running")Status="FAILED; see fixture error";
             }
@@ -133,7 +158,7 @@ namespace BattleCities.Editor
         sealed class Fixture
         {
             public bool FailSave,FailRead,Anonymous,LoseNextFuelReply,HoldFuelReply,OnlyLoadoutWritten=true;
-            public int Saves,Fuel=7,FuelRequests,FuelDebits;
+            public int Saves,Fuel=7,FuelRequests,FuelDebits,AccountReads;
             public readonly List<string> FuelRequestIds=new List<string>();
             readonly Dictionary<string,int> consumed=new Dictionary<string,int>();
             JObject loadout=new JObject();
@@ -159,6 +184,7 @@ namespace BattleCities.Editor
                     reply(200,new JObject{["ok"]=true,["requestId"]=requestId,["fuelConsumed"]=tier+1,["idempotent"]=idempotent,["account"]=Account()},null);yield break;
                 }
                 if(path!="/api/economy/account"){reply(404,new JObject(),"Unsupported fixture");yield break;}
+                if(method=="GET")AccountReads++;
                 if(Anonymous){reply(401,new JObject{["authenticated"]=false},null);yield break;}
                 if(method=="GET"&&FailRead){reply(503,new JObject(),"Offline fixture");yield break;}
                 if(method=="PUT")

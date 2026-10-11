@@ -154,7 +154,8 @@ namespace BattleCities.UI
             foreach(var period in options)
             {
                 if(period.IsCycle&&!cycleHeader){Group("Cycles","30-MINUTE CYCLE");cycleHeader=true;}
-                if(!period.IsCycle&&!seasonHeader){Group("Seasons","MONTHLY SEASONS");seasonHeader=true;}
+                if(period.IsAllTime)Group("All time","ALL-TIME STANDINGS");
+                if(!period.IsCycle&&!period.IsAllTime&&!seasonHeader){Group("Seasons","MONTHLY SEASONS");seasonHeader=true;}
                 string id=period.Id;
                 var button=Tab("Period "+id,periodScroll.content,()=>SelectPeriod(id),out var selection,out var label);
                 var normal=button.GetComponent<UnityEngine.UI.Image>();normal.sprite=art.tankCostButton;normal.color=tabsBar.GetComponent<UnityEngine.UI.Image>().color;

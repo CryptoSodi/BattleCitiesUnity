@@ -1,0 +1,17 @@
+name: Android release configuration
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  configuration:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Validate Android release configuration
+        shell: pwsh
+        run: ./Tools/Publishing/Test-AndroidRelease.ps1

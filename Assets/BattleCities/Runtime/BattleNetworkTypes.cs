@@ -2,6 +2,13 @@ using Fusion;
 using BattleCities.Core;
 namespace BattleCities.Multiplayer
 {
+    public struct NetBattleResultStats : INetworkStruct
+    {
+        public NetworkBool Participated;
+        public int Tier0,Tier1,Tier2,Tier3,Points,Bonus;
+        public static NetBattleResultStats From(BattleResultStats s) => new NetBattleResultStats { Participated=s.Participated,Tier0=s.Tier0,Tier1=s.Tier1,Tier2=s.Tier2,Tier3=s.Tier3,Points=s.Points,Bonus=s.Bonus };
+        public BattleResultStats ToState() => new BattleResultStats { Participated=Participated,Tier0=Tier0,Tier1=Tier1,Tier2=Tier2,Tier3=Tier3,Points=Points,Bonus=Bonus };
+    }
     public struct NetTankState : INetworkStruct
     {
         public int Id;

@@ -14,6 +14,7 @@ namespace BattleCities
     public sealed partial class BattleGame : MonoBehaviour
     {
         public GameObject[] TankModels;
+        public GameObject SpeedEnemyModel;
         public GameObject BrickModel, SteelModel, BushModel, EagleModel, RuinedEagleModel, MineModel, DroneModel, GroundTurretPrefab;
         public GameObject[] BulletModels;
         public TextAsset BrickSectionData;
@@ -49,7 +50,8 @@ namespace BattleCities
         private readonly Dictionary<string,List<Part>> brickParts=new Dictionary<string,List<Part>>();
         private List<Part> steelParts,bushParts;
         private Material street,pavement,paint,water,particleMaterial;
-        private GameObject eagle;
+        private GameObject eagle, rivalEagle;
+        private EagleNightTint rivalEagleTint;
         private EagleNightTint eagleTint;
         private InputActionMap input;
         private InputAction[] moveKeys,aimKeys;
@@ -156,6 +158,7 @@ namespace BattleCities
         private void LoadStageMap(int stage,MapData mapOverride)
         {
             if(IsOnline&&!loadingOnline)return;
+            CloseResults();
             FinishRecording();
             if(!loadingReplay){replayPlayer=null;if(touchControls)touchControls.enabled=true;}
             if(stage<1||stage>35)throw new ArgumentOutOfRangeException(nameof(stage),"Select a stage from 01 to 35.");
@@ -193,6 +196,12 @@ namespace BattleCities
             BuildGround(map);BuildEnvironment(map);BuildStageLights(map);RebuildTerrain();
             eagle=Instantiate(EagleModel,World(Simulation.BaseBounds.X+32,Simulation.BaseBounds.Y+32,.1f),Quaternion.Euler(0,180,0),stageRoot);
             eagleTint=eagle.AddComponent<EagleNightTint>();eagleTint.SetDarkness(weather.Darkness);
+            if(Simulation.RivalBaseAlive)
+            {
+                rivalEagle=Instantiate(EagleModel,World(Simulation.RivalBaseBounds.X+32,Simulation.RivalBaseBounds.Y+32,.1f),Quaternion.identity,stageRoot);
+                rivalEagleTint=rivalEagle.AddComponent<EagleNightTint>();Shadows(rivalEagle);
+                Simulation.RivalBaseDestroyed+=()=>{effects.Burst(World(Simulation.RivalBaseBounds.X+32,Simulation.RivalBaseBounds.Y+32,.35f),1.7f);Destroy(rivalEagle);rivalEagle=Instantiate(RuinedEagleModel,World(Simulation.RivalBaseBounds.X+32,Simulation.RivalBaseBounds.Y+32,.1f),Quaternion.identity,stageRoot);rivalEagleTint=rivalEagle.AddComponent<EagleNightTint>();Shadows(rivalEagle);};
+            }
             Shadows(eagle);cameraTarget=World(Simulation.Width/2,Simulation.Height/2);SyncActors(0);UpdateCamera(1);weather.Tick(0,Simulation.Width/64f,Simulation.Height/64f,sun,reflections);if(tvReplay)IsolateTvReplayVisuals();reflections.RenderProbe();
             BeginRecording(map);
         }
@@ -215,7 +224,7 @@ namespace BattleCities
                 for(int x=0;x<w;x++)for(int y=0;y<h;y++)
                 {
                     var cell=new Box(x*64,y*64,64,64);
-                    bool occupied=Simulation.Terrain.Any(t=>(t.StopsBullet||BattleTerrain.IsSurface(t.Type))&&t.Bounds.Overlaps(cell))||Simulation.BaseBounds.Overlaps(cell);
+                    bool occupied=Simulation.Terrain.Any(t=>(t.StopsBullet||BattleTerrain.IsSurface(t.Type))&&t.Bounds.Overlaps(cell))||Simulation.BaseBounds.Overlaps(cell)||(Simulation.RivalBaseAlive&&Simulation.RivalBaseBounds.Overlaps(cell));
                     if(!occupied&&x%2==0)Cube("Road marking",new Vector3(x+.5f,-.009f,-y-.5f),new Vector3(.035f,.015f,.28f),paint);
                 }
                 foreach(var region in map.terrain.regions.Where(r=>r.type.Contains("brick")||r.type=="steel"))Cube("Wall pavement",World(region.x+region.width/2,region.y+region.height/2,-.013f),new Vector3(region.width/64+.12f,.018f,region.height/64+.12f),pavement);
@@ -249,7 +258,7 @@ namespace BattleCities
         }
         private void Update()
         {
-            if(Simulation==null)return;float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);fps=Mathf.Lerp(fps,1/Mathf.Max(.0001f,Time.unscaledDeltaTime),.05f);
+            if(Simulation==null)return;if(UpdateResults())return;float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);fps=Mathf.Lerp(fps,1/Mathf.Max(.0001f,Time.unscaledDeltaTime),.05f);
             if(!tvReplay){UpdateGamepadControls();
             if(debug.WasPressedThisFrame()&&!IsReplaying)showDebug=!showDebug;if(restart.WasPressedThisFrame()&&!IsOnline)RequestBattleRestart();if(overhead.WasPressedThisFrame())CameraElevation=CameraElevation>85?70:90;
             if(Multiplayer.BattleSession.Instance&&Multiplayer.BattleSession.Instance.Lobby.Visible)paused=true;
@@ -268,20 +277,20 @@ namespace BattleCities
             }
             else secondaryQueued=false;
             if(SystemInfo.graphicsDeviceType==GraphicsDeviceType.Null)return;
+            float presentationDt=!IsOnline&&(paused||consumePending)?0:dt*(IsReplaying?replaySpeed:1);
             SyncMines();
-            SyncTurrets(!IsOnline&&(paused||consumePending)?0:dt);
+            SyncTurrets(presentationDt);
             SyncDrones();
             SyncLandDrones();
             if(terrainDirty)RebuildTerrain();
             foreach(var batch in batches)Graphics.DrawMeshInstanced(batch.Part.Mesh,batch.Part.Submesh,batch.Part.Material,batch.Matrices,batch.Matrices.Length,null,ShadowCastingMode.On,true,tvReplay?TvReplayLayer:0,tvReplay?gameCamera:null);
-            float presentationDt=!IsOnline&&(paused||consumePending)?0:dt;
             foreach(var surface in terrainSurfaces)surface.Tick(presentationDt);
-            SyncActors(presentationDt);effects.Tick(presentationDt,gameCamera);debris.Tick(presentationDt,tvReplay?gameCamera:null,tvReplay?TvReplayLayer:0);UpdateLighting(dt);UpdateCamera(dt);if(tvReplay)IsolateTvReplayVisuals();
+            SyncActors(presentationDt);SyncFlags();effects.Tick(presentationDt,gameCamera);debris.Tick(presentationDt,tvReplay?gameCamera:null,tvReplay?TvReplayLayer:0);UpdateLighting(IsReplaying?presentationDt:dt);UpdateCamera(IsReplaying?presentationDt:dt);if(tvReplay){DrawTvReplayPickup();IsolateTvReplayVisuals();}
         }
         private void UpdateLighting(float dt)
         {
             weather.Tick(paused?0:dt,Simulation.Width/64f,Simulation.Height/64f,sun,reflections);
-            if(eagleTint)eagleTint.SetDarkness(weather.Darkness);
+            if(eagleTint)eagleTint.SetDarkness(weather.Darkness);if(rivalEagleTint)rivalEagleTint.SetDarkness(weather.Darkness);
             foreach(var actor in actors.Values)foreach(var light in actor.Lights)light.intensity=Headlights?weather.Darkness*9:0;
         }
         private void UpdateCamera(float dt)
@@ -327,7 +336,8 @@ namespace BattleCities
         private Actor CreateTank(TankState t)
         {
             var a=new Actor{Root=new GameObject((t.Player?"Player":"Enemy")+" "+t.Id),Tier=t.Tier,Drop=t.Drop};a.Root.transform.SetParent(actorsRoot);
-            a.Model=Instantiate(TankModels[t.Tier],a.Root.transform);a.Model.transform.localScale=Vector3.one*.86f;Shadows(a.Model);
+            var model=!t.Player&&t.Tier==1&&SpeedEnemyModel?SpeedEnemyModel:TankModels[t.Tier];
+            a.Model=Instantiate(model,a.Root.transform);a.Model.transform.localScale=Vector3.one*.86f;Shadows(a.Model);
             string tint=TankTint(t);
             ColorUtility.TryParseHtmlString(tint,out a.Color);
             foreach(var renderer in a.Model.GetComponentsInChildren<Renderer>())
@@ -352,7 +362,7 @@ namespace BattleCities
             var noise=a.Dust.noise;noise.enabled=true;noise.strength=.16f;noise.frequency=.45f;noise.scrollSpeed=.18f;noise.damping=true;
             var color=a.Dust.colorOverLifetime;color.enabled=true;var gradient=new Gradient();gradient.SetKeys(new[]{new GradientColorKey(new Color(.88f,.78f,.58f),0),new GradientColorKey(new Color(.54f,.45f,.34f),1)},new[]{new GradientAlphaKey(0,0),new GradientAlphaKey(.58f,.08f),new GradientAlphaKey(.3f,.48f),new GradientAlphaKey(0,1)});color.color=gradient;
             var dustRenderer=a.Dust.GetComponent<ParticleSystemRenderer>();dustRenderer.sharedMaterial=particleMaterial;dustRenderer.renderMode=ParticleSystemRenderMode.Billboard;dustRenderer.sortingFudge=2;dustRenderer.maxParticleSize=.35f;
-            a.Dust.Play();a.Animation=a.Model.AddComponent<TankAnimation>();a.Animation.Initialize();a.Shield=a.Root.AddComponent<TankShield>();return a;
+            if(tvReplay)a.Dust.Pause();else a.Dust.Play();a.Animation=a.Model.AddComponent<TankAnimation>();a.Animation.Initialize();a.Shield=a.Root.AddComponent<TankShield>();return a;
         }
         private void SyncActors(float dt)
         {
@@ -360,17 +370,19 @@ namespace BattleCities
             foreach(var t in Simulation.Tanks.Where(t=>t.Alive))
             {
                 living.Add(t.Id);if(actors.TryGetValue(t.Id,out var old)&&(old.Tier!=t.Tier||old.Drop!=t.Drop)){Destroy(old.Root);actors.Remove(t.Id);}if(!actors.TryGetValue(t.Id,out var a)){a=CreateTank(t);actors.Add(t.Id,a);}
-                var targetPosition=World(t.X,t.Y,-t.SinkDepth*.43f);
-                a.Root.transform.position=IsOnline&&!NetworkMatch.Object.HasStateAuthority&&Vector3.Distance(a.Root.transform.position,targetPosition)<2?Vector3.Lerp(a.Root.transform.position,targetPosition,1-Mathf.Exp(-dt*24)):targetPosition;a.Model.transform.rotation=Quaternion.Slerp(a.Model.transform.rotation,Quaternion.Euler(0,(int)t.Direction*90,0),1-Mathf.Exp(-dt*22));
-                if(a.Turret)a.Turret.rotation=Quaternion.Slerp(a.Turret.rotation,Quaternion.Euler(0,(int)t.Aim*90,0),1-Mathf.Exp(-dt*16));
+                var pose=IsOnline&&!NetworkMatch.Object.HasStateAuthority&&predictedTank!=null&&predictedTank.Id==t.Id?predictedTank:t;
+                var targetPosition=World(pose.X,pose.Y,-pose.SinkDepth*.43f);
+                a.Root.transform.position=IsOnline&&!NetworkMatch.Object.HasStateAuthority&&Vector3.Distance(a.Root.transform.position,targetPosition)<2?Vector3.Lerp(a.Root.transform.position,targetPosition,1-Mathf.Exp(-dt*24)):targetPosition;a.Model.transform.rotation=Quaternion.Slerp(a.Model.transform.rotation,Quaternion.Euler(0,(int)pose.Direction*90,0),1-Mathf.Exp(-dt*22));
+                if(a.Turret)a.Turret.rotation=Quaternion.Slerp(a.Turret.rotation,Quaternion.Euler(0,(int)pose.Aim*90,0),1-Mathf.Exp(-dt*16));
                 bool local=t==Simulation.Player;
                 a.Animation.Tick(t,dt);a.Shield.Tick(t.Shield,dt);
-                effects.HealthBar(World(t.X,t.Y,.4f)+gameCamera.transform.up*.64f,t.Health,t.MaxHealth,a.Color,gameCamera);
-                float charge=IsOnline&&t.Player&&t.Slot>=0&&t.Slot!=NetworkMatch.LocalSlot?
+                effects.HealthBar(World(pose.X,pose.Y,.4f)+gameCamera.transform.up*.64f,t.Health,t.MaxHealth,a.Color,gameCamera);
+                float charge=replayPlayer!=null&&t.Player?replayPlayer.ChargeProgress(Mathf.Max(0,t.Slot)):IsOnline&&t.Player&&t.Slot>=0&&t.Slot!=NetworkMatch.LocalSlot?
                     NetworkMatch.ChargeProgress[t.Slot]:primaryCharge.IsCharging&&local?primaryCharge.Progress:0;
-                if(local)effects.CooldownBar(World(t.X,t.Y,.4f)+gameCamera.transform.up*.575f,charge>0?1-charge:t.ReloadProgress,gameCamera,charge>0);
+                if(local)effects.CooldownBar(World(pose.X,pose.Y,.4f)+gameCamera.transform.up*.575f,charge>0?1-charge:t.ReloadProgress,gameCamera,charge>0);
                 if(t.Player&&charge>0)foreach(var muzzle in a.Muzzles)effects.ProjectileGlow(muzzle.position,a.Color,true,gameCamera,.35f+charge*.65f);
                 var travel=Quaternion.Euler(0,(int)t.Direction*90,0)*Vector3.forward;a.Dust.transform.localPosition=-travel*.52f+Vector3.up*.06f;a.Dust.transform.localRotation=Quaternion.Euler(0,(int)t.Direction*90,0);var emission=a.Dust.emission;emission.rateOverTime=Dust&&t.Moving&&!t.InQuicksand?45:0;
+                if(tvReplay&&dt>0)a.Dust.Simulate(dt,false,false,false);
             }
             foreach(var id in actors.Keys.Where(id=>!living.Contains(id)).ToArray()){Destroy(actors[id].Root);actors.Remove(id);}
             SyncProjectiles(dt);
@@ -473,6 +485,7 @@ namespace BattleCities
         private void OnGUI()
         {
             if(Simulation==null||tvReplay)return;
+            if(!ReplayReady||HasMatchResult||ResultsVisible){hud.SetVisible(false);return;}
             hud.SetVisible(true);
             hud.Draw(Simulation,IsOnline||IsReplaying?null:economy,PowerupAtlas,consumePending,selectedPowerup,!IsReplaying);
             if(IsReplaying)return;
@@ -500,13 +513,13 @@ namespace BattleCities
             GUI.enabled=previousEnabled;
             if(!string.IsNullOrEmpty(Simulation.SecondaryStatus))GUI.Label(new Rect(180,Screen.height-secondaryBottom+2,Screen.width-200,44),Simulation.SecondaryStatus);
             }
-            if(economy&&showDebug)GUI.Label(new Rect(12,Screen.height-84,650,24),consumePending?"Confirming power-upÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦":economy.Status);
+            if(economy&&showDebug)GUI.Label(new Rect(12,Screen.height-84,650,24),consumePending?"Confirming power-upÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦":economy.Status);
             if(Simulation.PickupType!=null){var screen=gameCamera.WorldToScreenPoint(World(Simulation.PickupX,Simulation.PickupY,.7f));float size=Mathf.Clamp(Vector3.Distance(gameCamera.WorldToScreenPoint(World(Simulation.PickupX+67,Simulation.PickupY,.7f)),screen),96,144);var r=new Rect(screen.x-size/2,Screen.height-screen.y-size/2,size,size);if(PowerupAtlas&&BattleHud.TryPowerupUv(Simulation.PickupType,out var uv))GUI.DrawTextureWithTexCoords(r,PowerupAtlas,uv);else GUI.Box(r,Simulation.PickupType);pickupSparkles.Draw(r,Simulation.Tick*BattleSimulation.StepSeconds);}
-            if(!HasTouchControls&&!Psg1)GUI.Label(new Rect(12,Screen.height-28,Screen.width-24,24),"WASD drive   ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢   Arrows aim   ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢   Space: tap / hold + release   ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢   P pause   ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢   R restart   ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢   C camera");
+            if(!HasTouchControls&&!Psg1)GUI.Label(new Rect(12,Screen.height-28,Screen.width-24,24),"WASD drive   ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢   Arrows aim   ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢   Space: tap / hold + release   ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢   P pause   ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢   R restart   ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢   C camera");
             DrawPsg1Controls();
             if(!HasTouchControls&&!Psg1&&!IsOnline&&(paused||Simulation.Lost||Simulation.Won)){GUI.Box(new Rect(Screen.width/2-130,Screen.height/2-35,260,70),(paused?"PAUSED":Simulation.Won?"STAGE CLEAR":"GAME OVER")+"\nR: Restart");if(Simulation.Won&&Stage<35&&GUI.Button(new Rect(Screen.width/2-65,Screen.height/2+45,130,30),"Next stage"))LoadStage(Stage+1);}
             if(IsOnline||!showDebug||RuntimePlatformInfo.IsPsg1)return;
-            GUILayout.BeginArea(new Rect(Mathf.Max(8,Screen.width-282),92,270,Mathf.Max(120,Screen.height-132)),"Battle Cities ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ Debug",GUI.skin.window);
+            GUILayout.BeginArea(new Rect(Mathf.Max(8,Screen.width-282),92,270,Mathf.Max(120,Screen.height-132)),"Battle Cities ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Debug",GUI.skin.window);
             debugScroll=GUILayout.BeginScrollView(debugScroll);
             ChaseCamera=GUILayout.Toggle(ChaseCamera,"Chase shooting camera (arrows aim, LMB / Space fire)");
             if(ChaseCamera)
@@ -516,8 +529,8 @@ namespace BattleCities
             }
             GUILayout.Label("Stage "+requestedStage);requestedStage=Mathf.RoundToInt(GUILayout.HorizontalSlider(requestedStage,1,35));if(GUILayout.Button("Load stage "+requestedStage))LoadStage(requestedStage);
             weather.Cycle=GUILayout.Toggle(weather.Cycle,"Day/night cycle");weather.Rain=GUILayout.Toggle(weather.Rain,"Rain");weather.Clouds=GUILayout.Toggle(weather.Clouds,"Drifting clouds");GUILayout.Label("Time of day");weather.TimeOfDay=GUILayout.HorizontalSlider(weather.TimeOfDay,0,1);GUILayout.Label("Rain intensity");weather.RainIntensity=GUILayout.HorizontalSlider(weather.RainIntensity,0,1);Headlights=GUILayout.Toggle(Headlights,"Tank headlights");Dust=GUILayout.Toggle(Dust,"Tank trail dust");EnemyFire=GUILayout.Toggle(EnemyFire,"Enemy shooting");
-            AutomaticCamera=GUILayout.Toggle(AutomaticCamera,"Automatic camera");CameraShake=GUILayout.Toggle(CameraShake,"Camera shake");GUILayout.Label("Elevation "+CameraElevation.ToString("F0")+"Ãƒâ€šÃ‚Â°");CameraElevation=GUILayout.HorizontalSlider(CameraElevation,40,89.9f);GUILayout.Label("Zoom");Zoom=GUILayout.HorizontalSlider(Zoom,.7f,2);
-            GUILayout.Label("FPS "+fps.ToString("F0")+" ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ Terrain batches "+batches.Count);GUILayout.Label("Manual camera: middle-drag / wheel");DrawDebugPowerups();GUILayout.EndScrollView();GUILayout.EndArea();
+            AutomaticCamera=GUILayout.Toggle(AutomaticCamera,"Automatic camera");CameraShake=GUILayout.Toggle(CameraShake,"Camera shake");GUILayout.Label("Elevation "+CameraElevation.ToString("F0")+"ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°");CameraElevation=GUILayout.HorizontalSlider(CameraElevation,40,89.9f);GUILayout.Label("Zoom");Zoom=GUILayout.HorizontalSlider(Zoom,.7f,2);
+            GUILayout.Label("FPS "+fps.ToString("F0")+" ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Terrain batches "+batches.Count);GUILayout.Label("Manual camera: middle-drag / wheel");DrawDebugPowerups();GUILayout.EndScrollView();GUILayout.EndArea();
         }
         private void DrawDebugPowerups()
         {
@@ -579,6 +592,6 @@ namespace BattleCities
 #if UNITY_EDITOR
             if(authoringPreview)return;
 #endif
-            RestoreTvReplayMasks();FinishRecording();hud.Dispose();pickupSparkles?.Dispose();input?.Dispose();if(particleMaterial&&particleMaterial.mainTexture)Destroy(particleMaterial.mainTexture);foreach(var m in ownedMaterials)if(m)Destroy(m);foreach(var m in ownedMeshes)if(m)Destroy(m);}
+            if(resultsScreen)Destroy(resultsScreen.gameObject);RestoreTvReplayMasks();FinishRecording();hud.Dispose();pickupSparkles?.Dispose();input?.Dispose();if(particleMaterial&&particleMaterial.mainTexture)Destroy(particleMaterial.mainTexture);foreach(var m in ownedMaterials)if(m)Destroy(m);foreach(var m in ownedMeshes)if(m)Destroy(m);}
     }
 }

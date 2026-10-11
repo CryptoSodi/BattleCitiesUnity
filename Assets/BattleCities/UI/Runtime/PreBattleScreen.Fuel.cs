@@ -46,6 +46,7 @@ namespace BattleCities.UI
         void LaunchLoadoutBattle()
         {
             if(launchRequested||busy)return;
+            if(UsesLocalGuestLoadout){PrepareLocalGuestLoadout();LaunchConfirmedBattle();return;}
             if(inventoryUnavailable || (account==null&&WalletNeedsAccount))
             {status.text="ACCOUNT UNAVAILABLE • REOPEN LOADOUT TO RETRY";UpdateView();return;}
             // Offline guests have no server balance. Connected accounts always use the server receipt.
