@@ -2,6 +2,7 @@ using BattleCities.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -51,6 +52,12 @@ namespace BattleCities
         }
         void Build()
         {
+            if(!EventSystem.current)
+            {
+                var events=new GameObject("Battle connection EventSystem",typeof(EventSystem),typeof(InputSystemUIInputModule));
+                events.transform.SetParent(transform,false);
+                events.GetComponent<InputSystemUIInputModule>().AssignDefaultActions();
+            }
             art=Resources.Load<PreBattleArt>("PreBattleArt");
             var theme=Resources.Load<BattleResultsArt>("BattleResultsArt").theme;
             surface=new GameObject("Battle connection",typeof(RectTransform),typeof(Canvas),typeof(CanvasScaler),typeof(GraphicRaycaster));

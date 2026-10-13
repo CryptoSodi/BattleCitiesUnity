@@ -48,10 +48,20 @@ namespace BattleCities
         }
         IEnumerator PrepareSession(BattleSimulation current)
         {
+            // Scene activation and first-frame shader work can block WebGL callbacks.
+            // Let those frames finish before starting the HTTP timeout.
+            yield return null;
+            yield return null;
+            if(simulation!=current)yield break;
             EnsureTransport();
             long status=0;JObject reply=null;
-            yield return Request("/api/magicblock/session",new JObject{{"width",(int)current.Width},{"height",(int)current.Height}},(c,j,e)=>{status=c;reply=j;});
-            if(simulation!=current)yield break;
+            for(int attempt=0;attempt<3;attempt++)
+            {
+                yield return Request("/api/magicblock/session",new JObject{{"width",(int)current.Width},{"height",(int)current.Height}},(c,j,e)=>{status=c;reply=j;});
+                if(simulation!=current)yield break;
+                if(status!=0&&status<500)break;
+                if(attempt<2)yield return new WaitForSecondsRealtime(1);
+            }
             var sessionToken=(string)reply?["token"];
             var expiry=(long?)reply?["expires"]??0;
             if(status==201&&!string.IsNullOrEmpty(sessionToken)&&expiry>DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()+60000)
@@ -61,7 +71,7 @@ namespace BattleCities
             else
             {
                 Status=status==401?"Your session expired. Return to login and sign in again.":"Could not prepare power-up drops. Return to the menu and try again.";
-                Debug.LogWarning(Status);
+                Debug.LogWarning("MagicBlock pre-match setup HTTP "+status+": "+Status);
             }
             worker=null;
         }

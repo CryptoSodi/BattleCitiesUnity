@@ -56,6 +56,10 @@ namespace BattleCities.Tests
                 drops.Enqueue(sim,_=>callbacks++);Check(routines.Count==1,"Previous simulation cannot enqueue");
                 setupStatus=401;Drain(routines.Dequeue());
                 Check(!drops.Ready&&callbacks==1,"Failed setup keeps combat blocked");
+                setupStatus=503;
+                int beforeRetry=sessions;
+                drops.Prepare(sim);Drain(routines.Dequeue());
+                Check(!drops.Ready&&sessions==beforeRetry+3,"Transient setup failures retry only before combat, with a bound");
                 setupStatus=201;
                 drops.Prepare(sim);var stale=routines.Dequeue();
                 var replacement=new BattleSimulation(map);drops.Prepare(replacement);
@@ -66,6 +70,11 @@ namespace BattleCities.Tests
             }
             finally{UnityEngine.Object.DestroyImmediate(host);}
             Debug.Log("MAGICBLOCK_PREMATCH_CHECKS_PASSED: login, loading gate, first drop, failures and stale sessions");
+        }
+        public static void BuildRelease()
+        {
+            Run();
+            BattleCities.Editor.AutomationBuild.Build();
         }
         public static void Run()
         {
