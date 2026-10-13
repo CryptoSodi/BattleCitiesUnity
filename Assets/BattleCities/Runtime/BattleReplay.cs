@@ -223,9 +223,10 @@ namespace BattleCities.Core
             {
                 Require(e!=null&&e.tick>=last&&e.tick<=r.durationTicks,"Invalid event order.");last=e.tick;
                 Require(e.slot>=0&&e.slot<4,"Invalid event slot.");
-                Require(e.kind=="pickup"||e.kind=="powerup"||e.kind=="participant"||e.kind=="begin"||((r.mode=="ctf"||r.mode=="ctf1v1")&&e.kind=="flagdrop"),"Unsupported replay event.");
-                if(e.kind=="pickup"||e.kind=="powerup")Require((e.kind=="pickup"&&e.value==null)||Powerups.Contains(e.value),"Invalid replay power-up.");
-                else Require(r.mode!="single","Single-player replay contains a network event.");
+                Require(e.kind=="magicpickup"||e.kind=="pickup"||e.kind=="powerup"||e.kind=="participant"||e.kind=="begin"||((r.mode=="ctf"||r.mode=="ctf1v1")&&e.kind=="flagdrop"),"Unsupported replay event.");
+                if(e.kind=="magicpickup")Require(MagicDropEvent.Valid(e.value,r.map.field.widthTiles*64,r.map.field.heightTiles*64),"Invalid MagicBlock drop.");
+                else if(e.kind=="pickup"||e.kind=="powerup")Require((e.kind=="pickup"&&e.value==null)||Powerups.Contains(e.value),"Invalid replay power-up.");
+                else if(e.kind!="magicpickup")Require(r.mode!="single","Single-player replay contains a network event.");
             }
             Require(r.checkpoints!=null&&r.checkpoints.Count>=2&&r.checkpoints.Count<=1802,"Missing replay checkpoints.");
             int index=0;
@@ -466,6 +467,7 @@ namespace BattleCities.Core
         {
             switch(e.kind)
             {
+                case "magicpickup":MagicDropEvent.Apply(sim,e.value);break;
                 case "pickup":sim.SpawnPickup(e.value);break;
                 case "powerup":sim.ApplyPowerup(e.value);break;
                 case "participant":sim.SetParticipant(e.slot,e.connected);break;

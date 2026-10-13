@@ -37,7 +37,22 @@ namespace BattleCities.UI
         {
             return Uri.TryCreate(absoluteUrl, UriKind.Absolute, out var uri)
                 && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp)
-                && string.Equals(uri.Host, "test.battlecities.com", StringComparison.OrdinalIgnoreCase);
+                && (string.Equals(uri.Host, "test.battlecities.com", StringComparison.OrdinalIgnoreCase) || IsMagicWebUrl(absoluteUrl));
+        }
+
+        public static bool IsMagicWebUrl(string url) => Uri.TryCreate(url, UriKind.Absolute, out var uri)
+            && uri.Scheme == Uri.UriSchemeHttps && uri.IsDefaultPort && string.IsNullOrEmpty(uri.UserInfo)
+            && string.Equals(uri.Host, "magic.battlecities.com", StringComparison.OrdinalIgnoreCase);
+        public static bool IsMagicBlock
+        {
+            get
+            {
+#if UNITY_WEBGL && !UNITY_EDITOR
+                return IsMagicWebUrl(Application.absoluteURL);
+#else
+                return false;
+#endif
+            }
         }
 
         [Serializable]
@@ -212,7 +227,31 @@ namespace BattleCities.UI
             CancelWalletLogin(false);
             BeginGuestLogin();
             PlayerPrefs.SetString("battlecities.loginMode", "guest");
+            if (IsMagicBlock) StartCoroutine(AuthenticateMagicGuest());
+            else UseLocalGuest();
+        }
+
+        private IEnumerator AuthenticateMagicGuest()
+        {
+            NotifyStatus("CONNECTING", "Preparing your game session...");
+            bool ready = false;
+            yield return PrepareMagicAuthentication(value => ready = value);
+            if (!ready)
+            {
+                NotifyStatus("LOGIN UNAVAILABLE", "Could not prepare your game session. Please try again.");
+                yield break;
+            }
             UseLocalGuest();
+        }
+
+        // The endpoint preserves an existing authenticated session, including a wallet cookie.
+        // Only the Magic login flow calls this; ordinary guests remain entirely local.
+        public IEnumerator PrepareMagicAuthentication(Action<bool> completed)
+        {
+            long status = 0; JObject reply = null;
+            yield return Request("POST", "/api/session", new JObject { { "provider", "guest" } },
+                (code, body, error) => { status = code; reply = body; });
+            completed((status == 200 || status == 201) && (bool?)reply?["authenticated"] == true);
         }
 
         private static void BeginGuestLogin()

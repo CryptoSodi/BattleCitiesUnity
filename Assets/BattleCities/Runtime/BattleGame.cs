@@ -258,7 +258,7 @@ namespace BattleCities
         }
         private void Update()
         {
-            if(Simulation==null)return;if(UpdateResults())return;float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);fps=Mathf.Lerp(fps,1/Mathf.Max(.0001f,Time.unscaledDeltaTime),.05f);
+            if(Simulation==null)return;PrepareMagicBeforeStart();if(UpdateResults())return;float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);fps=Mathf.Lerp(fps,1/Mathf.Max(.0001f,Time.unscaledDeltaTime),.05f);
             if(!tvReplay){UpdateGamepadControls();
             if(debug.WasPressedThisFrame()&&!IsReplaying)showDebug=!showDebug;if(restart.WasPressedThisFrame()&&!IsOnline)RequestBattleRestart();if(overhead.WasPressedThisFrame())CameraElevation=CameraElevation>85?70:90;
             if(Multiplayer.BattleSession.Instance&&Multiplayer.BattleSession.Instance.Lobby.Visible)paused=true;
@@ -574,6 +574,13 @@ namespace BattleCities
         private async void RollDrop(BattleSimulation current)
         {
             if(IsReplaying)return;
+            if(BattleCities.UI.MainMenuApiClient.IsMagicBlock)
+            {
+                if(IsOnline&&!NetworkMatch.Object.HasStateAuthority)return;
+                var magic=GetComponent<MagicBlockDrops>();if(!magic)magic=gameObject.AddComponent<MagicBlockDrops>();
+                magic.Enqueue(current,e=>{if(this&&Simulation==current&&!IsReplaying)QueueReplayEvent(e);});
+                return;
+            }
             if(IsOnline){if(NetworkMatch.Object.HasStateAuthority)QueueReplayEvent(new ReplayEvent{kind="pickup"});return;}
             var drop=economy?await economy.Roll(Stage):null;
             if(this&&Simulation==current&&!IsReplaying)

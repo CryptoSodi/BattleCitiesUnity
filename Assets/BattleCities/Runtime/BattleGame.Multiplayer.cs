@@ -23,6 +23,10 @@ namespace BattleCities
                 EnemyFire=true;Simulation.DisableEnemyFire=false;
                 if(mode==BattleMode.Versus&&eagle)eagle.SetActive(false);
                 shotSequence=secondarySequence=0;latestPowerShot=false;onlineSecondary=SecondaryAttack.Mine;
+                if(!match.Object.HasStateAuthority&&magicDrops)
+                {
+                    magicDrops.StopForRecovery(Simulation);magicDrops=null;
+                }
                 ResetPrimaryFire();ResetMovementPrediction();paused=false;StartOnlineRecording();
             }
             finally{loadingOnline=false;}

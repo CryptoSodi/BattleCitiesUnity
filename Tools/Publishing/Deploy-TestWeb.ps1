@@ -36,7 +36,7 @@ try {
         $receiptRoot = Join-Path $script:GameRoot ("Builds/Automation/" + $buildJob)
         $request = Get-Content -LiteralPath (Join-Path $receiptRoot "build-request.json") -Raw | ConvertFrom-Json
         $report = Get-Content -LiteralPath (Join-Path $receiptRoot "build-report.json") -Raw | ConvertFrom-Json
-        if (-not $request.testNetwork -or $request.networkSelection -ne "exact-test-host" -or $request.target -ne "WebGL" -or $request.version -ne $Version -or
+        if (-not $request.testNetwork -or $request.networkSelection -ne "exact-test-and-magic-hosts" -or $request.target -ne "WebGL" -or $request.version -ne $Version -or
             [IO.Path]::GetFullPath($request.outputPath) -ne $web -or $report.result -ne "Succeeded" -or $report.totalErrors -ne 0) {
             throw "Only a verified build with hostname-based network selection can be reused."
         }

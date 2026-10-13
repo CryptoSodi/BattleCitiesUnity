@@ -16,9 +16,15 @@ namespace BattleCities
         private float replaySpeed=1;
         private string battleFuelRequestId;
         public bool IsReplaying=>replayPlayer!=null||loadingReplay;
-        public bool ReplayReady=>!replayPreparing;
+        private MagicBlockDrops magicDrops;
+        public bool ReplayReady=>!replayPreparing&&(!magicDrops||magicDrops.Ready||IsReplaying);
+        public void PrepareMagicBeforeStart()
+        {
+            if(magicDrops&&!IsReplaying&&Simulation!=null&&!Simulation.MatchStarted&&Simulation.Tick==0)
+                magicDrops.RefreshBeforeStart();
+        }
         private string replayStatus="";
-        public string ReplayStatus {get=>(replayPreparing||replaySaved&&replayArchive!=null&&!string.IsNullOrEmpty(replayArchive.sessionId))?(replayArchive?.uploadStatus??replayStatus):replayStatus;private set=>replayStatus=value;}
+        public string ReplayStatus {get=>magicDrops&&!magicDrops.Ready&&!IsReplaying?magicDrops.Status:(replayPreparing||replaySaved&&replayArchive!=null&&!string.IsNullOrEmpty(replayArchive.sessionId))?(replayArchive?.uploadStatus??replayStatus):replayStatus;private set=>replayStatus=value;}
         public ReplayPlayer ReplayPlayback=>replayPlayer;
         public float ReplaySpeed {get=>replaySpeed;set=>replaySpeed=Mathf.Clamp(value,.25f,4);}
         private void BeginRecording(MapData map)
@@ -29,9 +35,18 @@ namespace BattleCities
         }
         private void StartReplayRecorder()
         {
+            if(BattleCities.UI.MainMenuApiClient.IsMagicBlock)
+            {
+                if(!magicDrops)magicDrops=GetComponent<MagicBlockDrops>();
+                if(!magicDrops)magicDrops=gameObject.AddComponent<MagicBlockDrops>();
+                magicDrops.Prepare(Simulation);
+                var loadingNotice=GetComponent<BattleConnectionNotice>();
+                if(!loadingNotice)loadingNotice=gameObject.AddComponent<BattleConnectionNotice>();
+                loadingNotice.Initialize(this);
+            }
             replaySaved=false;
             battleFuelRequestId=BattlePreparation.Ready?BattlePreparation.FuelRequestId:null;
-            replayRecorder=new ReplayRecorder(Simulation,replayMap,Application.version,backgroundCheckpoints:true);
+            replayRecorder=new ReplayRecorder(Simulation,replayMap,Application.version+(BattleCities.UI.MainMenuApiClient.IsMagicBlock?"+magic":""),backgroundCheckpoints:true);
             // Guests keep battle recordings locally. Do not probe the browser's API cookie here:
             // it may still belong to a previously connected wallet in this browser profile.
             bool walletRecording=BattlePreparation.Ready&&BattlePreparation.OwnerProvider=="wallet";
@@ -48,7 +63,15 @@ namespace BattleCities
                     ()=>{if(this&&replayRecorder==recorder){replayPreparing=false;ReplayStatus=replayArchive.uploadStatus;}}));
             }
         }
-        public void StopRecordingForRecovery(){FinishRecording();ReplayStatus="Recovered match: recording unavailable for this round.";}
+        public void StopRecordingForRecovery()
+        {
+            FinishRecording();ReplayStatus="Recovered match: recording unavailable for this round.";
+            if(BattleCities.UI.MainMenuApiClient.IsMagicBlock)
+            {
+                var drops=GetComponent<MagicBlockDrops>();if(!drops)drops=gameObject.AddComponent<MagicBlockDrops>();
+                drops.StopForRecovery(Simulation);
+            }
+        }
         public void StartOnlineRecording()
         { if(NetworkMatch&&NetworkMatch.Object.HasStateAuthority)StartReplayRecorder(); }
         private void QueueReplayEvent(ReplayEvent e)

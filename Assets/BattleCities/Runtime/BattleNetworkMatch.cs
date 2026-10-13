@@ -97,7 +97,9 @@ namespace BattleCities.Multiplayer
 
         public override void FixedUpdateNetwork()
         {
-            if(!Object.HasStateAuthority||!BindGame()||!Game.ReplayReady||!HasChunks)return;
+            if(!Object.HasStateAuthority||!BindGame()||!HasChunks)return;
+            Game.PrepareMagicBeforeStart();
+            if(!Game.ReplayReady)return;
             if(restorePending){restorePending=false;RestoreMigration();}
             if(advanceStageRequested&&Mode==BattleMode.Coop&&Simulation.Won&&Map<35)
             {
@@ -110,6 +112,7 @@ namespace BattleCities.Multiplayer
             {
                 rematchRequested=false;quickStartAt=-1;Round++;EventSequence=0;BindGame();Runner.SessionInfo.IsOpen=true;
             }
+            if(!Game.ReplayReady)return;
             UpdateMembership();
             if(Time.realtimeSinceStartup<recoveryReadyAt)return;
             commands.Clear();
