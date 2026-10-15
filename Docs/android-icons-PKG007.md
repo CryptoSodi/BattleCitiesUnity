@@ -39,6 +39,6 @@ Final artifact: `Builds/Android/1.0.1-v2/20261015-084341/battlecities.apk`.
 - APK SHA-256: `1091318c730706b8a51ba908179c8139afdf3078d16c4ec05943e784de70154e`.
 - Detailed local reports: `release-verification.json`, `signature-verification.txt`, `apk-metadata.txt`, and `icon-verification/icon-verification.json` beside the APK.
 
-The APK was installed successfully on the attached Samsung SM-S918B. Visual launcher/Settings checks are recorded separately after the device is unlocked. This device is not a Solana Seeker; no Seeker-specific installed-device verification is claimed.
+The APK was installed successfully on the attached Samsung SM-S918B (Galaxy S23 Ultra). After the owner unlocked the phone, the approved yellow-C crest and Battle Cities label were visually verified on the home screen, in the app drawer, and in Android App info. Screenshots and hashes are retained locally beside the APK in device-verification/. The phone was left on its home screen. This device is not a Solana Seeker; no Seeker-specific installed-device verification is claimed.
 
 Reference: [Unity Android Player icon settings](https://docs.unity3d.com/6000.0/Documentation/Manual/class-PlayerSettingsAndroid.html). The installed 6000.6 APIs and actual APK resources were used to resolve differences from older Unity documentation.
