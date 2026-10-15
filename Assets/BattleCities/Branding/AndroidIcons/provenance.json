@@ -1,0 +1,214 @@
+{
+  "source": "C:/repos/BattleCity/art_exports/branding/bc-winged-crest-yellow-c-2026-10-15/bc-winged-crest-yellow-c.png",
+  "sourceSha256": "432c7367c59f9469ffa426d988d543f9a36f06e4d3c9e5a0130165f118b97aac",
+  "derivation": "Resize, centre, composite and round-mask only; no logo generation/redesign",
+  "background": "#062B53",
+  "adaptiveLayerDp": 108,
+  "safeCircleDp": 66,
+  "foregroundPixelsOutsideSafeCircle": 0,
+  "files": [
+    {
+      "name": "adaptive-background-1024.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": false,
+      "sha256": "ddd78ac73a08da7ef79387bdbdeed3ec367ea9e033a1f9069d936bce49db254a"
+    },
+    {
+      "name": "adaptive-background-108.png",
+      "width": 108,
+      "height": 108,
+      "alpha": false,
+      "sha256": "efb9f10dd22981ba2c0e34c6993b7054a5fda6f9fa6678c1fd92ea643f1ca10d"
+    },
+    {
+      "name": "adaptive-background-162.png",
+      "width": 162,
+      "height": 162,
+      "alpha": false,
+      "sha256": "8922e82e94a59573bde07966195b2b7a44bf2ee979a25266138ae8ae4e51a446"
+    },
+    {
+      "name": "adaptive-background-216.png",
+      "width": 216,
+      "height": 216,
+      "alpha": false,
+      "sha256": "28bcd7d29ff1eb0f8aaa0c700cff2adba58f9484bacfb1f18a9509ab1c2db890"
+    },
+    {
+      "name": "adaptive-background-324.png",
+      "width": 324,
+      "height": 324,
+      "alpha": false,
+      "sha256": "8d6877abf81820694ac6d6de02b7a4d337d7710345ec39dc343ee42496c0d9c0"
+    },
+    {
+      "name": "adaptive-background-432.png",
+      "width": 432,
+      "height": 432,
+      "alpha": false,
+      "sha256": "db8dcb415cf558d71c6855a5772bc34397f08fb09bc7c3ad339c534de3082e9f"
+    },
+    {
+      "name": "adaptive-background-81.png",
+      "width": 81,
+      "height": 81,
+      "alpha": false,
+      "sha256": "6871fe0ae1c8b2e1861abbd5bd924c549b414516abc2ffd79ebf27e82affecf1"
+    },
+    {
+      "name": "adaptive-foreground-1024.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "sha256": "e87fe765f46a1a32e3332a6b080399a5a618304880daa9ec64879e4296a560e5"
+    },
+    {
+      "name": "adaptive-foreground-108.png",
+      "width": 108,
+      "height": 108,
+      "alpha": true,
+      "sha256": "04e6a9a2136a2105b8a65df60eb8a15c20280f8349442cf7f2315ae9efbb08c4"
+    },
+    {
+      "name": "adaptive-foreground-162.png",
+      "width": 162,
+      "height": 162,
+      "alpha": true,
+      "sha256": "56ad4ae005b540a2893c1ca4406d2e39bed774a8d37a574f90dd31b1e9b43a9c"
+    },
+    {
+      "name": "adaptive-foreground-216.png",
+      "width": 216,
+      "height": 216,
+      "alpha": true,
+      "sha256": "de8fd4d20239a01b10d4d61b8b8f8c9bc36cc88c7113cfbfad8217137ba7386c"
+    },
+    {
+      "name": "adaptive-foreground-324.png",
+      "width": 324,
+      "height": 324,
+      "alpha": true,
+      "sha256": "b4c75dd50cda415d7d223f82670f175d65b40d0e7978648898ffcce54b4c7d60"
+    },
+    {
+      "name": "adaptive-foreground-432.png",
+      "width": 432,
+      "height": 432,
+      "alpha": true,
+      "sha256": "c1754c7191df3573693120fbbc59cfea9482984da9b275bbb337e3015c0b67f0"
+    },
+    {
+      "name": "adaptive-foreground-81.png",
+      "width": 81,
+      "height": 81,
+      "alpha": true,
+      "sha256": "75c87088d1fe6fa8c713ec0a9265689abd27206b66a24bbfeb37d459bd86a4d0"
+    },
+    {
+      "name": "default-1024.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": false,
+      "sha256": "5265a0ae10aebd009c05fd842f05f0d6372a571c0ec27187c260aafcf32dd7e7"
+    },
+    {
+      "name": "legacy-144.png",
+      "width": 144,
+      "height": 144,
+      "alpha": false,
+      "sha256": "f6cdeec62e8be8ff3696cc2fd931d9871a703869859feb31436afb7c01f40f78"
+    },
+    {
+      "name": "legacy-192.png",
+      "width": 192,
+      "height": 192,
+      "alpha": false,
+      "sha256": "c1efad91981dbb0ea96e386d71b90ac59c1f1f509e9149f4e69d384c74b0dcad"
+    },
+    {
+      "name": "legacy-36.png",
+      "width": 36,
+      "height": 36,
+      "alpha": false,
+      "sha256": "45f249b45ded46e06c97a22179f6bca60f7ccc41b01f95074f54c8a441990ea0"
+    },
+    {
+      "name": "legacy-48.png",
+      "width": 48,
+      "height": 48,
+      "alpha": false,
+      "sha256": "53789acae3ac85f9164770c70e92c43869e81c43e98f01ddfa3d181d807d5eec"
+    },
+    {
+      "name": "legacy-72.png",
+      "width": 72,
+      "height": 72,
+      "alpha": false,
+      "sha256": "b131a21f247384cf12d4c0eef266b13cbb613537310332428c4ea7b6084c371b"
+    },
+    {
+      "name": "legacy-96.png",
+      "width": 96,
+      "height": 96,
+      "alpha": false,
+      "sha256": "c5c0b0f2f73cdf7028dfdb719aa4c595294193b305671704d7a48e3b7d328b55"
+    },
+    {
+      "name": "official-bc-crest.png",
+      "width": 1254,
+      "height": 1254,
+      "alpha": true,
+      "sha256": "432c7367c59f9469ffa426d988d543f9a36f06e4d3c9e5a0130165f118b97aac"
+    },
+    {
+      "name": "round-1024.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "sha256": "2cbff35782038324f5dbef67986f9a9093fe6d6c793975e38fe6856ae51ba1c5"
+    },
+    {
+      "name": "round-144.png",
+      "width": 144,
+      "height": 144,
+      "alpha": true,
+      "sha256": "89f5f7df741e37df7fe96f2b41a8d4f1bcc69b78b1f9165fcada24dfe677494f"
+    },
+    {
+      "name": "round-192.png",
+      "width": 192,
+      "height": 192,
+      "alpha": true,
+      "sha256": "52f8ed0de4606dfd8b135362fbf9c4185c6744c23e5551155a9776958a174bbd"
+    },
+    {
+      "name": "round-36.png",
+      "width": 36,
+      "height": 36,
+      "alpha": true,
+      "sha256": "beac543c6324b14405311c4a21e9d6799155994823aeca0ebb9cbf4503740b6c"
+    },
+    {
+      "name": "round-48.png",
+      "width": 48,
+      "height": 48,
+      "alpha": true,
+      "sha256": "9fed5713a2249f59bfebdb51033c7d18d5a8ae9ab2894f0773c36065feccfba2"
+    },
+    {
+      "name": "round-72.png",
+      "width": 72,
+      "height": 72,
+      "alpha": true,
+      "sha256": "c16ed01c57bc96647bc3bbadb308da1c97b4296dcc555a832be8377f35134daf"
+    },
+    {
+      "name": "round-96.png",
+      "width": 96,
+      "height": 96,
+      "alpha": true,
+      "sha256": "3e2fee3d88bf362b40b6d8e459358704b9e1863511276ff0f9f8d349d2e2525a"
+    }
+  ]
+}
