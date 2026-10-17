@@ -50,7 +50,7 @@ namespace BattleCities.LevelEditor
             var scaler = canvas.GetComponent<UnityEngine.UI.CanvasScaler>(); scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize; scaler.referenceResolution = new Vector2(1600,900); scaler.matchWidthOrHeight = .5f;
             scaler.screenMatchMode = UnityEngine.UI.CanvasScaler.ScreenMatchMode.Expand;
             var events = new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule)); events.GetComponent<InputSystemUIInputModule>().AssignDefaultActions();
-            art = Resources.Load<PreBattleArt>("PreBattleArt"); if (!art) throw new InvalidOperationException("Missing PreBattleArt");
+            art = RemoteGameArt.Load<PreBattleArt>("PreBattleArt"); if (!art) throw new InvalidOperationException("Missing PreBattleArt");
             styles = new ArcadeTextStyles();
             var workspace = Rect("Workspace", canvas.transform); workspace.anchorMin=workspace.anchorMax=new Vector2(.5f,.5f); workspace.pivot=new Vector2(.5f,.5f); workspace.sizeDelta=new Vector2(1552,852);
             // The scene owns every RectTransform. No runtime layout rebuild overwrites author adjustments.

@@ -30,7 +30,8 @@ namespace BattleCities.UI
                 IsSigningOut=false;if(automaticRefresh)refreshRoutine=StartCoroutine(RefreshLoop());
                 completed?.Invoke(false,"Could not log out. Check your connection and retry.");yield break;
             }
-            sessionCookie=null;sessionCookieOrigin=null;CurrentGuestId=null;currentGuestName=null;
+            yield return ForgetSavedSession();
+            CurrentGuestId=null;currentGuestName=null;
             IsAuthenticated=false;IsWalletAuthenticated=false;IsLocalGuest=false;LastPlayer=null;LastRankings=null;LastRound=null;
             foreach(var key in new[]{"battlecities.guestId","battlecities.guestName","battlecities.playerName"})PlayerPrefs.DeleteKey(key);
             PlayerPrefs.SetString("battlecities.loginMode","signedout");PlayerPrefs.Save();

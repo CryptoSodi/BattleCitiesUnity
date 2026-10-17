@@ -15,7 +15,7 @@ namespace BattleCities.LevelEditor
         public string ActiveTree => !BrushProperties && Selected && Selected.Kind == LevelElementKind.Prop && LevelEditorCatalog.IsTree(Selected.Tile)
             ? Selected.Tile : TreeBrush;
 
-        static EnvironmentPiece TreePrefab(string key) => Resources.Load<EnvironmentPalette>("EnvironmentPalette")?.Prefabs.FirstOrDefault(p => p && p.Key == key);
+        static EnvironmentPiece TreePrefab(string key) => RemoteGameArt.Load<EnvironmentPalette>("EnvironmentPalette")?.Prefabs.FirstOrDefault(p => p && p.Key == key);
 
         public void SetTreeType(string type)
         {

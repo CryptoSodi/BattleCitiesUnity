@@ -263,7 +263,7 @@ namespace BattleCities.LevelEditor
             EnvironmentPiece prefab = null;
             if (BrushKind == LevelElementKind.Prop)
             {
-                var palette = Resources.Load<EnvironmentPalette>("EnvironmentPalette");
+                var palette = RemoteGameArt.Load<EnvironmentPalette>("EnvironmentPalette");
                 prefab = palette ? palette.Prefabs.FirstOrDefault(p => p && p.Key == Brush) : null;
                 if (!removing && !prefab) { Status("Missing prop: " + Brush); return; }
                 if (prefab) { w = prefab.FootprintWidth; h = prefab.FootprintHeight; }
@@ -373,7 +373,7 @@ namespace BattleCities.LevelEditor
             if (!elements.Any(e => e.Kind == LevelElementKind.EnemySpawn)) errors.Add("Place at least one enemy spawn.");
             if (elements.Count(e => e.Kind == LevelElementKind.Base) != 1) errors.Add("Place exactly one base.");
             if (Enemies == null || Enemies.Length == 0 || Enemies.Any(e => e == null || !new[] { "a", "b", "c", "d" }.Contains(e.tier))) errors.Add("Enemy roster needs valid a/b/c/d entries.");
-            var palette = Resources.Load<EnvironmentPalette>("EnvironmentPalette"); var props = palette ? palette.Lookup() : new Dictionary<string, EnvironmentPiece>();
+            var palette = RemoteGameArt.Load<EnvironmentPalette>("EnvironmentPalette"); var props = palette ? palette.Lookup() : new Dictionary<string, EnvironmentPiece>();
             foreach (var e in elements)
             {
                 var b = e.Bounds;
@@ -418,7 +418,7 @@ namespace BattleCities.LevelEditor
             GameObject model = e.Kind == LevelElementKind.PlayerSpawn || e.Kind == LevelElementKind.EnemySpawn ? TankModel : e.Kind == LevelElementKind.Base ? EagleModel : null;
             if (e.Kind == LevelElementKind.Prop)
             {
-                var palette = Resources.Load<EnvironmentPalette>("EnvironmentPalette"); var prefab = palette ? palette.Prefabs.FirstOrDefault(p => p && p.Key == e.Tile) : null;
+                var palette = RemoteGameArt.Load<EnvironmentPalette>("EnvironmentPalette"); var prefab = palette ? palette.Prefabs.FirstOrDefault(p => p && p.Key == e.Tile) : null;
                 if (prefab)
                 {
                     var obj = Instantiate(prefab.gameObject, root.transform); obj.transform.localPosition = Vector3.zero; obj.transform.localRotation = Quaternion.Euler(0, e.Rotation, 0);
@@ -460,7 +460,7 @@ namespace BattleCities.LevelEditor
             }
             foreach (var collider in root.GetComponentsInChildren<Collider>()) DestroyImmediate(collider);
             foreach (var renderer in root.GetComponentsInChildren<Renderer>(true))
-                renderer.sharedMaterials = renderer.sharedMaterials.Select(m => m ? Resources.Load<Material>("RuntimeShaders/Terrain/" + m.name) ?? m : material).ToArray();
+                renderer.sharedMaterials = renderer.sharedMaterials.Select(m => m ? RemoteGameArt.Load<Material>("RuntimeShaders/Terrain/" + m.name) ?? m : material).ToArray();
 #endif
         }
     }

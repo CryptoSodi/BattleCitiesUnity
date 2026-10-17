@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.util.Base64;
+import android.util.Log;
 import com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient;
 import com.solana.mobilewalletadapter.clientlib.scenario.LocalAssociationIntentCreator;
 import com.solana.mobilewalletadapter.clientlib.scenario.LocalAssociationScenario;
@@ -54,6 +55,12 @@ public final class MobileWalletLogin {
         private volatile HttpURLConnection connection;
         private volatile Thread worker;
         private String sessionCookie;
+        private long sessionExpiresAt;
+        private String stage = "starting";
+        private void stage(String value) {
+            stage = value;
+            Log.i("BattleCitiesWallet", "login stage=" + value);
+        }
 
         private Operation(Activity activity, String apiBaseUrl, boolean psg1,
                           String attemptId, Callback callback) {
@@ -91,6 +98,7 @@ public final class MobileWalletLogin {
                 if (!"https".equals(api.getProtocol()) || api.getUserInfo() != null)
                     throw new LoginException("Wallet sign-in requires an HTTPS API URL.");
                 remaining();
+                stage("association");
                 scenario = new LocalAssociationScenario(120000);
                 Intent intent = LocalAssociationIntentCreator.createAssociationIntent(
                     null, scenario.getPort(), scenario.getSession());
@@ -103,25 +111,28 @@ public final class MobileWalletLogin {
                 // Establish the encrypted association before authorizing the selected account.
                 var connected = scenario.start();
                 FutureTask<Void> launch = new FutureTask<>(() -> {
-                    if (!completed.get()) activity.startActivity(intent);
+                    if (!completed.get()) activity.startActivityForResult(intent, WalletIdentity.ASSOCIATION_REQUEST);
                     return null;
                 });
                 activity.runOnUiThread(launch);
                 launch.get(Math.min(remaining(), 10000), TimeUnit.MILLISECONDS);
                 MobileWalletAdapterClient client = connected.get(Math.min(remaining(), 35000), TimeUnit.MILLISECONDS);
-                var authorization = client.authorize(Uri.parse("https://battlecities.com"), null,
-                    "Battle Cities", "solana:mainnet", null, null, null, null)
+                stage("authorize");
+                var authorization = client.authorize(WalletIdentity.URI, WalletIdentity.ICON,
+                    WalletIdentity.NAME, "solana:mainnet", null, null, null, null)
                     .get(Math.min(remaining(), 120000), TimeUnit.MILLISECONDS);
                 if (authorization.accounts.length == 0 || authorization.accounts[0].publicKey.length != 32)
                     throw new LoginException("The wallet did not return a Solana account.");
                 byte[] publicKey = authorization.accounts[0].publicKey;
                 String address = encodeBase58(publicKey);
+                stage("challenge");
                 JSONObject challenge = request("PUT", "/api/session", new JSONObject().put("walletAddress", address));
                 String nonce = challenge.optString("nonce", "");
                 String message = challenge.optString("message", "");
                 if (!nonce.matches("[a-fA-F0-9]{32}") || message.isEmpty() || message.length() > 4096)
                     throw new LoginException("The server returned an invalid sign-in challenge.");
                 byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
+                stage("sign_message");
                 var signed = client.signMessagesDetached(new byte[][] { messageBytes }, new byte[][] { publicKey })
                     .get(Math.min(remaining(), 120000), TimeUnit.MILLISECONDS);
                 if (signed.messages.length != 1 || signed.messages[0].signatures.length != 1 ||
@@ -132,6 +143,7 @@ public final class MobileWalletLogin {
                     throw new LoginException("The wallet returned an invalid signature.");
                 closeWallet();
                 remaining();
+                stage("establish_session");
                 JSONObject session = request("POST", "/api/session", new JSONObject()
                     .put("provider", "wallet").put("walletAddress", address)
                     .put("nonce", nonce).put("message", message)
@@ -139,6 +151,7 @@ public final class MobileWalletLogin {
                 if (!session.optBoolean("authenticated") || !"wallet".equals(session.optString("provider")) ||
                     sessionCookie == null || sessionCookie.equals("battlecity_session="))
                     throw new LoginException("The API did not establish a wallet session.");
+                stage("load_player");
                 JSONObject playerBody = request("GET", "/api/player", null);
                 JSONObject player = playerBody.optJSONObject("player");
                 if (!playerBody.optBoolean("authenticated") || player == null ||
@@ -146,16 +159,22 @@ public final class MobileWalletLogin {
                     !address.equals(player.optString("walletAddress")))
                     throw new LoginException("The verified wallet session could not load its player.");
                 remaining();
+                stage("complete");
                 finish(true, null, player);
             } catch (Exception error) {
                 Throwable cause = error;
                 while (cause.getCause() != null) cause = cause.getCause();
+                // Never log exception messages or bodies: wallet responses may contain credentials.
+                Log.e("BattleCitiesWallet", "login failed stage=" + stage + " type=" + cause.getClass().getName());
+                StackTraceElement[] frames = cause.getStackTrace();
+                for (int i = 0; i < Math.min(4, frames.length); i++)
+                    Log.e("BattleCitiesWallet", "at " + frames[i].getClassName() + "." + frames[i].getMethodName() + ":" + frames[i].getLineNumber());
                 String message = cause instanceof LoginException ? cause.getMessage()
                     : cause instanceof TimeoutException ? "Wallet sign-in timed out. Return to the game and try again."
                     : cause instanceof ActivityNotFoundException ? "No compatible wallet could be opened. Install or update your wallet."
                     : cause instanceof CancellationException || cause instanceof InterruptedException ? "Wallet sign-in cancelled."
                     : cause instanceof IOException ? "Could not reach the wallet or Battle Cities API. Check your connection and try again."
-                    : "Wallet approval was cancelled or rejected. Please try again.";
+                    : "Wallet sign-in could not complete. Please try again.";
                 finish(false, message, null);
             } finally {
                 closeWallet();
@@ -185,12 +204,16 @@ public final class MobileWalletLogin {
                     try (var output = request.getOutputStream()) { output.write(bytes); }
                 }
                 int code = request.getResponseCode();
+                Log.i("BattleCitiesWallet", "login HTTP " + method + " " + path + " status=" + code);
                 for (Map.Entry<String, List<String>> header : request.getHeaderFields().entrySet()) {
                     if (!"Set-Cookie".equalsIgnoreCase(header.getKey())) continue;
                     for (String value : header.getValue()) {
                         for (HttpCookie cookie : HttpCookie.parse(value)) {
-                            if ("battlecity_session".equals(cookie.getName()))
+                            if ("battlecity_session".equals(cookie.getName())) {
                                 sessionCookie = cookie.getName() + "=" + cookie.getValue();
+                                long age = cookie.getMaxAge();
+                                sessionExpiresAt = System.currentTimeMillis() / 1000 + Math.min(age < 0 ? 2592000 : age, 2592000);
+                            }
                         }
                     }
                 }
@@ -223,7 +246,7 @@ public final class MobileWalletLogin {
             if (!completed.compareAndSet(false, true)) return;
             try {
                 JSONObject response = new JSONObject().put("ok", ok).put("attemptId", attemptId);
-                if (ok) response.put("player", player).put("sessionCookie", sessionCookie);
+                if (ok) response.put("player", player).put("sessionCookie", sessionCookie).put("sessionExpiresAt", sessionExpiresAt);
                 else response.put("error", error);
                 callback.onComplete(response.toString());
             } catch (Exception ignored) {

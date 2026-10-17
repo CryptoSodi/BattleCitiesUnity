@@ -27,7 +27,7 @@ namespace BattleCities.UI
             float edge=Mathf.Min(.1f,inset/Mathf.Max(1f,leaderboard.rect.height));
             var heading=leaderboard.Find("Heading") as RectTransform;
             var footer=leaderboard.Find("Footer") as RectTransform;
-            var art=Resources.Load<PreBattleArt>("PreBattleArt");
+            var art=RemoteGameArt.Load<PreBattleArt>("PreBattleArt");
             FitLeaderboardContainer(heading,side,edge,true,art?art.tankTitlePanel:null,4f);
             FitLeaderboardContainer(footer,side,edge,false,art?art.statusPanel:null,3f);
             var trophy=heading?heading.Find("Trophy")?.GetComponent<Image>():null;

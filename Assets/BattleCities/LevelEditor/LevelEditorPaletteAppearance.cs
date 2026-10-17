@@ -131,7 +131,7 @@ namespace BattleCities.LevelEditor
             try
             {
                 GameObject model = key=="brick"?doc.BrickModel:key=="steel"?doc.SteelModel:key=="jungle"?doc.BushModel:key=="base"?doc.EagleModel:key=="player"||key=="enemy"?doc.TankModel:null;
-                if (LevelEditorCatalog.IsTree(key) || LevelEditorCatalog.IsBuilding(key)) model = Resources.Load<EnvironmentPalette>("EnvironmentPalette")?.Prefabs.FirstOrDefault(p => p && p.Key == key)?.gameObject;
+                if (LevelEditorCatalog.IsTree(key) || LevelEditorCatalog.IsBuilding(key)) model = RemoteGameArt.Load<EnvironmentPalette>("EnvironmentPalette")?.Prefabs.FirstOrDefault(p => p && p.Key == key)?.gameObject;
                 GameObject root;
                 if(model)
                 {
@@ -140,7 +140,7 @@ namespace BattleCities.LevelEditor
                     {
                         renderer.sharedMaterials=renderer.sharedMaterials.Select(source=>
                         {
-                            var runtime=Resources.Load<Material>("RuntimeShaders/Terrain/"+source.name);
+                            var runtime=RemoteGameArt.Load<Material>("RuntimeShaders/Terrain/"+source.name);
                             var mat=runtime?new Material(runtime):source.shader.name.Contains("glTF")?ConvertMaterial(source):new Material(source);
                             owned.Add(mat);
                             if((key=="player"||key=="enemy")&&(source.name=="PrimaryPaint"||source.name=="SecondaryArmor"))

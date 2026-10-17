@@ -50,7 +50,7 @@ namespace BattleCities.UI
         {
             configured=false;
             if(api)api.PlayerLoaded-=OnPlayer;
-            menu=owner;theme=skin;api=client;art=Resources.Load<PreBattleArt>("PreBattleArt");
+            menu=owner;theme=skin;api=client;art=RemoteGameArt.Load<PreBattleArt>("PreBattleArt");
             if(api)api.PlayerLoaded+=OnPlayer;
             var existing=frame.Find("Ranking screen");bool wasOpen=existing&&existing.gameObject.activeSelf;
             root=Panel("Ranking screen",frame,null);root.GetComponent<UnityEngine.UI.Image>().raycastTarget=true;

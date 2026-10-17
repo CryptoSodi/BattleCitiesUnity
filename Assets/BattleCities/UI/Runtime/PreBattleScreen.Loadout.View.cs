@@ -76,7 +76,7 @@ namespace BattleCities.UI
         {if(string.IsNullOrEmpty(item))return "EMPTY";foreach(var product in ShopCatalog.Products)if(product.InventoryId==item)return product.Title;return "EMPTY";}
         void EnsureLoadoutView()
         {
-            loadoutShopArt=Resources.Load<ShopArt>("ShopArt");loadoutArt=Resources.Load<LoadoutArt>("LoadoutArt");
+            loadoutShopArt=RemoteGameArt.Load<ShopArt>("ShopArt");loadoutArt=RemoteGameArt.Load<LoadoutArt>("LoadoutArt");
             var legacy=loadoutPage.Find("Wallet and inventory");if(legacy)legacy.gameObject.SetActive(false);
             loadoutWorkspace=LoadoutPanel("Workspace",loadoutPage,theme.CreamPanel);loadoutWorkspace.GetComponent<Image>().pixelsPerUnitMultiplier=2;
             loadoutTankName=LoadoutLabel("Tank name",loadoutWorkspace,Names[selected]+" LOADOUT",new Rect(.02f,.01f,.96f,.08f),30);

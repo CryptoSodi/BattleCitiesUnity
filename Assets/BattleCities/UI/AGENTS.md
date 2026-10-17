@@ -98,6 +98,11 @@ These are the user's approved typography, layout, and interaction rules as of 20
 
 - On the Web battlefield login card, give the OR separator its own generous row between wallet and guest sign-in: 26-unit clean navy text in a 64 x 32 area, centered between thin rules with clear horizontal padding. Keep about 53 design units between the button artwork bounds, with balanced space above and below OR. Move the guest button and existing help text down within the TV glass instead of shrinking the button artwork or enlarging the card.
 
+## Remembered wallet sign-in
+
+- On startup, restore the last verified game session without opening a wallet. On Android, encrypt the session and wallet address using Android Keystore and keep the file outside backups; never store session credentials in PlayerPrefs. Check the saved expiry and exact API origin, validate the session and matching player with the server, and only then enter Home. Missing, expired or revoked sessions return to the existing sign-in controls. Temporary network failures preserve the saved session for a later launch.
+- Restored game authentication does not imply a wallet is open for purchases. After an app restart, Shop shows CONNECT WALLET until the player explicitly approves a wallet connection. New quotes/purchases require that connection, and every transaction still requires wallet signing. Pending payment receipts can be checked without signing a new payment. Confirmed Logout clears the encrypted session and purchase connection state.
+
 ## Login button feedback
 
 - Login feedback belongs to the button the player clicks or submits. During wallet/guest sign-in, keep the existing group input lock to prevent duplicate actions, but apply it through `LoginButtonState.SetInteractionLocked`: retain the untouched buttons' tint and scale and show pressed feedback only on the activated button. Do not darken or shrink every login button when sign-in begins. Restore normal per-button hover/focus/press feedback when a failed or cancelled sign-in unlocks the controls, including both standard and PSG1 layouts.

@@ -20,6 +20,7 @@ namespace BattleCities.Editor
             public int androidVersionCode;
             public bool buildAppBundle, testNetwork, exportAndroidProject;
             public string androidApplicationId;
+            public string remoteArtBaseUrl;
         }
 
         [Serializable]
@@ -143,12 +144,25 @@ namespace BattleCities.Editor
             ConfigureFromFile(path);
             var request = ReadRequest(path);
             Directory.CreateDirectory(Path.GetDirectoryName(request.outputPath));
+            using var remoteArt = RemoteGameArtBuild.Prepare(request.remoteArtBaseUrl, Path.Combine(Path.GetDirectoryName(request.outputPath), "RemoteArt"));
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
                 scenes = scenes, locationPathName = request.outputPath,
                 target = (BuildTarget)Enum.Parse(typeof(BuildTarget), request.target),
+                assetBundleManifestPath = RemoteGameArtBuild.ManifestPath,
                 options = BuildOptions.DetailedBuildReport
             });
+            if (remoteArt != null && report.packedAssets.SelectMany(pack => pack.contents)
+                .Any(asset => asset.sourceAssetPath.StartsWith("Assets/BattleCities/RemoteArtBuildStaging/", StringComparison.Ordinal)))
+                throw new BuildFailedException("Remote artwork is still referenced by local content and was duplicated into the APK.");
+            if (remoteArt != null)
+            {
+                var models = report.packedAssets.SelectMany(pack => pack.contents)
+                    .Select(asset => asset.sourceAssetPath).Where(path => new[] { ".glb", ".gltf", ".fbx", ".obj" }
+                    .Contains(Path.GetExtension(path).ToLowerInvariant())).Distinct().ToArray();
+                if (models.Length != 0) throw new BuildFailedException("3D models remain in APK: " + string.Join(", ", models));
+                File.WriteAllText(Path.Combine(Path.GetDirectoryName(request.reportPath), "remote-model-verification.txt"), "PASS: no 3D source models or remote roots in player build.");
+            }
             var summary = report.summary;
             var receipt = new Receipt
             {

@@ -55,7 +55,7 @@ namespace BattleCities.UI
             // Unity restores object references on script reload, but runtime arrays need rebinding.
             configured=false;
             if(api)api.PlayerLoaded-=OnPlayerLoaded;
-            menu=owner;theme=skin;api=client;art=Resources.Load<PreBattleArt>("PreBattleArt");shopArt=Resources.Load<ShopArt>("ShopArt");
+            menu=owner;theme=skin;api=client;art=RemoteGameArt.Load<PreBattleArt>("PreBattleArt");shopArt=RemoteGameArt.Load<ShopArt>("ShopArt");
             if(api)api.PlayerLoaded+=OnPlayerLoaded;
             var existing=frame.Find("Shop screen");bool open=existing&&existing.gameObject.activeSelf;
             root=Panel("Shop screen",frame,null);root.GetComponent<Image>().raycastTarget=true;
@@ -218,7 +218,7 @@ namespace BattleCities.UI
             var line=Panel("Divider",cell,null);line.GetComponent<Image>().color=new Color32(7,43,94,55);Fit(line,new Rect(.997f,.18f,.003f,.64f));
             Icon("Icon",cell,icon,new Rect(.04f,.12f,.18f,.76f));
             Label("Label",cell,name,new Rect(.25f,.12f,.31f,.76f),24,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
-            return Label("Value",cell,"—",new Rect(.57f,.08f,.39f,.84f),30,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            return Label("Value",cell,"â€”",new Rect(.57f,.08f,.39f,.84f),30,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
         }
         void BuildScroll()
         {
@@ -283,7 +283,7 @@ namespace BattleCities.UI
             var receive=Panel("You receive",swapPage,art.statusPanel);Fit(receive,new Rect(.08f,.55f,.84f,.22f));receive.GetComponent<Image>().pixelsPerUnitMultiplier=3;
             Label("Heading",receive,"YOU RECEIVE",new Rect(.05f,.05f,.90f,.25f),21,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineLeft);
             swapTo=Label("Currency",receive,"SKR",new Rect(.06f,.39f,.25f,.47f),32,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineLeft);
-            Label("Amount",receive,"—",new Rect(.38f,.33f,.56f,.56f),32,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineRight);
+            Label("Amount",receive,"â€”",new Rect(.38f,.33f,.56f,.56f),32,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineRight);
             swapBalance=Label("Balance",swapPage,"",new Rect(.08f,.80f,.84f,.06f),20,ArcadeTextTreatment.Navy);
             swapAction=MakeButton("Swap action",swapPage,"SWAP",()=>ShowNotice("SWAP","Swaps are not available yet."));Fit((RectTransform)swapAction.transform,new Rect(.25f,.885f,.5f,.09f));
         }
@@ -379,7 +379,7 @@ namespace BattleCities.UI
                 c.PriceText.text=LivePrice(p.Id);
                 SetSprite(c.Coin,shopArt?(currency==ShopCurrency.Solana?shopArt.solana:shopArt.skr):null);
                 int owned=p.InventoryId!=null?Count(account?["inventory"]?[p.InventoryId]):p.Category==ShopCategory.Fuel?Count(account?["fuelBalance"]):0;
-                c.Reward.text=p.Category==ShopCategory.SeasonPass?SeasonCaption():p.Reward+"  •  OWNED "+(account!=null?owned.ToString(CultureInfo.InvariantCulture):"—");
+                c.Reward.text=p.Category==ShopCategory.SeasonPass?SeasonCaption():p.Reward+"  â€¢  OWNED "+(account!=null?owned.ToString(CultureInfo.InvariantCulture):"â€”");
             }
             RefreshCardHighlights();
             RefreshPresentation();
@@ -390,7 +390,7 @@ namespace BattleCities.UI
         void DismissNotice(){CancelCheckout();notice.gameObject.SetActive(false);Focus(currency==ShopCurrency.Swap?swapAction:cards[selected].Price);}
         public void RefreshArt()
         {
-            shopArt=Resources.Load<ShopArt>("ShopArt");SetSprite(heading.Find("Shop icon").GetComponent<Image>(),theme.NavigationIcons[2]);
+            shopArt=RemoteGameArt.Load<ShopArt>("ShopArt");SetSprite(heading.Find("Shop icon").GetComponent<Image>(),theme.NavigationIcons[2]);
             SetSprite(inventoryHeading.Find("Crate").GetComponent<Image>(),shopArt?shopArt.supplyCrate:null);
             for(int i=0;i<8;i++)
             {
@@ -402,7 +402,7 @@ namespace BattleCities.UI
             {
                 var c=cards[i];var p=ShopCatalog.Products[i];var sprite=shopArt&&shopArt.products!=null&&i<shopArt.products.Length?shopArt.products[i]:null;
                 if(!sprite&&p.Category==ShopCategory.Fuel)sprite=art.fuelCan;
-                if(!sprite&&p.Category==ShopCategory.SeasonPass)sprite=Resources.Load<PlayerProfileArt>("PlayerProfileArt")?.insignia;
+                if(!sprite&&p.Category==ShopCategory.SeasonPass)sprite=RemoteGameArt.Load<PlayerProfileArt>("PlayerProfileArt")?.insignia;
                 SetSprite(c.Art,sprite);c.Art.gameObject.SetActive(sprite);c.Fallback.gameObject.SetActive(!sprite);
                 SetSprite(c.Coin,shopArt?(currency==ShopCurrency.Solana?shopArt.solana:shopArt.skr):null);
                 if(!sprite)SetInventoryIcon(c.Fallback,p.InventoryId??"shield");c.Shadow.gameObject.SetActive(sprite);
@@ -473,13 +473,13 @@ namespace BattleCities.UI
         }
         void RefreshAccount()
         {
-            for(int i=0;i<8;i++)inventoryCounts[i].text=account!=null?Count(account?["inventory"]?[ShopCatalog.InventoryIds[i]]).ToString(CultureInfo.InvariantCulture):"—";
-            connection.text=api&&api.IsWalletAuthenticated?"REFRESH":"CONNECT WALLET";
+            for(int i=0;i<8;i++)inventoryCounts[i].text=account!=null?Count(account?["inventory"]?[ShopCatalog.InventoryIds[i]]).ToString(CultureInfo.InvariantCulture):"â€”";
+            connection.text=api&&api.IsWalletReadyForPurchases?"REFRESH":"CONNECT WALLET";
             // The older tokenBalance field represents BATC; it must never be presented as SKR.
-            skrBalance.text=Amount(walletBalances?["skrBalance"],"0.#########");solBalance.text=Amount(walletBalances?["solBalance"],"0.#########");fuelBalance.text=account!=null?Count(account?["fuelBalance"]).ToString("N0",CultureInfo.InvariantCulture):"—";UpdateCards();RefreshSwap();
+            skrBalance.text=Amount(walletBalances?["skrBalance"],"0.#########");solBalance.text=Amount(walletBalances?["solBalance"],"0.#########");fuelBalance.text=account!=null?Count(account?["fuelBalance"]).ToString("N0",CultureInfo.InvariantCulture):"â€”";UpdateCards();RefreshSwap();
         }
         static int Count(JToken token){return int.TryParse(token?.ToString(),NumberStyles.Integer,CultureInfo.InvariantCulture,out int n)?Math.Max(0,n):0;}
-        static string Amount(JToken token,string format){return decimal.TryParse(token?.ToString(),NumberStyles.Number,CultureInfo.InvariantCulture,out var n)?Math.Max(0,n).ToString(format,CultureInfo.InvariantCulture):"—";}
+        static string Amount(JToken token,string format){return decimal.TryParse(token?.ToString(),NumberStyles.Number,CultureInfo.InvariantCulture,out var n)?Math.Max(0,n).ToString(format,CultureInfo.InvariantCulture):"â€”";}
         public void KeepControllerFocus(){Psg1UiNavigation.KeepFocus(root,notice.gameObject.activeSelf?noticeClose:currency==ShopCurrency.Swap?swapDirection:PreferredProductButton());}
         void ConfigureNavigation()
         {

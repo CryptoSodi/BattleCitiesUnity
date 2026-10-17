@@ -58,8 +58,8 @@ namespace BattleCities
                 events.transform.SetParent(transform,false);
                 events.GetComponent<InputSystemUIInputModule>().AssignDefaultActions();
             }
-            art=Resources.Load<PreBattleArt>("PreBattleArt");
-            var theme=Resources.Load<BattleResultsArt>("BattleResultsArt").theme;
+            art=RemoteGameArt.Load<PreBattleArt>("PreBattleArt");
+            var theme=RemoteGameArt.Load<BattleResultsArt>("BattleResultsArt").theme;
             surface=new GameObject("Battle connection",typeof(RectTransform),typeof(Canvas),typeof(CanvasScaler),typeof(GraphicRaycaster));
             surface.transform.SetParent(transform,false);
             var canvas=surface.GetComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceOverlay;canvas.sortingOrder=500;

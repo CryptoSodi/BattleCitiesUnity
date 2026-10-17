@@ -136,3 +136,9 @@ Web version selection and manual Pages defaults select a release with a web ZIP.
 Verification covers package/version, ARM64/non-debuggable release, APK signatures,
 16 KB zip alignment, original certificate, and source/compiled Firebase values.
 Hardware installation, wallet handoff, gameplay and push delivery require device checks.
+## Optional smaller Android APK with remote artwork
+
+The closed-editor signed build supports `-RemoteArtBaseUrl` to move selected UI
+artwork into a separately hosted, verified AssetBundle. See [Remote artwork](RemoteArtwork.md)
+for build instructions, cache behavior, recovery, and the required R2 rollout checks.
+This option remains off by default. Do not publish its APK before hosting its exact bundle.

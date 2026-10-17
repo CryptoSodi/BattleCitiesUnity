@@ -78,7 +78,7 @@ namespace BattleCities.UI
         public void Configure(RectTransform frame,MenuTheme skin,MainMenuApiClient client,Action onLaunch,Button returnTo)
         {
             if(api)api.PlayerLoaded-=OnLoadoutPlayer;theme=skin;api=client;launch=onLaunch;home=returnTo;if(api)api.PlayerLoaded+=OnLoadoutPlayer;BindLoadoutIdentity();
-            art=Resources.Load<PreBattleArt>("PreBattleArt");
+            art=RemoteGameArt.Load<PreBattleArt>("PreBattleArt");
             root=frame.Find("Pre-battle screens") as RectTransform;
             if(root)
             {

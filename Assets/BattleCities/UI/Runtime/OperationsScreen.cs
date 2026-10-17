@@ -53,7 +53,7 @@ namespace BattleCities.UI
         public void Configure(MainMenuScene owner,MenuTheme skin,MainMenuApiClient client,RectTransform frame)
         {
             CancelRequest();configured=false;if(api)api.PlayerLoaded-=OnPlayer;
-            menu=owner;theme=skin;api=client;art=Resources.Load<PreBattleArt>("PreBattleArt");shopArt=Resources.Load<ShopArt>("ShopArt");illustrations=Resources.Load<OperationsArt>("OperationsArt");
+            menu=owner;theme=skin;api=client;art=RemoteGameArt.Load<PreBattleArt>("PreBattleArt");shopArt=RemoteGameArt.Load<ShopArt>("ShopArt");illustrations=RemoteGameArt.Load<OperationsArt>("OperationsArt");
             playerIdentity=api?.LastPlayer?.walletAddress??api?.LastPlayer?.id;BindSocialProgress();
             if(illustrations&&illustrations.manual)manual=JsonUtility.FromJson<FieldManualEntries>(illustrations.manual.text).entries;
             if(api)api.PlayerLoaded+=OnPlayer;

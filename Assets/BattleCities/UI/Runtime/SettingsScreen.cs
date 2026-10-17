@@ -29,7 +29,7 @@ namespace BattleCities.UI
         public void Configure(MainMenuScene owner,MenuTheme skin,MainMenuApiClient client,RectTransform frame)
         {
             if(api)api.PlayerLoaded-=OnPlayer;
-            menu=owner;theme=skin;api=client;art=Resources.Load<PreBattleArt>("PreBattleArt");illustrations=Resources.Load<SettingsArt>("SettingsArt");
+            menu=owner;theme=skin;api=client;art=RemoteGameArt.Load<PreBattleArt>("PreBattleArt");illustrations=RemoteGameArt.Load<SettingsArt>("SettingsArt");
             var old=frame.Find("Settings screen");bool open=old&&old.gameObject.activeSelf;
             root=Panel("Settings screen",frame,null);root.GetComponent<Image>().raycastTarget=true;
             header=Panel("Title plate",root,art.tankTitlePanel);header.GetComponent<Image>().pixelsPerUnitMultiplier=4;

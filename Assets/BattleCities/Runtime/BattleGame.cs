@@ -84,6 +84,12 @@ namespace BattleCities
 
         private void Awake()
         {
+            if (RemoteGameArt.Required && !tvReplay)
+            {
+                var models = RemoteGameArt.Load<RemoteBattleModels>("RemoteBattleModels");
+                if (!models) throw new InvalidOperationException("Download game content from the login screen before entering battle.");
+                models.Apply(this);
+            }
             Debug.Log("[BattleCities] Runtime: "+RuntimePlatformInfo.Current+" ("+RuntimePlatformInfo.DeviceIdentity+")");
             pickupSparkles=new PickupSparkles();
             input=new InputActionMap("Gameplay");
@@ -134,7 +140,7 @@ namespace BattleCities
                 for(int i=0;i<mesh.sharedMesh.subMeshCount;i++)
                 {
                     var source=renderer.sharedMaterials[Math.Min(i,renderer.sharedMaterials.Length-1)];
-                    var mat=Resources.Load<Material>("RuntimeShaders/Terrain/"+source.name);
+                    var mat=RemoteGameArt.Load<Material>("RuntimeShaders/Terrain/"+source.name);
                     if(!mat)mat=source;
                     mat.enableInstancing=true;
                     parts.Add(new Part{Mesh=mesh.sharedMesh,Material=mat,Submesh=i,Local=root.transform.worldToLocalMatrix*mesh.transform.localToWorldMatrix});

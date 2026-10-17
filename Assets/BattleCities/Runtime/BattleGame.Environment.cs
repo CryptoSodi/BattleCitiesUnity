@@ -56,7 +56,7 @@ namespace BattleCities
         {
             environmentViews.Clear();
             if (map.objects == null || map.objects.Length == 0) return;
-            var palette = Resources.Load<EnvironmentPalette>("EnvironmentPalette");
+            var palette = RemoteGameArt.Load<EnvironmentPalette>("EnvironmentPalette");
             if (!palette) throw new InvalidOperationException("Missing EnvironmentPalette resource");
             var prefabs = palette.Lookup();
             foreach (var group in Simulation.Terrain.Where(w => w.PropKey != null).GroupBy(w => w.IsBuildingSection ? w.BuildingId : w.Id))

@@ -39,7 +39,7 @@ namespace BattleCities.UI
             connect.onClick.RemoveAllListeners();connect.onClick.AddListener(()=>
             {
                 if(checkoutBusy)return;
-                if(api&&api.IsWalletAuthenticated){if(accountRequest!=null)StopCoroutine(accountRequest);accountRequest=StartCoroutine(LoadAccount());}
+                if(api&&api.IsWalletReadyForPurchases){if(accountRequest!=null)StopCoroutine(accountRequest);accountRequest=StartCoroutine(LoadAccount());}
                 else if(api)api.ConnectWallet();
             });
             ResetNoticeActions();
@@ -130,7 +130,7 @@ namespace BattleCities.UI
                 ShowNotice(product.Title,description+"\n\n"+reason);return;
             }
             ShowNotice(product.Title,description+"\n\n"+LivePrice(product.Id));
-            ConfigureNoticeAction(api&&api.IsWalletAuthenticated?"GET QUOTE":"CONNECT WALLET");
+            ConfigureNoticeAction(api&&api.IsWalletReadyForPurchases?"GET QUOTE":"CONNECT WALLET");
         }
         string PassDescription()
         {
@@ -150,6 +150,7 @@ namespace BattleCities.UI
             if(checkoutBusy)return;
             if(!api||!api.IsWalletAuthenticated){DismissNotice();if(api)api.ConnectWallet();return;}
             if(pendingPayment!=null){checkoutRoutine=StartCoroutine(CheckPending());return;}
+            if(!api.IsWalletReadyForPurchases){DismissNotice();api.ConnectWallet();return;}
             if(checkoutQuote!=null){checkoutRoutine=StartCoroutine(SignAndSubmit());return;}
             if(checkoutIndex>=0&&liveCatalog!=null&&liveCatalog.Available(ShopCatalog.Products[checkoutIndex].Id,currency))
                 checkoutRoutine=StartCoroutine(PrepareQuote());

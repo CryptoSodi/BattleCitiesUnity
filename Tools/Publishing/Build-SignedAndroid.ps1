@@ -1,11 +1,12 @@
 [CmdletBinding()]
-param([string]$Version='1.0.0',[ValidateRange(1,2100000000)][int]$VersionCode=1,[string]$ExistingBuildDirectory)
+param([string]$Version='1.0.0',[ValidateRange(1,2100000000)][int]$VersionCode=1,[string]$ExistingBuildDirectory,[string]$RemoteArtBaseUrl)
 $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'Automation-Functions.ps1')
 $lock=Enter-GameAutomation
 $editor=$null
 try {
  if(-not $ExistingBuildDirectory){$editor=Assert-GameBuildReady Android}
+ if($RemoteArtBaseUrl -and ($editor -or $ExistingBuildDirectory)){throw 'Remote artwork builds require Unity closed and a fresh build directory.'}
  $job=Join-Path $script:GameRoot ("Builds/Android/$Version-v$VersionCode/"+[DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss'))
   if($ExistingBuildDirectory){
   $job=[IO.Path]::GetFullPath($ExistingBuildDirectory)
@@ -21,7 +22,7 @@ try {
   if($saved.version -ne $Version -or $saved.androidVersionCode -ne $VersionCode -or $saved.androidApplicationId -ne 'sol.battle.cities' -or -not $saved.exportAndroidProject){throw 'Existing export identity/version mismatch'}
   $report=Get-Content -LiteralPath $reportPath -Raw|ConvertFrom-Json
  }else{
- $request=[ordered]@{version=$Version;target='Android';outputPath=$export;reportPath=$reportPath;androidVersionCode=$VersionCode;buildAppBundle=$false;testNetwork=$false;exportAndroidProject=$true;androidApplicationId='sol.battle.cities'}
+ $request=[ordered]@{version=$Version;target='Android';outputPath=$export;reportPath=$reportPath;androidVersionCode=$VersionCode;buildAppBundle=$false;testNetwork=$false;exportAndroidProject=$true;androidApplicationId='sol.battle.cities';remoteArtBaseUrl=$RemoteArtBaseUrl}
  [IO.File]::WriteAllText($requestPath,($request|ConvertTo-Json))
  Write-Host "Signed Android $Version ($VersionCode). Output: $job"
  if($editor){

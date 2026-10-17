@@ -25,7 +25,7 @@ namespace BattleCities
         {
             ReplayJson.Validate(recording);
             if(!target)throw new ArgumentNullException(nameof(target));
-            var template=Resources.Load<GameObject>("TvReplayRig");
+            var template=RemoteGameArt.Load<GameObject>("TvReplayRig");
             if(!template||template.activeSelf)throw new InvalidOperationException("TV replay renderer is unavailable.");
             var root=Instantiate(template);root.name="TV replay renderer";
             var game=root.GetComponent<BattleGame>();

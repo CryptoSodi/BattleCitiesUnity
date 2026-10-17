@@ -13,7 +13,7 @@ namespace BattleCities.LevelEditor
         public string BuildingBrush = LevelEditorCatalog.DefaultBuilding;
         [HideInInspector] public string BuildingPage = "TYPE";
         public string ActiveBuilding => LevelEditorCatalog.CanonicalBuilding(!BrushProperties && Selected && Selected.IsBuilding ? Selected.Tile : BuildingBrush);
-        static EnvironmentPiece BuildingPrefab(string key) => Resources.Load<EnvironmentPalette>("EnvironmentPalette")?.Prefabs.FirstOrDefault(p => p && p.Key == key);
+        static EnvironmentPiece BuildingPrefab(string key) => RemoteGameArt.Load<EnvironmentPalette>("EnvironmentPalette")?.Prefabs.FirstOrDefault(p => p && p.Key == key);
 
         public void SetBuildingPage(string page)
         {

@@ -42,10 +42,10 @@ public final class MobileWalletCheckout {
                 if(psg1)intent.setPackage("ag.jup.jupiter.android");
                 if(intent.resolveActivity(activity.getPackageManager())==null)throw new Exception();
                 var future=scenario.start();
-                FutureTask<Void> launch=new FutureTask<>(()->{if(!done.get())activity.startActivity(intent);return null;});
+                FutureTask<Void> launch=new FutureTask<>(()->{if(!done.get())activity.startActivityForResult(intent,WalletIdentity.ASSOCIATION_REQUEST);return null;});
                 activity.runOnUiThread(launch);launch.get(Math.min(remaining(),10000),TimeUnit.MILLISECONDS);
                 var client=future.get(Math.min(remaining(),35000),TimeUnit.MILLISECONDS);
-                var auth=client.authorize(Uri.parse("https://battlecities.com"),null,"Battle Cities","solana:mainnet",null,null,null,null)
+                var auth=client.authorize(WalletIdentity.URI,WalletIdentity.ICON,WalletIdentity.NAME,"solana:mainnet",null,null,null,null)
                     .get(Math.min(remaining(),120000),TimeUnit.MILLISECONDS);
                 boolean matched=false;
                 for(var account:auth.accounts)if(account.publicKey.length==32&&MobileWalletLogin.encodeBase58(account.publicKey).equals(wallet))matched=true;

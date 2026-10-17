@@ -42,7 +42,7 @@ namespace BattleCities.UI
         public void Configure(MainMenuScene owner,MenuTheme skin,MainMenuApiClient client,RectTransform frame)
         {
             CloseReplayViewer();ClearStatus();Cancel();configured=false;if(api)api.PlayerLoaded-=OnPlayer;
-            menu=owner;theme=skin;api=client;art=Resources.Load<PreBattleArt>("PreBattleArt");pictures=Resources.Load<PlayerProfileArt>("PlayerProfileArt");links=Resources.Load<ProfileLinks>("ProfileLinks");
+            menu=owner;theme=skin;api=client;art=RemoteGameArt.Load<PreBattleArt>("PreBattleArt");pictures=RemoteGameArt.Load<PlayerProfileArt>("PlayerProfileArt");links=Resources.Load<ProfileLinks>("ProfileLinks");
             var old=frame.Find("Player profile screen");bool open=old&&old.gameObject.activeSelf;
             root=Panel("Player profile screen",frame,null);root.GetComponent<UnityEngine.UI.Image>().raycastTarget=true;
             BuildView();configured=true;root.gameObject.SetActive(open);

@@ -150,6 +150,7 @@ namespace BattleCities.UI
             requestInFlight = false;
             browserResponses.Clear();
             IsSigningOut = false;
+            IsRestoringSession = false;
         }
 
         public void ConfigureAutomaticRefresh(bool value) { automaticRefresh = value; }
@@ -187,13 +188,13 @@ namespace BattleCities.UI
         }
         public void RefreshNow()
         {
-            if (isActiveAndEnabled && !requestInFlight && !IsWalletLoginPending)
+            if (isActiveAndEnabled && !requestInFlight && !IsWalletLoginPending && !IsRestoringSession)
                 menuDataRoutine = StartMenuRefresh(RefreshMenuData());
         }
 
         public void ConnectWallet()
         {
-            if (!isActiveAndEnabled || IsWalletLoginPending) return;
+            if (!isActiveAndEnabled || IsWalletLoginPending || IsRestoringSession || IsSigningOut) return;
             if (menuDataRoutine != null) { StopCoroutine(menuDataRoutine); menuDataRoutine = null; }
             requestInFlight = false;
             walletAttemptId = Guid.NewGuid().ToString("N");
@@ -270,9 +271,10 @@ namespace BattleCities.UI
             currentGuestName = null;
             sessionCookie = null;
             sessionCookieOrigin = null;
+            purchaseWallet = null;
         }
 
-        public void OnWalletLoginResult(string json)
+        public async void OnWalletLoginResult(string json)
         {
             if (!isActiveAndEnabled || !IsWalletLoginPending) return;
             try
@@ -293,6 +295,13 @@ namespace BattleCities.UI
                 CaptureSessionCookie((string)body["sessionCookie"]);
                 if (string.IsNullOrEmpty(sessionCookie) || sessionCookieOrigin != ApiOrigin)
                     throw new InvalidOperationException("The server did not return a wallet session.");
+                string attempt = walletAttemptId;
+                var saved = new SavedWalletSession { origin = ApiOrigin, cookie = sessionCookie, wallet = player.walletAddress,
+                    expiresAt = (long?)body["sessionExpiresAt"] ?? 0 };
+                if (!saved.IsValid(ApiOrigin)) throw new InvalidOperationException("The server returned an invalid session lifetime.");
+                bool stored = await WalletSessionStorage.Save(saved);
+                if (!this || !isActiveAndEnabled || walletAttemptId != attempt) return;
+                if (!stored) Debug.LogWarning("Wallet session could not be saved on this device. Sign-in will be required next launch.");
 #endif
                 CancelWalletLogin(false);
                 PlayerPrefs.SetString("battlecities.loginMode", "wallet");
@@ -300,6 +309,7 @@ namespace BattleCities.UI
                 IsAuthenticated = true;
                 IsWalletAuthenticated = true;
                 IsLocalGuest = false;
+                purchaseWallet = player.walletAddress;
                 NotifyStatus("WALLET CONNECTED", ShortWallet(player.walletAddress));
                 PublishPlayer(player);
                 if (automaticRefresh) RefreshNow();
@@ -501,6 +511,7 @@ namespace BattleCities.UI
             {
                 request.downloadHandler = new DownloadHandlerBuffer();
                 request.timeout = Mathf.Max(1, requestTimeoutSeconds);
+                request.redirectLimit = 0;
                 request.SetRequestHeader("Accept", "application/json");
                 request.SetRequestHeader("Cache-Control", "no-store");
                 if (payload != null)

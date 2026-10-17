@@ -27,7 +27,9 @@ namespace BattleCities.UI
         [Header("Published links (leave empty until available)")]
         [SerializeField] private string dappStoreUrl;
         private bool pendingWallet;
+        private bool restoringSession;
         private bool loading;
+        private bool contentRetry;
         private Psg1UiInput controllerInput;
         private bool? previousGuestAccess;
         private bool showingDefaultStatus;
@@ -74,9 +76,20 @@ namespace BattleCities.UI
             ShowDefaultStatus();
             if (EventSystem.current) EventSystem.current.SetSelectedGameObject(
                 layout && layout.UsesPsg1 && psgPhantomButton ? psgPhantomButton.gameObject : phantomButton.gameObject);
+            if (apiClient) StartCoroutine(RestoreSignIn());
+        }
+        private System.Collections.IEnumerator RestoreSignIn()
+        {
+            restoringSession = true; SetButtons(false);
+            yield return apiClient.RestoreWalletSession(_ => { });
+            restoringSession = false;
+            if (loading || contentRetry) yield break;
+            SetButtons(true);
+            if (apiClient.LastStatusTitle == "RESTORING SESSION") ShowDefaultStatus();
         }
         private void OnDisable()
         {
+            StopAllCoroutines(); restoringSession = false;
             controllerInput?.Dispose(); controllerInput = null;
             if (apiClient) { apiClient.PlayerLoaded -= OnPlayerLoaded; apiClient.StatusChanged -= OnStatusChanged; }
             if (apiClient) apiClient.CancelWalletLogin();
@@ -104,12 +117,13 @@ namespace BattleCities.UI
         public void ConnectPhantom() => ConnectWallet();
         public void ConnectWallet()
         {
-            if (loading || pendingWallet || !apiClient) return;
+            if (loading || pendingWallet || restoringSession || !apiClient) return;
+            if (contentRetry) { EnterGame(); return; }
             pendingWallet = true; SetButtons(false); apiClient.ConnectWallet();
         }
         public void ContinueAsGuest()
         {
-            if (!GuestLoginAllowed || loading || pendingWallet || !apiClient) return;
+            if (!GuestLoginAllowed || loading || pendingWallet || restoringSession || !apiClient) return;
             SetButtons(false); apiClient.ContinueAsGuest();
         }
         private void OnPlayerLoaded(MainMenuApiClient.PlayerSnapshot player)
@@ -121,10 +135,30 @@ namespace BattleCities.UI
             PlayerPrefs.SetString("battlecities.loginMode", wallet ? "wallet" : "guest");
             PlayerPrefs.SetString("battlecities.playerName", player.displayName ?? "COMMANDER");
             PlayerPrefs.Save();
-            if (!Application.CanStreamedLevelBeLoaded(mainMenuScene))
-            { pendingWallet = false; SetButtons(true); SetStatus("MainMenu is missing from Build Settings."); return; }
-            loading = true; SetStatus("Entering Battle Cities...");
-            SceneManager.LoadSceneAsync(mainMenuScene);
+            EnterGame();
+        }
+        private async void EnterGame()
+        {
+            if (loading) return;
+            loading = true; pendingWallet = false; SetButtons(false);
+            try
+            {
+                await RemoteGameArt.EnsureReady(value => { if (this) SetStatus(value); }, destroyCancellationToken);
+                if (!this || !isActiveAndEnabled) return;
+                contentRetry = false;
+                if (!Application.CanStreamedLevelBeLoaded(mainMenuScene))
+                    throw new System.InvalidOperationException("MainMenu is missing from Build Settings.");
+                SetStatus("Entering Battle Cities...");
+                var sceneLoad = SceneManager.LoadSceneAsync(mainMenuScene);
+                while (sceneLoad != null && !sceneLoad.isDone) await System.Threading.Tasks.Task.Yield();
+            }
+            catch (System.OperationCanceledException) { }
+            catch (System.Exception error)
+            {
+                Debug.LogWarning("Game content unavailable: " + error.Message);
+                if (this) { contentRetry = true; SetButtons(true); SetStatus("Game content unavailable. Select Connect Wallet to retry the download."); }
+            }
+            finally { if (this) loading = false; }
         }
         private void OnStatusChanged(string title, string detail)
         {
@@ -156,7 +190,7 @@ namespace BattleCities.UI
             bool allowed = GuestLoginAllowed;
             if (previousGuestAccess == allowed) return;
             previousGuestAccess = allowed;
-            SetButtonAvailable(guestButton, allowed && !loading && !pendingWallet);
+            SetButtonAvailable(guestButton, allowed && !loading && !pendingWallet && !restoringSession);
             SetButtonAvailable(psgGuestButton, false);
             if (showingDefaultStatus) ShowDefaultStatus();
         }

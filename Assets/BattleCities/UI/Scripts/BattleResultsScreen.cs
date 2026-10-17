@@ -57,7 +57,7 @@ namespace BattleCities.UI
 
         void Build()
         {
-            art = Resources.Load<BattleResultsArt>("BattleResultsArt");
+            art = RemoteGameArt.Load<BattleResultsArt>("BattleResultsArt");
             if (!art || !art.theme || !art.panels) throw new InvalidOperationException("BattleResultsArt is not configured.");
             var go = new GameObject("Results Canvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster), typeof(CanvasGroup));
             go.transform.SetParent(transform, false); canvas = go.GetComponent<Canvas>();
