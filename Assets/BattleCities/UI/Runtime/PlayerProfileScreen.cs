@@ -47,6 +47,7 @@ namespace BattleCities.UI
             root=Panel("Player profile screen",frame,null);root.GetComponent<UnityEngine.UI.Image>().raycastTarget=true;
             BuildView();configured=true;root.gameObject.SetActive(open);
             if(api)api.PlayerLoaded+=OnPlayer;Render();
+            RemoteScreenView.Bind("profile",root);
         }
         public void Open(string playerId=null)
         {

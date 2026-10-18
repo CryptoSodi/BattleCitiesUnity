@@ -55,26 +55,26 @@ namespace BattleCities.UI
         }
         void BuildReplayViewer()
         {
-            replayView=Panel("Match replay",root,theme.CreamPanel);Fit(replayView,new Rect(0,0,1,1));replayView.GetComponent<Image>().raycastTarget=true;
+            replayView=Panel("Match replay",root,theme.CreamPanel);RemoteScreenView.Bind("replay",replayView);Fit(replayView,new Rect(0,0,1,1));replayView.GetComponent<Image>().raycastTarget=true;
             replayHeader=Panel("Title plate",replayView,art.tankTitlePanel);replayHeader.GetComponent<Image>().pixelsPerUnitMultiplier=4;
             var icon=Icon("Icon",replayHeader,pictures?pictures.matches:null,new Rect(0,0,1,1));
-            replayTitle=Label("Title",replayHeader,"MATCH REPLAY",new Rect(0,0,1,1),28,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
+            replayTitle=Label("Title",replayHeader,ScreenContent.Text("replay","match-replay-aa60c8","MATCH REPLAY"),new Rect(0,0,1,1),28,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
             replayNav=Panel("Navigation",replayHeader,art.tankCostButton);replayNav.GetComponent<Image>().color=new Color(.08f,.63f,.68f);
-            replayBack=Control("Back",replayNav,"BACK",CloseReplayViewer);
+            replayBack=Control("Back",replayNav,ScreenContent.Text("replay","back-639807","BACK"),CloseReplayViewer);
             // Match the profile's shared joined Back tab, including its triangular arrow.
             replayBack.image.sprite=null;replayBack.image.color=Color.clear;
             var focus=replayBack.transform.Find("Focus").GetComponent<Image>();focus.enabled=true;
             replayBack.GetComponent<SettingsControlVisual>().enabled=false;replayBack.targetGraphic=focus;replayBack.transition=Selectable.Transition.ColorTint;
             var colors=ColorBlock.defaultColorBlock;colors.normalColor=colors.disabledColor=Color.clear;colors.highlightedColor=colors.selectedColor=colors.pressedColor=Color.white;colors.fadeDuration=.08f;replayBack.colors=colors;
-            var caption=replayBack.transform.Find("Caption").GetComponent<TMP_Text>();Fit(caption.rectTransform,new Rect(.29f,.025f,.68f,.95f));styles.ApplyCleanButton(caption,false);
-            var arrow=new GameObject("Arrow",typeof(RectTransform),typeof(CanvasRenderer),typeof(BackTabArrow));arrow.layer=root.gameObject.layer;arrow.transform.SetParent(replayBack.transform,false);Fit((RectTransform)arrow.transform,new Rect(.10f,.17f,.14f,.66f));arrow.GetComponent<BackTabArrow>().raycastTarget=false;
+            var caption=replayBack.transform.Find("Caption").GetComponent<TMP_Text>();Fit(caption.rectTransform,ScreenContent.Rect("replay","playerprofilescreen-replay-buildreplayviewe-d4243c",new Rect(.29f,.025f,.68f,.95f)));styles.ApplyCleanButton(caption,false);
+            var arrow=new GameObject("Arrow",typeof(RectTransform),typeof(CanvasRenderer),typeof(BackTabArrow));arrow.layer=root.gameObject.layer;arrow.transform.SetParent(replayBack.transform,false);Fit((RectTransform)arrow.transform,ScreenContent.Rect("replay","playerprofilescreen-replay-buildreplayviewe-f394cc",new Rect(.10f,.17f,.14f,.66f)));arrow.GetComponent<BackTabArrow>().raycastTarget=false;
             replayViewport=Panel("Viewport",replayView,theme.DarkPanel);replayViewport.GetComponent<Image>().color=new Color32(8,27,41,255);
-            var image=new GameObject("Battle picture",typeof(RectTransform),typeof(RawImage));image.layer=root.gameObject.layer;image.transform.SetParent(replayViewport,false);replayImage=image.GetComponent<RawImage>();replayImage.raycastTarget=false;Fit(replayImage.rectTransform,new Rect(0,0,1,1));replayImage.rectTransform.offsetMin=Vector2.one*3;replayImage.rectTransform.offsetMax=Vector2.one*-3;
+            var image=new GameObject("Battle picture",typeof(RectTransform),typeof(RawImage));image.layer=root.gameObject.layer;image.transform.SetParent(replayViewport,false);replayImage=image.GetComponent<RawImage>();replayImage.raycastTarget=false;Fit(replayImage.rectTransform,new Rect(0,0,1,1));replayImage.rectTransform.offsetMin=Vector2.one*ScreenContent.Number("replay","viewport-padding",3f);replayImage.rectTransform.offsetMax=Vector2.one*-ScreenContent.Number("replay","viewport-padding",3);
             replayFooter=Panel("Status",replayView,art.statusPanel);TvStatusFooterLayout.ApplySkin(replayFooter.GetComponent<Image>(),art.statusPanel);
-            replayInfo=Label("Playback status",replayFooter,"",new Rect(.018f,.05f,.46f,.90f),23,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);replayInfo.overflowMode=TextOverflowModes.Ellipsis;
-            replayPause=Control("Pause",replayFooter,"PAUSE",()=>{if(replayGame)replayGame.Paused=!replayGame.Paused;});Fit((RectTransform)replayPause.transform,new Rect(.50f,.11f,.15f,.78f));
-            replaySpeed=Control("Speed",replayFooter,"1X",()=>{if(replayGame)replayGame.ReplaySpeed=replayGame.ReplaySpeed>=4?.5f:replayGame.ReplaySpeed*2;});Fit((RectTransform)replaySpeed.transform,new Rect(.665f,.11f,.085f,.78f));
-            replayRestart=Control("Restart",replayFooter,"RESTART",()=>{if(replayGame)replayGame.RestartReplay();});TvStatusFooterLayout.PlaceAction((RectTransform)replayRestart.transform);
+            replayInfo=Label("Playback status",replayFooter,"",ScreenContent.Rect("replay","playerprofilescreen-replay-buildreplayviewe-d2b364",new Rect(.018f,.05f,.46f,.90f)),23,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);replayInfo.overflowMode=TextOverflowModes.Ellipsis;
+            replayPause=Control("Pause",replayFooter,ScreenContent.Text("replay","pause-ca6456","PAUSE"),()=>{if(replayGame)replayGame.Paused=!replayGame.Paused;});Fit((RectTransform)replayPause.transform,ScreenContent.Rect("replay","playerprofilescreen-replay-buildreplayviewe-9037b8",new Rect(.50f,.11f,.15f,.78f)));
+            replaySpeed=Control("Speed",replayFooter,ScreenContent.Text("replay","1x-7cf631","1X"),()=>{if(replayGame)replayGame.ReplaySpeed=replayGame.ReplaySpeed>=4?.5f:replayGame.ReplaySpeed*2;});Fit((RectTransform)replaySpeed.transform,ScreenContent.Rect("replay","playerprofilescreen-replay-buildreplayviewe-b1b1c8",new Rect(.665f,.11f,.085f,.78f)));
+            replayRestart=Control("Restart",replayFooter,ScreenContent.Text("replay","restart-0ce770","RESTART"),()=>{if(replayGame)replayGame.RestartReplay();});TvStatusFooterLayout.PlaceAction((RectTransform)replayRestart.transform);
             foreach(var button in new[]{replayPause,replaySpeed,replayRestart})
             {
                 button.image.color=Color.white;
@@ -146,7 +146,7 @@ namespace BattleCities.UI
                 replayPause.GetComponent<SettingsControlVisual>().Refresh();
                 Psg1UiNavigation.Rows(new Selectable[]{replayBack},new Selectable[]{replayPause,replaySpeed,replayRestart});
             }
-            replayPause.transform.Find("Caption").GetComponent<TMP_Text>().text=replayGame.Paused?"RESUME":"PAUSE";
+            replayPause.transform.Find("Caption").GetComponent<TMP_Text>().text=replayGame.Paused?ScreenContent.Text("replay","resume","RESUME"):ScreenContent.Text("replay","pause","PAUSE");
             replaySpeed.transform.Find("Caption").GetComponent<TMP_Text>().text=replayGame.ReplaySpeed.ToString("0.#")+"X";
         }
         static string TimeLabel(int ticks){int seconds=Mathf.FloorToInt(ticks*BattleSimulation.StepSeconds);return (seconds/60).ToString("00")+":"+(seconds%60).ToString("00");}

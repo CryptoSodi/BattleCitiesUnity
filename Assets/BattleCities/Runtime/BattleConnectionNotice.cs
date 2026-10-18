@@ -12,7 +12,7 @@ namespace BattleCities
     public sealed class BattleConnectionNotice : MonoBehaviour
     {
         BattleGame game;
-        GameObject surface;
+        GameObject surface,loadingView;
         TMP_Text message,heading,caption;
         RectTransform safeArea,frame,content,header,footer;
         PreBattleArt art;
@@ -21,20 +21,35 @@ namespace BattleCities
         Rect lastSafe;
         Button back;
         float waitingSince;
+        const float RecoveryDelaySeconds=8f;
         readonly ArcadeTextStyles styles=new ArcadeTextStyles();
-        public void Initialize(BattleGame owner){game=owner;waitingSince=Time.unscaledTime;}
+        public void Initialize(BattleGame owner)
+        {game=owner;waitingSince=Time.unscaledTime;Update();}
         void Update()
         {
             bool visible=game&&!game.ReplayReady&&!game.IsReplaying;
-            if(!visible){waitingSince=Time.unscaledTime;if(surface)surface.SetActive(false);return;}
-            if(Time.unscaledTime-waitingSince<.5f)return;
-            if(!surface)Build();
-            if(!surface.activeSelf)
+            if(!visible)
             {
-                surface.SetActive(true);
-                if(EventSystem.current)EventSystem.current.SetSelectedGameObject(back.gameObject);
+                waitingSince=Time.unscaledTime;
+                if(surface)surface.SetActive(false);
+                ClearRecoveryFocus();
+                return;
             }
-            message.text=game.ReplayStatus;
+            if(!surface)Build();
+            surface.SetActive(true);
+            bool recovery=!string.IsNullOrEmpty(game.PreparationIssue)||Time.unscaledTime-waitingSince>=RecoveryDelaySeconds;
+            loadingView.SetActive(!recovery);
+            bool wasRecovery=frame.gameObject.activeSelf;
+            frame.gameObject.SetActive(recovery);
+            if(!recovery){ClearRecoveryFocus();return;}
+            heading.text=string.IsNullOrEmpty(game.PreparationIssue)?"STILL PREPARING BATTLE":"BATTLE CONNECTION";
+            message.text=game.PreparationIssue??"Preparing your match is taking longer than expected. Check your connection or return to the menu.";
+            if(!wasRecovery&&EventSystem.current)EventSystem.current.SetSelectedGameObject(back.gameObject);
+        }
+        void ClearRecoveryFocus()
+        {
+            if(back&&EventSystem.current&&EventSystem.current.currentSelectedGameObject==back.gameObject)
+                EventSystem.current.SetSelectedGameObject(null);
         }
         static RectTransform Rect(string name,Transform parent,Vector2 position,Vector2 size)
         {
@@ -65,9 +80,17 @@ namespace BattleCities
             var canvas=surface.GetComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceOverlay;canvas.sortingOrder=500;
             var scale=surface.GetComponent<CanvasScaler>();scale.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scale.referenceResolution=new Vector2(1280,720);scale.matchWidthOrHeight=.5f;
-            var shade=Panel("Backdrop",surface.transform,Vector2.zero,Vector2.zero,null,new Color(0,.03f,.08f,.65f));
+            var shade=Panel("Backdrop",surface.transform,Vector2.zero,Vector2.zero,null,new Color32(6,29,54,255));
             Stretch(shade.rectTransform);
             safeArea=Rect("Safe area",surface.transform,Vector2.zero,Vector2.zero);
+            loadingView=Rect("Preparing battle",safeArea,Vector2.zero,Vector2.zero).gameObject;
+            Stretch((RectTransform)loadingView.transform);
+            var logo=Panel("Battle Cities Logo",loadingView.transform,Vector2.zero,new Vector2(280,280),theme.Logo,Color.white);
+            logo.type=Image.Type.Simple;logo.preserveAspect=true;logo.raycastTarget=false;
+            logo.rectTransform.anchorMin=logo.rectTransform.anchorMax=new Vector2(.5f,.6f);
+            var loadingText=Text("Loading Status",loadingView.transform,"Preparing battle...",Vector2.zero,Vector2.zero,36,true);
+            loadingText.rectTransform.anchorMin=new Vector2(.1f,.24f);loadingText.rectTransform.anchorMax=new Vector2(.9f,.36f);
+            loadingText.rectTransform.offsetMin=loadingText.rectTransform.offsetMax=Vector2.zero;
             frame=Panel("TV frame",safeArea,Vector2.zero,new Vector2(760,320),theme.BlueFrame,Color.white).rectTransform;
             frame.GetComponent<Image>().pixelsPerUnitMultiplier=3;
             content=Panel("Connection status",frame,Vector2.zero,Vector2.zero,theme.CreamPanel,Color.white).rectTransform;
@@ -87,6 +110,7 @@ namespace BattleCities
             back.onClick.AddListener(()=>SceneManager.LoadScene("MainMenu"));
             caption=Text("Label",button.transform,"MAIN MENU",Vector2.zero,Vector2.zero,28,true);
             Stretch(caption.rectTransform);caption.rectTransform.offsetMin=new Vector2(6,2);caption.rectTransform.offsetMax=new Vector2(-6,-2);
+            frame.gameObject.SetActive(false);
             Layout();
             surface.SetActive(false);
         }
@@ -112,6 +136,7 @@ namespace BattleCities
             Canvas.ForceUpdateCanvases();TvTitleHeaderLayout.FitSkin(back.image,back.image.rectTransform.rect.height);
             lastCanvasSize=((RectTransform)surface.transform).rect.size;lastSafe=safe;
         }
+        void OnDisable(){ClearRecoveryFocus();if(surface)surface.SetActive(false);}
         void OnDestroy(){styles.Dispose();}
     }
 }

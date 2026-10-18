@@ -296,12 +296,12 @@ namespace BattleCities.UI
             if(mainFrame && mainFrame.Find("Operations screen"))EnsureOperations();
             if(mainFrame && mainFrame.Find("Settings screen"))EnsureSettings();
             if(mainFrame && mainFrame.Find("Player profile screen"))EnsurePlayerProfile();
+            SetPlayer(PlayerPrefs.GetString("battlecities.playerName","COMMANDER"), PlayerPrefs.GetInt("battlecities.lastScore",0), PlayerPrefs.GetInt("battlecities.highScore",0));
             BindApiClient();
             if(IsPlayerProfileOpen)profileScreen.Resume();
             ResetControllerLegendTimer();
             if(!inputActions){RefreshLayout();return;}
             liveInput=Instantiate(inputActions);
-            SetPlayer(PlayerPrefs.GetString("battlecities.playerName","COMMANDER"), PlayerPrefs.GetInt("battlecities.lastScore",0), PlayerPrefs.GetInt("battlecities.highScore",0));
             RefreshLayout();
         }
         private void Start()
@@ -372,6 +372,7 @@ namespace BattleCities.UI
         public void RefreshLayout()
         {
             if(!content || !safeArea)return;
+            RemoteScreenView.Bind("home",content);
             if(!canvas)canvas=GetComponent<Canvas>();
             lastSize=new Vector2(Screen.width,Screen.height);lastSafeArea=Screen.safeArea;
             var safe=lastSafeArea;
@@ -546,6 +547,7 @@ namespace BattleCities.UI
                     button.navigation=new Navigation { mode=Navigation.Mode.None };
                 }
             }
+            ScreenContent.BindAuthored(content,"home");
             ApplyNavigationTypography();
             RefreshNavigationState();
         }
@@ -747,6 +749,7 @@ namespace BattleCities.UI
                 walletLoginButton.onClick.RemoveListener(OpenOwnProfile);
                 walletLoginButton.onClick.AddListener(OpenOwnProfile);
             }
+            if (apiClient.LastPlayer != null) OnApiPlayerLoaded(apiClient.LastPlayer);
             if (apiClient.LastRankings != null) OnApiRankingsLoaded(apiClient.LastRankings);
             if (apiClient.LastRound != null) OnApiRoundLoaded(apiClient.LastRound);
             apiClient.RefreshNow();

@@ -10,61 +10,61 @@ namespace BattleCities.UI
         void BuildView()
         {
             header=Panel("Title plate",root,art.tankTitlePanel);header.GetComponent<UnityEngine.UI.Image>().pixelsPerUnitMultiplier=4;
-            Icon("Ranking icon",header,theme.NavigationIcons[3],new Rect(.10f,.12f,.25f,.76f));
-            Label("Title",header,"RANKING",new Rect(.36f,.06f,.57f,.88f),28,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
+            Icon("Ranking icon",header,theme.NavigationIcons[3],ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-10f-1-80a74b",new Rect(.10f,.12f,.25f,.76f)));
+            Label("Title",header,ScreenContent.Text("ranking","ranking-28901d","RANKING"),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-36f-0-f4baaa",new Rect(.36f,.06f,.57f,.88f)),28,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
             tabsBar=Panel("Tabs",header,art.tankCostButton);tabsBar.GetComponent<UnityEngine.UI.Image>().color=new Color(.08f,.63f,.68f,1);
             tabs[0]=Tab("GAMING",tabsBar,()=>SelectScope(false),out selectedTabs[0],out tabLabels[0]);
             tabs[1]=Tab("TRADING",tabsBar,()=>SelectScope(true),out selectedTabs[1],out tabLabels[1]);
-            Icon("Icon",tabs[0].transform,theme.RankingGamingIcon,new Rect(.055f,.08f,.23f,.84f));
-            Icon("Icon",tabs[1].transform,theme.RankingTradingIcon,new Rect(.055f,.08f,.23f,.84f));
-            for(int i=0;i<2;i++)Fit(tabLabels[i].rectTransform,new Rect(.30f,.02f,.66f,.96f));
+            Icon("Icon",tabs[0].transform,theme.RankingGamingIcon,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-055f--501c10",new Rect(.055f,.08f,.23f,.84f)));
+            Icon("Icon",tabs[1].transform,theme.RankingTradingIcon,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-055f--501c10",new Rect(.055f,.08f,.23f,.84f)));
+            for(int i=0;i<2;i++)Fit(tabLabels[i].rectTransform,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-30f-0-082861",new Rect(.30f,.02f,.66f,.96f)));
             LockedTabIcon.Apply(tabs[1],art.tankCostButtonLocked);
             tabs[2]=back=Tab("BACK",tabsBar,()=>Close(),out selectedTabs[2],out tabLabels[2]);selectedTabs[2].enabled=false;
-            Fit(tabLabels[2].rectTransform,new Rect(.28f,.02f,.68f,.96f));Arrow("Arrow",back.transform,new Rect(.10f,.17f,.14f,.66f),0);
+            Fit(tabLabels[2].rectTransform,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-28f-0-21d6d8",new Rect(.28f,.02f,.68f,.96f)));Arrow("Arrow",back.transform,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-10f-1-f37ad5",new Rect(.10f,.17f,.14f,.66f)),0);
             for(int i=1;i<3;i++){var line=Panel("Divider "+i,tabsBar,null);line.GetComponent<UnityEngine.UI.Image>().color=new Color32(2,27,64,255);}
 
             history=Panel("Payout history",root,theme.BlueFrame);historyPaper=Panel("Paper",history,theme.Rounded);
             historyHeading=Panel("Heading bar",historyPaper,theme.Rounded);historyHeading.GetComponent<UnityEngine.UI.Image>().pixelsPerUnitMultiplier=5;
-            Icon("Chest",historyHeading,theme.PrizeCrates.Length>0?theme.PrizeCrates[0]:theme.TrophyIcon,new Rect(.035f,.10f,.18f,.80f));
-            Label("Heading",historyHeading,"PAYOUTS",new Rect(.25f,.02f,.72f,.96f),24,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
-            historyPeriod=Label("Period",historyPaper,"CURRENT CYCLE",new Rect(.05f,.10f,.90f,.08f),24,ArcadeTextTreatment.PrizeAmount);
+            Icon("Chest",historyHeading,theme.PrizeCrates.Length>0?theme.PrizeCrates[0]:theme.TrophyIcon,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-035f--74384c",new Rect(.035f,.10f,.18f,.80f)));
+            Label("Heading",historyHeading,ScreenContent.Text("ranking","payouts-576390","PAYOUTS"),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-25f-0-7f8587",new Rect(.25f,.02f,.72f,.96f)),24,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            historyPeriod=Label("Period",historyPaper,ScreenContent.Text("ranking","current-cycle-965a70","CURRENT CYCLE"),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-05f-1-46ef62",new Rect(.05f,.10f,.90f,.08f)),24,ArcadeTextTreatment.PrizeAmount);
             historyEmpty=Panel("Empty history",historyPaper,null);
-            ContactShadow("Chest shadow",historyEmpty,new Rect(.29f,.36f,.42f,.045f));
-            Icon("Chest",historyEmpty,theme.PrizeCrates.Length>0?theme.PrizeCrates[0]:theme.TrophyIcon,new Rect(.27f,.04f,.46f,.35f));
-            Label("Title",historyEmpty,"PREVIOUS PAYOUTS",new Rect(.04f,.45f,.92f,.18f),26,ArcadeTextTreatment.PrizeAmount);
-            var historyCopy=Label("Description",historyEmpty,"No payout records\navailable yet.",new Rect(.04f,.64f,.92f,.25f),24,ArcadeTextTreatment.PrizeAmount);
+            ContactShadow("Chest shadow",historyEmpty,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-29f-3-9f50e2",new Rect(.29f,.36f,.42f,.045f)));
+            Icon("Chest",historyEmpty,theme.PrizeCrates.Length>0?theme.PrizeCrates[0]:theme.TrophyIcon,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-27f-0-4a5bf1",new Rect(.27f,.04f,.46f,.35f)));
+            Label("Title",historyEmpty,ScreenContent.Text("ranking","previous-payouts-c225a2","PREVIOUS PAYOUTS"),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-04f-4-182766",new Rect(.04f,.45f,.92f,.18f)),26,ArcadeTextTreatment.PrizeAmount);
+            var historyCopy=Label("Description",historyEmpty,ScreenContent.Text("ranking","no-payout-records-available-yet-c9ff9d","No payout records\navailable yet."),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-04f-6-a4f5c2",new Rect(.04f,.64f,.92f,.25f)),24,ArcadeTextTreatment.PrizeAmount);
             historyCopy.textWrappingMode=TextWrappingModes.Normal;
             eligibility=Panel("Eligibility",historyPaper,null);
-            var lineTop=Panel("Divider",eligibility,null);lineTop.GetComponent<UnityEngine.UI.Image>().color=new Color32(6,29,54,65);Fit(lineTop,new Rect(0,0,1,.015f));
-            eligibilityText=Label("Label",eligibility,"",new Rect(.02f,.10f,.96f,.80f),22,ArcadeTextTreatment.PrizeAmount);
+            var lineTop=Panel("Divider",eligibility,null);lineTop.GetComponent<UnityEngine.UI.Image>().color=new Color32(6,29,54,65);Fit(lineTop,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-0-0-1-d0ce80",new Rect(0,0,1,.015f)));
+            eligibilityText=Label("Label",eligibility,"",ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-02f-1-d9ecfd",new Rect(.02f,.10f,.96f,.80f)),22,ArcadeTextTreatment.PrizeAmount);
 
             table=Panel("Standings",root,theme.CreamPanel);table.GetComponent<UnityEngine.UI.Image>().pixelsPerUnitMultiplier=2;
             tableHeading=Panel("Heading",table,null);
-            tableTitle=Label("Period title",tableHeading,"LIVE PLAYER RANKINGS",new Rect(.02f,.05f,.96f,.45f),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            tableTitle=Label("Period title",tableHeading,ScreenContent.Text("ranking","live-player-rankings-40fcc9","LIVE PLAYER RANKINGS"),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-02f-0-cb9adc",new Rect(.02f,.05f,.96f,.45f)),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
             string[] columns={"#","PLAYER","SCORE","MATCHES"};
-            var positions=new[]{new Rect(.025f,.51f,.07f,.40f),new Rect(.12f,.51f,.43f,.40f),new Rect(.56f,.51f,.21f,.40f),new Rect(.79f,.51f,.18f,.40f)};
-            for(int i=0;i<4;i++){var label=Label(columns[i],tableHeading,columns[i],positions[i],19,ArcadeTextTreatment.PrizeAmount,i==1?TextAlignmentOptions.MidlineLeft:TextAlignmentOptions.Center);label.color=new Color32(63,89,115,255);}
-            var tableDivider=Panel("Divider",tableHeading,null);tableDivider.GetComponent<UnityEngine.UI.Image>().color=new Color32(52,82,102,120);Fit(tableDivider,new Rect(.016f,.975f,.968f,.02f));
+            var positions=new[]{ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-025f--3558fc",new Rect(.025f,.51f,.07f,.40f)),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-12f-5-e9624c",new Rect(.12f,.51f,.43f,.40f)),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-56f-5-ce3c0c",new Rect(.56f,.51f,.21f,.40f)),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-79f-5-e063dd",new Rect(.79f,.51f,.18f,.40f))};
+            for(int i=0;i<4;i++){var label=Label(columns[i],tableHeading,ScreenContent.Text("ranking","columns-"+i,columns[i]),positions[i],19,ArcadeTextTreatment.PrizeAmount,i==1?TextAlignmentOptions.MidlineLeft:TextAlignmentOptions.Center);label.color=new Color32(63,89,115,255);}
+            var tableDivider=Panel("Divider",tableHeading,null);tableDivider.GetComponent<UnityEngine.UI.Image>().color=new Color32(52,82,102,120);Fit(tableDivider,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-016f--81f2af",new Rect(.016f,.975f,.968f,.02f)));
             tableScroll=BuildScroll("Rows",table);
             empty=Panel("Empty standings",table,null);
-            var trophy=Icon("Trophy",empty,theme.TrophyIcon,new Rect(.33f,.12f,.34f,.43f));
-            var shadowRect=Panel("Ground shadow",empty,null);Fit(shadowRect,new Rect(.37f,.515f,.26f,.045f));shadowRect.SetSiblingIndex(0);
+            var trophy=Icon("Trophy",empty,theme.TrophyIcon,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-33f-1-3d3f87",new Rect(.33f,.12f,.34f,.43f)));
+            var shadowRect=Panel("Ground shadow",empty,null);Fit(shadowRect,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-37f-5-d90dcb",new Rect(.37f,.515f,.26f,.045f)));shadowRect.SetSiblingIndex(0);
             var oval=shadowRect.Find("Oval") as RectTransform;
             if(!oval){var go=new GameObject("Oval",typeof(RectTransform),typeof(CanvasRenderer),typeof(TankGroundShadow));go.layer=root.gameObject.layer;oval=(RectTransform)go.transform;oval.SetParent(shadowRect,false);}
             Fit(oval,new Rect(0,0,1,1));var shadow=oval.GetComponent<TankGroundShadow>();
             shadow.color=new Color32(35,25,13,112);shadow.raycastTarget=false;
-            emptyTitle=Label("Title",empty,"",new Rect(.04f,.62f,.92f,.14f),30,ArcadeTextTreatment.PrizeAmount);
-            emptyDetail=Label("Description",empty,"",new Rect(.07f,.78f,.86f,.12f),24,ArcadeTextTreatment.PrizeAmount);
+            emptyTitle=Label("Title",empty,"",ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-04f-6-a4c84d",new Rect(.04f,.62f,.92f,.14f)),30,ArcadeTextTreatment.PrizeAmount);
+            emptyDetail=Label("Description",empty,"",ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-07f-7-582556",new Rect(.07f,.78f,.86f,.12f)),24,ArcadeTextTreatment.PrizeAmount);
             emptyDetail.textWrappingMode=TextWrappingModes.Normal;
 
             footer=Panel("Status",root,art.statusPanel);TvStatusFooterLayout.ApplySkin(footer.GetComponent<UnityEngine.UI.Image>(),art.statusPanel);
-            Label("Rank label",footer,"YOUR RANK",new Rect(.025f,.08f,.15f,.36f),20,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
-            rankValue=Label("Rank value",footer,"—",new Rect(.025f,.43f,.15f,.49f),29,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
+            Label("Rank label",footer,ScreenContent.Text("ranking","your-rank-ce6722","YOUR RANK"),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-025f--f725e4",new Rect(.025f,.08f,.15f,.36f)),20,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            rankValue=Label("Rank value",footer,"—",ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-025f--616da8",new Rect(.025f,.43f,.15f,.49f)),29,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
             var oldRule=footer.Find("Reward rule");if(oldRule)oldRule.gameObject.SetActive(false);
-            countdown=Label("Countdown",footer,"TOP 10 EVERY 30 MINUTES • —",new Rect(.18f,.10f,.56f,.80f),25,ArcadeTextTreatment.PrizeAmount);
+            countdown=Label("Countdown",footer,ScreenContent.Text("ranking","top-10-every-30-minutes-892795","TOP 10 EVERY 30 MINUTES • —"),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-18f-1-d5bd13",new Rect(.18f,.10f,.56f,.80f)),25,ArcadeTextTreatment.PrizeAmount);
             picker=Action("Period picker",footer,TogglePicker);TvStatusFooterLayout.PlaceAction(picker.transform as RectTransform);
-            periodCaption=Label("Label",picker.transform,"CURRENT CYCLE",new Rect(.05f,.06f,.78f,.88f),26,ArcadeTextTreatment.PrizeAmount);periodCaption.color=Color.white;
-            Arrow("Up arrow",picker.transform,new Rect(.86f,.25f,.08f,.50f),-90);
+            periodCaption=Label("Label",picker.transform,ScreenContent.Text("ranking","current-cycle-965a70","CURRENT CYCLE"),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-05f-0-7f3367",new Rect(.05f,.06f,.78f,.88f)),26,ArcadeTextTreatment.PrizeAmount);periodCaption.color=Color.white;
+            Arrow("Up arrow",picker.transform,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-86f-2-dbd800",new Rect(.86f,.25f,.08f,.50f)),-90);
             pickerOverlay=Panel("Period overlay",root,null);Fit(pickerOverlay,new Rect(0,0,1,1));
             var dismiss=Action("Dismiss",pickerOverlay,()=>ClosePicker());Fit(dismiss.transform as RectTransform,new Rect(0,0,1,1));dismiss.image.sprite=null;dismiss.image.color=new Color(0,.025f,.08f,.16f);dismiss.transition=Selectable.Transition.None;dismiss.navigation=new Navigation{mode=Navigation.Mode.None};
             pickerPanel=Panel("Picker panel",pickerOverlay,art.tankCostButton);
@@ -93,7 +93,7 @@ namespace BattleCities.UI
             for(int i=1;i<3;i++)MainMenuScene.Place(tabsBar.Find("Divider "+i) as RectTransform,i*tabsBar.rect.width/3-1,titleLayout.NavigationHeight*.20f,2,titleLayout.NavigationHeight*.60f);
             statusLayout.Place(footer);TvStatusFooterLayout.PlaceAction(picker.transform as RectTransform);
             TvTitleHeaderLayout.FitSkin(picker.image,((RectTransform)picker.transform).rect.height);
-            float side=Mathf.Clamp(root.rect.width*.38f,320,460),top=titleLayout.Height+12,height=root.rect.height-top-statusLayout.Height-16;
+            float side=Mathf.Clamp(root.rect.width*ScreenContent.Number("ranking","payouts-ratio",0.38f),320,460),top=titleLayout.Height+12,height=root.rect.height-top-statusLayout.Height-16;
             MainMenuScene.Place(history,4,top,side,height);MainMenuScene.Place(table,side+12,top,root.rect.width-side-16,height);
             menu.ApplyDetailSurface(history,historyPaper,ref historyMaterial);
             float w=historyPaper.rect.width,h=historyPaper.rect.height;
@@ -109,7 +109,7 @@ namespace BattleCities.UI
             MainMenuScene.Place(tableHeading,6,7,table.rect.width-12,tableHeaderHeight);
             MainMenuScene.Place(tableScroll.transform as RectTransform,6,tableRowsTop,table.rect.width-12,height-tableRowsTop-8);
             MainMenuScene.Place(empty,14,tableRowsTop,table.rect.width-40,height-tableRowsTop-10);
-            foreach(var button in rowButtons)button.GetComponent<LayoutElement>().preferredHeight=58;
+            foreach(var button in rowButtons)button.GetComponent<LayoutElement>().preferredHeight=ScreenContent.Number("ranking","row-height",58f);
             LayoutPicker();
         }
         void LayoutPicker()
@@ -136,11 +136,11 @@ namespace BattleCities.UI
                 button.targetGraphic=rect.GetComponent<UnityEngine.UI.Image>();button.image.raycastTarget=true;button.onClick.RemoveAllListeners();
                 string playerId=row.playerId;if(ProfileLinks.ValidPlayerId(playerId))button.onClick.AddListener(()=>menu.OpenPlayerProfile(playerId));
                 var colors=ColorBlock.defaultColorBlock;colors.highlightedColor=colors.selectedColor=new Color(.65f,.85f,1f);colors.pressedColor=new Color(.55f,.8f,1f);button.colors=colors;
-                var fit=rect.GetComponent<LayoutElement>();if(!fit)fit=rect.gameObject.AddComponent<LayoutElement>();fit.preferredHeight=58;
-                Label("Rank",rect,row.rank.ToString(),new Rect(.025f,.10f,.08f,.80f),28,row.rank<=3?ArcadeTextTreatment.Gold:ArcadeTextTreatment.PrizeAmount);
-                var name=Label("Player",rect,row.displayName,new Rect(.12f,.10f,.43f,.80f),27,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);name.overflowMode=TextOverflowModes.Ellipsis;
-                Label("Score",rect,row.totalPoints.ToString("N0"),new Rect(.56f,.10f,.21f,.80f),27,ArcadeTextTreatment.PrizeAmount);
-                Label("Matches",rect,row.matches.ToString("N0"),new Rect(.79f,.10f,.18f,.80f),27,ArcadeTextTreatment.PrizeAmount);
+                var fit=rect.GetComponent<LayoutElement>();if(!fit)fit=rect.gameObject.AddComponent<LayoutElement>();fit.preferredHeight=ScreenContent.Number("ranking","row-height",58f);
+                Label("Rank",rect,row.rank.ToString(),ScreenContent.Rect("ranking","rankingscreen-view-buildrankingrows-new-rec-393431",new Rect(.025f,.10f,.08f,.80f)),28,row.rank<=3?ArcadeTextTreatment.Gold:ArcadeTextTreatment.PrizeAmount);
+                var name=Label("Player",rect,row.displayName,ScreenContent.Rect("ranking","rankingscreen-view-buildrankingrows-new-rec-79d9bb",new Rect(.12f,.10f,.43f,.80f)),27,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);name.overflowMode=TextOverflowModes.Ellipsis;
+                Label("Score",rect,row.totalPoints.ToString("N0"),ScreenContent.Rect("ranking","rankingscreen-view-buildrankingrows-new-rec-2ec34f",new Rect(.56f,.10f,.21f,.80f)),27,ArcadeTextTreatment.PrizeAmount);
+                Label("Matches",rect,row.matches.ToString("N0"),ScreenContent.Rect("ranking","rankingscreen-view-buildrankingrows-new-rec-e1bf0c",new Rect(.79f,.10f,.18f,.80f)),27,ArcadeTextTreatment.PrizeAmount);
                 var focus=rect.GetComponent<RankingRowFocus>();if(!focus)focus=rect.gameObject.AddComponent<RankingRowFocus>();focus.Configure(tableScroll);
                 rowButtons.Add(button);
             }
@@ -173,7 +173,7 @@ namespace BattleCities.UI
         {
             var rect=Panel(name,periodScroll.content,null);rect.gameObject.SetActive(true);rect.SetAsLastSibling();
             var fit=rect.GetComponent<LayoutElement>();if(!fit)fit=rect.gameObject.AddComponent<LayoutElement>();fit.preferredHeight=28;
-            Label("Label",rect,caption,new Rect(.03f,0,.94f,1),20,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft).color=Color.white;
+            Label("Label",rect,caption,ScreenContent.Rect("ranking","rankingscreen-view-group-new-rect-03f-0-94f-230328",new Rect(.03f,0,.94f,1)),20,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft).color=Color.white;
         }
 
         TankRosterScroll BuildScroll(string name,Transform parent)
@@ -199,7 +199,7 @@ namespace BattleCities.UI
             var selection=Panel("Selection",button.transform,art.tankCostButtonSelected);Fit(selection,new Rect(0,0,1,1));selection.SetSiblingIndex(1);selected=selection.GetComponent<UnityEngine.UI.Image>();
             button.targetGraphic=focus.GetComponent<UnityEngine.UI.Image>();button.transition=Selectable.Transition.ColorTint;
             var colors=ColorBlock.defaultColorBlock;colors.normalColor=colors.disabledColor=Color.clear;colors.highlightedColor=colors.selectedColor=colors.pressedColor=Color.white;colors.fadeDuration=.08f;button.colors=colors;
-            text=Label("Label",button.transform,name,new Rect(.04f,.02f,.92f,.96f),28,ArcadeTextTreatment.PrizeAmount);textStyles.ApplyCleanButton(text,false);text.transform.SetAsLastSibling();return button;
+            text=Label("Label",button.transform,ScreenContent.Text("ranking","tab-"+name.ToLowerInvariant(),name),ScreenContent.Rect("ranking","rankingscreen-view-tab-new-rect-04f-02f-92f-70faa6",new Rect(.04f,.02f,.92f,.96f)),28,ArcadeTextTreatment.PrizeAmount);textStyles.ApplyCleanButton(text,false);text.transform.SetAsLastSibling();return button;
         }
         UnityEngine.UI.Button Action(string name,Transform parent,UnityEngine.Events.UnityAction action)
         {

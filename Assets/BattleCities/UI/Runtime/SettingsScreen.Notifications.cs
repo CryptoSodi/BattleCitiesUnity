@@ -13,7 +13,7 @@ namespace BattleCities.UI
 
         void ConfigureNotifications()
         {
-            notifications = Control("Notifications", footer, "ENABLE ALERTS", ToggleNotifications, true);
+            notifications = Control("Notifications", footer, ScreenContent.Text("settings","enable-alerts","ENABLE ALERTS"), ToggleNotifications, true);
             notificationsCaption = notifications.transform.Find("Caption").GetComponent<TMP_Text>();
             notificationsVisual = notifications.GetComponent<SettingsControlVisual>();
             notifications.gameObject.SetActive(PushNotifications.IsNativeAndroid);
@@ -31,7 +31,7 @@ namespace BattleCities.UI
         {
             if (!notifications || !notifications.gameObject.activeSelf) return;
             version.text = "VERSION " + Application.version + " • " + (push ? push.Status : "Checking notifications...");
-            notificationsCaption.text = push && push.Enabled ? "DISABLE ALERTS" : "ENABLE ALERTS";
+            notificationsCaption.text = push && push.Enabled ? ScreenContent.Text("settings","disable-alerts","DISABLE ALERTS") : ScreenContent.Text("settings","enable-alerts","ENABLE ALERTS");
             bool available = push && push.Supported;
             bool changed = notifications.interactable != available;
             notifications.interactable = available;

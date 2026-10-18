@@ -119,3 +119,6 @@ InitTestScene*.unity*
 
 # Generated Unity performance test metadata
 /Assets/Resources/PerformanceTestRun*.json*
+
+# Local Cloudflare CLI account cache
+/.cloudflare/

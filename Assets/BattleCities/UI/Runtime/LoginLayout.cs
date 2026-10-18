@@ -211,7 +211,7 @@ namespace BattleCities.UI
                 var design = mode == 2 ? psg1DesignSize : mode == 3 ? webDesignSize : mode == 1 ? landscapeDesignSize : designSize;
                 float coverage = mode == 2 ? psg1ScreenCoverage : mode == 3 ? webScreenCoverage : mode == 1 ? landscapeScreenCoverage : screenCoverage;
                 root.sizeDelta = design;
-                root.localScale = Vector3.one * Mathf.Min(size.x / Mathf.Max(1, design.x), size.y / Mathf.Max(1, design.y)) * coverage;
+                root.localScale = Vector3.one * Mathf.Min(size.x / Mathf.Max(1, design.x), size.y / Mathf.Max(1, design.y)) * coverage * ScreenContent.Number("login","coverage-scale",1f);
                 lastGuestAllowed = AllowsGuestLogin;
                 lastMode = mode;
                 lastSize = size;

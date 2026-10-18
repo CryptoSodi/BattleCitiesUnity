@@ -26,7 +26,8 @@ namespace BattleCities.UI
             if(shopArt)for(int i=0;i<ShopCatalog.Products.Length;i++)if(ShopCatalog.Products[i].InventoryId==id&&i<shopArt.products.Length)return shopArt.products[i];
             return shopArt?shopArt.supplyCrate:null;
         }
-        Sprite ManualIcon(FieldManualEntry entry)
+        Sprite ManualIcon(FieldManualEntry entry)=>entry==null?null:ScreenContent.Sprite(ScreenId,"entry-"+entry.slug,NativeManualIcon(entry));
+        Sprite NativeManualIcon(FieldManualEntry entry)
         {
             if(entry==null)return null;
             if(entry.category=="powerups")return InventoryIcon(entry.slug);
@@ -39,11 +40,13 @@ namespace BattleCities.UI
         {
             if(!root)return;
             string heading=page==Page.Socials?"SOCIALS":page==Page.Treasury?"TREASURY":page==Page.Manual||page==Page.ManualDetail?"FIELD MANUAL":"QUARTERS";
-            title.text=heading;
+            title.text=ScreenContent.Text(ScreenId,"title",heading);
             titleIcon.sprite=page==Page.Socials?theme.NavigationIcons[4]:page==Page.Quarters?theme.NavigationIcons[1]:SectionIcon(page==Page.Treasury?0:1);
             titleIcon.color=Color.white;
             introTitle.text=page==Page.Socials?"JOIN THE BATTLE CITIES COMMUNITY":page==Page.Treasury?(history?"TRANSACTION HISTORY":"YOUR HOLDINGS"):page==Page.Quarters?"COMMAND CENTER":CategoryLabels[category]+" • FIELD INTELLIGENCE";
             introDescription.text=page==Page.Socials?"COMPLETE SOCIAL TASKS AND VERIFY AVAILABLE FUEL REWARDS":page==Page.Treasury?"BALANCES, OWNED ITEMS AND YOUR RECENT ACTIVITY":page==Page.Quarters?"ASSETS, OPERATIONS AND BATTLE INTELLIGENCE":"TANKS, WEAPONS, POWERUPS AND ENEMY INTELLIGENCE";
+            introTitle.text=ScreenContent.Text(ScreenId,"intro-title"+(page==Page.Treasury&&history?"-history":""),introTitle.text);
+            introDescription.text=ScreenContent.Text(ScreenId,"intro-description",introDescription.text);
             BuildTabs();items.Clear();
             bool treasury=page==Page.Treasury;
             summary.gameObject.SetActive(treasury);detail.gameObject.SetActive(page==Page.ManualDetail);empty.gameObject.SetActive(false);
@@ -57,7 +60,7 @@ namespace BattleCities.UI
             else if(page==Page.ManualDetail)
             {
                 var entry=manual.FirstOrDefault(e=>e.slug==entryId);
-                if(entry!=null){detailIcon.sprite=ManualIcon(entry);detailIcon.color=Color.white;detailTitle.text=entry.name;detailRole.text=entry.role;detailLore.text=entry.lore;detailEffect.text=entry.effect;detailSource.text="SOURCE: "+entry.source;}
+                if(entry!=null){detailIcon.sprite=ManualIcon(entry);detailIcon.color=Color.white;detailTitle.text=ScreenContent.Text("manualdetail","entry-"+entry.slug+"-name",entry.name);detailRole.text=ScreenContent.Text("manualdetail","entry-"+entry.slug+"-role",entry.role);detailLore.text=ScreenContent.Text("manualdetail","entry-"+entry.slug+"-lore",entry.lore);detailEffect.text=ScreenContent.Text("manualdetail","entry-"+entry.slug+"-effect",entry.effect);detailSource.text="SOURCE: "+ScreenContent.Text("manualdetail","entry-"+entry.slug+"-source",entry.source);}
             }
             else if(treasury)TreasuryItems();
             BuildCards();if(treasury&&history&&treasuryAuthenticated&&ledger!=null&&!loading&&ledgerError==null)BuildLedger();
@@ -67,15 +70,15 @@ namespace BattleCities.UI
         }
         void QuartersItems()
         {
-            string[] names={"TREASURY","FIELD MANUAL","CAMPAIGNS","STAKING","TRADING","BOOSTS","AIRDROP"};
-            string[] details={"BALANCES, ITEMS & HISTORY","TANKS, POWERUPS & ENEMIES","EVENTS, OPERATIONS & REWARDS","TOKEN STAKING & PERKS","SWAPS & MARKET TOOLS","TRAIT BOOSTS & PERKS","ALLOCATION & CLAIM STATUS"};
+            string[] names={ScreenContent.Text("quarters","treasury-497bc8","TREASURY"),ScreenContent.Text("quarters","field-manual-6aaebd","FIELD MANUAL"),ScreenContent.Text("quarters","campaigns-fa93a8","CAMPAIGNS"),ScreenContent.Text("quarters","staking-c94a1a","STAKING"),ScreenContent.Text("quarters","trading-0377b8","TRADING"),ScreenContent.Text("quarters","boosts-da6776","BOOSTS"),ScreenContent.Text("quarters","airdrop-c2834c","AIRDROP")};
+            string[] details={ScreenContent.Text("quarters","balances-items-history-067d23","BALANCES, ITEMS & HISTORY"),ScreenContent.Text("quarters","tanks-powerups-enemies-d614b3","TANKS, POWERUPS & ENEMIES"),ScreenContent.Text("quarters","events-operations-rewards-93e4ae","EVENTS, OPERATIONS & REWARDS"),ScreenContent.Text("quarters","token-staking-perks-5f6c28","TOKEN STAKING & PERKS"),ScreenContent.Text("quarters","swaps-market-tools-f4edc6","SWAPS & MARKET TOOLS"),ScreenContent.Text("quarters","trait-boosts-perks-1f227a","TRAIT BOOSTS & PERKS"),ScreenContent.Text("quarters","allocation-claim-status-d43021","ALLOCATION & CLAIM STATUS")};
             for(int i=0;i<names.Length;i++)
                 items.Add(new Item{Key="quarter-"+i,Title=names[i],Detail=details[i],Icon=SectionIcon(i),Action=i<2?"OPEN":"LOCKED",Locked=i>=2,Click=i==0?(UnityEngine.Events.UnityAction)OpenTreasury:i==1?OpenManual:null});
         }
         void ManualItems()
         {
             foreach(var entry in manual.Where(e=>e.category==Categories[category]))
-            {string id=entry.slug;items.Add(new Item{Key=id,Title=entry.name,Detail=entry.role,Action="VIEW DETAILS",Icon=ManualIcon(entry),Click=()=>OpenManualEntry(id)});}
+            {string id=entry.slug;items.Add(new Item{Key=id,Title=ScreenContent.Text("manual","entry-"+entry.slug+"-name",entry.name),Detail=ScreenContent.Text("manual","entry-"+entry.slug+"-role",entry.role),Action="VIEW DETAILS",Icon=ManualIcon(entry),Click=()=>OpenManualEntry(id)});}
         }
         void TreasuryItems()
         {

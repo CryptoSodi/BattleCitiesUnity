@@ -1,3 +1,4 @@
+using BattleCities.UI;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
@@ -81,7 +82,7 @@ namespace BattleCities
         }
         void Text(Rect rect,string text,Color color,bool value=false,TextAnchor alignment=TextAnchor.MiddleLeft,int size=0)
         {
-            var t=Element<Text>(rect);t.font=font;t.fontSize=size>0?size:value?23:16;t.fontStyle=FontStyle.Bold;t.color=color;t.text=text;t.alignment=alignment;t.horizontalOverflow=HorizontalWrapMode.Overflow;t.verticalOverflow=VerticalWrapMode.Overflow;
+            var t=Element<Text>(rect);t.font=font;t.fontSize=size>0?size:value?23:16;t.fontSize=Mathf.RoundToInt(t.fontSize*ScreenContent.Number("battle-hud","font-scale",1));t.fontStyle=FontStyle.Bold;t.color=color;t.text=text;t.alignment=alignment;t.horizontalOverflow=HorizontalWrapMode.Overflow;t.verticalOverflow=VerticalWrapMode.Overflow;
             if(UI.ArcadeTextStyles.IsWhite(color))UI.ArcadeTextStyles.ApplyWhite(t);
             else if(t.TryGetComponent<UI.ArcadeWhiteText>(out var style))style.enabled=false;
         }
@@ -202,25 +203,25 @@ namespace BattleCities
             var powerupUi=RuntimePlatformInfo.PowerupUi;bool psg1=powerupUi==PowerupUiMode.MergedTopHud;
             Fill(new Rect(0,0,Screen.width,h),navy);Fill(new Rect(0,0,Screen.width,2),new Color(.22f,.3f,.38f));Fill(new Rect(0,h-3,Screen.width,3),gold);
             float metricWidth=narrow?Screen.width/3f:175;
-            Icon(new Rect(7,5,36,36),player);Text(new Rect(46,2,metricWidth-48,18),"SCORE",cream);Text(new Rect(46,18,metricWidth-48,27),state.Score.ToString("D6"),gold,true);
+            Icon(new Rect(7,5,36,36),player);Text(new Rect(46,2,metricWidth-48,18),ScreenContent.Text("battle-hud","score-a60ffb","SCORE"),cream);Text(new Rect(46,18,metricWidth-48,27),state.Score.ToString("D6"),gold,true);
             float x=metricWidth;
             Fill(new Rect(x-7,9,1,28),gold);
             int seconds=state.Tick/60;
-            Text(new Rect(x+4,2,metricWidth-8,18),"TIME",cream);Text(new Rect(x+4,18,metricWidth-8,27),(seconds/60).ToString("D2")+":"+(seconds%60).ToString("D2"),cyan,true);
+            Text(new Rect(x+4,2,metricWidth-8,18),ScreenContent.Text("battle-hud","time-588867","TIME"),cream);Text(new Rect(x+4,18,metricWidth-8,27),(seconds/60).ToString("D2")+":"+(seconds%60).ToString("D2"),cyan,true);
             x+=metricWidth;Fill(new Rect(x-7,9,1,28),gold);
-            Text(new Rect(x+4,2,metricWidth-8,18),state.IsCaptureFlag?"RESPAWNS":"LIVES",cream);Text(new Rect(x+4,18,32,27),state.IsCaptureFlag?"∞":state.Lives.ToString(),gold,true);
+            Text(new Rect(x+4,2,metricWidth-8,18),state.IsCaptureFlag?ScreenContent.Text("battle-hud","respawns","RESPAWNS"):ScreenContent.Text("battle-hud","lives","LIVES"),cream);Text(new Rect(x+4,18,32,27),state.IsCaptureFlag?"∞":state.Lives.ToString(),gold,true);
             for(int i=0;i<(state.IsCaptureFlag?0:3);i++)Icon(new Rect(x+32+i*30,18,28,25),player,i>=state.Lives);
             float enemyX=narrow?12:metricWidth*3+4,enemyY=narrow?46:4;
             Fill(new Rect(enemyX-11,9,1,narrow?0:28),gold);
             int opponents=0;
             if(state.IsPvp)for(int i=0;i<BattleSimulation.MaxPlayers;i++)if(!state.AreAllies(i,state.LocalPlayerSlot)&&state.Participants[i].Connected&&state.Participants[i].Lives>0)opponents++;
-            Text(new Rect(enemyX,enemyY,100,19),state.IsPvp?"RIVALS":"ENEMIES",cream);
+            Text(new Rect(enemyX,enemyY,100,19),state.IsPvp?ScreenContent.Text("battle-hud","rivals","RIVALS"):ScreenContent.Text("battle-hud","enemies","ENEMIES"),cream);
             Text(new Rect(enemyX,enemyY+18,100,23),(state.IsPvp?opponents:state.Remaining).ToString()+" LEFT",new Color(1,.42f,.32f));
             float start=enemyX+100,reserved=psg1?Psg1PowerupWidth(narrow):0,available=Mathf.Max(1,Screen.width-start-10-reserved);
             if(state.IsCaptureFlag)
             {
                 Text(new Rect(start,enemyY,available,22),"FLAGS  YELLOW "+state.FlagScores[0]+" : "+state.FlagScores[1]+" GREEN",gold,true);
-                Text(new Rect(start,enemyY+22,available,19),"FIRST TO 3 · OWN FLAG MUST BE HOME",cream);
+                Text(new Rect(start,enemyY+22,available,19),ScreenContent.Text("battle-hud","first-to-3-own-flag-must-be-home-57a971","FIRST TO 3 · OWN FLAG MUST BE HOME"),cream);
             }
             int total=state.IsCaptureFlag?0:state.TotalEnemies,deadCount=total-state.Remaining;
             float step=Mathf.Min(34,available/Mathf.Max(1,total));

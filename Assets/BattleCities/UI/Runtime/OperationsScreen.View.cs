@@ -12,34 +12,34 @@ namespace BattleCities.UI
         {
             header=Panel("Title plate",root,art.tankTitlePanel);header.GetComponent<Image>().pixelsPerUnitMultiplier=4;
             titleIcon=Icon("Icon",header,null,new Rect(0,0,1,1));
-            title=Label("Title",header,"QUARTERS",new Rect(0,0,1,1),28,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
+            title=Label("Title",header,ScreenContent.Text(ScreenId,"quarters-f0d8b5","QUARTERS"),new Rect(0,0,1,1),28,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
             tabBar=Panel("Navigation",header,art.tankCostButton);tabBar.GetComponent<Image>().color=new Color(.08f,.63f,.68f,1);
             body=Panel("Body",root,theme.CreamPanel);body.GetComponent<Image>().pixelsPerUnitMultiplier=2;
             intro=Panel("Intro",body,null);
-            introTitle=Label("Title",intro,"COMMAND CENTER",new Rect(.02f,.05f,.96f,.45f),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
-            introDescription=Label("Description",intro,"ASSETS, OPERATIONS AND BATTLE INTELLIGENCE",new Rect(.02f,.51f,.96f,.40f),19,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);introDescription.color=new Color32(63,89,115,255);
-            var line=Panel("Divider",intro,null);line.GetComponent<Image>().color=new Color32(52,82,102,120);Fit(line,new Rect(.016f,.975f,.968f,.02f));
+            introTitle=Label("Title",intro,ScreenContent.Text(ScreenId,"command-center-2b1088","COMMAND CENTER"),ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-02-89a059",new Rect(.02f,.05f,.96f,.45f)),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            introDescription=Label("Description",intro,ScreenContent.Text(ScreenId,"assets-operations-and-battle-intelligence-b31d2c","ASSETS, OPERATIONS AND BATTLE INTELLIGENCE"),ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-02-6bc6fa",new Rect(.02f,.51f,.96f,.40f)),19,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);introDescription.color=new Color32(63,89,115,255);
+            var line=Panel("Divider",intro,null);line.GetComponent<Image>().color=new Color32(52,82,102,120);Fit(line,ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-01-6cdbec",new Rect(.016f,.975f,.968f,.02f)));
             summary=Panel("Account summary",body,null);
             scroll=BuildScroll(body);
             empty=Panel("Message",body,null);
-            Shadow(empty,new Rect(.32f,.53f,.36f,.065f));
-            emptyIcon=Icon("Icon",empty,illustrations?illustrations.quarters[0]:null,new Rect(.29f,.07f,.42f,.48f));
-            emptyTitle=Label("Title",empty,"",new Rect(.05f,.62f,.90f,.13f),32,ArcadeTextTreatment.PrizeAmount);
-            emptyDescription=Label("Description",empty,"",new Rect(.10f,.76f,.80f,.16f),24,ArcadeTextTreatment.PrizeAmount);emptyDescription.textWrappingMode=TextWrappingModes.Normal;
+            Shadow(empty,ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-32-335855",new Rect(.32f,.53f,.36f,.065f)));
+            emptyIcon=Icon("Icon",empty,illustrations?illustrations.quarters[0]:null,ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-29-ee4f8f",new Rect(.29f,.07f,.42f,.48f)));
+            emptyTitle=Label("Title",empty,"",ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-05-626b22",new Rect(.05f,.62f,.90f,.13f)),32,ArcadeTextTreatment.PrizeAmount);
+            emptyDescription=Label("Description",empty,"",ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-10-31d562",new Rect(.10f,.76f,.80f,.16f)),24,ArcadeTextTreatment.PrizeAmount);emptyDescription.textWrappingMode=TextWrappingModes.Normal;
             detail=Panel("Manual entry",body,null);
-            var figure=Panel("Figure",detail,art.tankCardAvailable);figure.GetComponent<Image>().pixelsPerUnitMultiplier=2;Fit(figure,new Rect(.02f,.06f,.35f,.88f));
-            Shadow(figure,new Rect(.16f,.64f,.68f,.08f));
-            detailIcon=Icon("Artwork",figure,null,new Rect(.07f,.11f,.86f,.57f));
-            detailTitle=Label("Entry title",figure,"",new Rect(.05f,.74f,.90f,.16f),30,ArcadeTextTreatment.PrizeAmount);
-            detailRole=Label("Role",detail,"",new Rect(.41f,.08f,.55f,.12f),30,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
-            detailLore=Label("Description",detail,"",new Rect(.41f,.23f,.55f,.24f),27,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.TopLeft);detailLore.textWrappingMode=TextWrappingModes.Normal;
-            var effect=Panel("Effect panel",detail,theme.Rounded);effect.GetComponent<Image>().pixelsPerUnitMultiplier=5;effect.GetComponent<Image>().color=new Color32(238,223,175,255);Fit(effect,new Rect(.40f,.52f,.57f,.27f));
-            Label("Label",effect,"IN BATTLE",new Rect(.04f,.05f,.92f,.22f),20,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
-            detailEffect=Label("Effect",effect,"",new Rect(.04f,.30f,.92f,.64f),29,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);detailEffect.textWrappingMode=TextWrappingModes.Normal;
-            detailSource=Label("Source",detail,"",new Rect(.41f,.84f,.55f,.10f),23,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            var figure=Panel("Figure",detail,art.tankCardAvailable);figure.GetComponent<Image>().pixelsPerUnitMultiplier=2;Fit(figure,ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-02-8aebfb",new Rect(.02f,.06f,.35f,.88f)));
+            Shadow(figure,ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-16-159b45",new Rect(.16f,.64f,.68f,.08f)));
+            detailIcon=Icon("Artwork",figure,null,ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-07-9e8f40",new Rect(.07f,.11f,.86f,.57f)));
+            detailTitle=Label("Entry title",figure,"",ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-05-98f810",new Rect(.05f,.74f,.90f,.16f)),30,ArcadeTextTreatment.PrizeAmount);
+            detailRole=Label("Role",detail,"",ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-41-65374d",new Rect(.41f,.08f,.55f,.12f)),30,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            detailLore=Label("Description",detail,"",ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-41-895323",new Rect(.41f,.23f,.55f,.24f)),27,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.TopLeft);detailLore.textWrappingMode=TextWrappingModes.Normal;
+            var effect=Panel("Effect panel",detail,theme.Rounded);effect.GetComponent<Image>().pixelsPerUnitMultiplier=5;effect.GetComponent<Image>().color=new Color32(238,223,175,255);Fit(effect,ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-40-66a49f",new Rect(.40f,.52f,.57f,.27f)));
+            Label("Label",effect,ScreenContent.Text(ScreenId,"in-battle-1f7685","IN BATTLE"),ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-04-a306fa",new Rect(.04f,.05f,.92f,.22f)),20,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            detailEffect=Label("Effect",effect,"",ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-04-8ece63",new Rect(.04f,.30f,.92f,.64f)),29,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);detailEffect.textWrappingMode=TextWrappingModes.Normal;
+            detailSource=Label("Source",detail,"",ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-41-71d142",new Rect(.41f,.84f,.55f,.10f)),23,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
             footer=Panel("Status",root,art.statusPanel);TvStatusFooterLayout.ApplySkin(footer.GetComponent<Image>(),art.statusPanel);
-            status=Label("Status text",footer,statusMessage,new Rect(.025f,.12f,.70f,.76f),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
-            footerAction=Button("Action",footer,FooterAction);footerCaption=Label("Label",footerAction.transform,"REFRESH",new Rect(.05f,.04f,.90f,.92f),28,ArcadeTextTreatment.PrizeAmount);footerCaption.color=Color.white;
+            status=Label("Status text",footer,statusMessage,ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-02-00ab2a",new Rect(.025f,.12f,.70f,.76f)),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            footerAction=Button("Action",footer,FooterAction);footerCaption=Label("Label",footerAction.transform,ScreenContent.Text(ScreenId,"refresh-1c3108","REFRESH"),ScreenContent.Rect(ScreenId,"operationsscreen-view-buildview-new-rect-05-83b409",new Rect(.05f,.04f,.90f,.92f)),28,ArcadeTextTreatment.PrizeAmount);footerCaption.color=Color.white;
             BuildLinkInstructions();
         }
 
@@ -75,6 +75,7 @@ namespace BattleCities.UI
             MainMenuScene.Place(detail,10,introHeight+13,body.rect.width-20,height-introHeight-23);
             columns=body.rect.width<510?2:3;
             grid.constraintCount=columns;
+            grid.spacing=Vector2.one*ScreenContent.Number(ScreenId,"card-gap",10);
             float cardWidth=(scroll.viewport.rect.width-grid.padding.horizontal-grid.spacing.x*(columns-1))/columns;
             float rowHeight=Mathf.Max(120,(scroll.viewport.rect.height-grid.padding.vertical-grid.spacing.y)/2f);
             scroll.CardAspectRatio=Mathf.Max(1.13f,cardWidth/rowHeight);
@@ -91,11 +92,11 @@ namespace BattleCities.UI
             if(page==Page.Socials)AddTab("REFRESH",false,RefreshTasks).interactable=!loading;
             if(page==Page.Treasury){AddTab("HOLDINGS",!history,()=>SelectTreasuryHistory(false));AddTab("HISTORY",history,()=>SelectTreasuryHistory(true));}
             if(page==Page.Manual||page==Page.ManualDetail)
-                for(int i=0;i<4;i++){int index=i;AddTab(CategoryLabels[i],category==i,()=>SelectManualCategory(index));}
-            var back=AddTab("BACK",false,Back);Fit(tabCaptions[tabCaptions.Count-1].rectTransform,new Rect(.31f,.02f,.65f,.96f));
+                for(int i=0;i<4;i++){int index=i;AddTab(ScreenContent.Text(ScreenId,"category-"+Categories[i],CategoryLabels[i]),category==i,()=>SelectManualCategory(index));}
+            var back=AddTab("BACK",false,Back);Fit(tabCaptions[tabCaptions.Count-1].rectTransform,ScreenContent.Rect(ScreenId,"operationsscreen-view-buildtabs-new-rect-31-53579f",new Rect(.31f,.02f,.65f,.96f)));
             var arrow=back.transform.Find("Back arrow") as RectTransform;
             if(!arrow){var go=new GameObject("Back arrow",typeof(RectTransform),typeof(CanvasRenderer),typeof(BackTabArrow));go.layer=root.gameObject.layer;arrow=(RectTransform)go.transform;arrow.SetParent(back.transform,false);}
-            arrow.gameObject.SetActive(true);Fit(arrow,new Rect(.10f,.24f,.16f,.52f));arrow.GetComponent<BackTabArrow>().raycastTarget=false;
+            arrow.gameObject.SetActive(true);Fit(arrow,ScreenContent.Rect(ScreenId,"operationsscreen-view-buildtabs-new-rect-10-88e765",new Rect(.10f,.24f,.16f,.52f)));arrow.GetComponent<BackTabArrow>().raycastTarget=false;
         }
         Button AddTab(string caption,bool active,UnityEngine.Events.UnityAction click)
         {
@@ -106,7 +107,7 @@ namespace BattleCities.UI
             button.image.overrideSprite=null;focus.GetComponent<Image>().overrideSprite=null;button.spriteState=default;
             button.targetGraphic=focus.GetComponent<Image>();button.transition=Selectable.Transition.ColorTint;
             var colors=ColorBlock.defaultColorBlock;colors.normalColor=colors.disabledColor=Color.clear;colors.selectedColor=colors.highlightedColor=colors.pressedColor=Color.white;colors.fadeDuration=.08f;button.colors=colors;
-            var label=Label("Label",button.transform,caption,new Rect(.04f,.02f,.92f,.96f),28,ArcadeTextTreatment.PrizeAmount);styles.ApplyCleanButton(label,active);label.transform.SetAsLastSibling();
+            var label=Label("Label",button.transform,caption,ScreenContent.Rect(ScreenId,"operationsscreen-view-addtab-new-rect-04f-0-dc01e7",new Rect(.04f,.02f,.92f,.96f)),28,ArcadeTextTreatment.PrizeAmount);styles.ApplyCleanButton(label,active);label.transform.SetAsLastSibling();
             if(i>0){var divider=Panel("Divider "+i,tabBar,null);divider.gameObject.SetActive(true);divider.GetComponent<Image>().color=new Color32(0,44,72,240);}
             tabs.Add(button);tabSelections.Add(selection.GetComponent<Image>());tabCaptions.Add(label);return button;
         }
@@ -121,13 +122,13 @@ namespace BattleCities.UI
                 {
                     var rect=Panel("Card "+i,scroll.content,art.tankCardAvailable);var button=rect.GetComponent<Button>();if(!button)button=rect.gameObject.AddComponent<Button>();
                     button.targetGraphic=rect.GetComponent<Image>();button.transition=Selectable.Transition.None;button.image.raycastTarget=true;
-                    var ground=Shadow(rect,new Rect(.25f,.625f,.50f,.055f));
+                    var ground=Shadow(rect,ScreenContent.Rect(ScreenId,"operationsscreen-view-buildcards-new-rect-2-4480ad",new Rect(.25f,.625f,.50f,.055f)));
                     card=new Card{Rect=rect,Button=button,Frame=button.image};
-                    card.Title=Label("Title",rect,"",new Rect(.12f,.045f,.76f,.17f),34,ArcadeTextTreatment.PrizeAmount);
-                    card.Icon=Icon("Artwork",rect,null,new Rect(.12f,.22f,.76f,.43f));
-                    card.Description=Label("Detail",rect,"",new Rect(.055f,.66f,.89f,.12f),24,ArcadeTextTreatment.PrizeAmount);
-                    var action=Panel("Action",rect,art.tankCostButton);Fit(action,new Rect(.07f,.79f,.86f,.165f));card.Action=action.GetComponent<Image>();
-                    card.Caption=Label("Caption",action,"",new Rect(.04f,.05f,.92f,.90f),30,ArcadeTextTreatment.PrizeAmount);
+                    card.Title=Label("Title",rect,"",ScreenContent.Rect(ScreenId,"operationsscreen-view-buildcards-new-rect-1-bf2c5f",new Rect(.12f,.045f,.76f,.17f)),34,ArcadeTextTreatment.PrizeAmount);
+                    card.Icon=Icon("Artwork",rect,null,ScreenContent.Rect(ScreenId,"operationsscreen-view-buildcards-new-rect-1-fb453c",new Rect(.12f,.22f,.76f,.43f)));
+                    card.Description=Label("Detail",rect,"",ScreenContent.Rect(ScreenId,"operationsscreen-view-buildcards-new-rect-0-0e72ee",new Rect(.055f,.66f,.89f,.12f)),24,ArcadeTextTreatment.PrizeAmount);
+                    var action=Panel("Action",rect,art.tankCostButton);Fit(action,ScreenContent.Rect(ScreenId,"operationsscreen-view-buildcards-new-rect-0-c7a839",new Rect(.07f,.79f,.86f,.165f)));card.Action=action.GetComponent<Image>();
+                    card.Caption=Label("Caption",action,"",ScreenContent.Rect(ScreenId,"operationsscreen-view-buildcards-new-rect-0-ff3d9d",new Rect(.04f,.05f,.92f,.90f)),30,ArcadeTextTreatment.PrizeAmount);
                     card.Highlight=CardSelectionHighlight.Ensure(card.Frame);
                     var handler=rect.GetComponent<OperationsCardFocus>();if(!handler)handler=rect.gameObject.AddComponent<OperationsCardFocus>();handler.Configure(this,index);
                     cards.Add(card);

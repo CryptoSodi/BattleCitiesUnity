@@ -1,0 +1,3284 @@
+{
+  "schemaVersion": 1,
+  "runtimeId": "battlecities-screens-v1",
+  "images": [],
+  "screens": [
+    {
+      "id": "settings",
+      "platform": "all",
+      "patches": [
+        {
+          "path": "Title plate/Title",
+          "text": "SETTINGS",
+          "fontSize": 28
+        },
+        {
+          "path": "Rows/Row 0/Name",
+          "text": "MUTE"
+        },
+        {
+          "path": "Rows/Row 1/Name",
+          "text": "SCANLINE"
+        },
+        {
+          "path": "Rows/Row 2/Name",
+          "text": "ACCOUNT"
+        },
+        {
+          "path": "Rows/Row 3/Name",
+          "text": "PHONE CONTROLLER"
+        },
+        {
+          "path": "Rows/Row 0/Description",
+          "text": "Game audio"
+        },
+        {
+          "path": "Rows/Row 1/Description",
+          "text": "Retro screen effect"
+        }
+      ],
+      "flows": [
+        {
+          "parent": "Rows",
+          "gap": 8,
+          "children": [
+            {
+              "path": "Row 0",
+              "weight": 1
+            },
+            {
+              "path": "Row 1",
+              "weight": 1
+            },
+            {
+              "path": "Row 2",
+              "weight": 1
+            },
+            {
+              "path": "Row 3",
+              "weight": 1.6
+            }
+          ]
+        }
+      ],
+      "copy": {
+        "settings-02f6ea": "SETTINGS",
+        "back-639807": "BACK",
+        "enable-alerts": "ENABLE ALERTS",
+        "disable-alerts": "DISABLE ALERTS"
+      },
+      "regions": {
+        "settingsscreen-configure-new-rect-29f-025f--77cdf9": [
+          0.29,
+          0.025,
+          0.68,
+          0.95
+        ],
+        "settingsscreen-configure-new-rect-10f-17f-1-cab8a0": [
+          0.1,
+          0.17,
+          0.14,
+          0.66
+        ],
+        "settingsscreen-configure-new-rect-035f-75f--67b9f5": [
+          0.035,
+          0.75,
+          0.26,
+          0.04
+        ],
+        "settingsscreen-configure-new-rect-052f-77f--caab42": [
+          0.052,
+          0.77,
+          0.14,
+          0.055
+        ],
+        "settingsscreen-configure-new-rect-025f-15f--9f0dd4": [
+          0.025,
+          0.15,
+          0.28,
+          0.62
+        ],
+        "settingsscreen-configure-new-rect-035f-12f--7368d7": [
+          0.035,
+          0.12,
+          0.17,
+          0.72
+        ],
+        "settingsscreen-configure-new-rect-36f-12f-3-ef7705": [
+          0.36,
+          0.12,
+          0.39,
+          0.2
+        ],
+        "settingsscreen-configure-new-rect-27f-14f-4-4f2ea2": [
+          0.27,
+          0.14,
+          0.41,
+          0.39
+        ],
+        "settingsscreen-configure-new-rect-36f-34f-3-c8d73b": [
+          0.36,
+          0.34,
+          0.37,
+          0.22
+        ],
+        "settingsscreen-configure-new-rect-27f-54f-3-999f7e": [
+          0.27,
+          0.54,
+          0.39,
+          0.27
+        ],
+        "settingsscreen-configure-new-rect-72f-22f-2-0e34a0": [
+          0.72,
+          0.22,
+          0.25,
+          0.56
+        ],
+        "settingsscreen-configure-new-rect-36f-59f-3-6f8c0f": [
+          0.36,
+          0.59,
+          0.36,
+          0.12
+        ],
+        "settingsscreen-configure-new-rect-36f-72f-3-d053e5": [
+          0.36,
+          0.72,
+          0.32,
+          0.22
+        ],
+        "settingsscreen-configure-new-rect-07f-83f-8-df68b5": [
+          0.07,
+          0.83,
+          0.86,
+          0.12
+        ],
+        "settingsscreen-configure-new-rect-03f-13f-9-83a952": [
+          0.03,
+          0.13,
+          0.94,
+          0.74
+        ],
+        "settingsscreen-refreshphone-new-rect-36f-34-6df5a1": [
+          0.36,
+          0.34,
+          0.37,
+          0.22
+        ],
+        "settingsscreen-refreshphone-new-rect-36f-35-fc4461": [
+          0.36,
+          0.35,
+          0.57,
+          0.23
+        ],
+        "settingsscreen-refreshphone-new-rect-36f-59-6c71a1": [
+          0.36,
+          0.59,
+          0.36,
+          0.12
+        ],
+        "settingsscreen-refreshphone-new-rect-36f-68-b07d3d": [
+          0.36,
+          0.68,
+          0.55,
+          0.12
+        ],
+        "settingsscreen-control-new-rect-035f-05f-93-6117e1": [
+          0.035,
+          0.05,
+          0.93,
+          0.9
+        ]
+      },
+      "layout": {},
+      "art": {
+        "Title plate/Icon": null,
+        "Rows/Row 0/Icon": null,
+        "Rows/Row 1/Icon": null,
+        "Rows/Row 2/Icon": null,
+        "Rows/Row 3/Icon": null
+      }
+    },
+    {
+      "id": "home",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "navigation-0": "PLAY",
+        "navigation-1": "SHOP",
+        "navigation-2": "RANKING",
+        "navigation-3": "QUARTERS",
+        "navigation-4": "SOCIALS",
+        "how-heading": "HOW IT WORKS ?",
+        "prize-heading": "PRIZE DISTRIBUTION !",
+        "main-display-battlefield-hero-start-battle-editable-label": "START",
+        "status-bar-score-readout-label": "SCORE",
+        "status-bar-high-score-readout-label": "HI-SCORE",
+        "how-it-works-paper-step-1-title": "PLAY",
+        "how-it-works-paper-step-1-body": "and earn points",
+        "how-it-works-paper-step-2-title": "REACH TOP 10",
+        "how-it-works-paper-step-2-body": "before the round closes",
+        "how-it-works-paper-step-3-title": "EARN SKR",
+        "how-it-works-paper-step-3-body": "to your linked wallet",
+        "psg1-controls-hints": "D-PAD  NAVIGATE          A  SELECT          B  BACK",
+        "psg1-controls-d-pad-hint-label": "D-PAD  NAVIGATE",
+        "psg1-controls-a-hint-label": "SELECT",
+        "psg1-controls-b-hint-label": "BACK",
+        "leaderboard-heading-title": "PLAYER RANKINGS",
+        "leaderboard-columns-player": "PLAYER",
+        "leaderboard-columns-score": "SCORE",
+        "leaderboard-columns-reward": "MATCHES"
+      },
+      "regions": {
+        "main-display-battlefield-hero-start-battle-editable-label": null,
+        "status-bar-player-readout-label": null,
+        "status-bar-score-readout-label": null,
+        "status-bar-high-score-readout-label": null,
+        "how-it-works-paper-step-1-title": null,
+        "how-it-works-paper-step-1-body": null,
+        "how-it-works-paper-step-2-title": null,
+        "how-it-works-paper-step-2-body": null,
+        "how-it-works-paper-step-3-title": null,
+        "how-it-works-paper-step-3-body": null,
+        "psg1-controls-hints": null,
+        "psg1-controls-d-pad-hint-label": null,
+        "psg1-controls-a-hint-label": null,
+        "psg1-controls-b-hint-label": null,
+        "leaderboard-heading-title": null,
+        "leaderboard-columns-player": null,
+        "leaderboard-columns-score": null,
+        "leaderboard-columns-reward": null
+      },
+      "layout": {},
+      "art": {
+        "Main Display/Battlefield Hero/Battle Cities logo": null,
+        "Main Display/Battlefield Hero/Start Battle": null,
+        "How It Works/Paper/TV Background": null,
+        "How It Works/Paper/Step 1/Icon": null,
+        "How It Works/Paper/Step 1/Step Badge": null,
+        "How It Works/Paper/Step 2/Icon": null,
+        "How It Works/Paper/Step 2/Step Badge": null,
+        "How It Works/Paper/Step 3/Icon": null,
+        "How It Works/Paper/Step 3/Step Badge": null,
+        "How It Works/Paper/Prize Distribution/Prize 1/Crate": null,
+        "How It Works/Paper/Prize Distribution/Prize 2/Crate": null,
+        "How It Works/Paper/Prize Distribution/Prize 3/Crate": null,
+        "How It Works/Paper/Prize Distribution/Prize 4/Crate": null,
+        "Navigation/PLAY": null,
+        "Navigation/PLAY/Icon": null,
+        "Navigation/SHOP": null,
+        "Navigation/SHOP/Icon": null,
+        "Navigation/RANKING": null,
+        "Navigation/RANKING/Icon": null,
+        "Navigation/QUARTERS": null,
+        "Navigation/QUARTERS/Icon": null,
+        "Navigation/SOCIALS": null,
+        "Navigation/SOCIALS/Icon": null,
+        "Leaderboard/Heading/Glass viewport/Paper/TV Background": null,
+        "Leaderboard/Heading/Trophy": null
+      }
+    },
+    {
+      "id": "login",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "login-layout-edit-child-positions-freely-heading": "ENTER THE BATTLEFIELD",
+        "login-layout-edit-child-positions-freely-description": "Sign in to record matches, protect replays, and\nprepare your scores for verified leaderboards.",
+        "login-layout-edit-child-positions-freely-or": "OR",
+        "login-layout-edit-child-positions-freely-choose-entry": "Choose how you want to enter Battle Cities.",
+        "psg1-login-layout-heading": "ENTER THE BATTLEFIELD",
+        "psg1-login-layout-description": "Sign in to save your progress and join the leaderboard.",
+        "psg1-login-layout-or": "OR",
+        "psg1-login-layout-choose-entry": "Choose how you want to enter Battle Cities.",
+        "psg1-login-layout-psg1-controller-legend-navigate": "NAVIGATE",
+        "psg1-login-layout-psg1-controller-legend-select": "SELECT",
+        "psg1-login-layout-psg1-controller-legend-back": "BACK"
+      },
+      "regions": {
+        "login-layout-edit-child-positions-freely-heading": null,
+        "login-layout-edit-child-positions-freely-description": null,
+        "login-layout-edit-child-positions-freely-or": null,
+        "login-layout-edit-child-positions-freely-choose-entry": null,
+        "psg1-login-layout-heading": null,
+        "psg1-login-layout-description": null,
+        "psg1-login-layout-or": null,
+        "psg1-login-layout-choose-entry": null,
+        "psg1-login-layout-psg1-controller-legend-navigate": null,
+        "psg1-login-layout-psg1-controller-legend-select": null,
+        "psg1-login-layout-psg1-controller-legend-back": null
+      },
+      "layout": {
+        "coverage-scale": 1
+      },
+      "art": {
+        "PSG1 Battlefield": null,
+        "Web Battlefield": null,
+        "Blurred Battlefield": null,
+        "Login Layout (edit child positions freely)/Main Menu Blue Container/Grey White TV Interior/TV Background": null,
+        "Login Layout (edit child positions freely)/Web Partner Dock/Navy Interior/TV Background": null,
+        "Login Layout (edit child positions freely)/Battle Cities Logo": null,
+        "Login Layout (edit child positions freely)/Connect Phantom": null,
+        "Login Layout (edit child positions freely)/Continue as Guest": null,
+        "Login Layout (edit child positions freely)/Solana dApp Store": null,
+        "Login Layout (edit child positions freely)/Built on Solana": null,
+        "Login Layout (edit child positions freely)/Powered by MagicBlock": null,
+        "Login Layout (edit child positions freely)/Golden Eagle": null,
+        "PSG1 Login Layout/Main Menu Blue Container/Grey White TV Interior/TV Background": null,
+        "PSG1 Login Layout/PSG1 Partner Dock/Glass Interior/TV Background": null,
+        "PSG1 Login Layout/Battle Cities Logo": null,
+        "PSG1 Login Layout/Connect Phantom": null,
+        "PSG1 Login Layout/Continue as Guest": null,
+        "PSG1 Login Layout/Solana dApp Store": null,
+        "PSG1 Login Layout/Built on Solana": null,
+        "PSG1 Login Layout/Powered by MagicBlock": null,
+        "PSG1 Login Layout/Golden Eagle": null,
+        "PSG1 Login Layout/PSG1 Controller Legend/NAVIGATE Icon": null,
+        "PSG1 Login Layout/PSG1 Controller Legend/SELECT Icon": null,
+        "PSG1 Login Layout/PSG1 Controller Legend/BACK Icon": null
+      }
+    },
+    {
+      "id": "shop",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "shop-1ed8f0": "SHOP",
+        "13-items-c3db8b": "13 ITEMS",
+        "inventory-44e764": "INVENTORY",
+        "swap-f4d4ba": "SWAP",
+        "you-pay-b6bc7a": "YOU PAY",
+        "switch-dc253e": "SWITCH",
+        "you-receive-8ffa86": "YOU RECEIVE",
+        "close-f13a1e": "CLOSE",
+        "all-b5c7ae": "ALL",
+        "fuel-0e2f3c": "FUEL",
+        "power-10149a": "POWER",
+        "packs-f4bff7": "PACKS",
+        "season-pass-e96fec": "SEASON PASS",
+        "product-fuel-one": "FUEL X1",
+        "product-fuel-five": "FUEL X5",
+        "product-fuel-twenty": "FUEL X20",
+        "product-shield": "SHIELD",
+        "product-base-defence": "BASE DEFENCE",
+        "product-freeze": "FREEZE",
+        "product-speed": "SPEED",
+        "product-upgrade": "STAR",
+        "product-zoom-out": "ZOOM OUT",
+        "product-wipeout": "WIPEOUT",
+        "product-extra-life": "EXTRA LIFE",
+        "product-starter-pack": "STARTER PACK",
+        "product-season-pass": "SEASON PASS",
+        "power-shield": "SHIELD",
+        "power-base-defence": "BASE DEFENCE",
+        "power-freeze": "FREEZE",
+        "power-speed": "SPEED",
+        "power-upgrade": "STAR",
+        "power-zoom-out": "ZOOM OUT",
+        "power-wipeout": "WIPEOUT",
+        "power-extra-life": "EXTRA LIFE",
+        "category-0": "ALL",
+        "category-1": "FUEL",
+        "category-2": "POWER",
+        "category-3": "PACKS",
+        "category-4": "SEASON PASS"
+      },
+      "regions": {
+        "shopscreen-buildview-new-rect-10f-12f-25f-7-8393c0": [
+          0.1,
+          0.12,
+          0.25,
+          0.76
+        ],
+        "shopscreen-buildview-new-rect-36f-06f-57f-8-fef25f": [
+          0.36,
+          0.06,
+          0.57,
+          0.88
+        ],
+        "shopscreen-buildview-new-rect-025f-06f-20f--63b702": [
+          0.025,
+          0.06,
+          0.2,
+          0.88
+        ],
+        "shopscreen-buildinventory-new-rect-025f-10f-8072a3": [
+          0.025,
+          0.1,
+          0.18,
+          0.8
+        ],
+        "shopscreen-buildinventory-new-rect-23f-02f--1f894f": [
+          0.23,
+          0.02,
+          0.74,
+          0.96
+        ],
+        "shopscreen-buildinventory-new-rect-02f-025f-56faa4": [
+          0.02,
+          0.025,
+          0.96,
+          0.95
+        ],
+        "shopscreen-buildinventory-new-rect-29f-08f--12ac26": [
+          0.29,
+          0.08,
+          0.5,
+          0.84
+        ],
+        "shopscreen-buildinventory-new-rect-08f-04f--b56b36": [
+          0.08,
+          0.04,
+          0.84,
+          0.92
+        ],
+        "shopscreen-buildcurrencies-new-rect-29f-025-821fdc": [
+          0.29,
+          0.025,
+          0.68,
+          0.95
+        ],
+        "shopscreen-buildcurrencies-new-rect-075f-12-412c3a": [
+          0.075,
+          0.12,
+          0.19,
+          0.76
+        ],
+        "shopscreen-buildcurrencies-new-rect-10f-17f-e9b4c7": [
+          0.1,
+          0.17,
+          0.14,
+          0.66
+        ],
+        "shopscreen-buildfilters-new-rect-035f-025f--7104c5": [
+          0.035,
+          0.025,
+          0.93,
+          0.95
+        ],
+        "shopscreen-joineddividers-new-rect-67f-0-33-ff6ece": [
+          0.67,
+          0.0,
+          0.33,
+          1.0
+        ],
+        "shopscreen-balance-new-rect-04f-12f-18f-76f-5c918c": [
+          0.04,
+          0.12,
+          0.18,
+          0.76
+        ],
+        "shopscreen-balance-new-rect-25f-12f-31f-76f-e8f078": [
+          0.25,
+          0.12,
+          0.31,
+          0.76
+        ],
+        "shopscreen-balance-new-rect-57f-08f-39f-84f-1dec04": [
+          0.57,
+          0.08,
+          0.39,
+          0.84
+        ],
+        "shopscreen-buildcard-new-rect-13f-055f-74f--a237c5": [
+          0.13,
+          0.055,
+          0.74,
+          0.167
+        ],
+        "shopscreen-buildcard-new-rect-18f-535f-64f--13fa6e": [
+          0.18,
+          0.535,
+          0.64,
+          0.055
+        ],
+        "shopscreen-buildcard-new-rect-12f-17f-76f-4-a7cf94": [
+          0.12,
+          0.17,
+          0.76,
+          0.485
+        ],
+        "shopscreen-buildcard-new-rect-23f-18f-54f-4-e7f598": [
+          0.23,
+          0.18,
+          0.54,
+          0.465
+        ],
+        "shopscreen-buildcard-new-rect-06f-66f-88f-1-5e0304": [
+          0.06,
+          0.66,
+          0.88,
+          0.125
+        ],
+        "shopscreen-buildcard-new-rect-035f-0-93f-1-e31dfd": [
+          0.035,
+          0.0,
+          0.93,
+          1.0
+        ],
+        "shopscreen-buildcard-new-rect-22f-05f-74f-9-78d721": [
+          0.22,
+          0.05,
+          0.74,
+          0.9
+        ],
+        "shopscreen-buildcard-new-rect-05f-13f-17f-7-bf92c8": [
+          0.05,
+          0.13,
+          0.17,
+          0.74
+        ],
+        "shopscreen-buildswap-new-rect-08f-045f-84f--9dfe27": [
+          0.08,
+          0.045,
+          0.84,
+          0.12
+        ],
+        "shopscreen-buildswap-new-rect-08f-22f-84f-2-bfa942": [
+          0.08,
+          0.22,
+          0.84,
+          0.22
+        ],
+        "shopscreen-buildswap-new-rect-05f-05f-90f-2-3e7ebb": [
+          0.05,
+          0.05,
+          0.9,
+          0.25
+        ],
+        "shopscreen-buildswap-new-rect-06f-39f-25f-4-4212f0": [
+          0.06,
+          0.39,
+          0.25,
+          0.47
+        ],
+        "shopscreen-buildswap-new-rect-38f-33f-56f-5-87452c": [
+          0.38,
+          0.33,
+          0.56,
+          0.56
+        ],
+        "shopscreen-buildswap-new-rect-03f-0-94f-1-adb75b": [
+          0.03,
+          0.0,
+          0.94,
+          1.0
+        ],
+        "shopscreen-buildswap-new-rect-37f-455f-26f--121745": [
+          0.37,
+          0.455,
+          0.26,
+          0.08
+        ],
+        "shopscreen-buildswap-new-rect-08f-55f-84f-2-c92ad3": [
+          0.08,
+          0.55,
+          0.84,
+          0.22
+        ],
+        "shopscreen-buildswap-new-rect-08f-80f-84f-0-06c1bc": [
+          0.08,
+          0.8,
+          0.84,
+          0.06
+        ],
+        "shopscreen-buildswap-new-rect-25f-885f-5f-0-255942": [
+          0.25,
+          0.885,
+          0.5,
+          0.09
+        ],
+        "shopscreen-buildnotice-new-rect-18f-24f-64f-3d6dba": [
+          0.18,
+          0.24,
+          0.64,
+          0.5
+        ],
+        "shopscreen-buildnotice-new-rect-07f-07f-86f-19b5bf": [
+          0.07,
+          0.07,
+          0.86,
+          0.16
+        ],
+        "shopscreen-buildnotice-new-rect-08f-27f-84f-280d38": [
+          0.08,
+          0.27,
+          0.84,
+          0.4
+        ],
+        "shopscreen-buildnotice-new-rect-25f-77f-5f--1c71d8": [
+          0.25,
+          0.77,
+          0.5,
+          0.15
+        ],
+        "shopscreen-makebutton-new-rect-06f-06f-88f--bf46d1": [
+          0.06,
+          0.06,
+          0.88,
+          0.88
+        ],
+        "checkout-region-0": [
+          0.66,
+          0.77,
+          0.27,
+          0.15
+        ],
+        "checkout-region-1": [
+          0.25,
+          0.77,
+          0.5,
+          0.15
+        ],
+        "checkout-region-2": [
+          0.07,
+          0.77,
+          0.55,
+          0.15
+        ],
+        "checkout-region-3": [
+          0.07,
+          0.23,
+          0.86,
+          0.5
+        ],
+        "checkout-region-4": [
+          0.12,
+          0.14,
+          0.76,
+          0.72
+        ]
+      },
+      "layout": {
+        "sidebar-ratio": 0.25,
+        "card-gap-x": 6,
+        "card-gap-y": 8
+      },
+      "art": {
+        "Title plate/Shop icon": null,
+        "Title plate/Currencies/SKR/Icon": null,
+        "Title plate/Currencies/SOLANA/Icon": null,
+        "Title plate/Currencies/SWAP/Icon": null,
+        "Inventory/Paper/Heading bar/Crate": null,
+        "Inventory/Paper/shield/Icon tile/Artwork": null,
+        "Inventory/Paper/base-defence/Icon tile/Artwork": null,
+        "Inventory/Paper/freeze/Icon tile/Artwork": null,
+        "Inventory/Paper/speed/Icon tile/Artwork": null,
+        "Inventory/Paper/upgrade/Icon tile/Artwork": null,
+        "Inventory/Paper/zoom-out/Icon tile/Artwork": null,
+        "Inventory/Paper/wipeout/Icon tile/Artwork": null,
+        "Inventory/Paper/extra-life/Icon tile/Artwork": null,
+        "Catalog/Products/Viewport/Content/fuel-one/Artwork": null,
+        "Catalog/Products/Viewport/Content/fuel-one/Price/Currency": null,
+        "Catalog/Products/Viewport/Content/fuel-five/Artwork": null,
+        "Catalog/Products/Viewport/Content/fuel-five/Price/Currency": null,
+        "Catalog/Products/Viewport/Content/fuel-twenty/Artwork": null,
+        "Catalog/Products/Viewport/Content/fuel-twenty/Price/Currency": null,
+        "Catalog/Products/Viewport/Content/shield/Artwork": null,
+        "Catalog/Products/Viewport/Content/shield/Price/Currency": null,
+        "Catalog/Products/Viewport/Content/base-defence/Artwork": null,
+        "Catalog/Products/Viewport/Content/base-defence/Price/Currency": null,
+        "Catalog/Products/Viewport/Content/freeze/Artwork": null,
+        "Catalog/Products/Viewport/Content/freeze/Price/Currency": null,
+        "Catalog/Products/Viewport/Content/speed/Artwork": null,
+        "Catalog/Products/Viewport/Content/speed/Price/Currency": null,
+        "Catalog/Products/Viewport/Content/upgrade/Artwork": null,
+        "Catalog/Products/Viewport/Content/upgrade/Price/Currency": null,
+        "Catalog/Products/Viewport/Content/zoom-out/Artwork": null,
+        "Catalog/Products/Viewport/Content/zoom-out/Price/Currency": null,
+        "Catalog/Products/Viewport/Content/wipeout/Artwork": null,
+        "Catalog/Products/Viewport/Content/wipeout/Price/Currency": null,
+        "Catalog/Products/Viewport/Content/extra-life/Artwork": null,
+        "Catalog/Products/Viewport/Content/extra-life/Price/Currency": null,
+        "Catalog/Products/Viewport/Content/starter-pack/Artwork": null,
+        "Catalog/Products/Viewport/Content/starter-pack/Price/Currency": null,
+        "Catalog/Products/Viewport/Content/season-pass/Artwork": null,
+        "Catalog/Products/Viewport/Content/season-pass/Price/Currency": null,
+        "Balances/SKR balance/Icon": null,
+        "Balances/SOL balance/Icon": null,
+        "Balances/FUEL balance/Icon": null
+      }
+    },
+    {
+      "id": "ranking",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "ranking-28901d": "RANKING",
+        "payouts-576390": "PAYOUTS",
+        "current-cycle-965a70": "CURRENT CYCLE",
+        "previous-payouts-c225a2": "PREVIOUS PAYOUTS",
+        "no-payout-records-available-yet-c9ff9d": "No payout records\navailable yet.",
+        "live-player-rankings-40fcc9": "LIVE PLAYER RANKINGS",
+        "your-rank-ce6722": "YOUR RANK",
+        "top-10-every-30-minutes-892795": "TOP 10 EVERY 30 MINUTES • —",
+        "columns-0": "#",
+        "columns-1": "PLAYER",
+        "columns-2": "SCORE",
+        "columns-3": "MATCHES",
+        "tab-gaming": "GAMING",
+        "tab-trading": "TRADING",
+        "tab-back": "BACK"
+      },
+      "regions": {
+        "rankingscreen-view-buildview-new-rect-10f-1-80a74b": [
+          0.1,
+          0.12,
+          0.25,
+          0.76
+        ],
+        "rankingscreen-view-buildview-new-rect-36f-0-f4baaa": [
+          0.36,
+          0.06,
+          0.57,
+          0.88
+        ],
+        "rankingscreen-view-buildview-new-rect-055f--501c10": [
+          0.055,
+          0.08,
+          0.23,
+          0.84
+        ],
+        "rankingscreen-view-buildview-new-rect-30f-0-082861": [
+          0.3,
+          0.02,
+          0.66,
+          0.96
+        ],
+        "rankingscreen-view-buildview-new-rect-28f-0-21d6d8": [
+          0.28,
+          0.02,
+          0.68,
+          0.96
+        ],
+        "rankingscreen-view-buildview-new-rect-10f-1-f37ad5": [
+          0.1,
+          0.17,
+          0.14,
+          0.66
+        ],
+        "rankingscreen-view-buildview-new-rect-035f--74384c": [
+          0.035,
+          0.1,
+          0.18,
+          0.8
+        ],
+        "rankingscreen-view-buildview-new-rect-25f-0-7f8587": [
+          0.25,
+          0.02,
+          0.72,
+          0.96
+        ],
+        "rankingscreen-view-buildview-new-rect-05f-1-46ef62": [
+          0.05,
+          0.1,
+          0.9,
+          0.08
+        ],
+        "rankingscreen-view-buildview-new-rect-29f-3-9f50e2": [
+          0.29,
+          0.36,
+          0.42,
+          0.045
+        ],
+        "rankingscreen-view-buildview-new-rect-27f-0-4a5bf1": [
+          0.27,
+          0.04,
+          0.46,
+          0.35
+        ],
+        "rankingscreen-view-buildview-new-rect-04f-4-182766": [
+          0.04,
+          0.45,
+          0.92,
+          0.18
+        ],
+        "rankingscreen-view-buildview-new-rect-04f-6-a4f5c2": [
+          0.04,
+          0.64,
+          0.92,
+          0.25
+        ],
+        "rankingscreen-view-buildview-new-rect-0-0-1-d0ce80": [
+          0.0,
+          0.0,
+          1.0,
+          0.015
+        ],
+        "rankingscreen-view-buildview-new-rect-02f-1-d9ecfd": [
+          0.02,
+          0.1,
+          0.96,
+          0.8
+        ],
+        "rankingscreen-view-buildview-new-rect-02f-0-cb9adc": [
+          0.02,
+          0.05,
+          0.96,
+          0.45
+        ],
+        "rankingscreen-view-buildview-new-rect-025f--3558fc": [
+          0.025,
+          0.51,
+          0.07,
+          0.4
+        ],
+        "rankingscreen-view-buildview-new-rect-12f-5-e9624c": [
+          0.12,
+          0.51,
+          0.43,
+          0.4
+        ],
+        "rankingscreen-view-buildview-new-rect-56f-5-ce3c0c": [
+          0.56,
+          0.51,
+          0.21,
+          0.4
+        ],
+        "rankingscreen-view-buildview-new-rect-79f-5-e063dd": [
+          0.79,
+          0.51,
+          0.18,
+          0.4
+        ],
+        "rankingscreen-view-buildview-new-rect-016f--81f2af": [
+          0.016,
+          0.975,
+          0.968,
+          0.02
+        ],
+        "rankingscreen-view-buildview-new-rect-33f-1-3d3f87": [
+          0.33,
+          0.12,
+          0.34,
+          0.43
+        ],
+        "rankingscreen-view-buildview-new-rect-37f-5-d90dcb": [
+          0.37,
+          0.515,
+          0.26,
+          0.045
+        ],
+        "rankingscreen-view-buildview-new-rect-04f-6-a4c84d": [
+          0.04,
+          0.62,
+          0.92,
+          0.14
+        ],
+        "rankingscreen-view-buildview-new-rect-07f-7-582556": [
+          0.07,
+          0.78,
+          0.86,
+          0.12
+        ],
+        "rankingscreen-view-buildview-new-rect-025f--f725e4": [
+          0.025,
+          0.08,
+          0.15,
+          0.36
+        ],
+        "rankingscreen-view-buildview-new-rect-025f--616da8": [
+          0.025,
+          0.43,
+          0.15,
+          0.49
+        ],
+        "rankingscreen-view-buildview-new-rect-18f-1-d5bd13": [
+          0.18,
+          0.1,
+          0.56,
+          0.8
+        ],
+        "rankingscreen-view-buildview-new-rect-05f-0-7f3367": [
+          0.05,
+          0.06,
+          0.78,
+          0.88
+        ],
+        "rankingscreen-view-buildview-new-rect-86f-2-dbd800": [
+          0.86,
+          0.25,
+          0.08,
+          0.5
+        ],
+        "rankingscreen-view-buildrankingrows-new-rec-393431": [
+          0.025,
+          0.1,
+          0.08,
+          0.8
+        ],
+        "rankingscreen-view-buildrankingrows-new-rec-79d9bb": [
+          0.12,
+          0.1,
+          0.43,
+          0.8
+        ],
+        "rankingscreen-view-buildrankingrows-new-rec-2ec34f": [
+          0.56,
+          0.1,
+          0.21,
+          0.8
+        ],
+        "rankingscreen-view-buildrankingrows-new-rec-e1bf0c": [
+          0.79,
+          0.1,
+          0.18,
+          0.8
+        ],
+        "rankingscreen-view-group-new-rect-03f-0-94f-230328": [
+          0.03,
+          0.0,
+          0.94,
+          1.0
+        ],
+        "rankingscreen-view-tab-new-rect-04f-02f-92f-70faa6": [
+          0.04,
+          0.02,
+          0.92,
+          0.96
+        ]
+      },
+      "layout": {
+        "payouts-ratio": 0.38,
+        "row-height": 58
+      },
+      "art": {
+        "Title plate/Ranking icon": null,
+        "Title plate/Tabs/GAMING/Icon": null,
+        "Title plate/Tabs/TRADING/Icon": null,
+        "Payout history/Paper/Heading bar/Chest": null
+      }
+    },
+    {
+      "id": "profile",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "player-profile-a8948a": "PLAYER PROFILE",
+        "back-639807": "BACK",
+        "share-profile-e6d90a": "SHARE PROFILE",
+        "recent-battles-1952da": "RECENT BATTLES",
+        "prev-39a400": "PREV",
+        "next-7a66ea": "NEXT",
+        "retry-e464c6": "RETRY",
+        "season-rank-5c9e49": "SEASON RANK",
+        "points-a79d7b": "POINTS",
+        "matches-c92cd8": "MATCHES",
+        "best-score-24961d": "BEST SCORE",
+        "column-result": "RESULT",
+        "column-mode": "MODE",
+        "column-stage": "STAGE",
+        "column-score": "SCORE",
+        "column-points": "POINTS"
+      },
+      "regions": {
+        "playerprofilescreen-view-buildview-new-rect-c56fb8": [
+          0.29,
+          0.025,
+          0.68,
+          0.95
+        ],
+        "playerprofilescreen-view-buildview-new-rect-0a1f7e": [
+          0.1,
+          0.17,
+          0.14,
+          0.66
+        ],
+        "playerprofilescreen-view-buildview-new-rect-0288fd": [
+          0.06,
+          0.22,
+          0.17,
+          0.56
+        ],
+        "playerprofilescreen-view-buildview-new-rect-76a170": [
+          0.25,
+          0.08,
+          0.72,
+          0.84
+        ],
+        "playerprofilescreen-view-buildview-new-rect-948fdc": [
+          0.035,
+          0.86,
+          0.23,
+          0.035
+        ],
+        "playerprofilescreen-view-buildview-new-rect-de97f2": [
+          0.025,
+          0.05,
+          0.25,
+          0.9
+        ],
+        "playerprofilescreen-view-buildview-new-rect-919816": [
+          0.31,
+          0.06,
+          0.4,
+          0.88
+        ],
+        "playerprofilescreen-view-buildview-new-rect-f63d07": [
+          0.73,
+          0.06,
+          0.24,
+          0.88
+        ],
+        "playerprofilescreen-view-buildview-new-rect-6e60a1": [
+          0.018,
+          0.02,
+          0.38,
+          0.43
+        ],
+        "playerprofilescreen-view-buildview-new-rect-6bce46": [
+          0.42,
+          0.04,
+          0.22,
+          0.39
+        ],
+        "playerprofilescreen-view-buildview-new-rect-ba420f": [
+          0.016,
+          0.975,
+          0.968,
+          0.02
+        ],
+        "playerprofilescreen-view-buildview-new-rect-d841a5": [
+          0.675,
+          0.02,
+          0.09,
+          0.43
+        ],
+        "playerprofilescreen-view-buildview-new-rect-87dd8a": [
+          0.77,
+          0.03,
+          0.11,
+          0.41
+        ],
+        "playerprofilescreen-view-buildview-new-rect-46926c": [
+          0.89,
+          0.02,
+          0.09,
+          0.43
+        ],
+        "playerprofilescreen-view-buildview-new-rect-b834f0": [
+          0.456,
+          0.46,
+          0.088,
+          0.035
+        ],
+        "playerprofilescreen-view-buildview-new-rect-512811": [
+          0.43,
+          0.1,
+          0.14,
+          0.38
+        ],
+        "playerprofilescreen-view-buildview-new-rect-203a72": [
+          0.04,
+          0.53,
+          0.92,
+          0.19
+        ],
+        "playerprofilescreen-view-buildview-new-rect-04529a": [
+          0.07,
+          0.76,
+          0.86,
+          0.16
+        ],
+        "playerprofilescreen-view-buildview-new-rect-04a7ff": [
+          0.38,
+          0.84,
+          0.24,
+          0.14
+        ],
+        "playerprofilescreen-view-buildbattles-new-r-13cd11": [
+          0.018,
+          0.12,
+          0.08,
+          0.76
+        ],
+        "playerprofilescreen-view-buildbattles-new-r-31b224": [
+          0.112,
+          0.12,
+          0.16,
+          0.4
+        ],
+        "playerprofilescreen-view-buildbattles-new-r-fe98a8": [
+          0.112,
+          0.56,
+          0.16,
+          0.3
+        ],
+        "playerprofilescreen-view-buildbattles-new-r-f9dadf": [
+          0.008,
+          0.985,
+          0.984,
+          0.015
+        ],
+        "playerprofilescreen-view-buildbattles-new-r-5de605": [
+          0.835,
+          0.17,
+          0.15,
+          0.66
+        ],
+        "playerprofilescreen-view-buildbattles-new-r-d6f456": [
+          0.06,
+          0.1,
+          0.65,
+          0.8
+        ],
+        "playerprofilescreen-view-buildbattles-new-r-4ef999": [
+          0.06,
+          0.1,
+          0.88,
+          0.8
+        ],
+        "playerprofilescreen-view-buildbattles-new-r-90b838": [
+          0.75,
+          0.27,
+          0.12,
+          0.46
+        ],
+        "playerprofilescreen-view-control-new-rect-0-e2c16c": [
+          0.04,
+          0.05,
+          0.92,
+          0.9
+        ]
+      },
+      "layout": {
+        "commander-ratio": 0.15,
+        "battle-row-ratio": 0.12
+      },
+      "art": {
+        "Title plate/Icon": null,
+        "Commander/Paper/TV Background": null,
+        "Commander/Paper/Share/Icon": null,
+        "Status/Statistics/Stat 0/Icon": null,
+        "Status/Statistics/Stat 1/Icon": null,
+        "Status/Statistics/Stat 2/Icon": null,
+        "Status/Statistics/Stat 3/Icon": null,
+        "Battle log/Empty/Icon": null
+      }
+    },
+    {
+      "id": "quarters",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "quarters-f0d8b5": "QUARTERS",
+        "command-center-2b1088": "COMMAND CENTER",
+        "assets-operations-and-battle-intelligence-b31d2c": "ASSETS, OPERATIONS AND BATTLE INTELLIGENCE",
+        "in-battle-1f7685": "IN BATTLE",
+        "refresh-1c3108": "REFRESH",
+        "treasury-497bc8": "TREASURY",
+        "field-manual-6aaebd": "FIELD MANUAL",
+        "campaigns-fa93a8": "CAMPAIGNS",
+        "staking-c94a1a": "STAKING",
+        "trading-0377b8": "TRADING",
+        "boosts-da6776": "BOOSTS",
+        "airdrop-c2834c": "AIRDROP",
+        "balances-items-history-067d23": "BALANCES, ITEMS & HISTORY",
+        "tanks-powerups-enemies-d614b3": "TANKS, POWERUPS & ENEMIES",
+        "events-operations-rewards-93e4ae": "EVENTS, OPERATIONS & REWARDS",
+        "token-staking-perks-5f6c28": "TOKEN STAKING & PERKS",
+        "swaps-market-tools-f4edc6": "SWAPS & MARKET TOOLS",
+        "trait-boosts-perks-1f227a": "TRAIT BOOSTS & PERKS",
+        "allocation-claim-status-d43021": "ALLOCATION & CLAIM STATUS",
+        "title": "QUARTERS",
+        "intro-title": "COMMAND CENTER",
+        "intro-description": "ASSETS, OPERATIONS AND BATTLE INTELLIGENCE"
+      },
+      "regions": {
+        "operationsscreen-view-buildview-new-rect-02-89a059": [
+          0.02,
+          0.05,
+          0.96,
+          0.45
+        ],
+        "operationsscreen-view-buildview-new-rect-02-6bc6fa": [
+          0.02,
+          0.51,
+          0.96,
+          0.4
+        ],
+        "operationsscreen-view-buildview-new-rect-01-6cdbec": [
+          0.016,
+          0.975,
+          0.968,
+          0.02
+        ],
+        "operationsscreen-view-buildview-new-rect-32-335855": [
+          0.32,
+          0.53,
+          0.36,
+          0.065
+        ],
+        "operationsscreen-view-buildview-new-rect-29-ee4f8f": [
+          0.29,
+          0.07,
+          0.42,
+          0.48
+        ],
+        "operationsscreen-view-buildview-new-rect-05-626b22": [
+          0.05,
+          0.62,
+          0.9,
+          0.13
+        ],
+        "operationsscreen-view-buildview-new-rect-10-31d562": [
+          0.1,
+          0.76,
+          0.8,
+          0.16
+        ],
+        "operationsscreen-view-buildview-new-rect-02-8aebfb": [
+          0.02,
+          0.06,
+          0.35,
+          0.88
+        ],
+        "operationsscreen-view-buildview-new-rect-16-159b45": [
+          0.16,
+          0.64,
+          0.68,
+          0.08
+        ],
+        "operationsscreen-view-buildview-new-rect-07-9e8f40": [
+          0.07,
+          0.11,
+          0.86,
+          0.57
+        ],
+        "operationsscreen-view-buildview-new-rect-05-98f810": [
+          0.05,
+          0.74,
+          0.9,
+          0.16
+        ],
+        "operationsscreen-view-buildview-new-rect-41-65374d": [
+          0.41,
+          0.08,
+          0.55,
+          0.12
+        ],
+        "operationsscreen-view-buildview-new-rect-41-895323": [
+          0.41,
+          0.23,
+          0.55,
+          0.24
+        ],
+        "operationsscreen-view-buildview-new-rect-40-66a49f": [
+          0.4,
+          0.52,
+          0.57,
+          0.27
+        ],
+        "operationsscreen-view-buildview-new-rect-04-a306fa": [
+          0.04,
+          0.05,
+          0.92,
+          0.22
+        ],
+        "operationsscreen-view-buildview-new-rect-04-8ece63": [
+          0.04,
+          0.3,
+          0.92,
+          0.64
+        ],
+        "operationsscreen-view-buildview-new-rect-41-71d142": [
+          0.41,
+          0.84,
+          0.55,
+          0.1
+        ],
+        "operationsscreen-view-buildview-new-rect-02-00ab2a": [
+          0.025,
+          0.12,
+          0.7,
+          0.76
+        ],
+        "operationsscreen-view-buildview-new-rect-05-83b409": [
+          0.05,
+          0.04,
+          0.9,
+          0.92
+        ],
+        "operationsscreen-view-buildtabs-new-rect-31-53579f": [
+          0.31,
+          0.02,
+          0.65,
+          0.96
+        ],
+        "operationsscreen-view-buildtabs-new-rect-10-88e765": [
+          0.1,
+          0.24,
+          0.16,
+          0.52
+        ],
+        "operationsscreen-view-addtab-new-rect-04f-0-dc01e7": [
+          0.04,
+          0.02,
+          0.92,
+          0.96
+        ],
+        "operationsscreen-view-buildcards-new-rect-2-4480ad": [
+          0.25,
+          0.625,
+          0.5,
+          0.055
+        ],
+        "operationsscreen-view-buildcards-new-rect-1-bf2c5f": [
+          0.12,
+          0.045,
+          0.76,
+          0.17
+        ],
+        "operationsscreen-view-buildcards-new-rect-1-fb453c": [
+          0.12,
+          0.22,
+          0.76,
+          0.43
+        ],
+        "operationsscreen-view-buildcards-new-rect-0-0e72ee": [
+          0.055,
+          0.66,
+          0.89,
+          0.12
+        ],
+        "operationsscreen-view-buildcards-new-rect-0-c7a839": [
+          0.07,
+          0.79,
+          0.86,
+          0.165
+        ],
+        "operationsscreen-view-buildcards-new-rect-0-ff3d9d": [
+          0.04,
+          0.05,
+          0.92,
+          0.9
+        ]
+      },
+      "layout": {
+        "card-gap": 10
+      },
+      "art": {
+        "Title plate/Icon": null,
+        "Body/Account summary/Stat 0/Icon": null,
+        "Body/Account summary/Stat 1/Icon": null,
+        "Body/Account summary/Stat 2/Icon": null,
+        "Body/Account summary/Stat 3/Icon": null,
+        "Body/Scroll/Viewport/Content/Card 7/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 6/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 0/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 1/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 2/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 3/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 4/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 5/Artwork": null
+      }
+    },
+    {
+      "id": "treasury",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "quarters-f0d8b5": "QUARTERS",
+        "command-center-2b1088": "COMMAND CENTER",
+        "assets-operations-and-battle-intelligence-b31d2c": "ASSETS, OPERATIONS AND BATTLE INTELLIGENCE",
+        "in-battle-1f7685": "IN BATTLE",
+        "refresh-1c3108": "REFRESH",
+        "title": "TREASURY",
+        "intro-title": "YOUR HOLDINGS",
+        "intro-description": "BALANCES, OWNED ITEMS AND YOUR RECENT ACTIVITY",
+        "intro-title-history": "TRANSACTION HISTORY"
+      },
+      "regions": {
+        "operationsscreen-view-buildview-new-rect-02-89a059": [
+          0.02,
+          0.05,
+          0.96,
+          0.45
+        ],
+        "operationsscreen-view-buildview-new-rect-02-6bc6fa": [
+          0.02,
+          0.51,
+          0.96,
+          0.4
+        ],
+        "operationsscreen-view-buildview-new-rect-01-6cdbec": [
+          0.016,
+          0.975,
+          0.968,
+          0.02
+        ],
+        "operationsscreen-view-buildview-new-rect-32-335855": [
+          0.32,
+          0.53,
+          0.36,
+          0.065
+        ],
+        "operationsscreen-view-buildview-new-rect-29-ee4f8f": [
+          0.29,
+          0.07,
+          0.42,
+          0.48
+        ],
+        "operationsscreen-view-buildview-new-rect-05-626b22": [
+          0.05,
+          0.62,
+          0.9,
+          0.13
+        ],
+        "operationsscreen-view-buildview-new-rect-10-31d562": [
+          0.1,
+          0.76,
+          0.8,
+          0.16
+        ],
+        "operationsscreen-view-buildview-new-rect-02-8aebfb": [
+          0.02,
+          0.06,
+          0.35,
+          0.88
+        ],
+        "operationsscreen-view-buildview-new-rect-16-159b45": [
+          0.16,
+          0.64,
+          0.68,
+          0.08
+        ],
+        "operationsscreen-view-buildview-new-rect-07-9e8f40": [
+          0.07,
+          0.11,
+          0.86,
+          0.57
+        ],
+        "operationsscreen-view-buildview-new-rect-05-98f810": [
+          0.05,
+          0.74,
+          0.9,
+          0.16
+        ],
+        "operationsscreen-view-buildview-new-rect-41-65374d": [
+          0.41,
+          0.08,
+          0.55,
+          0.12
+        ],
+        "operationsscreen-view-buildview-new-rect-41-895323": [
+          0.41,
+          0.23,
+          0.55,
+          0.24
+        ],
+        "operationsscreen-view-buildview-new-rect-40-66a49f": [
+          0.4,
+          0.52,
+          0.57,
+          0.27
+        ],
+        "operationsscreen-view-buildview-new-rect-04-a306fa": [
+          0.04,
+          0.05,
+          0.92,
+          0.22
+        ],
+        "operationsscreen-view-buildview-new-rect-04-8ece63": [
+          0.04,
+          0.3,
+          0.92,
+          0.64
+        ],
+        "operationsscreen-view-buildview-new-rect-41-71d142": [
+          0.41,
+          0.84,
+          0.55,
+          0.1
+        ],
+        "operationsscreen-view-buildview-new-rect-02-00ab2a": [
+          0.025,
+          0.12,
+          0.7,
+          0.76
+        ],
+        "operationsscreen-view-buildview-new-rect-05-83b409": [
+          0.05,
+          0.04,
+          0.9,
+          0.92
+        ],
+        "operationsscreen-view-buildtabs-new-rect-31-53579f": [
+          0.31,
+          0.02,
+          0.65,
+          0.96
+        ],
+        "operationsscreen-view-buildtabs-new-rect-10-88e765": [
+          0.1,
+          0.24,
+          0.16,
+          0.52
+        ],
+        "operationsscreen-view-addtab-new-rect-04f-0-dc01e7": [
+          0.04,
+          0.02,
+          0.92,
+          0.96
+        ],
+        "operationsscreen-view-buildcards-new-rect-2-4480ad": [
+          0.25,
+          0.625,
+          0.5,
+          0.055
+        ],
+        "operationsscreen-view-buildcards-new-rect-1-bf2c5f": [
+          0.12,
+          0.045,
+          0.76,
+          0.17
+        ],
+        "operationsscreen-view-buildcards-new-rect-1-fb453c": [
+          0.12,
+          0.22,
+          0.76,
+          0.43
+        ],
+        "operationsscreen-view-buildcards-new-rect-0-0e72ee": [
+          0.055,
+          0.66,
+          0.89,
+          0.12
+        ],
+        "operationsscreen-view-buildcards-new-rect-0-c7a839": [
+          0.07,
+          0.79,
+          0.86,
+          0.165
+        ],
+        "operationsscreen-view-buildcards-new-rect-0-ff3d9d": [
+          0.04,
+          0.05,
+          0.92,
+          0.9
+        ]
+      },
+      "layout": {
+        "card-gap": 10
+      },
+      "art": {
+        "Title plate/Icon": null,
+        "Body/Account summary/Stat 0/Icon": null,
+        "Body/Account summary/Stat 1/Icon": null,
+        "Body/Account summary/Stat 2/Icon": null,
+        "Body/Account summary/Stat 3/Icon": null,
+        "Body/Scroll/Viewport/Content/Card 7/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 6/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 0/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 1/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 2/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 3/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 4/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 5/Artwork": null
+      }
+    },
+    {
+      "id": "manual",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "quarters-f0d8b5": "QUARTERS",
+        "command-center-2b1088": "COMMAND CENTER",
+        "assets-operations-and-battle-intelligence-b31d2c": "ASSETS, OPERATIONS AND BATTLE INTELLIGENCE",
+        "in-battle-1f7685": "IN BATTLE",
+        "refresh-1c3108": "REFRESH",
+        "category-tanks": "TANKS",
+        "category-weapons": "WEAPONS",
+        "category-powerups": "POWERUPS",
+        "category-enemies": "ENEMIES",
+        "title": "FIELD MANUAL",
+        "intro-description": "TANKS, WEAPONS, POWERUPS AND ENEMY INTELLIGENCE",
+        "entry-vanguard-name": "VANGUARD",
+        "entry-vanguard-role": "PLAYER TANK - TIER 1",
+        "entry-vanguard-mk2-name": "VANGUARD MK-II",
+        "entry-vanguard-mk2-role": "PLAYER TANK - TIER 2",
+        "entry-vanguard-mk3-name": "VANGUARD MK-III",
+        "entry-vanguard-mk3-role": "PLAYER TANK - TIER 3",
+        "entry-siegebreaker-name": "SIEGEBREAKER",
+        "entry-siegebreaker-role": "PLAYER TANK - TIER 4",
+        "entry-cannon-name": "CANNON",
+        "entry-cannon-role": "PRIMARY WEAPON",
+        "entry-twin-shot-name": "TWIN AUTOLOADER",
+        "entry-twin-shot-role": "WEAPON MODULE",
+        "entry-ap-rounds-name": "AP ROUNDS",
+        "entry-ap-rounds-role": "WEAPON MODULE",
+        "entry-hull-plating-name": "HULL PLATING",
+        "entry-hull-plating-role": "DEFENSE MODULE",
+        "entry-shield-name": "SHIELD",
+        "entry-shield-role": "DEFENSIVE POWERUP",
+        "entry-base-defence-name": "BASE DEFENCE",
+        "entry-base-defence-role": "DEFENSIVE POWERUP",
+        "entry-freeze-name": "FREEZE",
+        "entry-freeze-role": "TACTICAL POWERUP",
+        "entry-speed-name": "SPEED",
+        "entry-speed-role": "MOBILITY POWERUP",
+        "entry-upgrade-name": "STAR",
+        "entry-upgrade-role": "UPGRADE POWERUP",
+        "entry-zoom-out-name": "ZOOM OUT",
+        "entry-zoom-out-role": "RECON POWERUP",
+        "entry-wipeout-name": "WIPEOUT",
+        "entry-wipeout-role": "OFFENSIVE POWERUP",
+        "entry-extra-life-name": "EXTRA LIFE",
+        "entry-extra-life-role": "SUPPORT POWERUP",
+        "entry-scout-name": "SCOUT",
+        "entry-scout-role": "ENEMY - LIGHT",
+        "entry-rapid-name": "RAPID",
+        "entry-rapid-role": "ENEMY - SKIRMISHER",
+        "entry-armored-name": "ARMORED",
+        "entry-armored-role": "ENEMY - MEDIUM",
+        "entry-heavy-name": "HEAVY",
+        "entry-heavy-role": "ENEMY - ASSAULT"
+      },
+      "regions": {
+        "operationsscreen-view-buildview-new-rect-02-89a059": [
+          0.02,
+          0.05,
+          0.96,
+          0.45
+        ],
+        "operationsscreen-view-buildview-new-rect-02-6bc6fa": [
+          0.02,
+          0.51,
+          0.96,
+          0.4
+        ],
+        "operationsscreen-view-buildview-new-rect-01-6cdbec": [
+          0.016,
+          0.975,
+          0.968,
+          0.02
+        ],
+        "operationsscreen-view-buildview-new-rect-32-335855": [
+          0.32,
+          0.53,
+          0.36,
+          0.065
+        ],
+        "operationsscreen-view-buildview-new-rect-29-ee4f8f": [
+          0.29,
+          0.07,
+          0.42,
+          0.48
+        ],
+        "operationsscreen-view-buildview-new-rect-05-626b22": [
+          0.05,
+          0.62,
+          0.9,
+          0.13
+        ],
+        "operationsscreen-view-buildview-new-rect-10-31d562": [
+          0.1,
+          0.76,
+          0.8,
+          0.16
+        ],
+        "operationsscreen-view-buildview-new-rect-02-8aebfb": [
+          0.02,
+          0.06,
+          0.35,
+          0.88
+        ],
+        "operationsscreen-view-buildview-new-rect-16-159b45": [
+          0.16,
+          0.64,
+          0.68,
+          0.08
+        ],
+        "operationsscreen-view-buildview-new-rect-07-9e8f40": [
+          0.07,
+          0.11,
+          0.86,
+          0.57
+        ],
+        "operationsscreen-view-buildview-new-rect-05-98f810": [
+          0.05,
+          0.74,
+          0.9,
+          0.16
+        ],
+        "operationsscreen-view-buildview-new-rect-41-65374d": [
+          0.41,
+          0.08,
+          0.55,
+          0.12
+        ],
+        "operationsscreen-view-buildview-new-rect-41-895323": [
+          0.41,
+          0.23,
+          0.55,
+          0.24
+        ],
+        "operationsscreen-view-buildview-new-rect-40-66a49f": [
+          0.4,
+          0.52,
+          0.57,
+          0.27
+        ],
+        "operationsscreen-view-buildview-new-rect-04-a306fa": [
+          0.04,
+          0.05,
+          0.92,
+          0.22
+        ],
+        "operationsscreen-view-buildview-new-rect-04-8ece63": [
+          0.04,
+          0.3,
+          0.92,
+          0.64
+        ],
+        "operationsscreen-view-buildview-new-rect-41-71d142": [
+          0.41,
+          0.84,
+          0.55,
+          0.1
+        ],
+        "operationsscreen-view-buildview-new-rect-02-00ab2a": [
+          0.025,
+          0.12,
+          0.7,
+          0.76
+        ],
+        "operationsscreen-view-buildview-new-rect-05-83b409": [
+          0.05,
+          0.04,
+          0.9,
+          0.92
+        ],
+        "operationsscreen-view-buildtabs-new-rect-31-53579f": [
+          0.31,
+          0.02,
+          0.65,
+          0.96
+        ],
+        "operationsscreen-view-buildtabs-new-rect-10-88e765": [
+          0.1,
+          0.24,
+          0.16,
+          0.52
+        ],
+        "operationsscreen-view-addtab-new-rect-04f-0-dc01e7": [
+          0.04,
+          0.02,
+          0.92,
+          0.96
+        ],
+        "operationsscreen-view-buildcards-new-rect-2-4480ad": [
+          0.25,
+          0.625,
+          0.5,
+          0.055
+        ],
+        "operationsscreen-view-buildcards-new-rect-1-bf2c5f": [
+          0.12,
+          0.045,
+          0.76,
+          0.17
+        ],
+        "operationsscreen-view-buildcards-new-rect-1-fb453c": [
+          0.12,
+          0.22,
+          0.76,
+          0.43
+        ],
+        "operationsscreen-view-buildcards-new-rect-0-0e72ee": [
+          0.055,
+          0.66,
+          0.89,
+          0.12
+        ],
+        "operationsscreen-view-buildcards-new-rect-0-c7a839": [
+          0.07,
+          0.79,
+          0.86,
+          0.165
+        ],
+        "operationsscreen-view-buildcards-new-rect-0-ff3d9d": [
+          0.04,
+          0.05,
+          0.92,
+          0.9
+        ]
+      },
+      "layout": {
+        "card-gap": 10
+      },
+      "art": {
+        "Title plate/Icon": null,
+        "Body/Account summary/Stat 0/Icon": null,
+        "Body/Account summary/Stat 1/Icon": null,
+        "Body/Account summary/Stat 2/Icon": null,
+        "Body/Account summary/Stat 3/Icon": null,
+        "Body/Scroll/Viewport/Content/Card 7/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 6/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 0/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 1/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 2/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 3/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 4/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 5/Artwork": null,
+        "entry-vanguard": null,
+        "entry-vanguard-mk2": null,
+        "entry-vanguard-mk3": null,
+        "entry-siegebreaker": null,
+        "entry-cannon": null,
+        "entry-twin-shot": null,
+        "entry-ap-rounds": null,
+        "entry-hull-plating": null,
+        "entry-shield": null,
+        "entry-base-defence": null,
+        "entry-freeze": null,
+        "entry-speed": null,
+        "entry-upgrade": null,
+        "entry-zoom-out": null,
+        "entry-wipeout": null,
+        "entry-extra-life": null,
+        "entry-scout": null,
+        "entry-rapid": null,
+        "entry-armored": null,
+        "entry-heavy": null
+      }
+    },
+    {
+      "id": "manualdetail",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "quarters-f0d8b5": "QUARTERS",
+        "command-center-2b1088": "COMMAND CENTER",
+        "assets-operations-and-battle-intelligence-b31d2c": "ASSETS, OPERATIONS AND BATTLE INTELLIGENCE",
+        "in-battle-1f7685": "IN BATTLE",
+        "refresh-1c3108": "REFRESH",
+        "category-tanks": "TANKS",
+        "category-weapons": "WEAPONS",
+        "category-powerups": "POWERUPS",
+        "category-enemies": "ENEMIES",
+        "title": "FIELD MANUAL",
+        "intro-description": "TANKS, WEAPONS, POWERUPS AND ENEMY INTELLIGENCE",
+        "entry-vanguard-name": "VANGUARD",
+        "entry-vanguard-role": "PLAYER TANK - TIER 1",
+        "entry-vanguard-lore": "THE STANDARD-ISSUE HULL EVERY COMMANDER STARTS IN.",
+        "entry-vanguard-effect": "BALANCED SPEED AND SINGLE CANNON.",
+        "entry-vanguard-source": "DEFAULT",
+        "entry-vanguard-mk2-name": "VANGUARD MK-II",
+        "entry-vanguard-mk2-role": "PLAYER TANK - TIER 2",
+        "entry-vanguard-mk2-lore": "FIELD-REFITTED WITH A FASTER BREECH.",
+        "entry-vanguard-mk2-effect": "FASTER SHELLS.",
+        "entry-vanguard-mk2-source": "STAR UPGRADE X1",
+        "entry-vanguard-mk3-name": "VANGUARD MK-III",
+        "entry-vanguard-mk3-role": "PLAYER TANK - TIER 3",
+        "entry-vanguard-mk3-lore": "TWIN AUTOLOADERS KEEP TWO SHELLS IN THE AIR.",
+        "entry-vanguard-mk3-effect": "DOUBLE SHOT.",
+        "entry-vanguard-mk3-source": "STAR UPGRADE X2",
+        "entry-siegebreaker-name": "SIEGEBREAKER",
+        "entry-siegebreaker-role": "PLAYER TANK - TIER 4",
+        "entry-siegebreaker-lore": "THE APEX REFIT. STEEL MEANS NOTHING TO IT.",
+        "entry-siegebreaker-effect": "DOUBLE SHOT + DESTROYS STEEL WALLS.",
+        "entry-siegebreaker-source": "STAR UPGRADE X3",
+        "entry-cannon-name": "CANNON",
+        "entry-cannon-role": "PRIMARY WEAPON",
+        "entry-cannon-lore": "ONE BARREL, ONE JOB.",
+        "entry-cannon-effect": "FIRES A SHELL THAT BREAKS BRICK.",
+        "entry-cannon-source": "DEFAULT",
+        "entry-twin-shot-name": "TWIN AUTOLOADER",
+        "entry-twin-shot-role": "WEAPON MODULE",
+        "entry-twin-shot-lore": "TWO SHELLS LOADED, NO WAITING.",
+        "entry-twin-shot-effect": "TWO SHELLS AIRBORNE AT ONCE.",
+        "entry-twin-shot-source": "TIER 3+",
+        "entry-ap-rounds-name": "AP ROUNDS",
+        "entry-ap-rounds-role": "WEAPON MODULE",
+        "entry-ap-rounds-lore": "TUNGSTEN CORES FOR STUBBORN STEEL.",
+        "entry-ap-rounds-effect": "SHELLS DESTROY STEEL WALLS.",
+        "entry-ap-rounds-source": "TIER 4",
+        "entry-hull-plating-name": "HULL PLATING",
+        "entry-hull-plating-role": "DEFENSE MODULE",
+        "entry-hull-plating-lore": "EXTRA PLATES BOLTED OVER THE ENGINE DECK.",
+        "entry-hull-plating-effect": "SURVIVE ONE EXTRA HIT.",
+        "entry-hull-plating-source": "EVENT / BOOST PERKS",
+        "entry-shield-name": "SHIELD",
+        "entry-shield-role": "DEFENSIVE POWERUP",
+        "entry-shield-lore": "A FLICKERING ENERGY FIELD FROM SALVAGED TECH.",
+        "entry-shield-effect": "TEMPORARY INVULNERABILITY.",
+        "entry-shield-source": "DROP / SHOP",
+        "entry-base-defence-name": "BASE DEFENCE",
+        "entry-base-defence-role": "DEFENSIVE POWERUP",
+        "entry-base-defence-lore": "ENGINEERS POUR STEEL AROUND HQ IN SECONDS.",
+        "entry-base-defence-effect": "BASE WALLS TURN TO STEEL FOR A TIME.",
+        "entry-base-defence-source": "DROP / SHOP",
+        "entry-freeze-name": "FREEZE",
+        "entry-freeze-role": "TACTICAL POWERUP",
+        "entry-freeze-lore": "CRYO CHARGE. THE FRONT GOES SILENT.",
+        "entry-freeze-effect": "ALL ENEMIES FREEZE IN PLACE.",
+        "entry-freeze-source": "DROP / SHOP",
+        "entry-speed-name": "SPEED",
+        "entry-speed-role": "MOBILITY POWERUP",
+        "entry-speed-lore": "OVERTUNED FUEL INJECTORS. HOLD ON.",
+        "entry-speed-effect": "TEMPORARY ENGINE BOOST.",
+        "entry-speed-source": "DROP / SHOP",
+        "entry-upgrade-name": "STAR",
+        "entry-upgrade-role": "UPGRADE POWERUP",
+        "entry-upgrade-lore": "A FIELD PROMOTION FOR YOUR HULL.",
+        "entry-upgrade-effect": "UPGRADES THE TANK ONE TIER.",
+        "entry-upgrade-source": "DROP / SHOP",
+        "entry-zoom-out-name": "ZOOM OUT",
+        "entry-zoom-out-role": "RECON POWERUP",
+        "entry-zoom-out-lore": "SPOTTER BALLOON WITH A WIDE LENS.",
+        "entry-zoom-out-effect": "PULLS THE CAMERA BACK TO SEE MORE FIELD.",
+        "entry-zoom-out-source": "DROP / SHOP",
+        "entry-wipeout-name": "WIPEOUT",
+        "entry-wipeout-role": "OFFENSIVE POWERUP",
+        "entry-wipeout-lore": "DANGER CLOSE. EVERYTHING BURNS.",
+        "entry-wipeout-effect": "DESTROYS ALL ENEMIES ON THE FIELD.",
+        "entry-wipeout-source": "DROP / SHOP",
+        "entry-extra-life-name": "EXTRA LIFE",
+        "entry-extra-life-role": "SUPPORT POWERUP",
+        "entry-extra-life-lore": "A RESERVE CREW AND A SPARE HULL.",
+        "entry-extra-life-effect": "+1 LIFE.",
+        "entry-extra-life-source": "DROP / SHOP",
+        "entry-scout-name": "SCOUT",
+        "entry-scout-role": "ENEMY - LIGHT",
+        "entry-scout-lore": "FAST, LOUD, AND FIRST THROUGH THE BREACH.",
+        "entry-scout-effect": "HIGH SPEED, ONE HIT TO DESTROY.",
+        "entry-scout-source": "ALL LEVELS",
+        "entry-rapid-name": "RAPID",
+        "entry-rapid-role": "ENEMY - SKIRMISHER",
+        "entry-rapid-lore": "ITS AUTOLOADER NEVER JAMS. UNFORTUNATELY.",
+        "entry-rapid-effect": "FAST SHELLS, ONE HIT TO DESTROY.",
+        "entry-rapid-source": "MID LEVELS",
+        "entry-armored-name": "ARMORED",
+        "entry-armored-role": "ENEMY - MEDIUM",
+        "entry-armored-lore": "ROLLING SCRAP-PLATE. AIM FOR THE SEAMS.",
+        "entry-armored-effect": "TAKES TWO HITS.",
+        "entry-armored-source": "MID LEVELS",
+        "entry-heavy-name": "HEAVY",
+        "entry-heavy-role": "ENEMY - ASSAULT",
+        "entry-heavy-lore": "A FORTRESS THAT DECIDED TO DRIVE.",
+        "entry-heavy-effect": "TAKES FOUR HITS. DROPS POWERUPS WHEN FLASHING.",
+        "entry-heavy-source": "LATE LEVELS"
+      },
+      "regions": {
+        "operationsscreen-view-buildview-new-rect-02-89a059": [
+          0.02,
+          0.05,
+          0.96,
+          0.45
+        ],
+        "operationsscreen-view-buildview-new-rect-02-6bc6fa": [
+          0.02,
+          0.51,
+          0.96,
+          0.4
+        ],
+        "operationsscreen-view-buildview-new-rect-01-6cdbec": [
+          0.016,
+          0.975,
+          0.968,
+          0.02
+        ],
+        "operationsscreen-view-buildview-new-rect-32-335855": [
+          0.32,
+          0.53,
+          0.36,
+          0.065
+        ],
+        "operationsscreen-view-buildview-new-rect-29-ee4f8f": [
+          0.29,
+          0.07,
+          0.42,
+          0.48
+        ],
+        "operationsscreen-view-buildview-new-rect-05-626b22": [
+          0.05,
+          0.62,
+          0.9,
+          0.13
+        ],
+        "operationsscreen-view-buildview-new-rect-10-31d562": [
+          0.1,
+          0.76,
+          0.8,
+          0.16
+        ],
+        "operationsscreen-view-buildview-new-rect-02-8aebfb": [
+          0.02,
+          0.06,
+          0.35,
+          0.88
+        ],
+        "operationsscreen-view-buildview-new-rect-16-159b45": [
+          0.16,
+          0.64,
+          0.68,
+          0.08
+        ],
+        "operationsscreen-view-buildview-new-rect-07-9e8f40": [
+          0.07,
+          0.11,
+          0.86,
+          0.57
+        ],
+        "operationsscreen-view-buildview-new-rect-05-98f810": [
+          0.05,
+          0.74,
+          0.9,
+          0.16
+        ],
+        "operationsscreen-view-buildview-new-rect-41-65374d": [
+          0.41,
+          0.08,
+          0.55,
+          0.12
+        ],
+        "operationsscreen-view-buildview-new-rect-41-895323": [
+          0.41,
+          0.23,
+          0.55,
+          0.24
+        ],
+        "operationsscreen-view-buildview-new-rect-40-66a49f": [
+          0.4,
+          0.52,
+          0.57,
+          0.27
+        ],
+        "operationsscreen-view-buildview-new-rect-04-a306fa": [
+          0.04,
+          0.05,
+          0.92,
+          0.22
+        ],
+        "operationsscreen-view-buildview-new-rect-04-8ece63": [
+          0.04,
+          0.3,
+          0.92,
+          0.64
+        ],
+        "operationsscreen-view-buildview-new-rect-41-71d142": [
+          0.41,
+          0.84,
+          0.55,
+          0.1
+        ],
+        "operationsscreen-view-buildview-new-rect-02-00ab2a": [
+          0.025,
+          0.12,
+          0.7,
+          0.76
+        ],
+        "operationsscreen-view-buildview-new-rect-05-83b409": [
+          0.05,
+          0.04,
+          0.9,
+          0.92
+        ],
+        "operationsscreen-view-buildtabs-new-rect-31-53579f": [
+          0.31,
+          0.02,
+          0.65,
+          0.96
+        ],
+        "operationsscreen-view-buildtabs-new-rect-10-88e765": [
+          0.1,
+          0.24,
+          0.16,
+          0.52
+        ],
+        "operationsscreen-view-addtab-new-rect-04f-0-dc01e7": [
+          0.04,
+          0.02,
+          0.92,
+          0.96
+        ],
+        "operationsscreen-view-buildcards-new-rect-2-4480ad": [
+          0.25,
+          0.625,
+          0.5,
+          0.055
+        ],
+        "operationsscreen-view-buildcards-new-rect-1-bf2c5f": [
+          0.12,
+          0.045,
+          0.76,
+          0.17
+        ],
+        "operationsscreen-view-buildcards-new-rect-1-fb453c": [
+          0.12,
+          0.22,
+          0.76,
+          0.43
+        ],
+        "operationsscreen-view-buildcards-new-rect-0-0e72ee": [
+          0.055,
+          0.66,
+          0.89,
+          0.12
+        ],
+        "operationsscreen-view-buildcards-new-rect-0-c7a839": [
+          0.07,
+          0.79,
+          0.86,
+          0.165
+        ],
+        "operationsscreen-view-buildcards-new-rect-0-ff3d9d": [
+          0.04,
+          0.05,
+          0.92,
+          0.9
+        ]
+      },
+      "layout": {
+        "card-gap": 10
+      },
+      "art": {
+        "Title plate/Icon": null,
+        "Body/Account summary/Stat 0/Icon": null,
+        "Body/Account summary/Stat 1/Icon": null,
+        "Body/Account summary/Stat 2/Icon": null,
+        "Body/Account summary/Stat 3/Icon": null,
+        "Body/Scroll/Viewport/Content/Card 7/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 6/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 0/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 1/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 2/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 3/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 4/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 5/Artwork": null,
+        "entry-vanguard": null,
+        "entry-vanguard-mk2": null,
+        "entry-vanguard-mk3": null,
+        "entry-siegebreaker": null,
+        "entry-cannon": null,
+        "entry-twin-shot": null,
+        "entry-ap-rounds": null,
+        "entry-hull-plating": null,
+        "entry-shield": null,
+        "entry-base-defence": null,
+        "entry-freeze": null,
+        "entry-speed": null,
+        "entry-upgrade": null,
+        "entry-zoom-out": null,
+        "entry-wipeout": null,
+        "entry-extra-life": null,
+        "entry-scout": null,
+        "entry-rapid": null,
+        "entry-armored": null,
+        "entry-heavy": null
+      }
+    },
+    {
+      "id": "socials",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "quarters-f0d8b5": "QUARTERS",
+        "command-center-2b1088": "COMMAND CENTER",
+        "assets-operations-and-battle-intelligence-b31d2c": "ASSETS, OPERATIONS AND BATTLE INTELLIGENCE",
+        "in-battle-1f7685": "IN BATTLE",
+        "refresh-1c3108": "REFRESH",
+        "link-your-account-5e6a7a": "LINK YOUR ACCOUNT",
+        "open-browser-0220bd": "OPEN BROWSER",
+        "check-status-664b70": "CHECK STATUS",
+        "title": "SOCIALS",
+        "intro-title": "JOIN THE BATTLE CITIES COMMUNITY",
+        "intro-description": "COMPLETE SOCIAL TASKS AND VERIFY AVAILABLE FUEL REWARDS"
+      },
+      "regions": {
+        "operationsscreen-view-buildview-new-rect-02-89a059": [
+          0.02,
+          0.05,
+          0.96,
+          0.45
+        ],
+        "operationsscreen-view-buildview-new-rect-02-6bc6fa": [
+          0.02,
+          0.51,
+          0.96,
+          0.4
+        ],
+        "operationsscreen-view-buildview-new-rect-01-6cdbec": [
+          0.016,
+          0.975,
+          0.968,
+          0.02
+        ],
+        "operationsscreen-view-buildview-new-rect-32-335855": [
+          0.32,
+          0.53,
+          0.36,
+          0.065
+        ],
+        "operationsscreen-view-buildview-new-rect-29-ee4f8f": [
+          0.29,
+          0.07,
+          0.42,
+          0.48
+        ],
+        "operationsscreen-view-buildview-new-rect-05-626b22": [
+          0.05,
+          0.62,
+          0.9,
+          0.13
+        ],
+        "operationsscreen-view-buildview-new-rect-10-31d562": [
+          0.1,
+          0.76,
+          0.8,
+          0.16
+        ],
+        "operationsscreen-view-buildview-new-rect-02-8aebfb": [
+          0.02,
+          0.06,
+          0.35,
+          0.88
+        ],
+        "operationsscreen-view-buildview-new-rect-16-159b45": [
+          0.16,
+          0.64,
+          0.68,
+          0.08
+        ],
+        "operationsscreen-view-buildview-new-rect-07-9e8f40": [
+          0.07,
+          0.11,
+          0.86,
+          0.57
+        ],
+        "operationsscreen-view-buildview-new-rect-05-98f810": [
+          0.05,
+          0.74,
+          0.9,
+          0.16
+        ],
+        "operationsscreen-view-buildview-new-rect-41-65374d": [
+          0.41,
+          0.08,
+          0.55,
+          0.12
+        ],
+        "operationsscreen-view-buildview-new-rect-41-895323": [
+          0.41,
+          0.23,
+          0.55,
+          0.24
+        ],
+        "operationsscreen-view-buildview-new-rect-40-66a49f": [
+          0.4,
+          0.52,
+          0.57,
+          0.27
+        ],
+        "operationsscreen-view-buildview-new-rect-04-a306fa": [
+          0.04,
+          0.05,
+          0.92,
+          0.22
+        ],
+        "operationsscreen-view-buildview-new-rect-04-8ece63": [
+          0.04,
+          0.3,
+          0.92,
+          0.64
+        ],
+        "operationsscreen-view-buildview-new-rect-41-71d142": [
+          0.41,
+          0.84,
+          0.55,
+          0.1
+        ],
+        "operationsscreen-view-buildview-new-rect-02-00ab2a": [
+          0.025,
+          0.12,
+          0.7,
+          0.76
+        ],
+        "operationsscreen-view-buildview-new-rect-05-83b409": [
+          0.05,
+          0.04,
+          0.9,
+          0.92
+        ],
+        "operationsscreen-view-buildtabs-new-rect-31-53579f": [
+          0.31,
+          0.02,
+          0.65,
+          0.96
+        ],
+        "operationsscreen-view-buildtabs-new-rect-10-88e765": [
+          0.1,
+          0.24,
+          0.16,
+          0.52
+        ],
+        "operationsscreen-view-addtab-new-rect-04f-0-dc01e7": [
+          0.04,
+          0.02,
+          0.92,
+          0.96
+        ],
+        "operationsscreen-view-buildcards-new-rect-2-4480ad": [
+          0.25,
+          0.625,
+          0.5,
+          0.055
+        ],
+        "operationsscreen-view-buildcards-new-rect-1-bf2c5f": [
+          0.12,
+          0.045,
+          0.76,
+          0.17
+        ],
+        "operationsscreen-view-buildcards-new-rect-1-fb453c": [
+          0.12,
+          0.22,
+          0.76,
+          0.43
+        ],
+        "operationsscreen-view-buildcards-new-rect-0-0e72ee": [
+          0.055,
+          0.66,
+          0.89,
+          0.12
+        ],
+        "operationsscreen-view-buildcards-new-rect-0-c7a839": [
+          0.07,
+          0.79,
+          0.86,
+          0.165
+        ],
+        "operationsscreen-view-buildcards-new-rect-0-ff3d9d": [
+          0.04,
+          0.05,
+          0.92,
+          0.9
+        ],
+        "operationsscreen-link-buildlinkinstructions-7bb221": [
+          0.05,
+          0.04,
+          0.9,
+          0.15
+        ],
+        "operationsscreen-link-buildlinkinstructions-ec3ab6": [
+          0.07,
+          0.23,
+          0.86,
+          0.48
+        ],
+        "operationsscreen-link-buildlinkinstructions-c411c6": [
+          0.06,
+          0.78,
+          0.43,
+          0.16
+        ],
+        "operationsscreen-link-buildlinkinstructions-9195e1": [
+          0.04,
+          0.04,
+          0.92,
+          0.92
+        ],
+        "operationsscreen-link-buildlinkinstructions-748673": [
+          0.51,
+          0.78,
+          0.43,
+          0.16
+        ]
+      },
+      "layout": {
+        "card-gap": 10
+      },
+      "art": {
+        "Title plate/Icon": null,
+        "Body/Account summary/Stat 0/Icon": null,
+        "Body/Account summary/Stat 1/Icon": null,
+        "Body/Account summary/Stat 2/Icon": null,
+        "Body/Account summary/Stat 3/Icon": null,
+        "Body/Scroll/Viewport/Content/Card 7/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 6/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 0/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 1/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 2/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 3/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 4/Artwork": null,
+        "Body/Scroll/Viewport/Content/Card 5/Artwork": null
+      }
+    },
+    {
+      "id": "select-tank",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "select-tank-bb60e5": "SELECT TANK",
+        "back-d325d6": "< BACK",
+        "fuel-available-61c4f6": "FUEL AVAILABLE",
+        "wallet-connect-to-load-inventory-73d286": "WALLET\nCONNECT TO LOAD INVENTORY",
+        "empty-cc1d2f": "EMPTY",
+        "change-788601": "CHANGE",
+        "headings-0": "HEALTH",
+        "headings-1": "ROUNDS",
+        "headings-2": "SPEED",
+        "headings-3": "POWER",
+        "tank-0": "VANGUARD",
+        "tank-1": "STRIKER",
+        "tank-2": "TWIN FANG",
+        "tank-3": "SIEGEBREAKER",
+        "title": "SELECT TANK",
+        "continue": "CONTINUE"
+      },
+      "regions": {
+        "prebattlescreen-configure-new-rect-025f-035-63a3ed": [
+          0.025,
+          0.035,
+          0.95,
+          0.93
+        ],
+        "prebattlescreen-configure-new-rect-02176f-0-aacea7": [
+          0.02176,
+          0.0176,
+          0.7203,
+          0.0798
+        ],
+        "prebattlescreen-configure-new-rect-30f-08f--7fc156": [
+          0.3,
+          0.08,
+          0.1,
+          0.84
+        ],
+        "prebattlescreen-configure-new-rect-42f-0-52-7d50ee": [
+          0.42,
+          0.0,
+          0.52,
+          1.0
+        ],
+        "prebattlescreen-configure-new-rect-7548f-01-c2d06c": [
+          0.7548,
+          0.0176,
+          0.2254,
+          0.0798
+        ],
+        "prebattlescreen-configure-new-rect-015f-103-ea2905": [
+          0.015,
+          0.103,
+          0.97,
+          0.089
+        ],
+        "prebattlescreen-configure-new-rect-105f-10f-e3eb45": [
+          0.105,
+          0.1,
+          0.27,
+          0.8
+        ],
+        "prebattlescreen-configure-new-rect-015f-207-12a69c": [
+          0.015,
+          0.207,
+          0.97,
+          0.633
+        ],
+        "prebattlescreen-configure-new-rect-025f-04f-8dd83c": [
+          0.025,
+          0.04,
+          0.95,
+          0.1
+        ],
+        "prebattlescreen-configure-new-rect-10f-115f-00c089": [
+          0.1,
+          0.115,
+          0.8,
+          0.38
+        ],
+        "prebattlescreen-configure-new-rect-06f-58f--52c92a": [
+          0.06,
+          0.58,
+          0.88,
+          0.19
+        ],
+        "prebattlescreen-configure-new-rect-0-0-25f--255662": [
+          0.0,
+          0.0,
+          0.25,
+          1.0
+        ],
+        "prebattlescreen-configure-new-rect-04f-02f--135468": [
+          0.04,
+          0.02,
+          0.92,
+          0.25
+        ],
+        "prebattlescreen-configure-new-rect-05f-03f--d9fa9c": [
+          0.05,
+          0.03,
+          0.9,
+          0.12
+        ],
+        "prebattlescreen-configure-new-rect-30f-19f--157893": [
+          0.3,
+          0.19,
+          0.4,
+          0.43
+        ],
+        "prebattlescreen-configure-new-rect-03f-65f--f060de": [
+          0.03,
+          0.65,
+          0.94,
+          0.13
+        ],
+        "prebattlescreen-configure-new-rect-08f-81f--85a7e6": [
+          0.08,
+          0.81,
+          0.84,
+          0.14
+        ],
+        "prebattlescreen-configure-new-rect-035f-88f-c7fb0e": [
+          0.035,
+          0.88,
+          0.58,
+          0.105
+        ],
+        "prebattlescreen-configure-new-rect-68f-88f--aa3d23": [
+          0.68,
+          0.88,
+          0.29,
+          0.105
+        ],
+        "prebattlescreen-applyscreensurface-new-rect-c4e1f7": [
+          0.025,
+          0.035,
+          0.95,
+          0.93
+        ],
+        "prebattlescreen-applyscreensurface-new-rect-e8e66e": [
+          0.015,
+          0.207,
+          0.97,
+          0.633
+        ],
+        "prebattlescreen-applyplatformspacing-new-re-9e56da": [
+          0.03,
+          0.0,
+          0.5,
+          1.0
+        ],
+        "prebattlescreen-applyplatformspacing-new-re-96105d": [
+          0.04,
+          0.0,
+          0.43,
+          1.0
+        ],
+        "prebattlescreen-applyplatformspacing-new-re-8a8e66": [
+          0.53,
+          0.13,
+          0.45,
+          0.74
+        ],
+        "prebattlescreen-applyplatformspacing-new-re-38d379": [
+          0.49,
+          0.13,
+          0.48,
+          0.74
+        ],
+        "prebattlescreen-applytitleheader-new-rect-2-03c000": [
+          0.29,
+          0.025,
+          0.68,
+          0.95
+        ],
+        "prebattlescreen-applytitleheader-new-rect-1-5caee0": [
+          0.1,
+          0.17,
+          0.14,
+          0.66
+        ],
+        "prebattlescreen-applytitleheader-new-rect-1-38c803": [
+          0.18,
+          0.9,
+          0.64,
+          0.035
+        ],
+        "prebattlescreen-cardcontentarea-new-rect-03-ff1dd1": [
+          0.035,
+          0.465,
+          0.93,
+          0.304
+        ],
+        "prebattlescreen-cardcontentarea-new-rect-06-747484": [
+          0.06,
+          0.505,
+          0.88,
+          0.265
+        ],
+        "prebattlescreen-fitpsg1summarylabels-new-re-e7c75c": [
+          0.1,
+          0.08,
+          0.245,
+          0.84
+        ],
+        "prebattlescreen-fitpsg1summarylabels-new-re-017dc3": [
+          0.365,
+          0.08,
+          0.07,
+          0.84
+        ],
+        "prebattlescreen-fitpsg1summarylabels-new-re-3f25b2": [
+          0.439,
+          0.08,
+          0.215,
+          0.84
+        ],
+        "prebattlescreen-fitpsg1summarylabels-new-re-03e56e": [
+          0.667,
+          0.08,
+          0.32,
+          0.84
+        ],
+        "prebattlescreen-applystatuspanel-new-rect-0-d37825": [
+          0.015,
+          0.103,
+          0.97,
+          0.089
+        ],
+        "prebattlescreen-applystatuspanel-new-rect-0-d68813": [
+          0.018,
+          0.0,
+          0.09,
+          1.0
+        ],
+        "prebattlescreen-applystatuspanel-new-rect-1-05a6a8": [
+          0.105,
+          0.1,
+          0.27,
+          0.8
+        ],
+        "prebattlescreen-applystatuspanel-new-rect-2-f6b69b": [
+          0.265,
+          0.08,
+          0.06,
+          0.84
+        ],
+        "prebattlescreen-applystatuspanel-new-rect-6-54c6ff": [
+          0.64,
+          0.08,
+          0.34,
+          0.39
+        ],
+        "prebattlescreen-applystatuspanel-new-rect-5-3fafed": [
+          0.56,
+          0.45,
+          0.42,
+          0.48
+        ],
+        "prebattlescreen-applysummarylayout-new-rect-66f557": [
+          0.015,
+          0.103,
+          0.97,
+          0.089
+        ],
+        "prebattlescreen-applysummarylayout-new-rect-89e034": [
+          0.018,
+          0.08,
+          0.085,
+          0.84
+        ],
+        "prebattlescreen-applysummarylayout-new-rect-6fbee4": [
+          0.105,
+          0.12,
+          0.3,
+          0.76
+        ],
+        "prebattlescreen-applysummarylayout-new-rect-25142a": [
+          0.42,
+          0.12,
+          0.085,
+          0.76
+        ],
+        "prebattlescreen-applysummarylayout-new-rect-4041e1": [
+          0.54,
+          0.13,
+          0.425,
+          0.32
+        ],
+        "prebattlescreen-applysummarylayout-new-rect-4e846d": [
+          0.52,
+          0.46,
+          0.445,
+          0.4
+        ],
+        "prebattlescreen-applysummarylayout-new-rect-dcbbb0": [
+          0.105,
+          0.1,
+          0.225,
+          0.8
+        ],
+        "prebattlescreen-applysummarylayout-new-rect-6ffda0": [
+          0.34,
+          0.08,
+          0.12,
+          0.84
+        ],
+        "prebattlescreen-applysummarylayout-new-rect-aa1ef4": [
+          0.53,
+          0.07,
+          0.445,
+          0.39
+        ],
+        "prebattlescreen-applysummarylayout-new-rect-edb38d": [
+          0.51,
+          0.12,
+          0.445,
+          0.39
+        ],
+        "prebattlescreen-applysummarylayout-new-rect-325de9": [
+          0.485,
+          0.45,
+          0.49,
+          0.48
+        ],
+        "prebattlescreen-applysummarylayout-new-rect-5cae8f": [
+          0.465,
+          0.45,
+          0.49,
+          0.48
+        ],
+        "prebattlescreen-applyclassifiedcard-new-rec-bf5455": [
+          0.08,
+          0.17,
+          0.84,
+          0.32
+        ],
+        "prebattlescreen-applyclassifiedcard-new-rec-29f971": [
+          0.05,
+          0.04,
+          0.9,
+          0.92
+        ],
+        "prebattlescreen-applytankpicture-new-rect-1-ec3183": [
+          0.14,
+          0.144,
+          0.72,
+          0.342
+        ],
+        "prebattlescreen-applytankgroundshadow-new-r-bef854": [
+          0.17,
+          0.455,
+          0.66,
+          0.052
+        ],
+        "prebattlescreen-applycostbadge-new-rect-13f-38121e": [
+          0.13,
+          0.14,
+          0.28,
+          0.72
+        ],
+        "prebattlescreen-applycostbadge-new-rect-13f-92a310": [
+          0.13,
+          0.2,
+          0.28,
+          0.6
+        ],
+        "prebattlescreen-applycostbadge-new-rect-44f-2b42c4": [
+          0.44,
+          0.045,
+          0.52,
+          0.91
+        ],
+        "prebattlescreen-fitcostbadgecontents-new-re-8bfba2": [
+          0.08,
+          0.1,
+          0.84,
+          0.8
+        ],
+        "prebattlescreen-fitcostbadgecontents-new-re-2b7407": [
+          0.05,
+          0.04,
+          0.9,
+          0.92
+        ],
+        "prebattlescreen-applyspecifications-new-rec-c2ef4f": [
+          0.03,
+          0.0,
+          0.5,
+          1.0
+        ],
+        "prebattlescreen-applyspecifications-new-rec-db499c": [
+          0.04,
+          0.0,
+          0.43,
+          1.0
+        ],
+        "prebattlescreen-applyspecifications-new-rec-7009d1": [
+          0.53,
+          0.13,
+          0.45,
+          0.74
+        ],
+        "prebattlescreen-applyspecifications-new-rec-144685": [
+          0.49,
+          0.13,
+          0.48,
+          0.74
+        ],
+        "prebattlescreen-applycontinueart-new-rect-0-251a57": [
+          0.08,
+          0.06,
+          0.84,
+          0.88
+        ],
+        "prebattlescreen-applycontinueart-new-rect-6-eafcd3": [
+          0.68,
+          0.88,
+          0.29,
+          0.105
+        ],
+        "prebattlescreen-applycontinueart-new-rect-0-5672f4": [
+          0.035,
+          0.88,
+          0.58,
+          0.105
+        ],
+        "prebattlescreen-button-new-rect-03f-04f-94f-652743": [
+          0.03,
+          0.04,
+          0.94,
+          0.92
+        ]
+      },
+      "layout": {
+        "card-gap-x": 4,
+        "card-gap-y": 8
+      },
+      "art": {
+        "Fuel summary/Fuel can": null,
+        "Tank roster/Viewport/Content/VANGUARD/Cost badge/Fuel can": null,
+        "Tank roster/Viewport/Content/STRIKER/Cost badge/Fuel can": null,
+        "Tank roster/Viewport/Content/TWIN FANG/Cost badge/Fuel can": null,
+        "Tank roster/Viewport/Content/SIEGEBREAKER/Cost badge/Fuel can": null,
+        "Title plate/Mascot": null,
+        "tank-0": null,
+        "tank-1": null,
+        "tank-2": null,
+        "tank-3": null
+      }
+    },
+    {
+      "id": "loadout",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "equip-up-to-four-powers-80e539": "EQUIP UP TO FOUR POWERS",
+        "inventory-44e764": "INVENTORY",
+        "slot-01-choose-a-power-1a7eae": "SLOT 01 • CHOOSE A POWER",
+        "clear-slot-dfaa13": "CLEAR SLOT",
+        "power-shield": "SHIELD",
+        "power-base-defence": "BASE DEFENCE",
+        "power-freeze": "FREEZE",
+        "power-speed": "SPEED",
+        "power-upgrade": "STAR",
+        "power-zoom-out": "ZOOM OUT",
+        "power-wipeout": "WIPEOUT",
+        "power-extra-life": "EXTRA LIFE",
+        "inventory-title": "INVENTORY",
+        "inventory-instruction": "SELECT AN OWNED POWER",
+        "equip": "EQUIP",
+        "unequip": "UNEQUIP",
+        "title": "BATTLE LOADOUT",
+        "start-battle": "START BATTLE"
+      },
+      "regions": {
+        "prebattlescreen-loadout-view-loadoutaction--896ba9": [
+          0.05,
+          0.04,
+          0.9,
+          0.92
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-ed4c0d": [
+          0.02,
+          0.01,
+          0.96,
+          0.08
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-52e40d": [
+          0.02,
+          0.09,
+          0.96,
+          0.055
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-8dc2c5": [
+          0.04,
+          0.7,
+          0.92,
+          0.16
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-80acdd": [
+          0.1,
+          0.59,
+          0.8,
+          0.18
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-b8edb6": [
+          0.015,
+          0.46,
+          0.97,
+          0.44
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-7ac617": [
+          0.02,
+          0.04,
+          0.96,
+          0.7
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-8df43a": [
+          0.06,
+          0.04,
+          0.88,
+          0.92
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-c650bf": [
+          0.24,
+          0.53,
+          0.52,
+          0.08
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-fb520d": [
+          0.22,
+          0.22,
+          0.56,
+          0.34
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-31fdd6": [
+          0.18,
+          0.22,
+          0.64,
+          0.34
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-da2268": [
+          0.04,
+          0.655,
+          0.92,
+          0.115
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-f30759": [
+          0.04,
+          0.04,
+          0.92,
+          0.92
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-8ae53f": [
+          0.025,
+          0.1,
+          0.18,
+          0.8
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-4c4efc": [
+          0.25,
+          0.02,
+          0.72,
+          0.96
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-599c9b": [
+          0.02,
+          0.0,
+          0.96,
+          1.0
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-a388b6": [
+          0.12,
+          0.01,
+          0.76,
+          0.98
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-f26705": [
+          0.12,
+          0.77,
+          0.76,
+          0.14
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-484ec6": [
+          0.02,
+          0.015,
+          0.96,
+          0.96
+        ],
+        "prebattlescreen-loadout-view-ensureloadoutv-a2bc66": [
+          0.29,
+          0.05,
+          0.49,
+          0.9
+        ],
+        "prebattlescreen-loadout-view-layoutloadoutf-1fa61c": [
+          0.024,
+          0.08,
+          0.535,
+          0.84
+        ],
+        "prebattlescreen-loadout-view-layoutloadoutf-e9228e": [
+          0.58,
+          0.11,
+          0.175,
+          0.78
+        ],
+        "prebattlescreen-loadout-view-applyloadoutla-0b7516": [
+          0.04,
+          0.035,
+          0.92,
+          0.16
+        ],
+        "prebattlescreen-loadout-view-applyloadoutla-bf3f76": [
+          0.06,
+          0.18,
+          0.88,
+          0.47
+        ],
+        "prebattlescreen-loadout-view-applyloadoutla-bb7104": [
+          0.06,
+          0.175,
+          0.88,
+          0.6
+        ],
+        "prebattlescreen-loadout-view-applyloadoutla-9d83a2": [
+          0.24,
+          0.585,
+          0.52,
+          0.065
+        ],
+        "prebattlescreen-loadout-view-applyloadoutla-e98a28": [
+          0.085,
+          0.045,
+          0.83,
+          0.125
+        ],
+        "prebattlescreen-loadout-view-applyloadoutla-a067ac": [
+          0.04,
+          0.655,
+          0.92,
+          0.115
+        ],
+        "prebattlescreen-loadout-view-applyloadoutla-edc5d0": [
+          0.2,
+          0.79,
+          0.6,
+          0.15
+        ]
+      },
+      "layout": {
+        "inventory-ratio": 0.28,
+        "column-ratio": 0.27
+      },
+      "art": {
+        "Fuel summary/Fuel can": null,
+        "Loadout/Workspace/Tank preview/Deployment platform": null,
+        "Loadout/Workspace/Slot 1/Empty equipment socket": null,
+        "Loadout/Workspace/Slot 2/Empty equipment socket": null,
+        "Loadout/Workspace/Slot 3/Empty equipment socket": null,
+        "Loadout/Workspace/Slot 4/Empty equipment socket": null,
+        "Loadout/Inventory/Paper/TV Background": null,
+        "Loadout/Inventory/Paper/Heading bar/Crate": null,
+        "Loadout/Inventory/Paper/Scroll/Viewport/Content/shield/Icon tile/Artwork": null,
+        "Loadout/Inventory/Paper/Scroll/Viewport/Content/base-defence/Icon tile/Artwork": null,
+        "Loadout/Inventory/Paper/Scroll/Viewport/Content/freeze/Icon tile/Artwork": null,
+        "Loadout/Inventory/Paper/Scroll/Viewport/Content/speed/Icon tile/Artwork": null,
+        "Loadout/Inventory/Paper/Scroll/Viewport/Content/upgrade/Icon tile/Artwork": null,
+        "Loadout/Inventory/Paper/Scroll/Viewport/Content/zoom-out/Icon tile/Artwork": null,
+        "Loadout/Inventory/Paper/Scroll/Viewport/Content/wipeout/Icon tile/Artwork": null,
+        "Loadout/Inventory/Paper/Scroll/Viewport/Content/extra-life/Icon tile/Artwork": null,
+        "Title plate/Mascot": null,
+        "power-shield": null,
+        "power-base-defence": null,
+        "power-freeze": null,
+        "power-speed": null,
+        "power-upgrade": null,
+        "power-zoom-out": null,
+        "power-wipeout": null,
+        "power-extra-life": null,
+        "tank-0": null,
+        "tank-1": null,
+        "tank-2": null,
+        "tank-3": null
+      }
+    },
+    {
+      "id": "battle-results",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "share-results-b9d541": "SHARE RESULTS",
+        "match-report-dbe562": "MATCH REPORT",
+        "hi-score-7f2f4e": "HI-SCORE",
+        "enemies-fa6710": "ENEMIES",
+        "battle-time-760e42": "BATTLE TIME",
+        "player-results-50395e": "PLAYER RESULTS",
+        "you-a0d4a6": "YOU",
+        "team-total-c0b137": "TEAM TOTAL"
+      },
+      "regions": {},
+      "layout": {
+        "report-ratio": 0.255,
+        "row-min-height": 108
+      },
+      "art": {
+        "Title/Medal": null,
+        "Title/Share results/Icon": null,
+        "Match report/Paper/Heading/Clipboard": null,
+        "Match report/Paper/Hi score/Icon": null,
+        "Match report/Paper/Enemies/Icon": null,
+        "Match report/Paper/Battle time/Icon": null,
+        "Match report/Paper/Players/Icon": null,
+        "Player results/Columns/Column 2/Tank": null,
+        "Player results/Columns/Column 3/Tank": null,
+        "Player results/Columns/Column 4/Tank": null,
+        "Player results/Columns/Column 5/Tank": null,
+        "Player results/Rows/Viewport/Content/Player row 0/Rank medal": null,
+        "Player results/Rows/Viewport/Content/Player row 1/Rank medal": null,
+        "Player results/Rows/Viewport/Content/Player row 2/Rank medal": null,
+        "Player results/Rows/Viewport/Content/Player row 3/Rank medal": null,
+        "Footer/Shells": null
+      }
+    },
+    {
+      "id": "replay",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "match-replay-aa60c8": "MATCH REPLAY",
+        "back-639807": "BACK",
+        "pause-ca6456": "PAUSE",
+        "1x-7cf631": "1X",
+        "restart-0ce770": "RESTART",
+        "resume": "RESUME",
+        "pause": "PAUSE"
+      },
+      "regions": {
+        "playerprofilescreen-replay-buildreplayviewe-d4243c": [
+          0.29,
+          0.025,
+          0.68,
+          0.95
+        ],
+        "playerprofilescreen-replay-buildreplayviewe-f394cc": [
+          0.1,
+          0.17,
+          0.14,
+          0.66
+        ],
+        "playerprofilescreen-replay-buildreplayviewe-d2b364": [
+          0.018,
+          0.05,
+          0.46,
+          0.9
+        ],
+        "playerprofilescreen-replay-buildreplayviewe-9037b8": [
+          0.5,
+          0.11,
+          0.15,
+          0.78
+        ],
+        "playerprofilescreen-replay-buildreplayviewe-b1b1c8": [
+          0.665,
+          0.11,
+          0.085,
+          0.78
+        ]
+      },
+      "layout": {
+        "viewport-padding": 3
+      },
+      "art": {
+        "Title plate/Icon": null
+      }
+    },
+    {
+      "id": "lobby",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "online-ac7e24": "ONLINE",
+        "battle-together-75d3e6": "BATTLE TOGETHER",
+        "co-op-d71cfe": "CO-OP",
+        "region-9d14e4": "REGION",
+        "friend-s-room-code-dae415": "FRIEND'S ROOM CODE",
+        "create-room-563695": "CREATE ROOM",
+        "join-room-ca8bf7": "JOIN ROOM",
+        "drive-wasd-aim-arrow-keys-fire-charge-space-270d37": "DRIVE  WASD     AIM  ARROW KEYS\nFIRE / CHARGE  SPACE\nCHANGE WEAPON  Q     DEPLOY  E / RIGHT CLICK",
+        "start-match-2bf823": "START MATCH",
+        "rematch-lobby-fae500": "REMATCH LOBBY",
+        "leave-room-d7f4d7": "LEAVE ROOM",
+        "back-to-game-dbbd2e": "BACK TO GAME"
+      },
+      "regions": {},
+      "layout": {
+        "panel-side-inset": 0.12
+      },
+      "art": {}
+    },
+    {
+      "id": "battle-hud",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "score-a60ffb": "SCORE",
+        "time-588867": "TIME",
+        "first-to-3-own-flag-must-be-home-57a971": "FIRST TO 3 · OWN FLAG MUST BE HOME",
+        "respawns": "RESPAWNS",
+        "lives": "LIVES",
+        "rivals": "RIVALS",
+        "enemies": "ENEMIES"
+      },
+      "regions": {},
+      "layout": {
+        "font-scale": 1
+      },
+      "art": {}
+    },
+    {
+      "id": "pause",
+      "platform": "all",
+      "patches": [],
+      "flows": [],
+      "copy": {
+        "action-resume": "RESUME",
+        "action-restart": "RESTART",
+        "action-next-stage": "NEXT STAGE",
+        "action-online-lobby": "ONLINE LOBBY",
+        "action-debug": "DEBUG",
+        "action-main-menu": "MAIN MENU",
+        "paused": "PAUSED",
+        "stage-clear": "STAGE CLEAR",
+        "game-over": "GAME OVER",
+        "navigation-help": "D-PAD: CHOOSE    A: SELECT    B: BACK",
+        "pause": "PAUSE"
+      },
+      "regions": {},
+      "layout": {
+        "row-height": 60,
+        "button-height": 56
+      },
+      "art": {}
+    },
+    {
+      "id": "select-tank",
+      "platform": "psg1",
+      "patches": [],
+      "flows": [],
+      "copy": {},
+      "regions": {},
+      "layout": {
+        "card-gap-y": 6
+      }
+    }
+  ]
+}

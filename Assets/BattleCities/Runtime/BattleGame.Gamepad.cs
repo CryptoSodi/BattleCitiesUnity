@@ -1,5 +1,6 @@
 using BattleCities.Core;
 using UnityEngine;
+using BattleCities.UI;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
@@ -149,22 +150,22 @@ namespace BattleCities
                 return;
             }
             var options = GamepadPauseOptions();
-            float height = 200 + options.Length * 60;
+            float height = 200 + options.Length * ScreenContent.Number("pause","row-height",60);
             var area = new Rect(Screen.width * .12f, (Screen.height - height) * .5f, Screen.width * .76f, height);
             DrawControllerPanel(area);
             GUILayout.BeginArea(new Rect(area.x + 18, area.y + 12, area.width - 36, area.height - 24));
             var title = new GUIStyle(centered) { fontSize = 30, fontStyle = FontStyle.Bold };
             var button = new GUIStyle(GUI.skin.button) { fontSize = 24, fontStyle = FontStyle.Bold };
-            GUILayout.Label(ended ? Simulation.Won ? "STAGE CLEAR" : "GAME OVER" : "PAUSED", title);
+            GUILayout.Label(ended?Simulation.Won?ScreenContent.Text("pause","stage-clear","STAGE CLEAR"):ScreenContent.Text("pause","game-over","GAME OVER"):ScreenContent.Text("pause","paused","PAUSED"),title);
             GUILayout.Label(BattleGamepadBindings.Help, centered);
             GUILayout.Space(12);
             for (int i = 0; i < options.Length; i++)
             {
                 var prior = GUI.backgroundColor; if (i == pauseChoice) GUI.backgroundColor = new Color(1f, .75f, .1f);
-                if (GUILayout.Button((i == pauseChoice ? "> " : "") + options[i], button, GUILayout.Height(56))) ActivatePauseChoice(options[i]);
+                if (GUILayout.Button((i == pauseChoice ? "> " : "") + ScreenContent.Text("pause","action-"+options[i].ToLowerInvariant().Replace(' ','-'),options[i]), button, GUILayout.Height(ScreenContent.Number("pause","button-height",56)))) ActivatePauseChoice(options[i]);
                 GUI.backgroundColor = prior;
             }
-            GUILayout.Label("D-PAD: CHOOSE    A: SELECT    B: BACK", centered);
+            GUILayout.Label(ScreenContent.Text("pause","navigation-help","D-PAD: CHOOSE    A: SELECT    B: BACK"), centered);
             GUILayout.EndArea();
         }
 

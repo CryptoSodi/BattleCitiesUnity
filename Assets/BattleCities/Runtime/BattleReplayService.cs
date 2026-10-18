@@ -51,7 +51,7 @@ namespace BattleCities
         private static bool Transient(long code)=>code==0||code==408||code==429||code>=500;
         private static string Failure(long code,string error,string fallback)
         {return (string.IsNullOrWhiteSpace(error)?fallback:error)+(code>0?" (HTTP "+code+")":"");}
-        private IEnumerator PrepareRequest(MainMenuApiClient api,string method,string path,JObject body,ReplayArchive archive,bool walletRequired,Func<bool> current,Action<long,JObject,string> completed)
+        private IEnumerator PrepareRequest(MainMenuApiClient api,string method,string path,JObject body,ReplayArchive archive,bool walletRequired,Func<bool> current,Action<long,JObject,string> completed,Action<string> attention)
         {
             int attempt=0;
             while(current())
@@ -62,6 +62,7 @@ namespace BattleCities
                 attempt=Math.Min(attempt+1,10);
                 if(!Transient(status)||!walletRequired&&attempt>=3){completed(status,response,error);yield break;}
                 archive.uploadStatus="Reconnecting before battle; "+Failure(status,error,"Score service unavailable")+". You can return to the menu.";
+                attention?.Invoke(archive.uploadStatus);
                 // A charged wallet match must not start without its server seed.
                 yield return new WaitForSecondsRealtime(Math.Min(10,attempt));
             }
@@ -88,7 +89,7 @@ namespace BattleCities
             }
             catch(Exception){return false;}
         }
-        public IEnumerator Prepare(ReplayRecorder recorder,ReplayArchive archive,Func<bool> current,Action done)
+        public IEnumerator Prepare(ReplayRecorder recorder,ReplayArchive archive,Func<bool> current,Action done,Action<string> attention=null)
         {
             MainMenuApiClient api=null;bool walletRequired=archive.ownerProvider=="wallet";
             string expectedOwner=archive.ownerId;
@@ -97,17 +98,17 @@ namespace BattleCities
                 archive.uploadStatus=walletRequired?"Connecting score recording; battle is paused":"Recording locally; no ranked session was started";
                 if(!CurrentNetwork(archive.apiUrl))
                 {
-                    if(walletRequired){archive.uploadStatus="Score service is unavailable. Return to the menu before starting.";yield return AwaitPreparationExit(current);}
+                    if(walletRequired){archive.uploadStatus="Score service is unavailable. Return to the menu before starting.";attention?.Invoke(archive.uploadStatus);yield return AwaitPreparationExit(current);}
                     yield break;
                 }
                 api=CreateApi(archive.apiUrl);JObject player=null;long status=0;string failure=null;
-                yield return PrepareRequest(api,"GET","/api/player",null,archive,walletRequired,current,(code,json,error)=>{status=code;failure=error;if(code==200&&error==null)player=json;});
+                yield return PrepareRequest(api,"GET","/api/player",null,archive,walletRequired,current,(code,json,error)=>{status=code;failure=error;if(code==200&&error==null)player=json;},attention);
                 if(!current())yield break;
                 if(!Authenticated(player))
                 {
                     archive.uploadStatus=walletRequired?"Wallet session unavailable. Return to the menu and sign in again.":
                         status==200||status==401?"Recording locally; sign in before starting to save online scores":"Recording locally; "+Failure(status,failure,"Player session unavailable");
-                    if(walletRequired)yield return AwaitPreparationExit(current);yield break;
+                    if(walletRequired){attention?.Invoke(archive.uploadStatus);yield return AwaitPreparationExit(current);}yield break;
                 }
                 var identity=player["player"] as JObject;
                 string owner=Text(identity?["id"]),provider=Text(identity?["provider"]);
@@ -115,6 +116,7 @@ namespace BattleCities
                 {
                     archive.uploadStatus=walletRequired?"Wallet account changed or unavailable. Return to the menu and reconnect the recording account.":
                         "Recording account changed or unavailable. Return to the menu and reconnect the recording account.";
+                    attention?.Invoke(archive.uploadStatus);
                     yield return AwaitPreparationExit(current);yield break;
                 }
                 archive.ownerId=owner;archive.ownerProvider=provider;walletRequired=provider=="wallet";
@@ -122,14 +124,14 @@ namespace BattleCities
                 var body=new JObject { ["simulationVersion"]=r.simulationVersion,["buildVersion"]=r.buildVersion,["levelNumber"]=r.levelNumber,
                     ["levelHash"]=r.levelHash,["configHash"]=r.configHash,["tickRate"]=60,["mode"]=r.mode };
                 JObject response=null;
-                yield return PrepareRequest(api,"POST","/api/replay-sessions",body,archive,walletRequired,current,(code,json,error)=>{status=code;failure=error;if(code>=200&&code<300&&error==null)response=json;});
+                yield return PrepareRequest(api,"POST","/api/replay-sessions",body,archive,walletRequired,current,(code,json,error)=>{status=code;failure=error;if(code>=200&&code<300&&error==null)response=json;},attention);
                 if(!current())yield break;
                 if(response?["session"] is JObject)
                 {
                     // Browser/native cookies can change while the session request is in flight.
                     JObject sessionPlayer=null;
                     yield return PrepareRequest(api,"GET","/api/player",null,archive,walletRequired,current,(code,json,error)=>
-                    {if(code==200&&error==null)sessionPlayer=json;});
+                    {if(code==200&&error==null)sessionPlayer=json;},attention);
                     if(!current())yield break;
                     var currentIdentity=sessionPlayer?["player"] as JObject;
                     if(!Authenticated(sessionPlayer)||Text(currentIdentity?["id"])!=archive.ownerId||
@@ -137,13 +139,14 @@ namespace BattleCities
                     {
                         archive.uploadStatus=walletRequired?"Wallet account changed or expired. Return to the menu and reconnect the recording account.":
                             "Recording account changed or expired. Return to the menu and reconnect the recording account.";
+                        attention?.Invoke(archive.uploadStatus);
                         yield return AwaitPreparationExit(current);yield break;
                     }
                 }
                 if(AcceptSession(recorder,archive,response,out var invalidSession))yield break;
                 archive.uploadStatus=(walletRequired?"Battle paused; ":"Recording locally; ")+Failure(status,failure,invalidSession)+
                     (walletRequired?". Return to the menu to reconnect.":"");
-                if(walletRequired)yield return AwaitPreparationExit(current);
+                if(walletRequired){attention?.Invoke(archive.uploadStatus);yield return AwaitPreparationExit(current);}
             }
             finally {ReleaseApi(api);done?.Invoke();}
         }

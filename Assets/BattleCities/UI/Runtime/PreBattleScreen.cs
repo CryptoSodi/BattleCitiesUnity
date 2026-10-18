@@ -83,6 +83,7 @@ namespace BattleCities.UI
             if(root)
             {
                 BindExistingView();
+                RemoteScreenView.Bind("select-tank",root,()=>inLoadout?"loadout":"select-tank");
                 EnsureLoadoutView();ApplyScreenSurface();
                 ShowPage(false);
                 return;
@@ -91,36 +92,36 @@ namespace BattleCities.UI
             ownsFont=!font;
             if(!font)font=TMP_FontAsset.CreateFontAsset(theme.HeadingFont);
             // Keep the original cream panel's sliced silhouette as the rounded screen mask.
-            root=Panel("Pre-battle screens",frame,theme.CreamPanel,new Rect(.025f,.035f,.95f,.93f));
+            root=Panel("Pre-battle screens",frame,theme.CreamPanel,ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-025f-035-63a3ed",new Rect(.025f,.035f,.95f,.93f)));
             root.GetComponent<Image>().raycastTarget=true;
             root.gameObject.AddComponent<UnityEngine.UI.Mask>().showMaskGraphic=false;
-            var titlePanel=Panel("Title plate",root,art&&art.tankTitlePanel?art.tankTitlePanel:theme.BlueFrame,new Rect(.02176f,.0176f,.7203f,.0798f));
+            var titlePanel=Panel("Title plate",root,art&&art.tankTitlePanel?art.tankTitlePanel:theme.BlueFrame,ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-02176f-0-aacea7",new Rect(.02176f,.0176f,.7203f,.0798f)));
             titlePanel.GetComponent<Image>().pixelsPerUnitMultiplier=4;
             var mascotSprite=theme.NavigationIcons!=null&&theme.NavigationIcons.Length>0?theme.NavigationIcons[0]:null;
-            var mascot=Panel("Mascot",titlePanel,mascotSprite,new Rect(.30f,.08f,.10f,.84f));
+            var mascot=Panel("Mascot",titlePanel,mascotSprite,ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-30f-08f--7fc156",new Rect(.30f,.08f,.10f,.84f)));
             var mascotImage=mascot.GetComponent<Image>();mascotImage.type=Image.Type.Simple;mascotImage.preserveAspect=true;
-            title=Label("Title",titlePanel,"SELECT TANK",new Rect(.42f,0,.52f,1),34,theme.Gold);
+            title=Label("Title",titlePanel,ScreenContent.Text("select-tank","select-tank-bb60e5","SELECT TANK"),ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-42f-0-52-7d50ee",new Rect(.42f,0,.52f,1)),34,theme.Gold);
             title.alignment=TextAlignmentOptions.MidlineLeft;
-            back=Button("Back",root,"< BACK",new Rect(.7548f,.0176f,.2254f,.0798f),Back);
-            var balance=Panel("Fuel summary",root,art&&art.statusPanel?art.statusPanel:theme.DarkPanel,new Rect(.015f,.103f,.97f,.089f));
-            fuel=Label("Fuel",balance,"FUEL AVAILABLE",new Rect(.105f,.10f,.27f,.80f),25,theme.Navy);
+            back=Button("Back",root,ScreenContent.Text("select-tank","back-d325d6","< BACK"),ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-7548f-01-c2d06c",new Rect(.7548f,.0176f,.2254f,.0798f)),Back);
+            var balance=Panel("Fuel summary",root,art&&art.statusPanel?art.statusPanel:theme.DarkPanel,ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-015f-103-ea2905",new Rect(.015f,.103f,.97f,.089f)));
+            fuel=Label("Fuel",balance,ScreenContent.Text("select-tank","fuel-available-61c4f6","FUEL AVAILABLE"),ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-105f-10f-e3eb45",new Rect(.105f,.10f,.27f,.80f)),25,theme.Navy);
             ApplyStatusPanel();
-            tankPage=Panel("Tank roster",root,null,new Rect(.015f,.207f,.97f,.633f));
+            tankPage=Panel("Tank roster",root,null,ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-015f-207-12a69c",new Rect(.015f,.207f,.97f,.633f)));
             for(int i=0;i<4;i++)
             {
                 int index=i;
                 var b=Button(Names[i],tankPage,"",new Rect(i*.25f+.006f,0,.238f,1),()=>SelectTank(index));
                 tankButtons[i]=b;
-                Label("Name",b.transform,Names[i],new Rect(.025f,.04f,.95f,.10f),26,theme.Navy);
-                var picture=Raw("Tank model",b.transform,new Rect(.10f,.115f,.80f,.38f));
+                Label("Name",b.transform,ScreenContent.Text("select-tank","tank-"+i,Names[i]),ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-025f-04f-8dd83c",new Rect(.025f,.04f,.95f,.10f)),26,theme.Navy);
+                var picture=Raw("Tank model",b.transform,ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-10f-115f-00c089",new Rect(.10f,.115f,.80f,.38f)));
                 picture.texture=art&&art.tanks!=null&&i<art.tanks.Length?art.tanks[i]:null;
                 picture.color=picture.texture?Color.white:Color.clear;
-                Label("Specifications",b.transform,"",new Rect(.06f,.58f,.88f,.19f),18,theme.Navy);
+                Label("Specifications",b.transform,"",ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-06f-58f--52c92a",new Rect(.06f,.58f,.88f,.19f)),18,theme.Navy);
             }
             ApplyRosterPanel();
-            loadoutPage=Panel("Loadout",root,null,new Rect(.015f,.207f,.97f,.633f));
-            var inventory=Panel("Wallet and inventory",loadoutPage,theme.DarkPanel,new Rect(0,0,.25f,1));
-            wallet=Label("Wallet",inventory,"WALLET\nCONNECT TO LOAD INVENTORY",new Rect(.04f,.02f,.92f,.25f),23,Color.white);
+            loadoutPage=Panel("Loadout",root,null,ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-015f-207-12a69c",new Rect(.015f,.207f,.97f,.633f)));
+            var inventory=Panel("Wallet and inventory",loadoutPage,theme.DarkPanel,ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-0-0-25f--255662",new Rect(0,0,.25f,1)));
+            wallet=Label("Wallet",inventory,ScreenContent.Text("select-tank","wallet-connect-to-load-inventory-73d286","WALLET\nCONNECT TO LOAD INVENTORY"),ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-04f-02f--135468",new Rect(.04f,.02f,.92f,.25f)),23,Color.white);
             for(int i=0;i<Items.Length;i++)
             {
                 float x=(i%2)*.5f,y=.30f+(i/2)*.17f;
@@ -132,19 +133,20 @@ namespace BattleCities.UI
                 int index=i;
                 var b=Button("Slot "+(i+1),loadoutPage,"",new Rect(.27f+(i%2)*.365f,(i/2)*.51f,.35f,.49f),()=>ChooseLoadoutSlot(index));
                 slotButtons[i]=b;
-                Label("Slot heading",b.transform,"SLOT 0"+(i+1),new Rect(.05f,.03f,.90f,.12f),24,theme.Navy);
-                slotIcons[i]=Raw("Equipped item",b.transform,new Rect(.30f,.19f,.40f,.43f));
-                slotEmpty[i]=Label("Empty slot",b.transform,"",new Rect(.30f,.19f,.40f,.43f),72,new Color(.25f,.38f,.48f));
-                slotNames[i]=Label("Item name",b.transform,"EMPTY",new Rect(.03f,.65f,.94f,.13f),25,theme.Navy);
-                Label("Change",b.transform,"CHANGE",new Rect(.08f,.81f,.84f,.14f),24,new Color(.03f,.32f,.65f));
+                Label("Slot heading",b.transform,"SLOT 0"+(i+1),ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-05f-03f--d9fa9c",new Rect(.05f,.03f,.90f,.12f)),24,theme.Navy);
+                slotIcons[i]=Raw("Equipped item",b.transform,ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-30f-19f--157893",new Rect(.30f,.19f,.40f,.43f)));
+                slotEmpty[i]=Label("Empty slot",b.transform,"",ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-30f-19f--157893",new Rect(.30f,.19f,.40f,.43f)),72,new Color(.25f,.38f,.48f));
+                slotNames[i]=Label("Item name",b.transform,ScreenContent.Text("select-tank","empty-cc1d2f","EMPTY"),ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-03f-65f--f060de",new Rect(.03f,.65f,.94f,.13f)),25,theme.Navy);
+                Label("Change",b.transform,ScreenContent.Text("select-tank","change-788601","CHANGE"),ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-08f-81f--85a7e6",new Rect(.08f,.81f,.84f,.14f)),24,new Color(.03f,.32f,.65f));
             }
-            status=Label("Status",root,"",new Rect(.035f,.88f,.58f,.105f),19,new Color32(245,235,207,255));
+            status=Label("Status",root,"",ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-035f-88f-c7fb0e",new Rect(.035f,.88f,.58f,.105f)),19,new Color32(245,235,207,255));
             status.alignment=TextAlignmentOptions.MidlineLeft;
-            proceed=Button("Continue",root,"CONTINUE",new Rect(.68f,.88f,.29f,.105f),Continue);
+            proceed=Button("Continue",root,"CONTINUE",ScreenContent.Rect("select-tank","prebattlescreen-configure-new-rect-68f-88f--aa3d23",new Rect(.68f,.88f,.29f,.105f)),Continue);
             continueLabel=proceed.GetComponentInChildren<TMP_Text>();
             EnsureLoadoutView();ApplyContinueArt();
             ApplyTitleHeader();
             root.gameObject.SetActive(false);
+            RemoteScreenView.Bind("select-tank",root,()=>inLoadout?"loadout":"select-tank");
         }
         // Scene previews and editor reloads retain GameObjects, but not runtime UnityEvent listeners.
         void BindExistingView()
@@ -195,7 +197,7 @@ namespace BattleCities.UI
         }
         void ApplyScreenSurface()
         {
-            Fit(root,new Rect(.025f,.035f,.95f,.93f));
+            Fit(root,ScreenContent.Rect("select-tank","prebattlescreen-applyscreensurface-new-rect-c4e1f7",new Rect(.025f,.035f,.95f,.93f)));
             var surface=root.GetComponent<Image>();
             surface.sprite=theme.CreamPanel;surface.type=Image.Type.Sliced;surface.color=Color.white;
             surface.raycastTarget=true;
@@ -215,7 +217,7 @@ namespace BattleCities.UI
                 else DestroyImmediate(backdrop.gameObject);
             }
             ApplyTitleHeader();
-            Fit(loadoutPage,new Rect(.015f,.207f,.97f,.633f));
+            Fit(loadoutPage,ScreenContent.Rect("select-tank","prebattlescreen-applyscreensurface-new-rect-e8e66e",new Rect(.015f,.207f,.97f,.633f)));
             status.color=new Color32(245,235,207,255);
             ApplyRosterPanel();
             ApplyStatusPanel();
@@ -246,7 +248,7 @@ namespace BattleCities.UI
                 {
                     grid.constraintCount=rosterColumns;
                     grid.padding=new RectOffset(4,4,psg1?2:4,4);
-                    grid.spacing=new Vector2(4,psg1?6:8);
+                    grid.spacing=new Vector2(ScreenContent.Number("select-tank","card-gap-x",4f),ScreenContent.Number("select-tank","card-gap-y",psg1?6:8));
                     LayoutRebuilder.MarkLayoutForRebuild(roster);
                 }
             }
@@ -267,10 +269,10 @@ namespace BattleCities.UI
                 if(label.name!="Heading"||!label.transform.parent||
                     !label.transform.parent.name.StartsWith("Specification row "))continue;
                 Fit((RectTransform)label.transform,
-                    psg1?new Rect(.03f,0,.50f,1):new Rect(.04f,0,.43f,1));
+                    psg1?ScreenContent.Rect("select-tank","prebattlescreen-applyplatformspacing-new-re-9e56da",new Rect(.03f,0,.50f,1)):ScreenContent.Rect("select-tank","prebattlescreen-applyplatformspacing-new-re-96105d",new Rect(.04f,0,.43f,1)));
                 var rating=label.transform.parent.Find("Rating") as RectTransform;
                 if(rating)Fit(rating,
-                    psg1?new Rect(.53f,.13f,.45f,.74f):new Rect(.49f,.13f,.48f,.74f));
+                    psg1?ScreenContent.Rect("select-tank","prebattlescreen-applyplatformspacing-new-re-8a8e66",new Rect(.53f,.13f,.45f,.74f)):ScreenContent.Rect("select-tank","prebattlescreen-applyplatformspacing-new-re-38d379",new Rect(.49f,.13f,.48f,.74f)));
                 float size=StatLabelSize;
                 label.fontSize=label.fontSizeMax=size;
                 label.fontSizeMin=StatLabelMinSize;
@@ -312,15 +314,15 @@ namespace BattleCities.UI
             MainMenuScene.Place((RectTransform)back.transform,3,3,backPlate.rect.width-6,layout.NavigationHeight-6);
             var hit=back.GetComponent<Image>();hit.sprite=hit.overrideSprite=null;hit.color=Color.clear;hit.raycastTarget=true;
             var label=back.GetComponentInChildren<TMP_Text>(true);label.gameObject.SetActive(true);label.text="BACK";
-            Fit(label.rectTransform,new Rect(.29f,.025f,.68f,.95f));
+            Fit(label.rectTransform,ScreenContent.Rect("select-tank","prebattlescreen-applytitleheader-new-rect-2-03c000",new Rect(.29f,.025f,.68f,.95f)));
             label.fontSize=label.fontSizeMax=TvTitleHeaderLayout.TextSize;label.fontSizeMin=12;label.enableAutoSizing=true;
             label.textWrappingMode=TextWrappingModes.NoWrap;label.alignment=TextAlignmentOptions.Center;
             textStyles.ApplyCleanButton(label,false);
             var arrow=back.transform.Find("Arrow") as RectTransform;
             if(!arrow){var go=new GameObject("Arrow",typeof(RectTransform),typeof(CanvasRenderer),typeof(BackTabArrow));go.layer=back.gameObject.layer;arrow=(RectTransform)go.transform;arrow.SetParent(back.transform,false);}
-            Fit(arrow,new Rect(.10f,.17f,.14f,.66f));var arrowGraphic=arrow.GetComponent<BackTabArrow>();arrowGraphic.color=Color.white;arrowGraphic.raycastTarget=false;
+            Fit(arrow,ScreenContent.Rect("select-tank","prebattlescreen-applytitleheader-new-rect-1-5caee0",new Rect(.10f,.17f,.14f,.66f)));var arrowGraphic=arrow.GetComponent<BackTabArrow>();arrowGraphic.color=Color.white;arrowGraphic.raycastTarget=false;
             var focus=back.transform.Find("Focus") as RectTransform;
-            if(!focus)focus=Panel("Focus",back.transform,null,new Rect(.18f,.90f,.64f,.035f));
+            if(!focus)focus=Panel("Focus",back.transform,null,ScreenContent.Rect("select-tank","prebattlescreen-applytitleheader-new-rect-1-38c803",new Rect(.18f,.90f,.64f,.035f)));
             Fit(focus,new Rect(0,0,1,1));focus.SetAsFirstSibling();var focusImage=focus.GetComponent<Image>();focusImage.sprite=art.tankCostButton;focusImage.type=Image.Type.Sliced;TvTitleHeaderLayout.FitSkin(focusImage,layout.NavigationHeight-6);focusImage.color=Color.white;
             back.targetGraphic=focusImage;back.transition=Selectable.Transition.ColorTint;back.spriteState=default;
             var colors=ColorBlock.defaultColorBlock;colors.normalColor=Color.clear;colors.highlightedColor=Color.white;colors.selectedColor=Color.white;colors.pressedColor=Color.white;colors.disabledColor=Color.clear;colors.fadeDuration=.08f;back.colors=colors;
@@ -341,13 +343,13 @@ namespace BattleCities.UI
             return new Rect(area.x,area.y*scale,area.width,area.height*scale);
         }
         Rect CardStatArea=>CardContentArea(psg1Spacing
-            ?new Rect(.035f,.465f,.93f,.304f):new Rect(.06f,.505f,.88f,.265f));
+            ?ScreenContent.Rect("select-tank","prebattlescreen-cardcontentarea-new-rect-03-ff1dd1",new Rect(.035f,.465f,.93f,.304f)):ScreenContent.Rect("select-tank","prebattlescreen-cardcontentarea-new-rect-06-747484",new Rect(.06f,.505f,.88f,.265f)));
         static void FitPsg1SummaryLabels(RectTransform balance)
         {
-            Fit((RectTransform)balance.Find("Fuel"),new Rect(.10f,.08f,.245f,.84f));
-            Fit((RectTransform)balance.Find("Fuel amount"),new Rect(.365f,.08f,.07f,.84f));
-            Fit((RectTransform)balance.Find("Deployment heading"),new Rect(.439f,.08f,.215f,.84f));
-            Fit((RectTransform)balance.Find("Deployment cost"),new Rect(.667f,.08f,.32f,.84f));
+            Fit((RectTransform)balance.Find("Fuel"),ScreenContent.Rect("select-tank","prebattlescreen-fitpsg1summarylabels-new-re-e7c75c",new Rect(.10f,.08f,.245f,.84f)));
+            Fit((RectTransform)balance.Find("Fuel amount"),ScreenContent.Rect("select-tank","prebattlescreen-fitpsg1summarylabels-new-re-017dc3",new Rect(.365f,.08f,.07f,.84f)));
+            Fit((RectTransform)balance.Find("Deployment heading"),ScreenContent.Rect("select-tank","prebattlescreen-fitpsg1summarylabels-new-re-3f25b2",new Rect(.439f,.08f,.215f,.84f)));
+            Fit((RectTransform)balance.Find("Deployment cost"),ScreenContent.Rect("select-tank","prebattlescreen-fitpsg1summarylabels-new-re-03e56e",new Rect(.667f,.08f,.32f,.84f)));
             balance.Find("Deployment cost").GetComponent<TMP_Text>().alignment=TextAlignmentOptions.MidlineLeft;
         }
         void ApplyStatusPanel()
@@ -356,7 +358,7 @@ namespace BattleCities.UI
             var balance=(RectTransform)fuel.transform.parent;
             foreach(var name in new[]{"Fuel can","Fuel","Fuel amount","Deployment heading","Deployment cost"}){var child=balance.Find(name);if(child)child.gameObject.SetActive(true);}
             if(status&&status.transform.parent==balance)status.transform.SetParent(root,false);
-            Fit(balance,new Rect(.015f,.103f,.97f,.089f));
+            Fit(balance,ScreenContent.Rect("select-tank","prebattlescreen-applystatuspanel-new-rect-0-d37825",new Rect(.015f,.103f,.97f,.089f)));
             var image=balance.GetComponent<Image>();
             TvStatusFooterLayout.ApplySkin(image,art&&art.statusPanel?art.statusPanel:theme.DarkPanel);
             var oldRefresh=balance.Find("Refresh");
@@ -366,23 +368,23 @@ namespace BattleCities.UI
                 else DestroyImmediate(oldRefresh.gameObject);
             }
             var icon=balance.Find("Fuel can") as RectTransform;
-            if(!icon)icon=Panel("Fuel can",balance,null,new Rect(.018f,0,.09f,1));
-            Fit(icon,new Rect(.018f,0,.09f,1));
+            if(!icon)icon=Panel("Fuel can",balance,null,ScreenContent.Rect("select-tank","prebattlescreen-applystatuspanel-new-rect-0-d68813",new Rect(.018f,0,.09f,1)));
+            Fit(icon,ScreenContent.Rect("select-tank","prebattlescreen-applystatuspanel-new-rect-0-d68813",new Rect(.018f,0,.09f,1)));
             var iconImage=icon.GetComponent<Image>();
             iconImage.sprite=art?art.fuelCan:null;
             iconImage.type=Image.Type.Simple;
             iconImage.preserveAspect=true;
             iconImage.color=iconImage.sprite?Color.white:Color.clear;
             iconImage.raycastTarget=false;
-            Fit((RectTransform)fuel.transform,new Rect(.105f,.10f,.27f,.80f));
+            Fit((RectTransform)fuel.transform,ScreenContent.Rect("select-tank","prebattlescreen-applystatuspanel-new-rect-1-05a6a8",new Rect(.105f,.10f,.27f,.80f)));
             fuel.text="FUEL AVAILABLE";
             fuel.color=theme.Navy;
             fuel.alignment=TextAlignmentOptions.MidlineLeft;
             fuel.fontSize=25;
             fuel.fontSizeMax=25;
-            fuelAmount=SummaryLabel(balance,"Fuel amount",new Rect(.265f,.08f,.06f,.84f),"0",38,theme.Gold,TextAlignmentOptions.Center);
-            deploymentHeading=SummaryLabel(balance,"Deployment heading",new Rect(.64f,.08f,.34f,.39f),"DEPLOYMENT COST",21,theme.Navy,TextAlignmentOptions.MidlineRight);
-            deploymentCost=SummaryLabel(balance,"Deployment cost",new Rect(.56f,.45f,.42f,.48f),"VANGUARD / 1 FUEL",28,new Color32(192,108,4,255),TextAlignmentOptions.MidlineRight);
+            fuelAmount=SummaryLabel(balance,"Fuel amount",ScreenContent.Rect("select-tank","prebattlescreen-applystatuspanel-new-rect-2-f6b69b",new Rect(.265f,.08f,.06f,.84f)),"0",38,theme.Gold,TextAlignmentOptions.Center);
+            deploymentHeading=SummaryLabel(balance,"Deployment heading",ScreenContent.Rect("select-tank","prebattlescreen-applystatuspanel-new-rect-6-54c6ff",new Rect(.64f,.08f,.34f,.39f)),"DEPLOYMENT COST",21,theme.Navy,TextAlignmentOptions.MidlineRight);
+            deploymentCost=SummaryLabel(balance,"Deployment cost",ScreenContent.Rect("select-tank","prebattlescreen-applystatuspanel-new-rect-5-3fafed",new Rect(.56f,.45f,.42f,.48f)),"VANGUARD / 1 FUEL",28,new Color32(192,108,4,255),TextAlignmentOptions.MidlineRight);
             fuelAmount.outlineColor=new Color32(75,45,7,255);
             fuelAmount.outlineWidth=.12f;
             deploymentCost.outlineColor=new Color32(76,46,8,255);
@@ -400,25 +402,25 @@ namespace BattleCities.UI
             if(inLoadout&&FillTvOpening)
                 MainMenuScene.Place(balance,PsgContentInset,PsgContentInset+ActiveHeaderHeight+PsgHeaderGap,
                     root.rect.width-PsgContentInset*2f,ActiveFooterHeight);
-            else if(inLoadout)Fit(balance,new Rect(.015f,.103f,.97f,.089f));
+            else if(inLoadout)Fit(balance,ScreenContent.Rect("select-tank","prebattlescreen-applysummarylayout-new-rect-66f557",new Rect(.015f,.103f,.97f,.089f)));
             else new TvStatusFooterLayout(root).Place(balance);
-            Fit((RectTransform)balance.Find("Fuel can"),new Rect(.018f,.08f,.085f,.84f));
+            Fit((RectTransform)balance.Find("Fuel can"),ScreenContent.Rect("select-tank","prebattlescreen-applysummarylayout-new-rect-89e034",new Rect(.018f,.08f,.085f,.84f)));
             if(psg1Spacing&&!inLoadout)FitPsg1SummaryLabels(balance);
             else if(androidSpacing&&!inLoadout)
             {
-                Fit((RectTransform)fuel.transform,new Rect(.105f,.12f,.30f,.76f));
-                Fit((RectTransform)fuelAmount.transform,new Rect(.42f,.12f,.085f,.76f));
-                Fit((RectTransform)deploymentHeading.transform,new Rect(.54f,.13f,.425f,.32f));
-                Fit((RectTransform)deploymentCost.transform,new Rect(.52f,.46f,.445f,.40f));
+                Fit((RectTransform)fuel.transform,ScreenContent.Rect("select-tank","prebattlescreen-applysummarylayout-new-rect-6fbee4",new Rect(.105f,.12f,.30f,.76f)));
+                Fit((RectTransform)fuelAmount.transform,ScreenContent.Rect("select-tank","prebattlescreen-applysummarylayout-new-rect-25142a",new Rect(.42f,.12f,.085f,.76f)));
+                Fit((RectTransform)deploymentHeading.transform,ScreenContent.Rect("select-tank","prebattlescreen-applysummarylayout-new-rect-4041e1",new Rect(.54f,.13f,.425f,.32f)));
+                Fit((RectTransform)deploymentCost.transform,ScreenContent.Rect("select-tank","prebattlescreen-applysummarylayout-new-rect-4e846d",new Rect(.52f,.46f,.445f,.40f)));
             }
             else
             {
-                Fit((RectTransform)fuel.transform,new Rect(.105f,.10f,.225f,.80f));
-                Fit((RectTransform)fuelAmount.transform,new Rect(.34f,.08f,.12f,.84f));
+                Fit((RectTransform)fuel.transform,ScreenContent.Rect("select-tank","prebattlescreen-applysummarylayout-new-rect-dcbbb0",new Rect(.105f,.10f,.225f,.80f)));
+                Fit((RectTransform)fuelAmount.transform,ScreenContent.Rect("select-tank","prebattlescreen-applysummarylayout-new-rect-6ffda0",new Rect(.34f,.08f,.12f,.84f)));
                 Fit((RectTransform)deploymentHeading.transform,
-                    inLoadout?new Rect(.53f,.07f,.445f,.39f):new Rect(.51f,.12f,.445f,.39f));
+                    inLoadout?ScreenContent.Rect("select-tank","prebattlescreen-applysummarylayout-new-rect-aa1ef4",new Rect(.53f,.07f,.445f,.39f)):ScreenContent.Rect("select-tank","prebattlescreen-applysummarylayout-new-rect-edb38d",new Rect(.51f,.12f,.445f,.39f)));
                 Fit((RectTransform)deploymentCost.transform,
-                    inLoadout?new Rect(.485f,.45f,.49f,.48f):new Rect(.465f,.45f,.49f,.48f));
+                    inLoadout?ScreenContent.Rect("select-tank","prebattlescreen-applysummarylayout-new-rect-325de9",new Rect(.485f,.45f,.49f,.48f)):ScreenContent.Rect("select-tank","prebattlescreen-applysummarylayout-new-rect-5cae8f",new Rect(.465f,.45f,.49f,.48f)));
             }
             if(!inLoadout)
             {
@@ -554,7 +556,7 @@ namespace BattleCities.UI
                 var cardAspect=card.GetComponent<AspectRatioFitter>();
                 if(cardAspect)cardAspect.enabled=false;
                 var name=tankButtons[i].transform.Find("Name") as RectTransform;
-                if(name)Fit(name,CardTitleArea(psg1Spacing,false));
+                if(name){Fit(name,CardTitleArea(psg1Spacing,false));name.GetComponent<TMPro.TMP_Text>().text=ScreenContent.Text("select-tank","tank-"+i,Names[i]);}
                 ApplyTankPicture(tankButtons[i],i);
                 ApplyCostBadge(tankButtons[i],i);
                 ConfigureRosterFocus(tankButtons[i]);
@@ -645,8 +647,8 @@ namespace BattleCities.UI
             colors.pressedColor=new Color(.85f,.91f,1f);card.colors=colors;
             SummaryLabel(card.transform,"Name",CardTitleArea(psg1Spacing,true),name,26,theme.Navy,TextAlignmentOptions.Center);
             var covered=card.transform.Find("Classified tank") as RectTransform;
-            if(!covered)covered=Panel("Classified tank",card.transform,null,CardContentArea(new Rect(.08f,.17f,.84f,.32f)));
-            Fit(covered,CardContentArea(new Rect(.08f,.17f,.84f,.32f)));
+            if(!covered)covered=Panel("Classified tank",card.transform,null,CardContentArea(ScreenContent.Rect("select-tank","prebattlescreen-applyclassifiedcard-new-rec-bf5455",new Rect(.08f,.17f,.84f,.32f))));
+            Fit(covered,CardContentArea(ScreenContent.Rect("select-tank","prebattlescreen-applyclassifiedcard-new-rec-bf5455",new Rect(.08f,.17f,.84f,.32f))));
             var coveredImage=covered.GetComponent<Image>();coveredImage.sprite=art?art.classifiedTank:null;
             coveredImage.type=Image.Type.Simple;coveredImage.preserveAspect=true;
             coveredImage.color=Color.white;coveredImage.raycastTarget=false;
@@ -664,7 +666,7 @@ namespace BattleCities.UI
             badgeImage.preserveAspect=false;
             badgeImage.color=Color.white;
             badgeImage.raycastTarget=false;
-            var caption=SummaryLabel(badge,"Locked text",new Rect(.05f,.04f,.90f,.92f),
+            var caption=SummaryLabel(badge,"Locked text",ScreenContent.Rect("select-tank","prebattlescreen-applyclassifiedcard-new-rec-29f971",new Rect(.05f,.04f,.90f,.92f)),
                 "LOCKED",27,Color.white,TextAlignmentOptions.Center);
             caption.fontStyle=FontStyles.Normal;
             caption.raycastTarget=false;
@@ -679,6 +681,7 @@ namespace BattleCities.UI
             if(!picture)return;
             var image=picture.GetComponent<RawImage>();
             var texture=art&&art.tanks!=null&&index<art.tanks.Length?art.tanks[index]:null;
+            texture=ScreenContent.Texture("select-tank","tank-"+index,texture);
             image.texture=texture;
             image.color=texture?Color.white:Color.clear;
             image.raycastTarget=false;
@@ -688,7 +691,7 @@ namespace BattleCities.UI
             aspect.aspectRatio=(float)texture.width/texture.height;
             if(bounds)
             {
-                Fit((RectTransform)bounds,CardContentArea(new Rect(.14f,.144f,.72f,.342f)));
+                Fit((RectTransform)bounds,CardContentArea(ScreenContent.Rect("select-tank","prebattlescreen-applytankpicture-new-rect-1-ec3183",new Rect(.14f,.144f,.72f,.342f))));
                 // Let the illustration tuck behind the title without covering its lettering.
                 bounds.SetAsFirstSibling();
                 aspect.aspectMode=AspectRatioFitter.AspectMode.FitInParent;
@@ -717,7 +720,7 @@ namespace BattleCities.UI
                 shadow.SetParent(card.transform,false);
             }
             if(!shadow.GetComponent<CanvasRenderer>())shadow.gameObject.AddComponent<CanvasRenderer>();
-            Fit(shadow,CardContentArea(new Rect(.17f,.455f,.66f,.052f)));
+            Fit(shadow,CardContentArea(ScreenContent.Rect("select-tank","prebattlescreen-applytankgroundshadow-new-r-bef854",new Rect(.17f,.455f,.66f,.052f))));
             var graphic=shadow.GetComponent<TankGroundShadow>();
             graphic.color=new Color32(35,25,13,112);
             graphic.raycastTarget=false;
@@ -751,8 +754,8 @@ namespace BattleCities.UI
             badgeImage.color=Color.white;
             badgeImage.raycastTarget=false;
             var can=badge.Find("Fuel can") as RectTransform;
-            if(!can)can=Panel("Fuel can",badge,null,new Rect(.13f,.14f,.28f,.72f));
-            Fit(can,new Rect(.13f,.20f,.28f,.60f));
+            if(!can)can=Panel("Fuel can",badge,null,ScreenContent.Rect("select-tank","prebattlescreen-applycostbadge-new-rect-13f-38121e",new Rect(.13f,.14f,.28f,.72f)));
+            Fit(can,ScreenContent.Rect("select-tank","prebattlescreen-applycostbadge-new-rect-13f-92a310",new Rect(.13f,.20f,.28f,.60f)));
             var canImage=can.GetComponent<Image>();
             canImage.sprite=art?(art.buttonFuelCan?art.buttonFuelCan:art.fuelCan):null;
             canImage.type=Image.Type.Simple;
@@ -760,8 +763,8 @@ namespace BattleCities.UI
             canImage.color=canImage.sprite?Color.white:Color.clear;
             canImage.raycastTarget=false;
             var child=badge.Find("Cost text");
-            var caption=child?child.GetComponent<TMP_Text>():Label("Cost text",badge,"",new Rect(.44f,.045f,.52f,.91f),27,Color.white);
-            Fit((RectTransform)caption.transform,new Rect(.44f,.045f,.52f,.91f));
+            var caption=child?child.GetComponent<TMP_Text>():Label("Cost text",badge,"",ScreenContent.Rect("select-tank","prebattlescreen-applycostbadge-new-rect-44f-2b42c4",new Rect(.44f,.045f,.52f,.91f)),27,Color.white);
+            Fit((RectTransform)caption.transform,ScreenContent.Rect("select-tank","prebattlescreen-applycostbadge-new-rect-44f-2b42c4",new Rect(.44f,.045f,.52f,.91f)));
             caption.text=(index+1)+" FUEL";
             caption.color=Color.white;
             caption.fontStyle=FontStyles.Normal;
@@ -793,7 +796,7 @@ namespace BattleCities.UI
             var locked=badge.Find("Locked text")?.GetComponent<TMP_Text>();
             if(locked)
             {
-                Fit(locked.rectTransform,androidSpacing?new Rect(.08f,.10f,.84f,.80f):new Rect(.05f,.04f,.90f,.92f));
+                Fit(locked.rectTransform,androidSpacing?ScreenContent.Rect("select-tank","prebattlescreen-fitcostbadgecontents-new-re-8bfba2",new Rect(.08f,.10f,.84f,.80f)):ScreenContent.Rect("select-tank","prebattlescreen-fitcostbadgecontents-new-re-2b7407",new Rect(.05f,.04f,.90f,.92f)));
                 locked.fontSize=locked.fontSizeMax=androidSpacing?25:27;
                 textStyles.ApplyCleanButton(locked,false);
             }
@@ -831,7 +834,7 @@ namespace BattleCities.UI
             Fit(specifications,statArea);
             var legacy=specifications.GetComponent<TMP_Text>();
             if(legacy)legacy.text="";
-            string[] headings={"HEALTH","ROUNDS","SPEED","POWER"};
+            string[] headings={ScreenContent.Text("select-tank","headings-0","HEALTH"),ScreenContent.Text("select-tank","headings-1","ROUNDS"),ScreenContent.Text("select-tank","headings-2","SPEED"),ScreenContent.Text("select-tank","headings-3","POWER")};
             for(int row=0;row<headings.Length;row++)
             {
                 var stripe=specifications.Find("Specification row "+row) as RectTransform;
@@ -843,7 +846,7 @@ namespace BattleCities.UI
                 background.color=row%2==1?new Color32(255,250,238,70):new Color32(238,220,184,130);
                 background.raycastTarget=false;
                 var heading=stripe.Find("Heading");
-                var labelArea=psg1Spacing?new Rect(.03f,0,.50f,1):new Rect(.04f,0,.43f,1);
+                var labelArea=psg1Spacing?ScreenContent.Rect("select-tank","prebattlescreen-applyspecifications-new-rec-c2ef4f",new Rect(.03f,0,.50f,1)):ScreenContent.Rect("select-tank","prebattlescreen-applyspecifications-new-rec-db499c",new Rect(.04f,0,.43f,1));
                 var left=heading?heading.GetComponent<TMP_Text>():Label("Heading",stripe,"",labelArea,DefaultStatLabelSize,theme.Navy);
                 Fit((RectTransform)left.transform,labelArea);
                 left.text=headings[row];
@@ -866,7 +869,7 @@ namespace BattleCities.UI
                     go.layer=stripe.gameObject.layer;go.transform.SetParent(stripe,false);
                     meterRect=(RectTransform)go.transform;
                 }
-                Fit(meterRect,psg1Spacing?new Rect(.53f,.13f,.45f,.74f):new Rect(.49f,.13f,.48f,.74f));
+                Fit(meterRect,psg1Spacing?ScreenContent.Rect("select-tank","prebattlescreen-applyspecifications-new-rec-7009d1",new Rect(.53f,.13f,.45f,.74f)):ScreenContent.Rect("select-tank","prebattlescreen-applyspecifications-new-rec-144685",new Rect(.49f,.13f,.48f,.74f)));
                 var meter=meterRect.GetComponent<TankStatMeter>();
                 meter.raycastTarget=false;
                 meter.color=Color.white;
@@ -902,7 +905,7 @@ namespace BattleCities.UI
         {
             inLoadout=loadoutView;tankPage.gameObject.SetActive(!inLoadout);loadoutPage.gameObject.SetActive(inLoadout);
             ApplyLoadoutBounds(loadoutPage);
-            title.text=inLoadout?"BATTLE LOADOUT":"SELECT TANK";
+            title.text=inLoadout?ScreenContent.Text("loadout","title","BATTLE LOADOUT"):ScreenContent.Text("select-tank","title","SELECT TANK");
             EnsureLoadoutView();ApplyContinueArt();
             UpdateView();Navigation();
         }
@@ -911,9 +914,9 @@ namespace BattleCities.UI
             if(inLoadout){ApplyLoadoutLayout();return;}
             ApplySummaryLayout();
             bool useSuppliedSprites=!inLoadout&&art&&art.tankCostButton&&art.tankCostButtonSelected;
-            continueLabel.text=inLoadout?"START BATTLE":"CONTINUE";
+            continueLabel.text=inLoadout?ScreenContent.Text("loadout","start-battle","START BATTLE"):ScreenContent.Text("select-tank","continue","CONTINUE");
             continueLabel.gameObject.SetActive(true);
-            Fit(continueLabel.rectTransform,new Rect(.08f,.06f,.84f,.88f));
+            Fit(continueLabel.rectTransform,ScreenContent.Rect("select-tank","prebattlescreen-applycontinueart-new-rect-0-251a57",new Rect(.08f,.06f,.84f,.88f)));
             continueLabel.alignment=TextAlignmentOptions.Center;
             continueLabel.textWrappingMode=TextWrappingModes.NoWrap;
             continueLabel.enableAutoSizing=true;
@@ -964,8 +967,8 @@ namespace BattleCities.UI
                 }
                 else
                 {
-                    Fit(buttonRect,new Rect(.68f,.88f,.29f,.105f));
-                    Fit(statusRect,new Rect(.035f,.88f,.58f,.105f));
+                    Fit(buttonRect,ScreenContent.Rect("select-tank","prebattlescreen-applycontinueart-new-rect-6-eafcd3",new Rect(.68f,.88f,.29f,.105f)));
+                    Fit(statusRect,ScreenContent.Rect("select-tank","prebattlescreen-applycontinueart-new-rect-0-5672f4",new Rect(.035f,.88f,.58f,.105f)));
                 }
                 status.fontSize=status.fontSizeMax=19;
                 proceed.transition=Selectable.Transition.ColorTint;
@@ -1166,7 +1169,7 @@ namespace BattleCities.UI
         {
             var rect=Panel(name,parent,theme.CreamPanel,area);var button=rect.gameObject.AddComponent<UnityEngine.UI.Button>();button.targetGraphic=rect.GetComponent<UnityEngine.UI.Image>();
             button.image.raycastTarget=true;var colors=button.colors;colors.highlightedColor=new Color(.80f,.94f,1);colors.selectedColor=colors.highlightedColor;colors.pressedColor=new Color(1,.65f,.1f);button.colors=colors;
-            button.onClick.AddListener(click);if(!string.IsNullOrEmpty(caption))Label("Label",rect,caption,new Rect(.03f,.04f,.94f,.92f),30,theme.Navy);return button;
+            button.onClick.AddListener(click);if(!string.IsNullOrEmpty(caption))Label("Label",rect,caption,ScreenContent.Rect("select-tank","prebattlescreen-button-new-rect-03f-04f-94f-652743",new Rect(.03f,.04f,.94f,.92f)),30,theme.Navy);return button;
         }
         RawImage Raw(string name,Transform parent,Rect area)
         {

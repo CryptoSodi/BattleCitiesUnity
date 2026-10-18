@@ -34,18 +34,18 @@ namespace BattleCities.UI
             root=Panel("Settings screen",frame,null);root.GetComponent<Image>().raycastTarget=true;
             header=Panel("Title plate",root,art.tankTitlePanel);header.GetComponent<Image>().pixelsPerUnitMultiplier=4;
             titleIcon=Icon("Icon",header,theme.SettingsIcon,new Rect(0,0,1,1));
-            title=Label("Title",header,"SETTINGS",new Rect(0,0,1,1),28,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
+            title=Label("Title",header,ScreenContent.Text("settings","settings-02f6ea","SETTINGS"),new Rect(0,0,1,1),28,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
             backBar=Panel("Navigation",header,art.tankCostButton);backBar.GetComponent<Image>().color=new Color(.08f,.63f,.68f);
-            back=Control("Back",backBar,"BACK",()=>menu.CloseSettings());
+            back=Control("Back",backBar,ScreenContent.Text("settings","back-639807","BACK"),()=>menu.CloseSettings());
             var backBackground=back.GetComponent<Image>();backBackground.sprite=null;backBackground.color=Color.clear;
             var backFocus=back.transform.Find("Focus").GetComponent<Image>();backFocus.enabled=true;
             back.GetComponent<SettingsControlVisual>().enabled=false;back.targetGraphic=backFocus;back.transition=Selectable.Transition.ColorTint;
             var backColors=ColorBlock.defaultColorBlock;backColors.normalColor=backColors.disabledColor=Color.clear;
             backColors.highlightedColor=backColors.selectedColor=backColors.pressedColor=Color.white;backColors.fadeDuration=.08f;back.colors=backColors;
-            var backText=back.transform.Find("Caption").GetComponent<TMP_Text>();Fit(backText.rectTransform,new Rect(.29f,.025f,.68f,.95f));styles.ApplyCleanButton(backText,false);
+            var backText=back.transform.Find("Caption").GetComponent<TMP_Text>();Fit(backText.rectTransform,ScreenContent.Rect("settings","settingsscreen-configure-new-rect-29f-025f--77cdf9",new Rect(.29f,.025f,.68f,.95f)));styles.ApplyCleanButton(backText,false);
             var arrow=back.transform.Find("Back arrow") as RectTransform;
             if(!arrow){var go=new GameObject("Back arrow",typeof(RectTransform),typeof(CanvasRenderer),typeof(BackTabArrow));go.layer=root.gameObject.layer;arrow=(RectTransform)go.transform;arrow.SetParent(back.transform,false);}
-            Fit(arrow,new Rect(.10f,.17f,.14f,.66f));arrow.GetComponent<BackTabArrow>().raycastTarget=false;
+            Fit(arrow,ScreenContent.Rect("settings","settingsscreen-configure-new-rect-10f-17f-1-cab8a0",new Rect(.10f,.17f,.14f,.66f)));arrow.GetComponent<BackTabArrow>().raycastTarget=false;
             body=Panel("Rows",root,null);
             string[] names={"MUTE","SCANLINE","ACCOUNT","PHONE CONTROLLER"};
             string[] descriptions={"Game audio","Retro screen effect","Loading account...","Scan with your phone to use it as a controller."};
@@ -54,11 +54,11 @@ namespace BattleCities.UI
             {
                 var row=rows[i]=Panel("Row "+i,body,art.tankCardAvailable);row.GetComponent<Image>().pixelsPerUnitMultiplier=4;
                 rowFocus[i]=CardSelectionHighlight.Ensure(row.GetComponent<Image>());
-                Shadow(row,i==3?new Rect(.035f,.75f,.26f,.04f):new Rect(.052f,.77f,.14f,.055f));
-                icons[i]=Icon("Icon",row,pictures[i],i==3?new Rect(.025f,.15f,.28f,.62f):new Rect(.035f,.12f,.17f,.72f));
+                Shadow(row,i==3?ScreenContent.Rect("settings","settingsscreen-configure-new-rect-035f-75f--67b9f5",new Rect(.035f,.75f,.26f,.04f)):ScreenContent.Rect("settings","settingsscreen-configure-new-rect-052f-77f--caab42",new Rect(.052f,.77f,.14f,.055f)));
+                icons[i]=Icon("Icon",row,pictures[i],i==3?ScreenContent.Rect("settings","settingsscreen-configure-new-rect-025f-15f--9f0dd4",new Rect(.025f,.15f,.28f,.62f)):ScreenContent.Rect("settings","settingsscreen-configure-new-rect-035f-12f--7368d7",new Rect(.035f,.12f,.17f,.72f)));
                 var divider=Panel("Divider",row,null);divider.GetComponent<Image>().color=new Color32(20,125,199,180);Fit(divider,i==3?new Rect(.33f,.14f,.0015f,.72f):new Rect(.235f,.17f,.0015f,.66f));
-                Label("Name",row,names[i],i==3?new Rect(.36f,.12f,.39f,.20f):new Rect(.27f,.14f,.41f,.39f),i==3?34:38,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
-                var description=Label("Description",row,descriptions[i],i==3?new Rect(.36f,.34f,.37f,.22f):new Rect(.27f,.54f,.39f,.27f),24,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);description.color=new Color32(25,76,126,255);
+                Label("Name",row,names[i],i==3?ScreenContent.Rect("settings","settingsscreen-configure-new-rect-36f-12f-3-ef7705",new Rect(.36f,.12f,.39f,.20f)):ScreenContent.Rect("settings","settingsscreen-configure-new-rect-27f-14f-4-4f2ea2",new Rect(.27f,.14f,.41f,.39f)),i==3?34:38,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+                var description=Label("Description",row,descriptions[i],i==3?ScreenContent.Rect("settings","settingsscreen-configure-new-rect-36f-34f-3-c8d73b",new Rect(.36f,.34f,.37f,.22f)):ScreenContent.Rect("settings","settingsscreen-configure-new-rect-27f-54f-3-999f7e",new Rect(.27f,.54f,.39f,.27f)),24,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);description.color=new Color32(25,76,126,255);
                 if(i==2)accountName=description;if(i==3){phoneDescription=description;description.textWrappingMode=TextWrappingModes.Normal;}
                 if(i<2)
                 {
@@ -66,22 +66,23 @@ namespace BattleCities.UI
                     var rowButton=row.GetComponent<Button>();if(!rowButton)rowButton=row.gameObject.AddComponent<Button>();rowButtons[i]=rowButton;
                     rowButton.targetGraphic=row.GetComponent<Image>();rowButton.image.raycastTarget=true;rowButton.transition=Selectable.Transition.None;rowButton.onClick.RemoveAllListeners();rowButton.onClick.AddListener(()=>TogglePreference(rowIndex));
                     var focus=row.GetComponent<SettingsRowFocus>();if(!focus)focus=row.gameObject.AddComponent<SettingsRowFocus>();focus.Configure(rowFocus[i]);
-                    var group=Panel("Toggle",row,art.tankCostButton);group.GetComponent<Image>().color=new Color(.08f,.63f,.68f);Fit(group,new Rect(.72f,.22f,.25f,.56f));
+                    var group=Panel("Toggle",row,art.tankCostButton);group.GetComponent<Image>().color=new Color(.08f,.63f,.68f);Fit(group,ScreenContent.Rect("settings","settingsscreen-configure-new-rect-72f-22f-2-0e34a0",new Rect(.72f,.22f,.25f,.56f)));
                     for(int j=0;j<2;j++){bool value=j==1;var b=toggles[i*2+j]=Control(value?"On":"Off",group,value?"ON":"OFF",()=>SetPreference(rowIndex,value),true);b.enabled=false;b.image.raycastTarget=false;b.navigation=new Navigation{mode=Navigation.Mode.None};Fit((RectTransform)b.transform,new Rect(j*.5f+.015f,.06f,.47f,.88f));}
                 }
             }
-            logout=Control("Logout",rows[2],"LOGOUT",Logout);Fit((RectTransform)logout.transform,new Rect(.72f,.22f,.25f,.56f));
+            logout=Control("Logout",rows[2],"LOGOUT",Logout);Fit((RectTransform)logout.transform,ScreenContent.Rect("settings","settingsscreen-configure-new-rect-72f-22f-2-0e34a0",new Rect(.72f,.22f,.25f,.56f)));
             if(illustrations&&illustrations.logout)logout.image.sprite=illustrations.logout;
-            phoneStatus=Label("Connection",rows[3],"NOT CONNECTED",new Rect(.36f,.59f,.36f,.12f),22,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
-            pair=Control("Pair",rows[3],"PAIR PHONE",Pair);Fit((RectTransform)pair.transform,new Rect(.36f,.72f,.32f,.22f));pairCaption=pair.transform.Find("Caption").GetComponent<TMP_Text>();pairCaption.fontSizeMax=24;
+            phoneStatus=Label("Connection",rows[3],"NOT CONNECTED",ScreenContent.Rect("settings","settingsscreen-configure-new-rect-36f-59f-3-6f8c0f",new Rect(.36f,.59f,.36f,.12f)),22,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            pair=Control("Pair",rows[3],"PAIR PHONE",Pair);Fit((RectTransform)pair.transform,ScreenContent.Rect("settings","settingsscreen-configure-new-rect-36f-72f-3-d053e5",new Rect(.36f,.72f,.32f,.22f)));pairCaption=pair.transform.Find("Caption").GetComponent<TMP_Text>();pairCaption.fontSizeMax=24;
             qrFrame=Panel("Pairing",rows[3],art.statusPanel);qrFrame.GetComponent<Image>().pixelsPerUnitMultiplier=3;
             var q=qrFrame.Find("QR");if(!q){var go=new GameObject("QR",typeof(RectTransform),typeof(RawImage));go.layer=root.gameObject.layer;go.transform.SetParent(qrFrame,false);q=go.transform;}
             qr=q.GetComponent<RawImage>();qr.raycastTarget=false;qr.color=Color.white;
-            qrLabel=Label("Label",qrFrame,"PAIRING QR",new Rect(.07f,.83f,.86f,.12f),18,ArcadeTextTreatment.PrizeAmount);
+            qrLabel=Label("Label",qrFrame,"PAIRING QR",ScreenContent.Rect("settings","settingsscreen-configure-new-rect-07f-83f-8-df68b5",new Rect(.07f,.83f,.86f,.12f)),18,ArcadeTextTreatment.PrizeAmount);
             footer=Panel("Status",root,art.statusPanel);TvStatusFooterLayout.ApplySkin(footer.GetComponent<Image>(),art.statusPanel);
-            version=Label("Version",footer,"VERSION "+Application.version,new Rect(.03f,.13f,.94f,.74f),24,ArcadeTextTreatment.PrizeAmount);
+            version=Label("Version",footer,"VERSION "+Application.version,ScreenContent.Rect("settings","settingsscreen-configure-new-rect-03f-13f-9-83a952",new Rect(.03f,.13f,.94f,.74f)),24,ArcadeTextTreatment.PrizeAmount);
             ConfigureNotifications();if(api)api.PlayerLoaded+=OnPlayer;
             configured=true;root.gameObject.SetActive(open);GamePreferences.Apply();Refresh();
+            RemoteScreenView.Bind("settings",root);
         }
         public void Open()
         {
@@ -120,8 +121,8 @@ namespace BattleCities.UI
             qr.enabled=supported&&phone.QrTexture;qr.texture=qr.enabled?phone.QrTexture:null;
             qrLabel.text=qr.enabled?phone.RoomCode:supported?"WAITING FOR QR":"WEB PAIRING";
             qrFrame.gameObject.SetActive(supported);
-            Fit(phoneDescription.rectTransform,supported?new Rect(.36f,.34f,.37f,.22f):new Rect(.36f,.35f,.57f,.23f));
-            Fit(phoneStatus.rectTransform,supported?new Rect(.36f,.59f,.36f,.12f):new Rect(.36f,.68f,.55f,.12f));
+            Fit(phoneDescription.rectTransform,supported?ScreenContent.Rect("settings","settingsscreen-refreshphone-new-rect-36f-34-6df5a1",new Rect(.36f,.34f,.37f,.22f)):ScreenContent.Rect("settings","settingsscreen-refreshphone-new-rect-36f-35-fc4461",new Rect(.36f,.35f,.57f,.23f)));
+            Fit(phoneStatus.rectTransform,supported?ScreenContent.Rect("settings","settingsscreen-refreshphone-new-rect-36f-59-6c71a1",new Rect(.36f,.59f,.36f,.12f)):ScreenContent.Rect("settings","settingsscreen-refreshphone-new-rect-36f-68-b07d3d",new Rect(.36f,.68f,.55f,.12f)));
         }
         void Pair(){if(phone){phone.Begin(true);RefreshPhone();RefreshNotifications();}}
         void Logout()
@@ -170,7 +171,7 @@ namespace BattleCities.UI
             b.image.color=new Color(.5f,.68f,.86f);
             var focus=Panel("Focus",rect,art.tankCostButton);Fit(focus,new Rect(0,0,1,1));
             var active=Panel("Active",rect,art.tankCostButtonSelected);Fit(active,new Rect(0,0,1,1));active.gameObject.SetActive(toggle);
-            var label=Label("Caption",rect,caption,new Rect(.035f,.05f,.93f,.90f),28,ArcadeTextTreatment.PrizeAmount);
+            var label=Label("Caption",rect,caption,ScreenContent.Rect("settings","settingsscreen-control-new-rect-035f-05f-93-6117e1",new Rect(.035f,.05f,.93f,.90f)),28,ArcadeTextTreatment.PrizeAmount);
             var visual=rect.GetComponent<SettingsControlVisual>();if(!visual)visual=rect.gameObject.AddComponent<SettingsControlVisual>();visual.Configure(focus.GetComponent<Image>(),toggle?active.GetComponent<Image>():null,label,styles);
             return b;
         }

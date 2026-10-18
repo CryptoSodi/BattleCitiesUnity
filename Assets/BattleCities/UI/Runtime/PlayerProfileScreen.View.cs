@@ -14,18 +14,18 @@ namespace BattleCities.UI
         {
             header=Panel("Title plate",root,art.tankTitlePanel);header.GetComponent<Image>().pixelsPerUnitMultiplier=4;
             titleIcon=Icon("Icon",header,pictures?pictures.insignia:null,new Rect(0,0,1,1));
-            title=Label("Title",header,"PLAYER PROFILE",new Rect(0,0,1,1),28,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
+            title=Label("Title",header,ScreenContent.Text("profile","player-profile-a8948a","PLAYER PROFILE"),new Rect(0,0,1,1),28,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
             nav=Panel("Navigation",header,art.tankCostButton);nav.GetComponent<Image>().color=new Color(.08f,.63f,.68f);
-            back=Control("Back",nav,"BACK",()=>menu.ClosePlayerProfile());
+            back=Control("Back",nav,ScreenContent.Text("profile","back-639807","BACK"),()=>menu.ClosePlayerProfile());
             var backBackground=back.GetComponent<Image>();backBackground.sprite=null;backBackground.color=Color.clear;
             var backFocus=back.transform.Find("Focus").GetComponent<Image>();backFocus.enabled=true;
             back.GetComponent<SettingsControlVisual>().enabled=false;back.targetGraphic=backFocus;back.transition=Selectable.Transition.ColorTint;
             var backColors=ColorBlock.defaultColorBlock;backColors.normalColor=backColors.disabledColor=Color.clear;
             backColors.highlightedColor=backColors.selectedColor=backColors.pressedColor=Color.white;backColors.fadeDuration=.08f;back.colors=backColors;
-            var backCaption=back.transform.Find("Caption").GetComponent<TMP_Text>();Fit(backCaption.rectTransform,new Rect(.29f,.025f,.68f,.95f));styles.ApplyCleanButton(backCaption,false);
+            var backCaption=back.transform.Find("Caption").GetComponent<TMP_Text>();Fit(backCaption.rectTransform,ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-c56fb8",new Rect(.29f,.025f,.68f,.95f)));styles.ApplyCleanButton(backCaption,false);
             var arrow=back.transform.Find("Arrow") as RectTransform;
             if(!arrow){var go=new GameObject("Arrow",typeof(RectTransform),typeof(CanvasRenderer),typeof(BackTabArrow));go.layer=root.gameObject.layer;arrow=(RectTransform)go.transform;arrow.SetParent(back.transform,false);}
-            Fit(arrow,new Rect(.10f,.17f,.14f,.66f));arrow.GetComponent<BackTabArrow>().raycastTarget=false;
+            Fit(arrow,ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-0a1f7e",new Rect(.10f,.17f,.14f,.66f)));arrow.GetComponent<BackTabArrow>().raycastTarget=false;
             hero=Panel("Commander",root,theme.BlueFrame);
             heroPaper=Panel("Paper",hero,theme.Rounded);
             foreach(var childName in new[]{"Portrait","Eyebrow","Name","Identity","Player ID","Share"})
@@ -35,46 +35,46 @@ namespace BattleCities.UI
             avatar=Icon("Portrait",heroPaper,pictures?pictures.commander:null,new Rect(0,0,1,1));
             nameLabel=Label("Name",heroPaper,"—",new Rect(0,0,1,1),40,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);nameLabel.overflowMode=TextOverflowModes.Ellipsis;
             identityLabel=Label("Identity",heroPaper,"—",new Rect(0,0,1,1),22,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);identityLabel.overflowMode=TextOverflowModes.Ellipsis;
-            share=Control("Share",heroPaper,"SHARE PROFILE",Share);
-            Icon("Icon",share.transform,pictures?pictures.share:null,new Rect(.06f,.22f,.17f,.56f));Fit(share.transform.Find("Caption") as RectTransform,new Rect(.25f,.08f,.72f,.84f));
+            share=Control("Share",heroPaper,ScreenContent.Text("profile","share-profile-e6d90a","SHARE PROFILE"),Share);
+            Icon("Icon",share.transform,pictures?pictures.share:null,ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-0288fd",new Rect(.06f,.22f,.17f,.56f)));Fit(share.transform.Find("Caption") as RectTransform,ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-76a170",new Rect(.25f,.08f,.72f,.84f)));
             footer=Panel("Status",root,art.statusPanel);TvStatusFooterLayout.ApplySkin(footer.GetComponent<Image>(),art.statusPanel);
             var oldStatus=footer.Find("Label");if(oldStatus)oldStatus.gameObject.SetActive(false);
             var oldMetrics=root.Find("Statistics");if(oldMetrics)oldMetrics.SetParent(footer,false);
             metrics=Panel("Statistics",footer,null);
-            string[] captions={"SEASON RANK","POINTS","MATCHES","BEST SCORE"};
+            string[] captions={ScreenContent.Text("profile","season-rank-5c9e49","SEASON RANK"),ScreenContent.Text("profile","points-a79d7b","POINTS"),ScreenContent.Text("profile","matches-c92cd8","MATCHES"),ScreenContent.Text("profile","best-score-24961d","BEST SCORE")};
             Sprite[] icons={pictures?pictures.insignia:null,theme.ScoreIcon,pictures?pictures.matches:null,theme.TrophyIcon};
             for(int i=0;i<4;i++)
             {
                 var r=stats[i]=Panel("Stat "+i,metrics,null);
-                Shadow(r,new Rect(.035f,.86f,.23f,.035f));
-                Icon("Icon",r,icons[i],new Rect(.025f,.05f,.25f,.90f));
-                statNames[i]=Label("Name",r,captions[i],new Rect(.31f,.06f,.40f,.88f),24,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
-                values[i]=Label("Value",r,"—",new Rect(.73f,.06f,.24f,.88f),38,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+                Shadow(r,ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-948fdc",new Rect(.035f,.86f,.23f,.035f)));
+                Icon("Icon",r,icons[i],ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-de97f2",new Rect(.025f,.05f,.25f,.90f)));
+                statNames[i]=Label("Name",r,captions[i],ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-919816",new Rect(.31f,.06f,.40f,.88f)),24,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+                values[i]=Label("Value",r,"—",ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-f63d07",new Rect(.73f,.06f,.24f,.88f)),38,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
                 var oldDetail=r.Find("Detail");if(oldDetail)oldDetail.gameObject.SetActive(false);
                 if(i<3){var divider=Panel("Divider",r,null);divider.GetComponent<Image>().color=new Color32(7,91,139,150);Fit(divider,new Rect(.992f,.12f,.004f,.76f));}
             }
             battleLog=Panel("Battle log",root,theme.CreamPanel);battleLog.GetComponent<Image>().pixelsPerUnitMultiplier=2;
             battleHeading=Panel("Heading",battleLog,null);
-            Label("Title",battleHeading,"RECENT BATTLES",new Rect(.018f,.02f,.38f,.43f),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
-            recordCount=Label("Records",battleHeading,"",new Rect(.42f,.04f,.22f,.39f),19,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);recordCount.color=new Color32(63,89,115,255);
+            Label("Title",battleHeading,ScreenContent.Text("profile","recent-battles-1952da","RECENT BATTLES"),ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-6e60a1",new Rect(.018f,.02f,.38f,.43f)),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            recordCount=Label("Records",battleHeading,"",ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-6bce46",new Rect(.42f,.04f,.22f,.39f)),19,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);recordCount.color=new Color32(63,89,115,255);
             var oldLibrary=battleHeading.Find("Local replays");if(oldLibrary)oldLibrary.gameObject.SetActive(false);
             for(int i=0;i<BattleColumns.Length;i++)
             {
-                var column=Label(BattleColumns[i],battleHeading,BattleColumns[i],new Rect(BattleColumnLeft[i],.55f,BattleColumnWidth[i],.35f),20,ArcadeTextTreatment.PrizeAmount,i==0?TextAlignmentOptions.MidlineLeft:TextAlignmentOptions.Center);
+                var column=Label(BattleColumns[i],battleHeading,ScreenContent.Text("profile","column-"+BattleColumns[i].ToLowerInvariant(),BattleColumns[i]),new Rect(BattleColumnLeft[i],.55f,BattleColumnWidth[i],.35f),20,ArcadeTextTreatment.PrizeAmount,i==0?TextAlignmentOptions.MidlineLeft:TextAlignmentOptions.Center);
                 column.color=new Color32(63,89,115,255);
             }
-            var logDivider=Panel("Divider",battleHeading,null);logDivider.GetComponent<Image>().color=new Color32(52,82,102,120);Fit(logDivider,new Rect(.016f,.975f,.968f,.02f));
-            previous=Control("Previous",battleHeading,"PREV",()=>SelectPage(requestedPage-1));Fit((RectTransform)previous.transform,new Rect(.675f,.02f,.09f,.43f));
-            pageLabel=Label("Page",battleHeading,"1 / 1",new Rect(.77f,.03f,.11f,.41f),22,ArcadeTextTreatment.PrizeAmount);
-            next=Control("Next",battleHeading,"NEXT",()=>SelectPage(requestedPage+1));Fit((RectTransform)next.transform,new Rect(.89f,.02f,.09f,.43f));
+            var logDivider=Panel("Divider",battleHeading,null);logDivider.GetComponent<Image>().color=new Color32(52,82,102,120);Fit(logDivider,ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-ba420f",new Rect(.016f,.975f,.968f,.02f)));
+            previous=Control("Previous",battleHeading,ScreenContent.Text("profile","prev-39a400","PREV"),()=>SelectPage(requestedPage-1));Fit((RectTransform)previous.transform,ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-d841a5",new Rect(.675f,.02f,.09f,.43f)));
+            pageLabel=Label("Page",battleHeading,"1 / 1",ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-87dd8a",new Rect(.77f,.03f,.11f,.41f)),22,ArcadeTextTreatment.PrizeAmount);
+            next=Control("Next",battleHeading,ScreenContent.Text("profile","next-7a66ea","NEXT"),()=>SelectPage(requestedPage+1));Fit((RectTransform)next.transform,ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-46926c",new Rect(.89f,.02f,.09f,.43f)));
             scroll=BuildScroll(battleLog);
             empty=Panel("Empty",battleLog,null);
-            Shadow(empty,new Rect(.456f,.46f,.088f,.035f));
-            Icon("Icon",empty,theme.TrophyIcon,new Rect(.43f,.10f,.14f,.38f));
-            emptyTitle=Label("Title",empty,"",new Rect(.04f,.53f,.92f,.19f),28,ArcadeTextTreatment.PrizeAmount);
-            emptyDescription=Label("Description",empty,"",new Rect(.07f,.76f,.86f,.16f),23,ArcadeTextTreatment.PrizeAmount);emptyDescription.textWrappingMode=TextWrappingModes.Normal;
+            Shadow(empty,ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-b834f0",new Rect(.456f,.46f,.088f,.035f)));
+            Icon("Icon",empty,theme.TrophyIcon,ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-512811",new Rect(.43f,.10f,.14f,.38f)));
+            emptyTitle=Label("Title",empty,"",ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-203a72",new Rect(.04f,.53f,.92f,.19f)),28,ArcadeTextTreatment.PrizeAmount);
+            emptyDescription=Label("Description",empty,"",ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-04529a",new Rect(.07f,.76f,.86f,.16f)),23,ArcadeTextTreatment.PrizeAmount);emptyDescription.textWrappingMode=TextWrappingModes.Normal;
             var oldAction=footer.Find("Action");if(oldAction){oldAction.SetParent(empty,false);oldAction.name="Retry";}
-            retry=Control("Retry",empty,"RETRY",Refresh);Fit((RectTransform)retry.transform,new Rect(.38f,.84f,.24f,.14f));
+            retry=Control("Retry",empty,ScreenContent.Text("profile","retry-e464c6","RETRY"),Refresh);Fit((RectTransform)retry.transform,ScreenContent.Rect("profile","playerprofilescreen-view-buildview-new-rect-04a7ff",new Rect(.38f,.84f,.24f,.14f)));
         }
         void Render()
         {
@@ -116,22 +116,22 @@ namespace BattleCities.UI
                 int index=i;var row=data.Battles[i];var r=Panel("Battle "+i,scroll.content,theme.Rounded);r.gameObject.SetActive(true);r.GetComponent<Image>().pixelsPerUnitMultiplier=5;
                 var stripe=i%2==0?new Color32(245,234,207,255):new Color32(255,248,230,255);r.GetComponent<Image>().color=stripe;
                 var b=r.GetComponent<Button>();if(!b)b=r.gameObject.AddComponent<Button>();b.targetGraphic=r.GetComponent<Image>();b.image.raycastTarget=true;b.transition=Selectable.Transition.None;b.onClick.RemoveAllListeners();b.onClick.AddListener(()=>Watch(index));
-                Icon("Outcome",r,pictures?(row.Won?pictures.victory:pictures.defeat):null,new Rect(.018f,.12f,.08f,.76f));
-                var outcome=Label("Result",r,row.Won?"VICTORY":"DEFEAT",new Rect(.112f,.12f,.16f,.40f),28,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);outcome.color=row.Won?new Color32(25,112,40,255):new Color32(190,24,24,255);
-                var date=Label("Date",r,row.Date,new Rect(.112f,.56f,.16f,.30f),19,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);date.color=new Color32(63,89,115,255);
+                Icon("Outcome",r,pictures?(row.Won?pictures.victory:pictures.defeat):null,ScreenContent.Rect("profile","playerprofilescreen-view-buildbattles-new-r-13cd11",new Rect(.018f,.12f,.08f,.76f)));
+                var outcome=Label("Result",r,row.Won?"VICTORY":"DEFEAT",ScreenContent.Rect("profile","playerprofilescreen-view-buildbattles-new-r-31b224",new Rect(.112f,.12f,.16f,.40f)),28,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);outcome.color=row.Won?new Color32(25,112,40,255):new Color32(190,24,24,255);
+                var date=Label("Date",r,row.Date,ScreenContent.Rect("profile","playerprofilescreen-view-buildbattles-new-r-fe98a8",new Rect(.112f,.56f,.16f,.30f)),19,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);date.color=new Color32(63,89,115,255);
                 string[] numbers={row.Mode,PlayerProfileData.Format(row.Stage),PlayerProfileData.Format(row.Score),PlayerProfileData.Format(row.Points)};
                 for(int j=1;j<BattleColumns.Length;j++)
                 {
                     var oldCaption=r.Find(BattleColumns[j]);if(oldCaption)oldCaption.gameObject.SetActive(false);
                     Label(BattleColumns[j]+" value",r,numbers[j-1],new Rect(BattleColumnLeft[j],.10f,BattleColumnWidth[j],.80f),32,ArcadeTextTreatment.PrizeAmount);
                 }
-                var rowDivider=Panel("Divider",r,null);rowDivider.GetComponent<Image>().color=new Color32(31,123,171,60);Fit(rowDivider,new Rect(.008f,.985f,.984f,.015f));
+                var rowDivider=Panel("Divider",r,null);rowDivider.GetComponent<Image>().color=new Color32(31,123,171,60);Fit(rowDivider,ScreenContent.Rect("profile","playerprofilescreen-view-buildbattles-new-r-f9dadf",new Rect(.008f,.985f,.984f,.015f)));
                 bool available=row.Replay;
-                var watch=Panel("Watch",r,available?art.tankCostButton:art.tankCostButtonLocked);Fit(watch,new Rect(.835f,.17f,.15f,.66f));
-                var caption=Label("Caption",watch,available?"WATCH":"NO REPLAY",available?new Rect(.06f,.10f,.65f,.80f):new Rect(.06f,.10f,.88f,.80f),26,ArcadeTextTreatment.PrizeAmount);styles.ApplyCleanButton(caption,false);
+                var watch=Panel("Watch",r,available?art.tankCostButton:art.tankCostButtonLocked);Fit(watch,ScreenContent.Rect("profile","playerprofilescreen-view-buildbattles-new-r-5de605",new Rect(.835f,.17f,.15f,.66f)));
+                var caption=Label("Caption",watch,available?"WATCH":"NO REPLAY",available?ScreenContent.Rect("profile","playerprofilescreen-view-buildbattles-new-r-d6f456",new Rect(.06f,.10f,.65f,.80f)):ScreenContent.Rect("profile","playerprofilescreen-view-buildbattles-new-r-4ef999",new Rect(.06f,.10f,.88f,.80f)),26,ArcadeTextTreatment.PrizeAmount);styles.ApplyCleanButton(caption,false);
                 var play=watch.Find("Play arrow") as RectTransform;
                 if(!play){var go=new GameObject("Play arrow",typeof(RectTransform),typeof(CanvasRenderer),typeof(BackTabArrow));go.layer=root.gameObject.layer;play=(RectTransform)go.transform;play.SetParent(watch,false);}
-                Fit(play,new Rect(.75f,.27f,.12f,.46f));play.localRotation=Quaternion.Euler(0,0,180);play.GetComponent<BackTabArrow>().raycastTarget=false;play.gameObject.SetActive(available);
+                Fit(play,ScreenContent.Rect("profile","playerprofilescreen-view-buildbattles-new-r-90b838",new Rect(.75f,.27f,.12f,.46f)));play.localRotation=Quaternion.Euler(0,0,180);play.GetComponent<BackTabArrow>().raycastTarget=false;play.gameObject.SetActive(available);
                 var highlight=CardSelectionHighlight.Ensure(b.image,stripe);var focus=r.GetComponent<ProfileRowFocus>();if(!focus)focus=r.gameObject.AddComponent<ProfileRowFocus>();focus.Configure(scroll,highlight);battles.Add(b);
             }
             LayoutRebuilder.MarkLayoutForRebuild(scroll.content);
@@ -148,7 +148,7 @@ namespace BattleCities.UI
             head.PlaceTitle(header,titleIcon.rectTransform,title.rectTransform,true);head.PlaceNavigation(header,nav,true);foot.Place(footer);if(ReplayViewerOpen)LayoutReplayViewer();
             MainMenuScene.Place((RectTransform)back.transform,3,3,nav.rect.width-6,head.NavigationHeight-6);
             float top=head.Height+12,available=root.rect.height-top-foot.Height-16,width=root.rect.width-8;
-            float heroH=Mathf.Clamp(available*.15f,76f,94f);
+            float heroH=Mathf.Clamp(available*ScreenContent.Number("profile","commander-ratio",0.15f),76f,94f);
             MainMenuScene.Place(hero,4,top,width,heroH);MainMenuScene.Place(metrics,6,3,width-12,foot.Height-6);
             menu.ApplyDetailSurface(hero,heroPaper,ref commanderMaterial,3f);LayoutCommander();
             for(int i=0;i<4;i++)
@@ -161,7 +161,7 @@ namespace BattleCities.UI
             MainMenuScene.Place(battleLog,4,logTop,width,logHeight);MainMenuScene.Place(battleHeading,11,7,width-42,logHeaderHeight);
             MainMenuScene.Place((RectTransform)scroll.transform,5,logHeaderHeight+15,width-10,logHeight-logHeaderHeight-21);
             MainMenuScene.Place(empty,10,logHeaderHeight+17,width-36,logHeight-logHeaderHeight-28);
-            scroll.CardAspectRatio=Mathf.Max(1,(width-42)/Mathf.Clamp(available*.12f,68,82));
+            scroll.CardAspectRatio=Mathf.Max(1,(width-42)/Mathf.Clamp(available*ScreenContent.Number("profile","battle-row-ratio",0.12f),68,82));
             foreach(var image in root.GetComponentsInChildren<Image>(true))if(image.sprite==art.tankCostButton||image.sprite==art.tankCostButtonLocked)TvTitleHeaderLayout.FitSkin(image,Mathf.Max(20,image.rectTransform.rect.height));
         }
         void LayoutCommander()
@@ -214,7 +214,7 @@ namespace BattleCities.UI
         Button Control(string name,Transform parent,string caption,UnityEngine.Events.UnityAction action)
         {
             var r=Panel(name,parent,art.tankCostButton);var b=r.GetComponent<Button>();if(!b)b=r.gameObject.AddComponent<Button>();b.targetGraphic=r.GetComponent<Image>();b.image.raycastTarget=true;b.transition=Selectable.Transition.None;b.onClick.RemoveAllListeners();b.onClick.AddListener(action);b.image.color=new Color(.5f,.68f,.86f);
-            var f=Panel("Focus",r,art.tankCostButton);Fit(f,new Rect(0,0,1,1));var label=Label("Caption",r,caption,new Rect(.04f,.05f,.92f,.90f),28,ArcadeTextTreatment.PrizeAmount);
+            var f=Panel("Focus",r,art.tankCostButton);Fit(f,new Rect(0,0,1,1));var label=Label("Caption",r,caption,ScreenContent.Rect("profile","playerprofilescreen-view-control-new-rect-0-e2c16c",new Rect(.04f,.05f,.92f,.90f)),28,ArcadeTextTreatment.PrizeAmount);
             var visual=r.GetComponent<SettingsControlVisual>();if(!visual)visual=r.gameObject.AddComponent<SettingsControlVisual>();visual.Configure(f.GetComponent<Image>(),null,label,styles);return b;
         }
         RectTransform Panel(string name,Transform parent,Sprite sprite)

@@ -17,11 +17,13 @@ namespace BattleCities.UI
         private void ApplyNavigationTypography()
         {
             if(tabs==null)return;
-            foreach(var tab in tabs)
+            for(int tabIndex=0;tabIndex<tabs.Length;tabIndex++)
             {
-                if(!tab)continue;
+                var tab=tabs[tabIndex];if(!tab)continue;
                 var label=tab.GetComponentInChildren<UnityEngine.UI.Text>(true);
                 if(!label)continue;
+                string[] captions={"PLAY","SHOP","RANKING","QUARTERS","SOCIALS"};
+                if(tabIndex<captions.Length)label.text=ScreenContent.Text("home","navigation-"+tabIndex,captions[tabIndex]);
                 // Keep the larger caption below the icon and inside the plate's rim.
                 var rect=label.rectTransform;
                 rect.anchorMin=new Vector2(.06f,.09f);

@@ -33,8 +33,18 @@ namespace BattleCities.Editor
         public void OnPostprocessBuild(BuildReport report)
         {
             if ((report.summary.options & BuildOptions.DetailedBuildReport) == 0) return;
+            var packedAssets = report.packedAssets;
+            // Unity omits content information when an incremental player build
+            // reuses the serialized assets. The material and shader reference
+            // are still checked by OnPreprocessBuild on every build.
+            if (packedAssets.Length == 0)
+            {
+                Debug.Log("BATTLE SHADER CHECK: Cached content reused; material and shader validated before build.");
+                return;
+            }
+
             var shaderPath = AssetDatabase.GetAssetPath(Shader.Find(ShaderName));
-            var paths = report.packedAssets.SelectMany(pack => pack.contents).Select(asset => asset.sourceAssetPath);
+            var paths = packedAssets.SelectMany(pack => pack.contents).Select(asset => asset.sourceAssetPath);
             if (!paths.Contains(Path) || !paths.Contains(shaderPath))
                 throw new BuildFailedException("The player is missing the runtime battle material or Lit shader.");
             Debug.Log("BATTLE SHADER CHECK PASSED: Lit material and shader retained in player.");

@@ -30,12 +30,12 @@ namespace BattleCities.UI
         }
         void BuildCheckout()
         {
-            Fit(noticeCard,new Rect(.12f,.14f,.76f,.72f));
-            Fit(noticeBody.rectTransform,new Rect(.07f,.23f,.86f,.50f));
+            Fit(noticeCard,ScreenContent.Rect("shop","checkout-region-4",new Rect(.12f,.14f,.76f,.72f)));
+            Fit(noticeBody.rectTransform,ScreenContent.Rect("shop","checkout-region-3",new Rect(.07f,.23f,.86f,.50f)));
             signer=GetComponent<CheckoutWalletSigner>();if(!signer)signer=gameObject.AddComponent<CheckoutWalletSigner>();
             noticeConfirm=MakeButton("Purchase",noticeCard,"GET QUOTE",ConfirmCheckout);
             noticeConfirmText=noticeConfirm.GetComponentInChildren<TMP_Text>();
-            Fit((RectTransform)noticeConfirm.transform,new Rect(.07f,.77f,.55f,.15f));
+            Fit((RectTransform)noticeConfirm.transform,ScreenContent.Rect("shop","checkout-region-2",new Rect(.07f,.77f,.55f,.15f)));
             connect.onClick.RemoveAllListeners();connect.onClick.AddListener(()=>
             {
                 if(checkoutBusy)return;
@@ -47,7 +47,7 @@ namespace BattleCities.UI
         void ResetNoticeActions()
         {
             if(noticeConfirm)noticeConfirm.gameObject.SetActive(false);
-            if(noticeClose){noticeClose.interactable=true;Fit((RectTransform)noticeClose.transform,new Rect(.25f,.77f,.5f,.15f));}
+            if(noticeClose){noticeClose.interactable=true;Fit((RectTransform)noticeClose.transform,ScreenContent.Rect("shop","checkout-region-1",new Rect(.25f,.77f,.5f,.15f)));}
             checkoutQuote=null;checkoutIndex=-1;
             LinkNoticeButtons();
         }
@@ -142,7 +142,7 @@ namespace BattleCities.UI
         void ConfigureNoticeAction(string caption)
         {
             noticeConfirm.gameObject.SetActive(true);noticeConfirm.interactable=true;noticeConfirmText.text=caption;
-            Fit((RectTransform)noticeClose.transform,new Rect(.66f,.77f,.27f,.15f));
+            Fit((RectTransform)noticeClose.transform,ScreenContent.Rect("shop","checkout-region-0",new Rect(.66f,.77f,.27f,.15f)));
             LinkNoticeButtons();Focus(noticeConfirm);
         }
         void ConfirmCheckout()

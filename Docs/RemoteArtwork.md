@@ -65,7 +65,7 @@ kept so APK rollback can reuse its content. Cache cleanup can be added later.
 
 Production bucket: `battlecities-game-assets` (Standard storage).
 Custom domain: `assets.battlecities.com`, ownership and TLS active; minimum TLS 1.2.
-Latest hosted object:
+First verified hosted object:
 `android/art/a8e6bdf233f793a3fa2c4a45d423d1df5cc64d588bf6e3a447144815cd6f0934.bundle`
 It matches the manifest from `Builds/Android/1.0.1-v2/20261016-095133`.
 Public HTTPS download verified: HTTP 200, 66,628,993 bytes, exact SHA256 match.
@@ -136,3 +136,7 @@ RuntimeShaderBuild now ensures a texture-free, instancing-enabled BattleLit
 material remains in Resources/RuntimeShaders (outside the remote Terrain folder).
 Detailed player builds verify both material and shader appear in packed assets.
 Do not remove this material during future APK size reductions.
+
+## OTA screen releases
+
+Android 1.0.4 adds a separate signed screen-definition channel. See [OTA screens](OTAScreens.md). The large art/model bundle remains APK-pinned; compatible screen text/layout/PNG changes use small independent files and do not rebuild the APK.

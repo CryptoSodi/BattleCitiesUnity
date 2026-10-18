@@ -55,6 +55,7 @@ namespace BattleCities.UI
             var existing=frame.Find("Ranking screen");bool wasOpen=existing&&existing.gameObject.activeSelf;
             root=Panel("Ranking screen",frame,null);root.GetComponent<UnityEngine.UI.Image>().raycastTarget=true;
             BuildView();RebuildOptions();Render();root.gameObject.SetActive(wasOpen);configured=true;
+            RemoteScreenView.Bind("ranking",root);
         }
         public void Open(bool refresh=true)
         {

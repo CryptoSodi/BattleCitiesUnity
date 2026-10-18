@@ -29,6 +29,12 @@ Web uses the existing HTTP-only browser cookie and now checks it on the Login
 screen automatically. Guest/signed-out entry suppresses automatic wallet login.
 Desktop does not persist native credentials.
 
+Startup hides the authored login Canvas before its first frame and shows the
+game logo with loading status while checking the session and preparing content.
+A verified session goes directly to Home. Failed/missing restoration reveals
+the existing login controls and controller focus; content download failures
+also reveal those controls for retry.
+
 Validation: BattleCities.Editor.SavedSessionChecks.Run uses isolated storage and
 HTTP fixtures for valid restore, missing/malformed/expired credentials, origin
 and account mismatch, denied sessions, outages, Shop connection state and logout.

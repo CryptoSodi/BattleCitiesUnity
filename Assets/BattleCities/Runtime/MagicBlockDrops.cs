@@ -14,6 +14,7 @@ namespace BattleCities
         BattleSimulation simulation;MainMenuApiClient api;Coroutine worker;string token;int index;
         long expires;
         public bool Ready {get;private set;}
+        public string PreparationIssue {get;private set;}
         public string Status {get;private set;}="Preparing power-up drops...";
 #if UNITY_EDITOR
         public Func<string,string,JObject,Action<long,JObject,string>,IEnumerator> EditorRequestOverride;
@@ -36,7 +37,7 @@ namespace BattleCities
         public void Prepare(BattleSimulation current)
         {
             if(worker!=null)StopCoroutine(worker);
-            pending.Clear();simulation=current;token=null;index=0;expires=0;Ready=false;enabled=true;
+            pending.Clear();simulation=current;token=null;index=0;expires=0;Ready=false;PreparationIssue=null;enabled=true;
             Status="Preparing power-up drops...";
             worker=Run(PrepareSession(current));
         }
@@ -71,6 +72,7 @@ namespace BattleCities
             else
             {
                 Status=status==401?"Your session expired. Return to login and sign in again.":"Could not prepare power-up drops. Return to the menu and try again.";
+                PreparationIssue=Status;
                 Debug.LogWarning("MagicBlock pre-match setup HTTP "+status+": "+Status);
             }
             worker=null;
@@ -85,7 +87,7 @@ namespace BattleCities
         public void StopForRecovery(BattleSimulation current)
         {
             if(worker!=null)StopCoroutine(worker);
-            worker=null;pending.Clear();simulation=current;enabled=false;Ready=true;token=null;
+            worker=null;pending.Clear();simulation=current;enabled=false;Ready=true;PreparationIssue=null;token=null;
             Status="MagicBlock drops paused after host recovery; start a new round.";
         }
         void EnsureTransport()

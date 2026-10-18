@@ -62,19 +62,20 @@ namespace BattleCities.UI
             buttonCaptions.Clear();BuildView();RefreshArt();RefreshAccount();SetCurrency(currency==ShopCurrency.Swap?ShopCurrency.Skr:currency,false);
             root.gameObject.SetActive(open);
             configured=true;
+            RemoteScreenView.Bind("shop",root);
         }
         void BuildView()
         {
             heading=Panel("Title plate",root,art.tankTitlePanel);heading.GetComponent<Image>().pixelsPerUnitMultiplier=4;
-            Icon("Shop icon",heading,theme.NavigationIcons[2],new Rect(.10f,.12f,.25f,.76f));
-            Label("Title",heading,"SHOP",new Rect(.36f,.06f,.57f,.88f),28,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
+            Icon("Shop icon",heading,theme.NavigationIcons[2],ScreenContent.Rect("shop","shopscreen-buildview-new-rect-10f-12f-25f-7-8393c0",new Rect(.10f,.12f,.25f,.76f)));
+            Label("Title",heading,ScreenContent.Text("shop","shop-1ed8f0","SHOP"),ScreenContent.Rect("shop","shopscreen-buildview-new-rect-36f-06f-57f-8-fef25f",new Rect(.36f,.06f,.57f,.88f)),28,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
             BuildCurrencies();
             BuildInventory();
             catalog=Panel("Catalog",root,theme.CreamPanel);catalog.GetComponent<Image>().pixelsPerUnitMultiplier=2;
             var oldFilters=root.Find("Filters");if(oldFilters&&!catalog.Find("Filters"))oldFilters.SetParent(catalog,false);
             filterRow=Panel("Filters",catalog,art.tankTitlePanel);filterRow.GetComponent<Image>().pixelsPerUnitMultiplier=4;
             BuildFilters();
-            itemCount=Label("Item count",filterRow,"13 ITEMS",new Rect(.025f,.06f,.20f,.88f),TvTitleHeaderLayout.TextSize,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
+            itemCount=Label("Item count",filterRow,ScreenContent.Text("shop","13-items-c3db8b","13 ITEMS"),ScreenContent.Rect("shop","shopscreen-buildview-new-rect-025f-06f-20f--63b702",new Rect(.025f,.06f,.20f,.88f)),TvTitleHeaderLayout.TextSize,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
             BuildScroll();
             for(int i=0;i<cards.Length;i++)BuildCard(i);
             footer=Panel("Balances",root,art.statusPanel);TvStatusFooterLayout.ApplySkin(footer.GetComponent<Image>(),art.statusPanel);
@@ -88,8 +89,8 @@ namespace BattleCities.UI
             inventoryPaper=Panel("Paper",inventory,theme.Rounded);
             inventoryHeading=Panel("Heading bar",inventoryPaper,theme.Rounded);inventoryHeading.GetComponent<Image>().pixelsPerUnitMultiplier=5;
             var oldHeading=inventory.Find("Heading");if(oldHeading)oldHeading.SetParent(inventoryHeading,false);
-            Icon("Crate",inventoryHeading,shopArt?shopArt.supplyCrate:null,new Rect(.025f,.10f,.18f,.80f));
-            Label("Heading",inventoryHeading,"INVENTORY",new Rect(.23f,.02f,.74f,.96f),24,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            Icon("Crate",inventoryHeading,shopArt?shopArt.supplyCrate:null,ScreenContent.Rect("shop","shopscreen-buildinventory-new-rect-025f-10f-8072a3",new Rect(.025f,.10f,.18f,.80f)));
+            Label("Heading",inventoryHeading,ScreenContent.Text("shop","inventory-44e764","INVENTORY"),ScreenContent.Rect("shop","shopscreen-buildinventory-new-rect-23f-02f--1f894f",new Rect(.23f,.02f,.74f,.96f)),24,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
             for(int i=0;i<8;i++)
             {
                 string id=ShopCatalog.InventoryIds[i];var old=inventory.Find(id);if(old)old.SetParent(inventoryPaper,false);
@@ -99,14 +100,14 @@ namespace BattleCities.UI
                 var shadow=plate.Find("Ground shadow") as RectTransform;
                 if(!shadow){var go=new GameObject("Ground shadow",typeof(RectTransform),typeof(CanvasRenderer),typeof(TankGroundShadow));go.layer=row.gameObject.layer;shadow=(RectTransform)go.transform;shadow.SetParent(plate,false);}
                 inventoryShadows[i]=shadow.GetComponent<TankGroundShadow>();inventoryShadows[i].color=new Color32(35,25,13,112);inventoryShadows[i].raycastTarget=false;
-                inventoryArt[i]=Icon("Artwork",plate,null,new Rect(.02f,.025f,.96f,.95f));
-                inventoryFallbacks[i]=Raw("Atlas fallback",plate,new Rect(.02f,.025f,.96f,.95f));SetInventoryIcon(inventoryFallbacks[i],id);
+                inventoryArt[i]=Icon("Artwork",plate,null,ScreenContent.Rect("shop","shopscreen-buildinventory-new-rect-02f-025f-56faa4",new Rect(.02f,.025f,.96f,.95f)));
+                inventoryFallbacks[i]=Raw("Atlas fallback",plate,ScreenContent.Rect("shop","shopscreen-buildinventory-new-rect-02f-025f-56faa4",new Rect(.02f,.025f,.96f,.95f)));SetInventoryIcon(inventoryFallbacks[i],id);
                 int product=InventoryProduct(id);string name=product>=0?ShopCatalog.Products[product].Title:id.ToUpperInvariant();
                 if(id=="base-defence")name="BASE\nDEFENCE";else if(id=="extra-life")name="EXTRA\nLIFE";
-                Label("Name",row,name,new Rect(.29f,.08f,.50f,.84f),20,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+                Label("Name",row,ScreenContent.Text("shop","power-"+ShopCatalog.InventoryIds[i],name),ScreenContent.Rect("shop","shopscreen-buildinventory-new-rect-29f-08f--12ac26",new Rect(.29f,.08f,.50f,.84f)),20,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
                 var count=Panel("Count badge",row,theme.DarkPanel);count.GetComponent<Image>().pixelsPerUnitMultiplier=3;
                 var oldCount=row.Find("Count");if(oldCount)oldCount.SetParent(count,false);
-                inventoryCounts[i]=Label("Count",count,"0",new Rect(.08f,.04f,.84f,.92f),28,ArcadeTextTreatment.PrizeAmount);inventoryCounts[i].color=Color.white;
+                inventoryCounts[i]=Label("Count",count,"0",ScreenContent.Rect("shop","shopscreen-buildinventory-new-rect-08f-04f--b56b36",new Rect(.08f,.04f,.84f,.92f)),28,ArcadeTextTreatment.PrizeAmount);inventoryCounts[i].color=Color.white;
                 var divider=Panel("Divider",row,null);divider.GetComponent<Image>().color=new Color32(6,29,54,85);divider.gameObject.SetActive(i<7);
             }
         }
@@ -145,15 +146,15 @@ namespace BattleCities.UI
             string[] names={"SKR","SOLANA","SWAP"};
             for(int i=0;i<3;i++)
             {
-                int n=i;hudTabs[i]=currencyTabs[i]=JoinedTab(names[i],currencyBar,()=>SetCurrency((ShopCurrency)n,true),out hudSelections[i],out currencyLabels[i],new Rect(.29f,.025f,.68f,.95f));
-                Icon("Icon",currencyTabs[i].transform,shopArt?(i==0?shopArt.skr:i==1?shopArt.solana:shopArt.swap):null,new Rect(.075f,.12f,.19f,.76f));
+                int n=i;hudTabs[i]=currencyTabs[i]=JoinedTab(names[i],currencyBar,()=>SetCurrency((ShopCurrency)n,true),out hudSelections[i],out currencyLabels[i],ScreenContent.Rect("shop","shopscreen-buildcurrencies-new-rect-29f-025-821fdc",new Rect(.29f,.025f,.68f,.95f)));
+                Icon("Icon",currencyTabs[i].transform,shopArt?(i==0?shopArt.skr:i==1?shopArt.solana:shopArt.swap):null,ScreenContent.Rect("shop","shopscreen-buildcurrencies-new-rect-075f-12-412c3a",new Rect(.075f,.12f,.19f,.76f)));
             }
             LockedTabIcon.Apply(currencyTabs[2],art.tankCostButtonLocked);
             var oldBack=root.Find("Back");if(oldBack)oldBack.SetParent(currencyBar,false);
-            hudTabs[3]=back=JoinedTab("Back",currencyBar,Close,out hudSelections[3],out var backLabel,new Rect(.29f,.025f,.68f,.95f));backLabel.text="BACK";hudSelections[3].enabled=false;
+            hudTabs[3]=back=JoinedTab("Back",currencyBar,Close,out hudSelections[3],out var backLabel,ScreenContent.Rect("shop","shopscreen-buildcurrencies-new-rect-29f-025-821fdc",new Rect(.29f,.025f,.68f,.95f)));backLabel.text="BACK";hudSelections[3].enabled=false;
             var arrow=back.transform.Find("Arrow") as RectTransform;
             if(!arrow){var go=new GameObject("Arrow",typeof(RectTransform),typeof(CanvasRenderer),typeof(BackTabArrow));go.layer=back.gameObject.layer;arrow=(RectTransform)go.transform;arrow.SetParent(back.transform,false);}
-            Fit(arrow,new Rect(.10f,.17f,.14f,.66f));var arrowGraphic=arrow.GetComponent<BackTabArrow>();arrowGraphic.color=Color.white;arrowGraphic.raycastTarget=false;
+            Fit(arrow,ScreenContent.Rect("shop","shopscreen-buildcurrencies-new-rect-10f-17f-e9b4c7",new Rect(.10f,.17f,.14f,.66f)));var arrowGraphic=arrow.GetComponent<BackTabArrow>();arrowGraphic.color=Color.white;arrowGraphic.raycastTarget=false;
             JoinedDividers(currencyBar,4);
         }
         void BuildFilters()
@@ -165,7 +166,8 @@ namespace BattleCities.UI
             {
                 // Reparent the existing controls when refreshing an already-open Shop.
                 var old=filterRow.Find(categories[i]);if(old)old.SetParent(filterBar,false);
-                int n=i;filters[i]=JoinedTab(categories[i],filterBar,()=>SetCategory((ShopCategory)n,true),out filterSelections[i],out filterLabels[i],new Rect(.035f,.025f,.93f,.95f));
+                int n=i;filters[i]=JoinedTab(categories[i],filterBar,()=>SetCategory((ShopCategory)n,true),out filterSelections[i],out filterLabels[i],ScreenContent.Rect("shop","shopscreen-buildfilters-new-rect-035f-025f--7104c5",new Rect(.035f,.025f,.93f,.95f)));
+                filterLabels[i].text=ScreenContent.Text("shop","category-"+i,categories[i]);
             }
             JoinedDividers(filterBar,filters.Length);
         }
@@ -183,7 +185,7 @@ namespace BattleCities.UI
             for(int i=1;i<count;i++)
             {
                 var divider=Panel("Divider "+i,bar,null);divider.GetComponent<Image>().color=new Color32(2,27,64,255);
-                var light=Panel("Highlight",divider,null);light.GetComponent<Image>().color=new Color32(47,183,242,210);Fit(light,new Rect(.67f,0,.33f,1));
+                var light=Panel("Highlight",divider,null);light.GetComponent<Image>().color=new Color32(47,183,242,210);Fit(light,ScreenContent.Rect("shop","shopscreen-joineddividers-new-rect-67f-0-33-ff6ece",new Rect(.67f,0,.33f,1)));
             }
         }
         void LayoutJoinedBar(RectTransform bar,Button[] buttons,Image[] selections,float height,float cornerFraction=.36f)
@@ -216,9 +218,9 @@ namespace BattleCities.UI
         {
             var cell=Panel(name+" balance",footer,null);Fit(cell,new Rect(index*.25f,0,.25f,1));
             var line=Panel("Divider",cell,null);line.GetComponent<Image>().color=new Color32(7,43,94,55);Fit(line,new Rect(.997f,.18f,.003f,.64f));
-            Icon("Icon",cell,icon,new Rect(.04f,.12f,.18f,.76f));
-            Label("Label",cell,name,new Rect(.25f,.12f,.31f,.76f),24,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
-            return Label("Value",cell,"â€”",new Rect(.57f,.08f,.39f,.84f),30,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            Icon("Icon",cell,icon,ScreenContent.Rect("shop","shopscreen-balance-new-rect-04f-12f-18f-76f-5c918c",new Rect(.04f,.12f,.18f,.76f)));
+            Label("Label",cell,name,ScreenContent.Rect("shop","shopscreen-balance-new-rect-25f-12f-31f-76f-e8f078",new Rect(.25f,.12f,.31f,.76f)),24,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            return Label("Value",cell,"—",ScreenContent.Rect("shop","shopscreen-balance-new-rect-57f-08f-39f-84f-1dec04",new Rect(.57f,.08f,.39f,.84f)),30,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
         }
         void BuildScroll()
         {
@@ -228,7 +230,7 @@ namespace BattleCities.UI
             var mask=viewport.GetComponent<Mask>();if(!mask)mask=viewport.gameObject.AddComponent<Mask>();mask.showMaskGraphic=false;
             var content=Panel("Content",viewport,null);content.anchorMin=new Vector2(0,1);content.anchorMax=new Vector2(1,1);content.pivot=new Vector2(.5f,1);content.anchoredPosition=Vector2.zero;content.sizeDelta=Vector2.zero;
             grid=content.GetComponent<GridLayoutGroup>();if(!grid)grid=content.gameObject.AddComponent<GridLayoutGroup>();
-            grid.constraint=GridLayoutGroup.Constraint.FixedColumnCount;grid.constraintCount=columns;grid.padding=new RectOffset(4,4,4,4);grid.spacing=new Vector2(6,8);grid.childAlignment=TextAnchor.UpperLeft;
+            grid.constraint=GridLayoutGroup.Constraint.FixedColumnCount;grid.constraintCount=columns;grid.padding=new RectOffset(4,4,4,4);grid.spacing=new Vector2(ScreenContent.Number("shop","card-gap-x",6f),ScreenContent.Number("shop","card-gap-y",8));grid.childAlignment=TextAnchor.UpperLeft;
             var fit=content.GetComponent<ContentSizeFitter>();if(!fit)fit=content.gameObject.AddComponent<ContentSizeFitter>();fit.horizontalFit=ContentSizeFitter.FitMode.Unconstrained;fit.verticalFit=ContentSizeFitter.FitMode.PreferredSize;
             var track=Panel("Scrollbar",area,theme.DarkPanel);track.GetComponent<Image>().pixelsPerUnitMultiplier=3;track.GetComponent<Image>().color=new Color32(110,198,255,255);track.GetComponent<Image>().raycastTarget=true;
             track.anchorMin=new Vector2(1,0);track.anchorMax=Vector2.one;track.pivot=new Vector2(1,.5f);track.anchoredPosition=new Vector2(-4,0);track.sizeDelta=new Vector2(18,-8);
@@ -243,22 +245,22 @@ namespace BattleCities.UI
             var card=new Card{Rect=rect,Frame=rect.GetComponent<Image>()};cards[index]=card;
             card.Highlight=CardSelectionHighlight.Ensure(card.Frame);
             var focus=rect.GetComponent<ShopCardFocus>();if(!focus)focus=rect.gameObject.AddComponent<ShopCardFocus>();focus.Configure(this,index);card.Frame.raycastTarget=true;
-            card.Title=Label("Title",rect,product.Title,new Rect(.13f,.055f,.74f,.167f),34,ArcadeTextTreatment.Navy);
+            card.Title=Label("Title",rect,ScreenContent.Text("shop","product-"+product.Id,product.Title),ScreenContent.Rect("shop","shopscreen-buildcard-new-rect-13f-055f-74f--a237c5",new Rect(.13f,.055f,.74f,.167f)),34,ArcadeTextTreatment.Navy);
             var shadow=rect.Find("Ground shadow") as RectTransform;
             if(!shadow){var go=new GameObject("Ground shadow",typeof(RectTransform),typeof(CanvasRenderer),typeof(TankGroundShadow));go.layer=rect.gameObject.layer;shadow=(RectTransform)go.transform;shadow.SetParent(rect,false);}
-            Fit(shadow,new Rect(.18f,.535f,.64f,.055f));card.Shadow=shadow.GetComponent<TankGroundShadow>();card.Shadow.color=new Color32(35,25,13,112);card.Shadow.raycastTarget=false;
-            card.Art=Icon("Artwork",rect,null,new Rect(.12f,.17f,.76f,.485f));card.Fallback=Raw("Inventory artwork",rect,new Rect(.23f,.18f,.54f,.465f));
-            var reward=DetailRow("Reward strip",rect,new Rect(.06f,.66f,.88f,.125f),new Color32(238,220,184,130));
+            Fit(shadow,ScreenContent.Rect("shop","shopscreen-buildcard-new-rect-18f-535f-64f--13fa6e",new Rect(.18f,.535f,.64f,.055f)));card.Shadow=shadow.GetComponent<TankGroundShadow>();card.Shadow.color=new Color32(35,25,13,112);card.Shadow.raycastTarget=false;
+            card.Art=Icon("Artwork",rect,null,ScreenContent.Rect("shop","shopscreen-buildcard-new-rect-12f-17f-76f-4-a7cf94",new Rect(.12f,.17f,.76f,.485f)));card.Fallback=Raw("Inventory artwork",rect,ScreenContent.Rect("shop","shopscreen-buildcard-new-rect-23f-18f-54f-4-e7f598",new Rect(.23f,.18f,.54f,.465f)));
+            var reward=DetailRow("Reward strip",rect,ScreenContent.Rect("shop","shopscreen-buildcard-new-rect-06f-66f-88f-1-5e0304",new Rect(.06f,.66f,.88f,.125f)),new Color32(238,220,184,130));
             var existingReward=rect.Find("Reward");if(existingReward)existingReward.SetParent(reward,false);
-            card.Reward=Label("Reward",reward,product.Reward,new Rect(.035f,0,.93f,1),30,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineLeft);
+            card.Reward=Label("Reward",reward,product.Reward,ScreenContent.Rect("shop","shopscreen-buildcard-new-rect-035f-0-93f-1-e31dfd",new Rect(.035f,0,.93f,1)),30,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineLeft);
             card.Reward.fontSizeMin=9;card.Reward.margin=new Vector4(1,0,1,0);
             var oldOwned=rect.Find("Owned strip");if(oldOwned)oldOwned.gameObject.SetActive(false);
-            card.Price=MakeButton("Price",rect,"",()=>InspectProduct(index));card.PriceText=Label("Label",card.Price.transform,"",new Rect(.22f,.05f,.74f,.90f),26,ArcadeTextTreatment.PrizeAmount);textStyles.ApplyCleanButton(card.PriceText,false);
+            card.Price=MakeButton("Price",rect,"",()=>InspectProduct(index));card.PriceText=Label("Label",card.Price.transform,"",ScreenContent.Rect("shop","shopscreen-buildcard-new-rect-22f-05f-74f-9-78d721",new Rect(.22f,.05f,.74f,.90f)),26,ArcadeTextTreatment.PrizeAmount);textStyles.ApplyCleanButton(card.PriceText,false);
             // The shared card highlight keeps focus distinct from gold activation.
             card.Price.transition=Selectable.Transition.ColorTint;card.Price.spriteState=default;
             var colors=card.Price.colors;colors.normalColor=Color.white;colors.highlightedColor=colors.selectedColor=new Color(1f,.98f,.86f);colors.pressedColor=new Color(.92f,.92f,.92f);colors.disabledColor=Color.white;card.Price.colors=colors;
             buttonCaptions.Add(new ButtonCaption{Button=card.Price,Text=card.PriceText});
-            card.Coin=Icon("Currency",card.Price.transform,shopArt?shopArt.skr:null,new Rect(.05f,.13f,.17f,.74f));
+            card.Coin=Icon("Currency",card.Price.transform,shopArt?shopArt.skr:null,ScreenContent.Rect("shop","shopscreen-buildcard-new-rect-05f-13f-17f-7-bf92c8",new Rect(.05f,.13f,.17f,.74f)));
             var priceFocus=card.Price.GetComponent<ShopCardFocus>();if(!priceFocus)priceFocus=card.Price.gameObject.AddComponent<ShopCardFocus>();priceFocus.Configure(this,index,false);
             float height=.72f*ShopCardAspect*(art.tankCostButton.rect.height/art.tankCostButton.rect.width)*1.25f;
             Fit((RectTransform)card.Price.transform,new Rect(.14f,.88f-height*.5f,.72f,height));
@@ -271,29 +273,29 @@ namespace BattleCities.UI
         void BuildSwap()
         {
             swapPage=Panel("Swap",root,theme.CreamPanel);swapPage.GetComponent<Image>().pixelsPerUnitMultiplier=2;
-            Label("Title",swapPage,"SWAP",new Rect(.08f,.045f,.84f,.12f),38,ArcadeTextTreatment.Gold);
-            var pay=Panel("You pay",swapPage,art.statusPanel);Fit(pay,new Rect(.08f,.22f,.84f,.22f));pay.GetComponent<Image>().pixelsPerUnitMultiplier=3;
-            Label("Heading",pay,"YOU PAY",new Rect(.05f,.05f,.90f,.25f),21,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineLeft);
-            swapFrom=Label("Currency",pay,"SOL",new Rect(.06f,.39f,.25f,.47f),32,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineLeft);
-            var inputArea=Panel("Amount",pay,null);Fit(inputArea,new Rect(.38f,.33f,.56f,.56f));inputArea.GetComponent<Image>().raycastTarget=true;
-            var inputText=Label("Text",inputArea,"",new Rect(.03f,0,.94f,1),32,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineRight);
-            var placeholder=Label("Placeholder",inputArea,"0.00",new Rect(.03f,0,.94f,1),32,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineRight);placeholder.color=new Color32(7,43,94,135);
+            Label("Title",swapPage,ScreenContent.Text("shop","swap-f4d4ba","SWAP"),ScreenContent.Rect("shop","shopscreen-buildswap-new-rect-08f-045f-84f--9dfe27",new Rect(.08f,.045f,.84f,.12f)),38,ArcadeTextTreatment.Gold);
+            var pay=Panel("You pay",swapPage,art.statusPanel);Fit(pay,ScreenContent.Rect("shop","shopscreen-buildswap-new-rect-08f-22f-84f-2-bfa942",new Rect(.08f,.22f,.84f,.22f)));pay.GetComponent<Image>().pixelsPerUnitMultiplier=3;
+            Label("Heading",pay,ScreenContent.Text("shop","you-pay-b6bc7a","YOU PAY"),ScreenContent.Rect("shop","shopscreen-buildswap-new-rect-05f-05f-90f-2-3e7ebb",new Rect(.05f,.05f,.90f,.25f)),21,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineLeft);
+            swapFrom=Label("Currency",pay,"SOL",ScreenContent.Rect("shop","shopscreen-buildswap-new-rect-06f-39f-25f-4-4212f0",new Rect(.06f,.39f,.25f,.47f)),32,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineLeft);
+            var inputArea=Panel("Amount",pay,null);Fit(inputArea,ScreenContent.Rect("shop","shopscreen-buildswap-new-rect-38f-33f-56f-5-87452c",new Rect(.38f,.33f,.56f,.56f)));inputArea.GetComponent<Image>().raycastTarget=true;
+            var inputText=Label("Text",inputArea,"",ScreenContent.Rect("shop","shopscreen-buildswap-new-rect-03f-0-94f-1-adb75b",new Rect(.03f,0,.94f,1)),32,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineRight);
+            var placeholder=Label("Placeholder",inputArea,"0.00",ScreenContent.Rect("shop","shopscreen-buildswap-new-rect-03f-0-94f-1-adb75b",new Rect(.03f,0,.94f,1)),32,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineRight);placeholder.color=new Color32(7,43,94,135);
             swapAmount=inputArea.GetComponent<TMP_InputField>();if(!swapAmount)swapAmount=inputArea.gameObject.AddComponent<TMP_InputField>();swapAmount.textViewport=inputArea;swapAmount.textComponent=inputText;swapAmount.placeholder=placeholder;swapAmount.contentType=TMP_InputField.ContentType.DecimalNumber;swapAmount.characterLimit=14;
-            swapDirection=MakeButton("Change direction",swapPage,"SWITCH",()=>{swapFromSol=!swapFromSol;RefreshSwap();});Fit((RectTransform)swapDirection.transform,new Rect(.37f,.455f,.26f,.08f));
-            var receive=Panel("You receive",swapPage,art.statusPanel);Fit(receive,new Rect(.08f,.55f,.84f,.22f));receive.GetComponent<Image>().pixelsPerUnitMultiplier=3;
-            Label("Heading",receive,"YOU RECEIVE",new Rect(.05f,.05f,.90f,.25f),21,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineLeft);
-            swapTo=Label("Currency",receive,"SKR",new Rect(.06f,.39f,.25f,.47f),32,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineLeft);
-            Label("Amount",receive,"â€”",new Rect(.38f,.33f,.56f,.56f),32,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineRight);
-            swapBalance=Label("Balance",swapPage,"",new Rect(.08f,.80f,.84f,.06f),20,ArcadeTextTreatment.Navy);
-            swapAction=MakeButton("Swap action",swapPage,"SWAP",()=>ShowNotice("SWAP","Swaps are not available yet."));Fit((RectTransform)swapAction.transform,new Rect(.25f,.885f,.5f,.09f));
+            swapDirection=MakeButton("Change direction",swapPage,ScreenContent.Text("shop","switch-dc253e","SWITCH"),()=>{swapFromSol=!swapFromSol;RefreshSwap();});Fit((RectTransform)swapDirection.transform,ScreenContent.Rect("shop","shopscreen-buildswap-new-rect-37f-455f-26f--121745",new Rect(.37f,.455f,.26f,.08f)));
+            var receive=Panel("You receive",swapPage,art.statusPanel);Fit(receive,ScreenContent.Rect("shop","shopscreen-buildswap-new-rect-08f-55f-84f-2-c92ad3",new Rect(.08f,.55f,.84f,.22f)));receive.GetComponent<Image>().pixelsPerUnitMultiplier=3;
+            Label("Heading",receive,ScreenContent.Text("shop","you-receive-8ffa86","YOU RECEIVE"),ScreenContent.Rect("shop","shopscreen-buildswap-new-rect-05f-05f-90f-2-3e7ebb",new Rect(.05f,.05f,.90f,.25f)),21,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineLeft);
+            swapTo=Label("Currency",receive,"SKR",ScreenContent.Rect("shop","shopscreen-buildswap-new-rect-06f-39f-25f-4-4212f0",new Rect(.06f,.39f,.25f,.47f)),32,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineLeft);
+            Label("Amount",receive,"—",ScreenContent.Rect("shop","shopscreen-buildswap-new-rect-38f-33f-56f-5-87452c",new Rect(.38f,.33f,.56f,.56f)),32,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineRight);
+            swapBalance=Label("Balance",swapPage,"",ScreenContent.Rect("shop","shopscreen-buildswap-new-rect-08f-80f-84f-0-06c1bc",new Rect(.08f,.80f,.84f,.06f)),20,ArcadeTextTreatment.Navy);
+            swapAction=MakeButton("Swap action",swapPage,ScreenContent.Text("shop","swap-f4d4ba","SWAP"),()=>ShowNotice("SWAP","Swaps are not available yet."));Fit((RectTransform)swapAction.transform,ScreenContent.Rect("shop","shopscreen-buildswap-new-rect-25f-885f-5f-0-255942",new Rect(.25f,.885f,.5f,.09f)));
         }
         void BuildNotice()
         {
             notice=Panel("Notice",root,null);Fit(notice,new Rect(0,0,1,1));notice.GetComponent<Image>().color=new Color(0,.035f,.09f,.70f);notice.GetComponent<Image>().raycastTarget=true;
-            noticeCard=Panel("Panel",notice,art.tankCardAvailable);Fit(noticeCard,new Rect(.18f,.24f,.64f,.50f));noticeCard.GetComponent<Image>().pixelsPerUnitMultiplier=3;
-            noticeTitle=Label("Title",noticeCard,"",new Rect(.07f,.07f,.86f,.16f),34,ArcadeTextTreatment.Gold);
-            noticeBody=Label("Body",noticeCard,"",new Rect(.08f,.27f,.84f,.40f),27,ArcadeTextTreatment.Navy);noticeBody.textWrappingMode=TextWrappingModes.Normal;
-            noticeClose=MakeButton("Close",noticeCard,"CLOSE",DismissNotice);Fit((RectTransform)noticeClose.transform,new Rect(.25f,.77f,.5f,.15f));notice.gameObject.SetActive(false);
+            noticeCard=Panel("Panel",notice,art.tankCardAvailable);Fit(noticeCard,ScreenContent.Rect("shop","shopscreen-buildnotice-new-rect-18f-24f-64f-3d6dba",new Rect(.18f,.24f,.64f,.50f)));noticeCard.GetComponent<Image>().pixelsPerUnitMultiplier=3;
+            noticeTitle=Label("Title",noticeCard,"",ScreenContent.Rect("shop","shopscreen-buildnotice-new-rect-07f-07f-86f-19b5bf",new Rect(.07f,.07f,.86f,.16f)),34,ArcadeTextTreatment.Gold);
+            noticeBody=Label("Body",noticeCard,"",ScreenContent.Rect("shop","shopscreen-buildnotice-new-rect-08f-27f-84f-280d38",new Rect(.08f,.27f,.84f,.40f)),27,ArcadeTextTreatment.Navy);noticeBody.textWrappingMode=TextWrappingModes.Normal;
+            noticeClose=MakeButton("Close",noticeCard,ScreenContent.Text("shop","close-f13a1e","CLOSE"),DismissNotice);Fit((RectTransform)noticeClose.transform,ScreenContent.Rect("shop","shopscreen-buildnotice-new-rect-25f-77f-5f--1c71d8",new Rect(.25f,.77f,.5f,.15f)));notice.gameObject.SetActive(false);
         }
         public void Open(bool refreshAccount=true)
         {
@@ -322,7 +324,7 @@ namespace BattleCities.UI
             var headerLayout=new TvTitleHeaderLayout(root);
             var footerLayout=new TvStatusFooterLayout(root);
             float header=headerLayout.Height,footerHeight=footerLayout.Height;
-            float sidebar=Mathf.Clamp(w*.25f,208f,300f);
+            float sidebar=Mathf.Clamp(w*ScreenContent.Number("shop","sidebar-ratio",0.25f),208f,300f);
             headerLayout.PlaceTitle(heading,heading.Find("Shop icon") as RectTransform,heading.Find("Title") as RectTransform,iconHeightFraction:.64f);
             headerLayout.PlaceNavigation(heading,currencyBar);
             LayoutJoinedBar(currencyBar,hudTabs,hudSelections,headerLayout.NavigationHeight,.22f);
@@ -379,7 +381,7 @@ namespace BattleCities.UI
                 c.PriceText.text=LivePrice(p.Id);
                 SetSprite(c.Coin,shopArt?(currency==ShopCurrency.Solana?shopArt.solana:shopArt.skr):null);
                 int owned=p.InventoryId!=null?Count(account?["inventory"]?[p.InventoryId]):p.Category==ShopCategory.Fuel?Count(account?["fuelBalance"]):0;
-                c.Reward.text=p.Category==ShopCategory.SeasonPass?SeasonCaption():p.Reward+"  â€¢  OWNED "+(account!=null?owned.ToString(CultureInfo.InvariantCulture):"â€”");
+                c.Reward.text=p.Category==ShopCategory.SeasonPass?SeasonCaption():p.Reward+"  •  OWNED "+(account!=null?owned.ToString(CultureInfo.InvariantCulture):"—");
             }
             RefreshCardHighlights();
             RefreshPresentation();
@@ -473,13 +475,13 @@ namespace BattleCities.UI
         }
         void RefreshAccount()
         {
-            for(int i=0;i<8;i++)inventoryCounts[i].text=account!=null?Count(account?["inventory"]?[ShopCatalog.InventoryIds[i]]).ToString(CultureInfo.InvariantCulture):"â€”";
+            for(int i=0;i<8;i++)inventoryCounts[i].text=account!=null?Count(account?["inventory"]?[ShopCatalog.InventoryIds[i]]).ToString(CultureInfo.InvariantCulture):"—";
             connection.text=api&&api.IsWalletReadyForPurchases?"REFRESH":"CONNECT WALLET";
             // The older tokenBalance field represents BATC; it must never be presented as SKR.
-            skrBalance.text=Amount(walletBalances?["skrBalance"],"0.#########");solBalance.text=Amount(walletBalances?["solBalance"],"0.#########");fuelBalance.text=account!=null?Count(account?["fuelBalance"]).ToString("N0",CultureInfo.InvariantCulture):"â€”";UpdateCards();RefreshSwap();
+            skrBalance.text=Amount(walletBalances?["skrBalance"],"0.#########");solBalance.text=Amount(walletBalances?["solBalance"],"0.#########");fuelBalance.text=account!=null?Count(account?["fuelBalance"]).ToString("N0",CultureInfo.InvariantCulture):"—";UpdateCards();RefreshSwap();
         }
         static int Count(JToken token){return int.TryParse(token?.ToString(),NumberStyles.Integer,CultureInfo.InvariantCulture,out int n)?Math.Max(0,n):0;}
-        static string Amount(JToken token,string format){return decimal.TryParse(token?.ToString(),NumberStyles.Number,CultureInfo.InvariantCulture,out var n)?Math.Max(0,n).ToString(format,CultureInfo.InvariantCulture):"â€”";}
+        static string Amount(JToken token,string format){return decimal.TryParse(token?.ToString(),NumberStyles.Number,CultureInfo.InvariantCulture,out var n)?Math.Max(0,n).ToString(format,CultureInfo.InvariantCulture):"—";}
         public void KeepControllerFocus(){Psg1UiNavigation.KeepFocus(root,notice.gameObject.activeSelf?noticeClose:currency==ShopCurrency.Swap?swapDirection:PreferredProductButton());}
         void ConfigureNavigation()
         {
@@ -500,7 +502,7 @@ namespace BattleCities.UI
         Button MakeButton(string name,Transform parent,string caption,UnityEngine.Events.UnityAction action)
         {
             var rect=Panel(name,parent,art.tankCostButton);var button=rect.GetComponent<Button>();if(!button)button=rect.gameObject.AddComponent<Button>();button.targetGraphic=rect.GetComponent<Image>();button.image.raycastTarget=true;button.transition=Selectable.Transition.SpriteSwap;button.spriteState=new SpriteState{highlightedSprite=art.tankCostButtonSelected,pressedSprite=art.tankCostButtonSelected,selectedSprite=art.tankCostButtonSelected,disabledSprite=art.tankCostButtonLocked};button.onClick.RemoveAllListeners();button.onClick.AddListener(action);
-            if(caption.Length>0){var text=Label("Label",rect,caption,new Rect(.06f,.06f,.88f,.88f),28,ArcadeTextTreatment.PrizeAmount);textStyles.ApplyCleanButton(text,false);buttonCaptions.Add(new ButtonCaption{Button=button,Text=text});}return button;
+            if(caption.Length>0){var text=Label("Label",rect,caption,ScreenContent.Rect("shop","shopscreen-makebutton-new-rect-06f-06f-88f--bf46d1",new Rect(.06f,.06f,.88f,.88f)),28,ArcadeTextTreatment.PrizeAmount);textStyles.ApplyCleanButton(text,false);buttonCaptions.Add(new ButtonCaption{Button=button,Text=text});}return button;
         }
         RectTransform Panel(string name,Transform parent,Sprite sprite)
         {

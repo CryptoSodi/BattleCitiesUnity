@@ -30,6 +30,9 @@ namespace BattleCities.UI
         private bool restoringSession;
         private bool loading;
         private bool contentRetry;
+        private CanvasGroup loginVisibility;
+        private GameObject startupView;
+        private UnityEngine.UI.Text startupStatus;
         private Psg1UiInput controllerInput;
         private bool? previousGuestAccess;
         private bool showingDefaultStatus;
@@ -48,6 +51,10 @@ namespace BattleCities.UI
         {
             if (!apiClient) apiClient = GetComponent<MainMenuApiClient>();
             if (apiClient) { apiClient.ConfigureGuestFallback(false); apiClient.ConfigureAutomaticRefresh(false); }
+            // Gate the authored Canvas before the first rendered frame.
+            restoringSession = true;
+            SetButtons(false);
+            CreateStartupView();
         }
         private void OnEnable()
         {
@@ -74,9 +81,18 @@ namespace BattleCities.UI
             }
             RefreshGuestAccess();
             ShowDefaultStatus();
-            if (EventSystem.current) EventSystem.current.SetSelectedGameObject(
-                layout && layout.UsesPsg1 && psgPhantomButton ? psgPhantomButton.gameObject : phantomButton.gameObject);
-            if (apiClient) StartCoroutine(RestoreSignIn());
+            PrepareSignIn();
+        }
+        private async void PrepareSignIn()
+        {
+            restoringSession=true;SetButtons(false);
+            try { await ScreenUpdates.EnsureReady(value=>{if(this)SetStatus(value);},destroyCancellationToken); }
+            catch(System.OperationCanceledException){return;}
+            if(!this||!isActiveAndEnabled)return;
+            var screenRoot=layout?layout.transform as RectTransform:phantomButton?phantomButton.GetComponentInParent<Canvas>().transform as RectTransform:null;
+            ScreenContent.BindAuthored(screenRoot,"login");
+            RemoteScreenView.Bind("login",screenRoot);
+            if(apiClient)StartCoroutine(RestoreSignIn());else{restoringSession=false;SetButtons(true);ShowSignIn();}
         }
         private System.Collections.IEnumerator RestoreSignIn()
         {
@@ -86,10 +102,77 @@ namespace BattleCities.UI
             if (loading || contentRetry) yield break;
             SetButtons(true);
             if (apiClient.LastStatusTitle == "RESTORING SESSION") ShowDefaultStatus();
+            ShowSignIn();
+        }
+        private void CreateStartupView()
+        {
+            var root = layout ? layout.transform : phantomButton ? phantomButton.GetComponentInParent<Canvas>()?.transform : null;
+            if (root)
+            {
+                loginVisibility = root.GetComponent<CanvasGroup>();
+                if (!loginVisibility) loginVisibility = root.gameObject.AddComponent<CanvasGroup>();
+                loginVisibility.alpha = 0;
+                loginVisibility.interactable = loginVisibility.blocksRaycasts = false;
+            }
+
+            startupView = new GameObject("Session Startup", typeof(RectTransform), typeof(Canvas),
+                typeof(UnityEngine.UI.CanvasScaler), typeof(UnityEngine.UI.GraphicRaycaster));
+            startupView.transform.SetParent(transform, false);
+            var canvas = startupView.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = short.MaxValue;
+            var scaler = startupView.GetComponent<UnityEngine.UI.CanvasScaler>();
+            scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1600, 900);
+            scaler.matchWidthOrHeight = .5f;
+
+            var background = new GameObject("Background", typeof(RectTransform), typeof(UnityEngine.UI.Image));
+            background.transform.SetParent(startupView.transform, false);
+            var backgroundRect = (RectTransform)background.transform;
+            backgroundRect.anchorMin = Vector2.zero; backgroundRect.anchorMax = Vector2.one;
+            backgroundRect.offsetMin = backgroundRect.offsetMax = Vector2.zero;
+            background.GetComponent<UnityEngine.UI.Image>().color = new Color32(6, 29, 54, 255);
+
+            if (walletButtonTheme && walletButtonTheme.Logo)
+            {
+                var logo = new GameObject("Battle Cities Logo", typeof(RectTransform), typeof(UnityEngine.UI.Image));
+                logo.transform.SetParent(startupView.transform, false);
+                var logoRect = (RectTransform)logo.transform;
+                logoRect.anchorMin = logoRect.anchorMax = new Vector2(.5f, .58f);
+                logoRect.sizeDelta = new Vector2(320, 320);
+                var image = logo.GetComponent<UnityEngine.UI.Image>();
+                image.sprite = walletButtonTheme.Logo; image.preserveAspect = true; image.raycastTarget = false;
+            }
+            var status = new GameObject("Loading Status", typeof(RectTransform), typeof(UnityEngine.UI.Text));
+            status.transform.SetParent(startupView.transform, false);
+            var statusRect = (RectTransform)status.transform;
+            statusRect.anchorMin = new Vector2(.1f, .25f); statusRect.anchorMax = new Vector2(.9f, .36f);
+            statusRect.offsetMin = statusRect.offsetMax = Vector2.zero;
+            startupStatus = status.GetComponent<UnityEngine.UI.Text>();
+            startupStatus.font = walletButtonTheme ? walletButtonTheme.HeadingFont : statusText ? statusText.font : null;
+            startupStatus.text = "Loading Battle Cities...";
+            startupStatus.color = Color.white; startupStatus.alignment = TextAnchor.MiddleCenter;
+            startupStatus.fontSize = 36; startupStatus.resizeTextForBestFit = true;
+            startupStatus.resizeTextMinSize = 20; startupStatus.resizeTextMaxSize = 36;
+            startupStatus.raycastTarget = false;
+            ArcadeTextStyles.ApplyWhite(startupStatus, startupStatus.font);
+        }
+        private void ShowSignIn()
+        {
+            if (loginVisibility)
+            {
+                loginVisibility.alpha = 1;
+                loginVisibility.interactable = loginVisibility.blocksRaycasts = true;
+            }
+            if (startupView) { startupView.SetActive(false); Destroy(startupView); }
+            startupStatus = null;
+            if (EventSystem.current) EventSystem.current.SetSelectedGameObject(
+                layout && layout.UsesPsg1 && psgPhantomButton ? psgPhantomButton.gameObject : phantomButton.gameObject);
         }
         private void OnDisable()
         {
             StopAllCoroutines(); restoringSession = false;
+            if (startupView) { startupView.SetActive(false); Destroy(startupView); }
             controllerInput?.Dispose(); controllerInput = null;
             if (apiClient) { apiClient.PlayerLoaded -= OnPlayerLoaded; apiClient.StatusChanged -= OnStatusChanged; }
             if (apiClient) apiClient.CancelWalletLogin();
@@ -104,6 +187,7 @@ namespace BattleCities.UI
         private void LateUpdate()
         {
             RefreshGuestAccess();
+            if (restoringSession || loading) return;
             if (!layout || !layout.UsesPsg1) { controllerInput?.Dispose(); controllerInput = null; return; }
             if (controllerInput == null || !controllerInput.MatchesCurrent)
             { controllerInput?.Dispose(); controllerInput = new Psg1UiInput(); }
@@ -143,6 +227,7 @@ namespace BattleCities.UI
             loading = true; pendingWallet = false; SetButtons(false);
             try
             {
+                await ScreenUpdates.EnsureReady(value=>{if(this)SetStatus(value);},destroyCancellationToken);
                 await RemoteGameArt.EnsureReady(value => { if (this) SetStatus(value); }, destroyCancellationToken);
                 if (!this || !isActiveAndEnabled) return;
                 contentRetry = false;
@@ -156,7 +241,7 @@ namespace BattleCities.UI
             catch (System.Exception error)
             {
                 Debug.LogWarning("Game content unavailable: " + error.Message);
-                if (this) { contentRetry = true; SetButtons(true); SetStatus("Game content unavailable. Select Connect Wallet to retry the download."); }
+                if (this) { contentRetry = true; SetButtons(true); ShowSignIn(); SetStatus("Game content unavailable. Select Connect Wallet to retry the download."); }
             }
             finally { if (this) loading = false; }
         }
@@ -204,6 +289,7 @@ namespace BattleCities.UI
         private void SetStatus(string value)
         {
             showingDefaultStatus = false;
+            if (startupStatus) startupStatus.text = value ?? "";
             if (statusText) statusText.text = value ?? "";
             if (psgStatusText) psgStatusText.text = value ?? "";
         }

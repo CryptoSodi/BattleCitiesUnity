@@ -42,6 +42,7 @@ namespace BattleCities.UI
             data = report; continueAction = onContinue; backAction = onBack;
             gameObject.SetActive(true);
             if (!canvas) Build();
+            RemoteScreenView.Bind("battle-results",root);
             busy = false; inputReady = false; next.interactable = true; openedAt = Time.unscaledTime; gate.interactable = false;
             Render(); Layout();
             if (!Application.isPlaying) { gate.interactable = true; return; }
@@ -70,23 +71,23 @@ namespace BattleCities.UI
             header = Panel("Title", root, art.panels.tankTitlePanel); header.GetComponent<Image>().pixelsPerUnitMultiplier = 4;
             Icon("Medal", header, art.medal);
             title = Label("Title text", header, "", 38, TextAlignmentOptions.MidlineLeft, true);
-            share = Control("Share results", header, "SHARE RESULTS", Share);
+            share = Control("Share results", header, ScreenContent.Text("battle-results","share-results-b9d541","SHARE RESULTS"), Share);
             Icon("Icon", share.transform, art.share);
             sidebar = Panel("Match report", root, art.theme.BlueFrame); sidebar.GetComponent<Image>().pixelsPerUnitMultiplier = 3;
             paper = Panel("Paper", sidebar, art.theme.CreamPanel); paper.GetComponent<Image>().pixelsPerUnitMultiplier = 2;
             summaryHeading = Panel("Heading", paper, art.panels.statusPanel); summaryHeading.GetComponent<Image>().pixelsPerUnitMultiplier = 3;
-            Icon("Clipboard", summaryHeading, art.report); Label("Label", summaryHeading, "MATCH REPORT", 29, TextAlignmentOptions.MidlineLeft);
+            Icon("Clipboard", summaryHeading, art.report); Label("Label", summaryHeading, ScreenContent.Text("battle-results","match-report-dbe562","MATCH REPORT"), 29, TextAlignmentOptions.MidlineLeft);
             var result = Panel("Outcome", paper, null); outcomeIcon = Icon("Icon", result, art.defeat); outcome = Label("Text", result, "", 39, TextAlignmentOptions.MidlineLeft);
-            highScore = Metric("Hi score", paper, art.theme.TrophyIcon, "HI-SCORE");
-            enemies = Metric("Enemies", paper, art.enemy, "ENEMIES");
-            duration = Metric("Battle time", paper, art.theme.TimerIcon, "BATTLE TIME");
+            highScore = Metric("Hi score", paper, art.theme.TrophyIcon, ScreenContent.Text("battle-results","hi-score-7f2f4e","HI-SCORE"));
+            enemies = Metric("Enemies", paper, art.enemy, ScreenContent.Text("battle-results","enemies-fa6710","ENEMIES"));
+            duration = Metric("Battle time", paper, art.theme.TimerIcon, ScreenContent.Text("battle-results","battle-time-760e42","BATTLE TIME"));
             summaryCount = Metric("Players", paper, art.players, "PLAYERS");
             mvp = Panel("MVP", paper, art.panels.tankTitlePanel); mvp.GetComponent<Image>().pixelsPerUnitMultiplier = 4;
             Icon("Medal", mvp, art.medal); mvpPortrait = Icon("Portrait", mvp, art.portraits[0]);
             mvpName = Label("Name", mvp, "", 25, TextAlignmentOptions.MidlineLeft); mvpName.color = Color.white;
             table = Panel("Player results", root, art.theme.CreamPanel); table.GetComponent<Image>().pixelsPerUnitMultiplier = 2;
             tableHeading = Panel("Heading", table, null);
-            Label("Title", tableHeading, "PLAYER RESULTS", 35, TextAlignmentOptions.MidlineLeft);
+            Label("Title", tableHeading, ScreenContent.Text("battle-results","player-results-50395e","PLAYER RESULTS"), 35, TextAlignmentOptions.MidlineLeft);
             playerCount = Label("Count", tableHeading, "", 28, TextAlignmentOptions.MidlineRight);
             columns = Panel("Columns", table, null);
             string[] captions = { "RANK", "PLAYER", "I", "II", "III", "IV", "BONUS", "POINTS" };
@@ -114,14 +115,14 @@ namespace BattleCities.UI
                 row.Name=Label("Player name",row.Root,"",30,TextAlignmentOptions.MidlineLeft);row.Name.overflowMode=TextOverflowModes.Ellipsis;
                 row.Kills=Label("Kills",row.Root,"",22,TextAlignmentOptions.MidlineLeft);
                 row.You=Panel("You badge",row.Root,art.theme.Rounded);row.You.GetComponent<Image>().color=new Color32(0,143,231,255);
-                Label("Label",row.You,"YOU",18).color=Color.white;
+                Label("Label",row.You,ScreenContent.Text("battle-results","you-a0d4a6","YOU"),18).color=Color.white;
                 for(int t=0;t<4;t++)row.Tiers[t]=Label("Tier " + t,row.Root,"",32);
                 row.Bonus=Label("Bonus",row.Root,"",30);row.Points=Label("Points",row.Root,"",38);
                 Rule(row.Root,"Bottom");
                 for(int line=1;line<8;line++)Rule(row.Root,"Column divider " + line);
             }
             footer = Panel("Footer",root,art.panels.statusPanel); TvStatusFooterLayout.ApplySkin(footer.GetComponent<Image>(),art.panels.statusPanel);
-            Icon("Shells",footer,art.shells); Label("Team label",footer,"TEAM TOTAL",26,TextAlignmentOptions.MidlineLeft);
+            Icon("Shells",footer,art.shells); Label("Team label",footer,ScreenContent.Text("battle-results","team-total-c0b137","TEAM TOTAL"),26,TextAlignmentOptions.MidlineLeft);
             teamTotal=Label("Team total",footer,"",48);status=Label("Status",footer,"MATCH COMPLETE",25);
             Rule(footer,"Divider left");Rule(footer,"Divider right");
             next=Control("Continue",footer,"CONTINUE",()=>{if(!busy)continueAction?.Invoke();});
@@ -164,7 +165,7 @@ namespace BattleCities.UI
             Fit((RectTransform)share.transform.Find("Icon"),.045f,.18f,.15f,.64f);Fit((RectTransform)share.transform.Find("Caption"),.22f,.06f,.73f,.88f);
             var bottom=new TvStatusFooterLayout(root);bottom.Place(footer);TvStatusFooterLayout.PlaceAction((RectTransform)next.transform);
             FitButtonSkin(next);
-            float bodyTop=top.Height+14,bodyHeight=h-bodyTop-bottom.Height-14,leftWidth=w*.255f;
+            float bodyTop=top.Height+14,bodyHeight=h-bodyTop-bottom.Height-14,leftWidth=w*ScreenContent.Number("battle-results","report-ratio",0.255f);
             Place(sidebar,10,bodyTop,leftWidth-15,bodyHeight);Place(paper,7,7,sidebar.rect.width-14,bodyHeight-14);
             Place(table,leftWidth+4,bodyTop,w-leftWidth-14,bodyHeight);
             float pw=paper.rect.width,ph=paper.rect.height,headingHeight=54,mvpHeight=Mathf.Clamp(ph*.135f,68,95);
@@ -194,7 +195,7 @@ namespace BattleCities.UI
                 var caption=(RectTransform)cell.Find("Caption");if(i>=2&&i<=5){Place((RectTransform)cell.Find("Tank"),cell.rect.width*.2f,5,cell.rect.width*.6f,49);Place(caption,0,53,cell.rect.width,28);}else Place(caption,3,5,cell.rect.width-6,74);
             }
             Place((RectTransform)viewport.parent,8,142,inner,th-150);Canvas.ForceUpdateCanvases();
-            float rh=Mathf.Max(108,(th-150)/4);
+            float rh=Mathf.Max(ScreenContent.Number("battle-results","row-min-height",108f),(th-150)/4);
             foreach(var row in rows)
             {
                 row.Root.GetComponent<LayoutElement>().preferredHeight=rh;

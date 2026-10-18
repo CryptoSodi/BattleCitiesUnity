@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using BattleCities.Core;
 using TMPro;
 using UnityEngine;
+using BattleCities.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using MobileScreen = UnityEngine.Device.Screen;
@@ -171,7 +172,7 @@ namespace BattleCities
             feedback.rectTransform.anchoredPosition = new Vector2(0, 150);
             feedback.textWrappingMode = TextWrappingModes.Normal;
 
-            pauseButton = Button("Pause", safeRoot, new Vector2(.5f, 1), new Vector2(0, -86), new Vector2(98, 48), "PAUSE", () =>
+            pauseButton = Button("Pause", safeRoot, new Vector2(.5f, 1), new Vector2(0, -86), new Vector2(98, 48), ScreenContent.Text("pause","pause","PAUSE"), () =>
             { game.CancelTouchGameplay(); game.Paused = !game.Paused; });
             pauseLabel = pauseButton.GetComponentInChildren<TMP_Text>();
             pauseRect = (RectTransform)pauseButton.transform;
@@ -180,9 +181,9 @@ namespace BattleCities
             statePanel = panel.gameObject;
             Surface(panel, new Color(.025f, .07f, .12f, .96f), false, true);
             stateLabel = Label("State", panel, "PAUSED", new Vector2(0, 74), new Vector2(310, 44), 30, gold);
-            resumeButton = Button("Resume", panel, new Vector2(.5f, .5f), new Vector2(0, 15), new Vector2(256, 48), "RESUME", () => game.Paused = false);
-            restartButton = Button("Restart", panel, new Vector2(.5f, .5f), new Vector2(0, -46), new Vector2(256, 48), "RESTART", () => game.RequestBattleRestart());
-            nextButton = Button("Next Stage", panel, new Vector2(.5f, .5f), new Vector2(0, 15), new Vector2(256, 48), "NEXT STAGE", () => game.LoadStage(game.Stage + 1));
+            resumeButton = Button("Resume", panel, new Vector2(.5f, .5f), new Vector2(0, 15), new Vector2(256, 48), ScreenContent.Text("pause","action-resume","RESUME"), () => game.Paused = false);
+            restartButton = Button("Restart", panel, new Vector2(.5f, .5f), new Vector2(0, -46), new Vector2(256, 48), ScreenContent.Text("pause","action-restart","RESTART"), () => game.RequestBattleRestart());
+            nextButton = Button("Next Stage", panel, new Vector2(.5f, .5f), new Vector2(0, 15), new Vector2(256, 48), ScreenContent.Text("pause","action-next-stage","NEXT STAGE"), () => game.LoadStage(game.Stage + 1));
         }
 
         private void LateUpdate() { if (game) Refresh(); }
@@ -224,11 +225,11 @@ namespace BattleCities
                 slotCounts[i].text = game.TouchConsumePending ? "…" : game.TouchSlotCount(i).ToString();
                 slotNames[i].text = string.IsNullOrEmpty(type) ? "EMPTY" : type.ToUpperInvariant();
             }
-            pauseLabel.text = game.Paused ? "RESUME" : "PAUSE";
+            pauseLabel.text = game.Paused ? ScreenContent.Text("pause","action-resume","RESUME") : ScreenContent.Text("pause","pause","PAUSE");
             bool ended = state.Lost || state.Won;
             pauseButton.interactable = !ended;
             statePanel.SetActive(!game.IsOnline && (game.Paused || ended));
-            stateLabel.text = ended ? state.Won ? "STAGE CLEAR" : "GAME OVER" : "PAUSED";
+            stateLabel.text=ended?state.Won?ScreenContent.Text("pause","stage-clear","STAGE CLEAR"):ScreenContent.Text("pause","game-over","GAME OVER"):ScreenContent.Text("pause","paused","PAUSED");
             resumeButton.gameObject.SetActive(!ended);
             nextButton.gameObject.SetActive(state.Won && game.Stage < 35);
         }

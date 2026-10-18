@@ -40,7 +40,7 @@ namespace BattleCities.Tests
                 // Simulation determinism is covered separately by ReplayChecks.
                 template.completion="completed";template.claimedResult.lost=true;template.debugUsed=false;
 
-                int playerRequests=0,sessionRequests=0;bool prepared=false;
+                int playerRequests=0,sessionRequests=0;bool prepared=false;int preparationIssues=0;
                 var simulation=new BattleSimulation(ReplayJson.Copy(template.map),template.levelNumber);
                 var recorder=new ReplayRecorder(simulation,template.map,"recovery-check");
                 var preparing=new ReplayArchive { replay=recorder.Data,apiUrl="https://replay-fixture.invalid",ownerId="recovery-owner",ownerProvider="wallet" };
@@ -53,22 +53,24 @@ namespace BattleCities.Tests
                     var session=(JObject)body.DeepClone();session["id"]="urs-prepared-fixture";session["seed"]="742";
                     done(201,new JObject { ["ok"]=true,["session"]=session },null);
                 });
-                Drain(service.Prepare(recorder,preparing,()=>true,()=>prepared=true));
+                Drain(service.Prepare(recorder,preparing,()=>true,()=>prepared=true,issue=>{preparationIssues++;Check(issue.Contains("Session service temporarily unavailable"),"Transient preparation problem lost its recovery detail");}));
+                Check(preparationIssues==4,"Transient preparation errors were not reported to the loading UI");
                 Check(prepared&&sessionRequests==5&&playerRequests==2,"Wallet preparation gave up or skipped its final identity check");
                 Check(preparing.sessionId=="urs-prepared-fixture"&&recorder.Data.seed==742&&simulation.Tick==0,"Prepared session seed was not installed before tick one");
                 Check(preparing.ownerProvider=="wallet","Recording identity provider was not retained");
                 recorder.Finish("aborted");
 
-                bool active=true,cancelled=false;int switchedRequests=0;
+                bool active=true,cancelled=false;string preparationIssue=null;int switchedRequests=0;
                 simulation=new BattleSimulation(ReplayJson.Copy(template.map),template.levelNumber);
                 recorder=new ReplayRecorder(simulation,template.map,"recovery-check");
                 var switched=new ReplayArchive { replay=recorder.Data,apiUrl="https://replay-fixture.invalid",ownerId="recovery-owner",ownerProvider="wallet" };
                 service.EditorRequestOverride=(method,path,body,done)=>Response(()=>
                 {switchedRequests++;Check(path=="/api/player","Wallet mismatch created a server session");done(200,Player("other-owner"),null);});
-                Drain(service.Prepare(recorder,switched,()=>active,()=>cancelled=true),_=>
+                Drain(service.Prepare(recorder,switched,()=>active,()=>cancelled=true,issue=>preparationIssue=issue),_=>
                 {
                     Check(!cancelled&&simulation.Tick==0&&switched.sessionId==null&&switched.ownerId=="recovery-owner","Wallet mismatch silently resumed or rebound the charged match");
-                    Check(switched.uploadStatus.Contains("Return to the menu"),"Wallet mismatch has no recovery action");active=false;
+                    Check(switched.uploadStatus.Contains("Return to the menu"),"Wallet mismatch has no recovery action");
+                    Check(preparationIssue==switched.uploadStatus,"Account errors did not immediately enable the recovery UI");active=false;
                 });
                 Check(cancelled&&switchedRequests==1,"Cancelling paused preparation did not finish cleanly");recorder.Finish("aborted");
 

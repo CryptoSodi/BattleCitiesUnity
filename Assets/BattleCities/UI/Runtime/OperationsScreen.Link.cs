@@ -14,12 +14,12 @@ namespace BattleCities.UI
         {
             linkNotice=Panel("Browser linking",root,null);Fit(linkNotice,new Rect(0,0,1,1));linkNotice.GetComponent<UnityEngine.UI.Image>().color=new Color(0,.025f,.08f,.75f);linkNotice.GetComponent<UnityEngine.UI.Image>().raycastTarget=true;
             linkPanel=Panel("Panel",linkNotice,theme.CreamPanel);linkPanel.GetComponent<UnityEngine.UI.Image>().pixelsPerUnitMultiplier=2;
-            linkHeading=Label("Title",linkPanel,"LINK YOUR ACCOUNT",new Rect(.05f,.04f,.90f,.15f),32,ArcadeTextTreatment.PrizeAmount);
-            linkBody=Label("Instructions",linkPanel,"",new Rect(.07f,.23f,.86f,.48f),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);linkBody.textWrappingMode=TextWrappingModes.Normal;
-            linkOpen=Button("Open browser",linkPanel,()=>{if(!loading)OpenLink(linkBrowserUrl??"https://battlecities.com/#hero","LINK YOUR ACCOUNT IN THE BROWSER, THEN RETURN");});Fit((RectTransform)linkOpen.transform,new Rect(.06f,.78f,.43f,.16f));
-            linkOpenCaption=Label("Label",linkOpen.transform,"OPEN BROWSER",new Rect(.04f,.04f,.92f,.92f),28,ArcadeTextTreatment.PrizeAmount);
-            linkDone=Button("Check status",linkPanel,()=>{if(loading)return;if(!IsSocialLinkPending)HideLinkInstructions();Refresh();});Fit((RectTransform)linkDone.transform,new Rect(.51f,.78f,.43f,.16f));
-            linkDoneCaption=Label("Label",linkDone.transform,"CHECK STATUS",new Rect(.04f,.04f,.92f,.92f),28,ArcadeTextTreatment.PrizeAmount);
+            linkHeading=Label("Title",linkPanel,ScreenContent.Text("socials","link-your-account-5e6a7a","LINK YOUR ACCOUNT"),ScreenContent.Rect("socials","operationsscreen-link-buildlinkinstructions-7bb221",new Rect(.05f,.04f,.90f,.15f)),32,ArcadeTextTreatment.PrizeAmount);
+            linkBody=Label("Instructions",linkPanel,"",ScreenContent.Rect("socials","operationsscreen-link-buildlinkinstructions-ec3ab6",new Rect(.07f,.23f,.86f,.48f)),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);linkBody.textWrappingMode=TextWrappingModes.Normal;
+            linkOpen=Button("Open browser",linkPanel,()=>{if(!loading)OpenLink(linkBrowserUrl??"https://battlecities.com/#hero","LINK YOUR ACCOUNT IN THE BROWSER, THEN RETURN");});Fit((RectTransform)linkOpen.transform,ScreenContent.Rect("socials","operationsscreen-link-buildlinkinstructions-c411c6",new Rect(.06f,.78f,.43f,.16f)));
+            linkOpenCaption=Label("Label",linkOpen.transform,ScreenContent.Text("socials","open-browser-0220bd","OPEN BROWSER"),ScreenContent.Rect("socials","operationsscreen-link-buildlinkinstructions-9195e1",new Rect(.04f,.04f,.92f,.92f)),28,ArcadeTextTreatment.PrizeAmount);
+            linkDone=Button("Check status",linkPanel,()=>{if(loading)return;if(!IsSocialLinkPending)HideLinkInstructions();Refresh();});Fit((RectTransform)linkDone.transform,ScreenContent.Rect("socials","operationsscreen-link-buildlinkinstructions-748673",new Rect(.51f,.78f,.43f,.16f)));
+            linkDoneCaption=Label("Label",linkDone.transform,ScreenContent.Text("socials","check-status-664b70","CHECK STATUS"),ScreenContent.Rect("socials","operationsscreen-link-buildlinkinstructions-9195e1",new Rect(.04f,.04f,.92f,.92f)),28,ArcadeTextTreatment.PrizeAmount);
             Link(linkOpen,linkDone,linkDone,linkDone,linkDone);Link(linkDone,linkOpen,linkOpen,linkOpen,linkOpen);linkNotice.gameObject.SetActive(false);
         }
         void ShowLinkInstructions(string provider,bool native=false)

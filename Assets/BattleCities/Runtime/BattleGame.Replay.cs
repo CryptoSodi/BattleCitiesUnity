@@ -15,8 +15,10 @@ namespace BattleCities
         private bool replayPreparing,loadingReplay,replaySaved;
         private float replaySpeed=1;
         private string battleFuelRequestId;
+        private string replayPreparationIssue;
         public bool IsReplaying=>replayPlayer!=null||loadingReplay;
         private MagicBlockDrops magicDrops;
+        public string PreparationIssue=>magicDrops&&!magicDrops.Ready&&!string.IsNullOrEmpty(magicDrops.PreparationIssue)?magicDrops.PreparationIssue:replayPreparing?replayPreparationIssue:null;
         public bool ReplayReady=>!replayPreparing&&(!magicDrops||magicDrops.Ready||IsReplaying);
         public void PrepareMagicBeforeStart()
         {
@@ -35,6 +37,7 @@ namespace BattleCities
         }
         private void StartReplayRecorder()
         {
+            replayPreparationIssue=null;
             if(BattleCities.UI.MainMenuApiClient.IsMagicBlock)
             {
                 if(!magicDrops)magicDrops=GetComponent<MagicBlockDrops>();
@@ -60,7 +63,8 @@ namespace BattleCities
                 var recorder=replayRecorder;
                 BattleReplayService.Instance.StartCoroutine(BattleReplayService.Instance.Prepare(recorder,replayArchive,
                     ()=>this&&replayRecorder==recorder&&!recorder.Finished,
-                    ()=>{if(this&&replayRecorder==recorder){replayPreparing=false;ReplayStatus=replayArchive.uploadStatus;}}));
+                    ()=>{if(this&&replayRecorder==recorder){replayPreparing=false;replayPreparationIssue=null;ReplayStatus=replayArchive.uploadStatus;}},
+                    issue=>{if(this&&replayRecorder==recorder)replayPreparationIssue=issue;}));
             }
         }
         public void StopRecordingForRecovery()

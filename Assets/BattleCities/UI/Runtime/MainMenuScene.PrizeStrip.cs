@@ -198,7 +198,7 @@ namespace BattleCities.UI
             var title = heading ? heading.Find("Title")?.GetComponent<Text>() : null;
             if (!title) return;
             if (instructionsHeadingSize == Vector2.zero) instructionsHeadingSize = heading.sizeDelta;
-            title.text = prizes ? "PRIZE DISTRIBUTION !" : "HOW IT WORKS ?";
+            title.text=prizes?ScreenContent.Text("home","prize-heading","PRIZE DISTRIBUTION !"):ScreenContent.Text("home","how-heading","HOW IT WORKS ?");
             heading.sizeDelta = new Vector2(
                 Mathf.Max(instructionsHeadingSize.x, title.preferredWidth + 24f), heading.sizeDelta.y);
         }

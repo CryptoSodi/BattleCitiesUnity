@@ -45,6 +45,7 @@ namespace BattleCities.UI
         public bool IsOpen=>root&&root.gameObject.activeSelf;
         public bool IsSocials=>page==Page.Socials;
         public Page CurrentPage=>page;
+        string ScreenId=>page==Page.Socials?"socials":page==Page.Treasury?"treasury":page==Page.Manual?"manual":page==Page.ManualDetail?"manualdetail":"quarters";
         public RectTransform Root=>root;
         public TankRosterScroll Scroll=>scroll;
         public int ItemCount=>items.Count;
@@ -60,6 +61,7 @@ namespace BattleCities.UI
             var old=frame.Find("Operations screen");bool open=old&&old.gameObject.activeSelf;
             root=Panel("Operations screen",frame,null);root.GetComponent<Image>().raycastTarget=true;
             BuildView();configured=true;Render();root.gameObject.SetActive(open);
+            RemoteScreenView.Bind("quarters",root,()=>page==Page.Socials?"socials":page==Page.Treasury?"treasury":page==Page.Manual?"manual":page==Page.ManualDetail?"manualdetail":"quarters");
         }
         public void Open(bool socials=false)
         {
