@@ -37,6 +37,7 @@ namespace BattleCities.Multiplayer
             var scaler=canvas.GetComponent<UnityEngine.UI.CanvasScaler>();scaler.uiScaleMode=UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution=new Vector2(1280,900);scaler.matchWidthOrHeight=.5f;
             open=Button(canvas.transform,ScreenContent.Text("lobby","online-ac7e24","ONLINE"),new Vector2(92,-74),new Vector2(158,38),Show);
+            open.gameObject.SetActive(DevelopmentOverlays.Visible);
             var openRect=(RectTransform)open.transform;openRect.anchorMin=openRect.anchorMax=new Vector2(0,1);
             panel=new GameObject("Room panel",typeof(RectTransform),typeof(UnityEngine.UI.Image));panel.transform.SetParent(canvas.transform,false);
             var rect=(RectTransform)panel.transform;float sideInset=ScreenContent.Number("lobby","panel-side-inset",0.12f);rect.anchorMin=new Vector2(sideInset,.08f);rect.anchorMax=new Vector2(1-sideInset,.92f);rect.offsetMin=rect.offsetMax=Vector2.zero;
@@ -95,7 +96,7 @@ namespace BattleCities.Multiplayer
             bool psgMenu=RuntimePlatformInfo.IsPsg1&&SceneManager.GetActiveScene().name=="MainMenu";
             if(psgMenu&&!mainMenuView)mainMenuView=UnityEngine.Object.FindFirstObjectByType<UI.MainMenuScene>();
             var homeHud=psgMenu&&mainMenuView?mainMenuView.Content.Find("Status Bar"):null;
-            open.gameObject.SetActive(available&&!Visible&&(!homeHud||homeHud.gameObject.activeInHierarchy));
+            open.gameObject.SetActive(DevelopmentOverlays.Visible&&available&&!Visible&&(!homeHud||homeHud.gameObject.activeInHierarchy));
             ((RectTransform)open.transform).anchoredPosition=psgMenu
                 ?new Vector2(128,-206):new Vector2(92,-74);
             var match=Session.Match;

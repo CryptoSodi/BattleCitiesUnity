@@ -114,7 +114,9 @@ namespace BattleCities
             if (IsOnline) return new[] { "RESUME", "ONLINE LOBBY" };
             if (Simulation.Won && Stage < 35) return new[] { "NEXT STAGE", "RESTART", "MAIN MENU" };
             if (Simulation.Won || Simulation.Lost) return new[] { "RESTART", "MAIN MENU" };
-            return new[] { "RESUME", "RESTART", "ONLINE LOBBY", "DEBUG", "MAIN MENU" };
+            return DevelopmentOverlays.Visible
+                ? new[] { "RESUME", "RESTART", "ONLINE LOBBY", "DEBUG", "MAIN MENU" }
+                : new[] { "RESUME", "RESTART", "ONLINE LOBBY", "MAIN MENU" };
         }
 
         private void ActivatePauseChoice(string choice)
@@ -126,7 +128,7 @@ namespace BattleCities
                 case "RESTART": RequestBattleRestart(); break;
                 case "NEXT STAGE": LoadStage(Stage + 1); break;
                 case "ONLINE LOBBY": if (Multiplayer.BattleSession.Instance) Multiplayer.BattleSession.Instance.Lobby.Show(); break;
-                case "DEBUG": showDebug = true; paused = true; break;
+                case "DEBUG": if (DevelopmentOverlays.Visible) { showDebug = true; paused = true; } break;
                 case "MAIN MENU": SceneManager.LoadScene("MainMenu"); break;
             }
         }

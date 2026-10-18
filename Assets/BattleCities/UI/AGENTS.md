@@ -227,6 +227,7 @@ These are the user's approved typography, layout, and interaction rules as of 20
 
 ## Gameplay frame-rate readout
 
+- The ONLINE launcher, FPS badge, legacy gray secondary-weapon overlay, desktop keyboard-help line, and debug controls are development UI. Show them only in the Unity Editor and at `https://test.battlecities.com`. Hide them on Magic, live Web, and published native builds. Use `DevelopmentOverlays.Visible`; do not use `IsTestNetwork`, because Magic shares the test API. Keep normal matchmaking/recovery and gameplay controls available.
 - The user requested a visible FPS counter on the right for performance checks. Place its compact navy badge directly below the minimap, aligned to the minimap's right edge with an 8-unit scaled gap. Use the bundled white Barlow HUD treatment; disable raycasts and keep it clear of the top enemy roster, PSG1 powerups, and Android fire controls.
 - Sample rendered updates over a half-second window with unscaled time, refresh the cached text at most twice a second, and reset after focus/suspension. Keep measurement independent of simulation pause and avoid per-frame text formatting or styling.
 
