@@ -28,7 +28,7 @@ namespace BattleCities
             {
                 float angle=time*1.7f+i*Mathf.PI/3;
                 float pulse=(Mathf.Sin(time*4+i*2)+1)*.5f;
-                float size=12+10*pulse;
+                float size=(12+10*pulse)*icon.width/96;
                 Vector2 point=icon.center+new Vector2(Mathf.Cos(angle)*icon.width*.65f,Mathf.Sin(angle)*icon.height*.58f);
                 GUI.color=new Color(1,1,1,.55f+.45f*pulse);
                 GUI.DrawTexture(new Rect(point.x-size/2,point.y-size/2,size,size),star);

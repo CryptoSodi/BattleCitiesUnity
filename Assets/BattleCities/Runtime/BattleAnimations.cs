@@ -202,12 +202,13 @@ namespace BattleCities
             pickupIcon.SetTexture("_BaseMap",atlas);pickupStar.SetTexture("_BaseMap",star);
             pickupQuad.uv=new[]{new Vector2(uv.xMin,uv.yMin),new Vector2(uv.xMax,uv.yMin),new Vector2(uv.xMax,uv.yMax),new Vector2(uv.xMin,uv.yMax)};
             properties.SetColor("_BaseColor",Color.white);
-            Graphics.DrawMesh(pickupQuad,Matrix4x4.TRS(position,camera.transform.rotation,Vector3.one*1.1f),pickupIcon,camera.gameObject.layer,camera,0,properties,false,false,false);
+            float size=BattleHudLayout.PickupWorldSize(camera,position);
+            Graphics.DrawMesh(pickupQuad,Matrix4x4.TRS(position,camera.transform.rotation,Vector3.one*size),pickupIcon,camera.gameObject.layer,camera,0,properties,false,false,false);
             for(int i=0;i<6;i++)
             {
                 float angle=time*1.7f+i*Mathf.PI/3,pulse=(Mathf.Sin(time*4+i*2)+1)*.5f;
-                var point=position+camera.transform.right*(Mathf.Cos(angle)*.715f)+camera.transform.up*(Mathf.Sin(angle)*.638f);
-                Draw(point,camera.transform.rotation,.14f+.11f*pulse,new Color(1,1,1,.55f+.45f*pulse),pickupStar,camera);
+                var point=position+camera.transform.right*(Mathf.Cos(angle)*size*.65f)+camera.transform.up*(Mathf.Sin(angle)*size*.58f);
+                Draw(point,camera.transform.rotation,(.14f+.11f*pulse)*size/1.1f,new Color(1,1,1,.55f+.45f*pulse),pickupStar,camera);
             }
         }
         public void Clear(){foreach(var puff in puffs)pool.Push(puff);puffs.Clear();if(combat)combat.Clear();}

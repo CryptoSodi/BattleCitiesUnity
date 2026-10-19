@@ -99,6 +99,13 @@ namespace BattleCities.Multiplayer
             open.gameObject.SetActive(DevelopmentOverlays.Visible&&available&&!Visible&&(!homeHud||homeHud.gameObject.activeInHierarchy));
             ((RectTransform)open.transform).anchoredPosition=psgMenu
                 ?new Vector2(128,-206):new Vector2(92,-74);
+            if(SceneManager.GetActiveScene().name=="BattleCity")
+            {
+                var hud=BattleHudLayout.Current;
+                float slots=RuntimePlatformInfo.PowerupUi==PowerupUiMode.WebTopLeft?94*hud.DetailScale*hud.Scale:0;
+                float y=(hud.TopHeightPixels+slots)/Mathf.Max(.01f,canvas.scaleFactor)+27;
+                ((RectTransform)open.transform).anchoredPosition=new Vector2(92,-y);
+            }
             var match=Session.Match;
             bool advancing=match&&match.Mode==BattleMode.Coop&&match.Won&&match.Map<35;
             bool ended=match&&(match.Won||match.Lost)&&!advancing;

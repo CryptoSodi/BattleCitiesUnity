@@ -9,10 +9,15 @@ namespace BattleCities
     // HUD skin is separate from gameplay and uses live simulation/economy values only.
     public sealed class BattleHud
     {
-        public static float TopHeightPixels => Screen.width<920?84:48;
+        public static float TopHeightPixels => BattleHudLayout.Current.TopHeightPixels;
+        BattleHudLayout layout;
+        float Width=>layout.Width;
+        float Height=>layout.Height;
+        float TopHeight=>layout.TopHeight;
         readonly Color navy=new Color(.025f,.045f,.075f,.98f),gold=new Color(1,.68f,.015f),cream=new Color(1,.94f,.78f),cyan=new Color(.3f,.9f,1);
         readonly string[] emptySlotTypes={"shield","freeze","speed","upgrade"};
         Canvas canvas;
+        BattleFrameRateDisplay frameRate;
         readonly List<Graphic> elements=new List<Graphic>();
         int cursor;
         Font font;
@@ -44,7 +49,7 @@ namespace BattleCities
             {
                 var fps=new GameObject("Frame rate",typeof(RectTransform),typeof(BattleFrameRateDisplay));
                 fps.transform.SetParent(canvas.transform,false);
-                fps.GetComponent<BattleFrameRateDisplay>().Initialize(roundedSprite,navy);
+                frameRate=fps.GetComponent<BattleFrameRateDisplay>();frameRate.Initialize(roundedSprite,navy);
             }
         }
         T Element<T>(Rect rect) where T:Graphic
@@ -53,7 +58,7 @@ namespace BattleCities
             // The economy panel and responsive layout can change the element order.
             // Reuse only a matching graphic type; an Image cannot be cast to Text.
             if(cursor<elements.Count&&!(elements[cursor] is T))
-            {Object.Destroy(elements[cursor].gameObject);elements[cursor]=null;}
+            {BattleVisualLifetime.Release(elements[cursor].gameObject);elements[cursor]=null;}
             if(cursor==elements.Count||!elements[cursor])
             {
                 var go=new GameObject(typeof(T).Name,typeof(RectTransform));go.transform.SetParent(canvas.transform,false);
@@ -117,10 +122,10 @@ namespace BattleCities
         }
         void PowerupBar(EconomyClient economy,Texture2D atlas,bool pending,bool topLeft)
         {
-            float scale=Mathf.Clamp(Screen.width/1240f,.78f,1.15f),iconSize=82*scale,gap=5*scale;
+            float scale=layout.DetailScale,iconSize=82*scale,gap=5*scale;
             float total=iconSize*4+gap*3;
-            float px=topLeft?14*scale:Screen.width-total-14*scale;
-            float py=topLeft?TopHeightPixels+12*scale:Screen.height-iconSize-14*scale;
+            float px=topLeft?14*scale:Width-total-14*scale;
+            float py=topLeft?TopHeight+12*scale:Height-iconSize-14*scale;
             for(int i=0;i<4;i++)
             {
                 string liveType=economy?economy.SlotType(i):null;int count=economy?economy.SlotCount(i):0;bool available=count>0&&!pending;string type=string.IsNullOrEmpty(liveType)?emptySlotTypes[i]:liveType;
@@ -134,13 +139,13 @@ namespace BattleCities
         }
         float Psg1PowerupWidth(bool narrow)
         {
-            float scale=Mathf.Clamp(Screen.width/1240f,.78f,1.15f),size=(narrow?34:38)*scale,gap=3*scale;
+            float scale=layout.DetailScale,size=(narrow?34:38)*scale,gap=3*scale;
             return size*4+gap*3+14*scale;
         }
         void Psg1Powerups(EconomyClient economy,Texture2D atlas,bool pending,bool narrow,int selectedSlot)
         {
-            float scale=Mathf.Clamp(Screen.width/1240f,.78f,1.15f),size=(narrow?34:38)*scale,gap=3*scale;
-            float total=size*4+gap*3,x=Screen.width-total-6*scale,y=narrow?46:5,badge=14*scale;
+            float scale=layout.DetailScale,size=(narrow?34:38)*scale,gap=3*scale;
+            float total=size*4+gap*3,x=Width-total-6*scale,y=narrow?46:5,badge=14*scale;
             Fill(new Rect(x-8*scale,narrow?48:9,1,narrow?28:30),gold);
             for(int i=0;i<4;i++)
             {
@@ -195,17 +200,23 @@ namespace BattleCities
         }
         void Minimap(BattleSimulation state)
         {
-            UpdateMinimap(state);float scale=Mathf.Clamp(Screen.width/1240f,.78f,1.15f),size=142*scale;
-            float top=TopHeightPixels,x=Screen.width-size-14*scale,y=top+12*scale;
+            UpdateMinimap(state);float scale=layout.DetailScale,size=142*scale;
+            float top=TopHeight,x=Width-size-14*scale,y=top+12*scale;
             var map=Element<RawImage>(new Rect(x,y,size,size));map.texture=minimapTexture;map.uvRect=new Rect(0,0,1,1);map.color=new Color(1,1,1,.88f);
             Outline(new Rect(x,y,size,size),new Color(1,.68f,.05f,.86f),1.5f*scale);
         }
         public void Draw(BattleSimulation state,EconomyClient economy,Texture2D powerupAtlas,bool consumePending,int selectedSlot=0,bool showPowerups=true)
+            => DrawLayout(state,economy,powerupAtlas,consumePending,BattleHudLayout.Current,RuntimePlatformInfo.PowerupUi,selectedSlot,showPowerups);
+#if UNITY_EDITOR
+        public void DrawPreview(BattleSimulation state,Texture2D atlas,BattleHudLayout preview,PowerupUiMode mode)
+            => DrawLayout(state,null,atlas,false,preview,mode,0,true);
+#endif
+        void DrawLayout(BattleSimulation state,EconomyClient economy,Texture2D powerupAtlas,bool consumePending,BattleHudLayout viewport,PowerupUiMode powerupUi,int selectedSlot,bool showPowerups)
         {
-            Initialize();cursor=0;bool narrow=Screen.width<920;float h=TopHeightPixels;
-            var powerupUi=RuntimePlatformInfo.PowerupUi;bool psg1=powerupUi==PowerupUiMode.MergedTopHud;
-            Fill(new Rect(0,0,Screen.width,h),navy);Fill(new Rect(0,0,Screen.width,2),new Color(.22f,.3f,.38f));Fill(new Rect(0,h-3,Screen.width,3),gold);
-            float metricWidth=narrow?Screen.width/3f:175;
+            Initialize();layout=viewport;canvas.scaleFactor=layout.Scale;if(frameRate)frameRate.ApplyLayout(layout);cursor=0;bool narrow=layout.Narrow;float h=TopHeight;
+            bool psg1=powerupUi==PowerupUiMode.MergedTopHud;
+            Fill(new Rect(0,0,Width,h),navy);Fill(new Rect(0,0,Width,2),new Color(.22f,.3f,.38f));Fill(new Rect(0,h-3,Width,3),gold);
+            float metricWidth=narrow?Width/3f:175;
             Icon(new Rect(7,5,36,36),player);Text(new Rect(46,2,metricWidth-48,18),ScreenContent.Text("battle-hud","score-a60ffb","SCORE"),cream);Text(new Rect(46,18,metricWidth-48,27),state.Score.ToString("D6"),gold,true);
             float x=metricWidth;
             Fill(new Rect(x-7,9,1,28),gold);
@@ -220,7 +231,7 @@ namespace BattleCities
             if(state.IsPvp)for(int i=0;i<BattleSimulation.MaxPlayers;i++)if(!state.AreAllies(i,state.LocalPlayerSlot)&&state.Participants[i].Connected&&state.Participants[i].Lives>0)opponents++;
             Text(new Rect(enemyX,enemyY,100,19),state.IsPvp?ScreenContent.Text("battle-hud","rivals","RIVALS"):ScreenContent.Text("battle-hud","enemies","ENEMIES"),cream);
             Text(new Rect(enemyX,enemyY+18,100,23),(state.IsPvp?opponents:state.Remaining).ToString()+" LEFT",new Color(1,.42f,.32f));
-            float start=enemyX+100,reserved=psg1?Psg1PowerupWidth(narrow):0,available=Mathf.Max(1,Screen.width-start-10-reserved);
+            float start=enemyX+100,reserved=psg1?Psg1PowerupWidth(narrow):0,available=Mathf.Max(1,Width-start-10-reserved);
             if(state.IsCaptureFlag)
             {
                 Text(new Rect(start,enemyY,available,22),"FLAGS  YELLOW "+state.FlagScores[0]+" : "+state.FlagScores[1]+" GREEN",gold,true);
@@ -244,6 +255,6 @@ namespace BattleCities
             while(cursor<elements.Count)elements[cursor++].gameObject.SetActive(false);
         }
         public void SetVisible(bool visible){if(canvas)canvas.gameObject.SetActive(visible);}
-        public void Dispose(){if(canvas)Object.Destroy(canvas.gameObject);if(font)Object.Destroy(font);if(roundedSprite)Object.Destroy(roundedSprite);if(roundedTexture)Object.Destroy(roundedTexture);if(minimapTexture)Object.Destroy(minimapTexture);}
+        public void Dispose(){if(canvas)BattleVisualLifetime.Release(canvas.gameObject);if(font)BattleVisualLifetime.Release(font);if(roundedSprite)BattleVisualLifetime.Release(roundedSprite);if(roundedTexture)BattleVisualLifetime.Release(roundedTexture);if(minimapTexture)BattleVisualLifetime.Release(minimapTexture);}
     }
 }

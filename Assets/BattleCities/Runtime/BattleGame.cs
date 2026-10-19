@@ -520,7 +520,7 @@ namespace BattleCities
             if(!string.IsNullOrEmpty(Simulation.SecondaryStatus))GUI.Label(new Rect(180,Screen.height-secondaryBottom+2,Screen.width-200,44),Simulation.SecondaryStatus);
             }
             if(DevelopmentOverlays.Visible&&economy&&showDebug)GUI.Label(new Rect(12,Screen.height-84,650,24),consumePending?"Confirming power-upÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦":economy.Status);
-            if(Simulation.PickupType!=null){var screen=gameCamera.WorldToScreenPoint(World(Simulation.PickupX,Simulation.PickupY,.7f));float size=Mathf.Clamp(Vector3.Distance(gameCamera.WorldToScreenPoint(World(Simulation.PickupX+67,Simulation.PickupY,.7f)),screen),96,144);var r=new Rect(screen.x-size/2,Screen.height-screen.y-size/2,size,size);if(PowerupAtlas&&BattleHud.TryPowerupUv(Simulation.PickupType,out var uv))GUI.DrawTextureWithTexCoords(r,PowerupAtlas,uv);else GUI.Box(r,Simulation.PickupType);pickupSparkles.Draw(r,Simulation.Tick*BattleSimulation.StepSeconds);}
+            DrawLivePickup();
             if(DevelopmentOverlays.Visible&&!HasTouchControls&&!Psg1)GUI.Label(new Rect(12,Screen.height-28,Screen.width-24,24),"WASD drive | Arrows aim | Space: tap / hold + release | P pause | R restart | C camera");
             DrawPsg1Controls();
             if(!HasTouchControls&&!Psg1&&!IsOnline&&(paused||Simulation.Lost||Simulation.Won)){GUI.Box(new Rect(Screen.width/2-130,Screen.height/2-35,260,70),(paused?"PAUSED":Simulation.Won?"STAGE CLEAR":"GAME OVER")+"\nR: Restart");if(Simulation.Won&&Stage<35&&GUI.Button(new Rect(Screen.width/2-65,Screen.height/2+45,130,30),"Next stage"))LoadStage(Stage+1);}

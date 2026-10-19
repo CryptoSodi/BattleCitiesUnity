@@ -12,7 +12,8 @@ namespace BattleCities
         RectTransform panel;
         Text label;
         double elapsed;
-        int frames, displayedFps = -1, screenWidth, screenHeight;
+        int frames, displayedFps = -1;
+        Vector3 layoutKey;
         bool skipNextFrame;
 
         public void Initialize(Sprite background, Color color)
@@ -38,7 +39,7 @@ namespace BattleCities
             rect.anchorMax = Vector2.one;
             rect.offsetMin = new Vector2(6, 2);
             rect.offsetMax = new Vector2(-6, -2);
-            Layout();
+            ApplyLayout(BattleHudLayout.Current);
         }
 
         void OnEnable() => ResetSample();
@@ -55,7 +56,6 @@ namespace BattleCities
         void Update()
         {
             if (!label) return;
-            if (screenWidth != Screen.width || screenHeight != Screen.height) Layout();
             if (skipNextFrame) { skipNextFrame = false; return; }
             elapsed += Time.unscaledDeltaTime;
             frames++;
@@ -70,14 +70,15 @@ namespace BattleCities
             frames = 0;
         }
 
-        void Layout()
+        public void ApplyLayout(BattleHudLayout layout)
         {
-            screenWidth = Screen.width;
-            screenHeight = Screen.height;
-            float scale = Mathf.Clamp(screenWidth / 1240f, .78f, 1.15f);
+            var key=new Vector3(layout.Width,layout.Height,layout.Scale);
+            if(layoutKey==key)return;
+            layoutKey=key;
+            float scale = layout.DetailScale;
             panel.anchorMin = panel.anchorMax = new Vector2(1, 1);
             panel.pivot = new Vector2(1, 1);
-            panel.anchoredPosition = new Vector2(-14 * scale, -BattleHud.TopHeightPixels - 162 * scale);
+            panel.anchoredPosition = new Vector2(-14 * scale, -layout.TopHeight - 162 * scale);
             panel.sizeDelta = new Vector2(142 * scale, 34 * scale);
             label.fontSize = Mathf.RoundToInt(22 * scale);
         }
