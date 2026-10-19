@@ -42,6 +42,8 @@ Android players request 60 FPS before the first scene loads. Simulation and repl
 
 ## Backend and verification boundary
 
+New matches record `config.tankStatsVersion = 1`: card health becomes hit points, rounds divides reload and charged-shot recovery, speed sets movement, and power multiplies shell damage. Chassis and STAR upgrade level are separate. Multiplayer selection is recorded as a `tank` event before `begin` and is locked during combat. Network protocol `battlecities-9` carries chassis, stats version and upgrade level in snapshots and checkpoints. Zero/missing stats version retains the previous combat rules and omits new zero-valued fields from hashes, preserving archived replay reproduction. Deploy the matching `Tools/ReplayVerifier` with new clients; older verifiers do not implement these profiles.
+
 The client requests `POST /api/replay-sessions` before its first simulation tick when an API/account is available. It applies the issued seed and binds the recording to the session's mode, level/content/config hashes, tick rate, build and simulator version. Failure leaves a local recording. Completed archives upload to `POST /api/replays/unity`, idempotently by session ID. A completed, debug-free single-player recording then links through `POST /api/matches/submit`; match-link failures are independently retriable.
 
 Successful upload or replay reproduction does **not** prove fair play. Map/config choices, external power-up events, client input legitimacy and multiplayer-host authority still require trusted checks. SHA256 detects differences, not an attacker who controls both the evidence and its hashes. The API keeps competitive approval pending for review; no client route can award points or prizes by calling its own recording verified.

@@ -31,7 +31,7 @@ namespace BattleCities
             foreach(var pending in pendingMovement)Simulation.PredictMovement(predictedTank,pending.Command);
         }
         private void ResetMovementPrediction(){pendingMovement.Clear();predictedTank=null;}
-        private static TankState CloneMovement(TankState t)=>new TankState {Id=t.Id,Slot=t.Slot,Player=true,Tier=t.Tier,Health=t.Health,
+        private static TankState CloneMovement(TankState t)=>new TankState {Id=t.Id,Slot=t.Slot,Player=true,Tier=t.Tier,StatsVersion=t.StatsVersion,UpgradeLevel=t.UpgradeLevel,Health=t.Health,
             X=t.X,Y=t.Y,Direction=t.Direction,Aim=t.Aim,Slide=t.Slide,SpeedBoost=t.SpeedBoost,InQuicksand=t.InQuicksand,SinkDepth=t.SinkDepth};
     }
 }

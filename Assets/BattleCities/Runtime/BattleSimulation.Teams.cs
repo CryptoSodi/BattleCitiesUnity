@@ -38,7 +38,7 @@ namespace BattleCities.Core
                     var tank=new TankState {Id=nextId+1,Slot=team,Tier=teamSpawnCounts[team]%5==4?1:0,
                         X=x,Y=y,Direction=team==0?Facing.Up:Facing.Down,Aim=team==0?Facing.Up:Facing.Down};
                     if(!Free(tank.MovementBounds,tank))continue;
-                    tank.Health=TankState.StartingHealth(tank.Tier,false);tank.Shield=1;
+                    tank.StatsVersion=TankStatsVersion;tank.Health=tank.MaxHealth;tank.Shield=1;
                     nextId++;Tanks.Add(tank);teamSpawnCounts[team]++;teamSpawnTimers[team]=4;break;
                 }
             }

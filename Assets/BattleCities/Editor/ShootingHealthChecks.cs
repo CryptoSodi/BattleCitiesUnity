@@ -13,7 +13,9 @@ namespace BattleCities
 
         static BattleSimulation Ready(float normalReloadSeconds=.12f,float upgradedNormalReloadSeconds=.08f)
         {
-            var sim=new BattleSimulation(new MapData(),normalReloadSeconds:normalReloadSeconds,upgradedNormalReloadSeconds:upgradedNormalReloadSeconds){Freeze=999,DisableEnemyFire=true};
+            // Retain coverage of the original shooting rules used by archived replays.
+            // TankStatsChecks covers the current roster profiles and weapon cadence.
+            var sim=new BattleSimulation(new MapData(),normalReloadSeconds:normalReloadSeconds,upgradedNormalReloadSeconds:upgradedNormalReloadSeconds,tankStatsVersion:0){Freeze=999,DisableEnemyFire=true};
             sim.Terrain.Clear();
             for(int i=0;i<122;i++)sim.Step(default);
             sim.Player.X=400;sim.Player.Y=400;sim.Player.Aim=Facing.Up;

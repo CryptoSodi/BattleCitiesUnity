@@ -13,7 +13,8 @@ namespace BattleCities
         private static void Check(bool condition,string name){if(!condition)throw new Exception("MULTIPLAYER: "+name);}
         private static BattleSimulation Ready(BattleMode mode)
         {
-            var s=new BattleSimulation(new MapData()){DisableEnemyFire=true,Freeze=999};
+            // Legacy combat regression; current roster/multiplayer stats use TankStatsChecks.
+            var s=new BattleSimulation(new MapData(),tankStatsVersion:0){DisableEnemyFire=true,Freeze=999};
             s.Terrain.Clear();s.ConfigureMultiplayer(mode);s.RecordVisualEvents();s.SetParticipant(0,true);s.SetParticipant(1,true);s.BeginMatch();
             for(int i=0;i<122;i++)s.StepMultiplayer(new Dictionary<int,Command>());
             return s;

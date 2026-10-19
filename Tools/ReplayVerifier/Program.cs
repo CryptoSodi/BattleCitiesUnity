@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 try
 {
     if(args.Length==1&&args[0]=="--self-test")
-    {ReplayChecks.Run();Console.WriteLine("Replay verification tests passed.");return 0;}
+    {ReplayChecks.Run();TankStatsChecks.Run();Console.WriteLine("Replay verification tests passed.");return 0;}
     if(args.Length==2&&args[0]=="--fixture")
     {File.WriteAllText(args[1],ReplayJson.Write(ReplayChecks.Fixture()));Console.WriteLine("Fixture written.");return 0;}
     if(args.Length!=1){Console.Error.WriteLine("Usage: ReplayVerifier <replay.json> | --self-test | --fixture <file>");return 2;}

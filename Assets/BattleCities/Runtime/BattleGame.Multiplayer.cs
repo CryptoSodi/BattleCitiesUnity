@@ -37,7 +37,7 @@ namespace BattleCities
         }
         public BattleNetworkInput ReadOnlineInput()
         {
-            var result=new BattleNetworkInput{Move=-1,Aim=-1,ShotSequence=shotSequence,SecondarySequence=secondarySequence,Secondary=(int)onlineSecondary,PowerRequested=latestPowerShot};
+            var result=new BattleNetworkInput{TankTier=BattlePreparation.TankTier,Move=-1,Aim=-1,ShotSequence=shotSequence,SecondarySequence=secondarySequence,Secondary=(int)onlineSecondary,PowerRequested=latestPowerShot};
             if(!IsOnline||paused||BlockCombat||!Simulation.MatchStarted||NetworkMatch.LocalSlot<0||Simulation.Lost||Simulation.Won)return result;
             result.Move=(int?)PlayerMove()??-1;result.Aim=(int?)DirectionalAim()??-1;
             result.ChargeHeld=fire.IsPressed();

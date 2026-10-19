@@ -8,11 +8,13 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" Condition="'@(UnityJson)' == ''" />
     <Compile Include="../../Assets/BattleCities/Runtime/BattleSimulation*.cs" />
     <Compile Include="../../Assets/BattleCities/Runtime/BattleReplay.cs" />
+    <Compile Include="../../Assets/BattleCities/Runtime/MagicDropEvent.cs" />
     <Compile Include="../../Assets/BattleCities/Runtime/MapDamage.cs" />
     <Compile Include="../../Assets/BattleCities/Runtime/BattleTerrain.cs" />
     <Compile Include="../../Assets/BattleCities/Runtime/BattleBuildings.cs" />
     <Compile Include="../../Assets/BattleCities/Runtime/BattleBridgeLayout.cs" />
     <Compile Include="../../Assets/BattleCities/Editor/ReplayChecks.cs" />
     <Compile Include="../../Assets/BattleCities/Editor/ReplayHashChecks.cs" />
+    <Compile Include="../../Assets/BattleCities/Editor/TankStatsChecks.cs" />
   </ItemGroup>
 </Project>

@@ -11,13 +11,17 @@ namespace BattleCities.Core
         public void SetReplaySeed(uint seed)
         { if(Tick!=0||seed==0)throw new InvalidOperationException("Set a nonzero seed before gameplay.");random=seed; }
         public ReplayConfig ReplayConfiguration()=>new ReplayConfig {
-            normalReload=PlayerNormalReloadSeconds,upgradedReload=PlayerUpgradedNormalReloadSeconds,playerTier=initialPlayerTier,
+            normalReload=PlayerNormalReloadSeconds,upgradedReload=PlayerUpgradedNormalReloadSeconds,playerTier=initialPlayerTier,tankStatsVersion=TankStatsVersion,
             turretRange=turretAttackRange,turretDamage=turretDamage,turretCooldown=turretFireCooldown,turretReload=turretReloadDuration,
             turretTurn=turretTurnDuration,turretMuzzle=turretMuzzleDistance,turretHealth=turretHealth,turretDeploy=turretDeployDuration,
             landDrone=ReplayJson.Copy(LandDroneSettings)
         };
         public void ApplyReplayConfiguration(ReplayConfig c)
-        { ConfigureTurrets(c.turretRange,c.turretDamage,c.turretCooldown,c.turretReload,c.turretTurn,c.turretMuzzle,c.turretHealth,c.turretDeploy);LandDroneSettings=ReplayJson.Copy(c.landDrone); }
+        {
+            TankStatsVersion=c.tankStatsVersion;initialPlayerTier=c.playerTier;
+            PlayerNormalReloadSeconds=ValidReloadSeconds(c.normalReload,.12f);PlayerUpgradedNormalReloadSeconds=ValidReloadSeconds(c.upgradedReload,.08f);
+            ConfigureTurrets(c.turretRange,c.turretDamage,c.turretCooldown,c.turretReload,c.turretTurn,c.turretMuzzle,c.turretHealth,c.turretDeploy);LandDroneSettings=ReplayJson.Copy(c.landDrone);
+        }
         // Include hidden timers, RNG, entity order, pathfinding history, terrain damage and
         // participant state. Local camera slot, UI text and visual event buffers are excluded.
         public string ReplayStateHash()=>ReplayJson.Hash(ReplayStateData());
@@ -63,7 +67,7 @@ namespace BattleCities.Core
         private static Point Snapshot(Point p)=>p==null?null:new Point{x=p.x,y=p.y};
         private static EnemySpec Snapshot(EnemySpec s)=>s==null?null:new EnemySpec{tier=s.tier,drop=s.drop};
         private static BattleParticipant Snapshot(BattleParticipant p)=>p==null?null:new BattleParticipant{
-            Connected=p.Connected,Lives=p.Lives,Respawn=p.Respawn,SecondaryCooldown=p.SecondaryCooldown,Secondary=p.Secondary
+            Connected=p.Connected,Lives=p.Lives,TankTier=p.TankTier,Respawn=p.Respawn,SecondaryCooldown=p.SecondaryCooldown,Secondary=p.Secondary
         };
         private static Wall Snapshot(Wall w)=>w==null?null:new Wall{
             Id=w.Id,Type=w.Type,Bounds=w.Bounds,Alive=w.Alive,Damage=w.Damage?.Copy(),Health=w.Health,
@@ -71,7 +75,7 @@ namespace BattleCities.Core
             BuildingBounds=w.BuildingBounds,BuildingSettings=w.BuildingSettings?.Copy()
         };
         private static TankState Snapshot(TankState t)=>t==null?null:new TankState{
-            Slot=t.Slot,Id=t.Id,Tier=t.Tier,Health=t.Health,Player=t.Player,Drop=t.Drop,Alive=t.Alive,Moving=t.Moving,
+            Slot=t.Slot,Id=t.Id,Tier=t.Tier,StatsVersion=t.StatsVersion,UpgradeLevel=t.UpgradeLevel,Health=t.Health,Player=t.Player,Drop=t.Drop,Alive=t.Alive,Moving=t.Moving,
             X=t.X,Y=t.Y,Shield=t.Shield,Cooldown=t.Cooldown,Think=t.Think,FireDelay=t.FireDelay,Slide=t.Slide,
             SpeedBoost=t.SpeedBoost,SinkDepth=t.SinkDepth,InQuicksand=t.InQuicksand,ReloadDuration=t.ReloadDuration,
             AiState=t.AiState,Direction=t.Direction,Aim=t.Aim

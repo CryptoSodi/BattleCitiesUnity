@@ -20,6 +20,7 @@ namespace BattleCities.Core
     {
         public bool Connected;
         public int Lives = 3;
+        [Newtonsoft.Json.JsonProperty(DefaultValueHandling=Newtonsoft.Json.DefaultValueHandling.Ignore)] public int TankTier;
         public float Respawn, SecondaryCooldown;
         public SecondaryAttack Secondary = SecondaryAttack.Mine;
     }
@@ -48,7 +49,7 @@ namespace BattleCities.Core
             Mode=mode;MatchStarted=false;WinnerSlot=-1;
             for(int i=0;i<MaxPlayers;i++)ResultStats[i]=new BattleResultStats();
             Tanks.Clear();Shots.Clear();Mines.Clear();Drones.Clear();Turrets.Clear();LandDrones.Clear();
-            foreach(var p in Participants){p.Connected=false;p.Lives=3;p.Respawn=0;p.SecondaryCooldown=0;}
+            foreach(var p in Participants){p.Connected=false;p.Lives=3;p.Respawn=0;p.SecondaryCooldown=0;p.TankTier=0;}
             if(mode==BattleMode.Versus){wave=Array.Empty<EnemySpec>();BaseAlive=false;BaseBounds=new Box(-1024,-1024,64,64);}
             // Search clear, non-overlapping spawns near opposite corners for PvP,
             // and near the original player spawn for co-op. Never remove cover.
@@ -105,7 +106,8 @@ namespace BattleCities.Core
         private bool TrySpawnParticipant(int slot)
         {
             var origin=onlineSpawns[slot];
-            var tank=new TankState{Id=nextId+1,Slot=slot,Player=true,Health=5,Shield=3.5f,Direction=IsTeamBattle&&TeamForSlot(slot)==1?Facing.Down:Facing.Up,Aim=IsTeamBattle&&TeamForSlot(slot)==1?Facing.Down:Facing.Up};
+            var tank=NewTank(Participants[slot].TankTier,true);tank.Id=nextId+1;tank.Slot=slot;tank.Shield=3.5f;
+            tank.Direction=tank.Aim=IsTeamBattle&&TeamForSlot(slot)==1?Facing.Down:Facing.Up;
             for(int radius=0;radius<=160;radius+=16)
             for(int y=-radius;y<=radius;y+=16)for(int x=-radius;x<=radius;x+=16)
             {

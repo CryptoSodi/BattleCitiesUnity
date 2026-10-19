@@ -85,8 +85,14 @@ namespace BattleCities.Core
         public const float MovementHalfSize = 32;
         public int Slot = -1;
         public int Id, Tier, Health = 3;
+        [Newtonsoft.Json.JsonProperty(DefaultValueHandling=Newtonsoft.Json.DefaultValueHandling.Ignore)] public int StatsVersion;
+        [Newtonsoft.Json.JsonProperty(DefaultValueHandling=Newtonsoft.Json.DefaultValueHandling.Ignore)] public int UpgradeLevel;
         public static int StartingHealth(int tier,bool player) => player?5:tier==3?6:tier==2?4:3;
-        public int MaxHealth => StartingHealth(Tier,Player);
+        public TankStats Stats => TankProfiles.Get(Tier,Player);
+        public int MaxHealth => StatsVersion==0?StartingHealth(Tier,Player):Stats.Health;
+        public int Rounds => StatsVersion==0?1:Stats.Rounds;
+        public int FirePower => StatsVersion==0?1:Stats.Power+(UpgradeLevel>=3?1:0);
+        public float ShellSpeed => StatsVersion==0?(Player?Tier>=1:Tier==2)?900:600:UpgradeLevel>=1?900:Stats.ShellSpeed;
         public bool Player, Drop, Alive = true, Moving;
         public float X, Y, Shield, Cooldown, Think, FireDelay, Slide, SpeedBoost;
         public float SinkDepth;
@@ -99,7 +105,7 @@ namespace BattleCities.Core
         public Box Bounds => new Box(X-32, Y-32, 64, 64);
         public Box MovementBounds => MovementBox(X,Y);
         public static Box MovementBox(float x,float y) => new Box(x-MovementHalfSize,y-MovementHalfSize,MovementHalfSize*2,MovementHalfSize*2);
-        public float Speed => Player ? 180*(SpeedBoost>0?1.5f:1) : Tier == 1 ? 240 : 120;
+        public float Speed => (StatsVersion==0?(Player?180:Tier==1?240:120):Stats.MovementSpeed)*(Player&&SpeedBoost>0?1.5f:1);
     }
     public sealed class ShotState
     {
@@ -177,12 +183,14 @@ namespace BattleCities.Core
         private int spawned, nextId, spawnIndex;
         private float spawnTimer = .16f, respawnTimer, intro = 2;
         private uint random = 12345;
-        public float PlayerNormalReloadSeconds { get; }
-        public float PlayerUpgradedNormalReloadSeconds { get; }
+        public float PlayerNormalReloadSeconds { get; private set; }
+        public float PlayerUpgradedNormalReloadSeconds { get; private set; }
 
-        private readonly int initialPlayerTier;
-        public BattleSimulation(MapData map, int stage = 1, float normalReloadSeconds = .12f, float upgradedNormalReloadSeconds = .08f, int playerTier = 0)
+        private int initialPlayerTier;
+        public BattleSimulation(MapData map, int stage = 1, float normalReloadSeconds = .12f, float upgradedNormalReloadSeconds = .08f, int playerTier = 0, int tankStatsVersion = TankProfiles.Version)
         {
+            if(tankStatsVersion<0||tankStatsVersion>TankProfiles.Version)throw new ArgumentOutOfRangeException(nameof(tankStatsVersion));
+            TankStatsVersion=tankStatsVersion;
             initialPlayerTier=Math.Max(0,Math.Min(3,playerTier));
             PlayerNormalReloadSeconds=ValidReloadSeconds(normalReloadSeconds,.12f);
             PlayerUpgradedNormalReloadSeconds=ValidReloadSeconds(upgradedNormalReloadSeconds,.08f);
@@ -259,7 +267,7 @@ namespace BattleCities.Core
             unchecked { random+=0x6d2b79f5;uint t=random;t=(t^(t>>15))*(t|1);t^=t+(t^(t>>7))*(t|61);return min+(int)(((t^(t>>14))/4294967296.0)*(max-min)); }
         }
         public static void Vector(Facing d,out float x,out float y) { x=d==Facing.Right?1:d==Facing.Left?-1:0; y=d==Facing.Down?1:d==Facing.Up?-1:0; }
-        private void SpawnPlayer() { Tanks.Add(new TankState{Id=++nextId,Player=true,Tier=initialPlayerTier,Health=TankState.StartingHealth(initialPlayerTier,true),X=playerSpawn.x+32,Y=playerSpawn.y+32,Shield=3.5f}); }
+        private void SpawnPlayer() { var tank=NewTank(initialPlayerTier,true);tank.Id=++nextId;tank.X=playerSpawn.x+32;tank.Y=playerSpawn.y+32;tank.Shield=3.5f;Tanks.Add(tank); }
         public void Step(Command command)
         {
             if(Lost || Won) return;
@@ -306,7 +314,7 @@ namespace BattleCities.Core
                 if(!Tanks.Any(t=>t.Alive&&box.Overlaps(t.Bounds))&&!Turrets.Any(t=>t.BlocksPath&&box.Overlaps(t.BlockingBounds)))
                 {
                     var spec=wave[spawned++];int tier=Math.Max(0,"abcd".IndexOf(spec.tier ?? "a"));
-                    Tanks.Add(new TankState{Id=++nextId,Tier=tier,Health=TankState.StartingHealth(tier,false),Drop=spec.drop,X=point.x+32,Y=point.y+32,Direction=Facing.Down,Aim=Facing.Down});
+                    var tank=NewTank(tier,false);tank.Id=++nextId;tank.Drop=spec.drop;tank.X=point.x+32;tank.Y=point.y+32;tank.Direction=tank.Aim=Facing.Down;Tanks.Add(tank);
                     spawnIndex++;spawnTimer=3;if(spec.drop)PickupType=null;
                 }
             }
@@ -650,13 +658,13 @@ namespace BattleCities.Core
         private static float ValidReloadSeconds(float seconds,float fallback)
         {return float.IsNaN(seconds)||float.IsInfinity(seconds)?fallback:Math.Max(StepSeconds,seconds);}
         public float NormalReloadSeconds(TankState tank)
-        {return tank.Player?(tank.Tier>=2?PlayerUpgradedNormalReloadSeconds:PlayerNormalReloadSeconds):.16f;}
+        {return (tank.Player?((tank.StatsVersion==0?tank.Tier:tank.UpgradeLevel)>=2?PlayerUpgradedNormalReloadSeconds:PlayerNormalReloadSeconds):.16f)/tank.Rounds;}
         public bool Fire(TankState tank,bool powerShot=false)
         {
             if(!CanFire(tank))return false;
             Vector(tank.Aim,out var x,out var y);
-            var s=new ShotState{Id=++nextId,Owner=tank.Id,OwnerSlot=tank.Slot,Player=tank.Player,PowerShot=powerShot,Damage=powerShot?3:1,X=tank.X+x*32,Y=tank.Y+y*32,Direction=tank.Aim,Speed=powerShot||(tank.Player?tank.Tier>=1:tank.Tier==2)?900:600,WallDamage=powerShot?2:1};
-            Shots.Add(s);tank.Cooldown=tank.ReloadDuration=powerShot?.25f:NormalReloadSeconds(tank);ShotFired?.Invoke(s);return true;
+            var s=new ShotState{Id=++nextId,Owner=tank.Id,OwnerSlot=tank.Slot,Player=tank.Player,PowerShot=powerShot,Damage=powerShot?3*tank.FirePower:tank.FirePower,X=tank.X+x*32,Y=tank.Y+y*32,Direction=tank.Aim,Speed=powerShot?900:tank.ShellSpeed,WallDamage=powerShot?2:1};
+            Shots.Add(s);tank.Cooldown=tank.ReloadDuration=powerShot?.25f/tank.Rounds:NormalReloadSeconds(tank);ShotFired?.Invoke(s);return true;
         }
         private void MoveShot(ShotState s)
         {
@@ -831,7 +839,7 @@ namespace BattleCities.Core
             switch(type)
             {
                 case "shield":if(p!=null)p.Shield=10;break;
-                case "upgrade":if(p!=null)p.Tier=Math.Min(3,p.Tier+1);break;
+                case "upgrade":if(p!=null){if(p.StatsVersion==0)p.Tier=Math.Min(3,p.Tier+1);else p.UpgradeLevel=Math.Min(3,p.UpgradeLevel+1);}break;
                 case "speed":if(p!=null)p.SpeedBoost=10;break;
                 case "life":Lives++;break;
                 case "freeze":Freeze=10;break;

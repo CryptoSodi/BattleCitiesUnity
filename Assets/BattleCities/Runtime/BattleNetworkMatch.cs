@@ -9,7 +9,7 @@ namespace BattleCities.Multiplayer
 {
     public struct BattleNetworkInput : INetworkInput
     {
-        public int Sequence, Move, Aim, ShotSequence, SecondarySequence, Secondary;
+        public int Sequence, Move, Aim, ShotSequence, SecondarySequence, Secondary, TankTier;
         public NetworkBool ChargeHeld, PowerRequested;
     }
 
@@ -85,6 +85,7 @@ namespace BattleCities.Multiplayer
                 Game.PrepareOnline(this,Mode,Map);appliedRound=Round;appliedTick=-1;appliedEvents=0;
                 if(Simulation.InitialTerrainCount>TerrainWords*32)throw new InvalidOperationException("Map exceeds the terrain replication budget.");
                 Array.Clear(shotSequences,0,4);Array.Clear(secondarySequences,0,4);Array.Clear(chargeSeconds,0,4);
+                Array.Clear(inputInitialized,0,4);
             }
             LocalSlot=-1;
             for(int i=0;i<4;i++)if(Players[i]==Runner.LocalPlayer){LocalSlot=i;Simulation.LocalPlayerSlot=i;break;}
@@ -121,6 +122,7 @@ namespace BattleCities.Multiplayer
                 if(Players[slot]==PlayerRef.None){chargeSeconds[slot]=0;ChargeProgress.Set(slot,0);continue;}
                 Simulation.SetParticipant(slot,true);
                 if(!Runner.TryGetInputForPlayer<BattleNetworkInput>(Players[slot],out var input)){chargeSeconds[slot]=0;ChargeProgress.Set(slot,0);continue;}
+                if(!Simulation.MatchStarted)Simulation.SetParticipantTankTier(slot,input.TankTier);
                 AcknowledgedInput.Set(slot,input.Sequence);
                 if(input.ChargeHeld)chargeSeconds[slot]=Mathf.Min(ChargedFireInput.ChargeDuration,chargeSeconds[slot]+Runner.DeltaTime);
                 if(!inputInitialized[slot]){shotSequences[slot]=input.ShotSequence;secondarySequences[slot]=input.SecondarySequence;inputInitialized[slot]=true;}
@@ -143,7 +145,7 @@ namespace BattleCities.Multiplayer
                     if(PlayerCount>=4||Time.realtimeSinceStartup>=quickStartAt)beginRequested=true;
                 }
             }
-            if(beginRequested)
+            if(beginRequested&&Enumerable.Range(0,4).All(i=>Players[i]==PlayerRef.None||inputInitialized[i]))
             {
                 beginRequested=false;
                 if(PlayerCount>=RequiredPlayers){Simulation.BeginMatch();Runner.SessionInfo.IsOpen=true;Runner.SessionInfo.IsVisible=false;}

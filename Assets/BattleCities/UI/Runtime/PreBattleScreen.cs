@@ -17,13 +17,9 @@ namespace BattleCities.UI
         const float PsgContentInset=4f,PsgHeaderGap=8f;
         const float DefaultStatLabelSize=15f,Psg1StatLabelSize=30f,AndroidLandscapeStatLabelSize=28f;
         static readonly string[] Names={"VANGUARD","STRIKER","TWIN FANG","SIEGEBREAKER"};
-        // Roster ratings: Health, Rounds, Speed, Power. Classified II-IV are placeholders.
-        static readonly int[,] TankRatings=
+        // Locked roster placeholders only. Launchable cards read Core.TankProfiles.
+        static readonly int[,] ClassifiedTankRatings=
         {
-            {1,1,1,1}, // Vanguard
-            {2,1,1,1}, // Striker
-            {1,2,1,1}, // Twin Fang
-            {5,1,1,2}, // Siegebreaker
             {1,1,3,1}, // Classified I
             {3,1,2,2}, // Classified II
             {2,3,2,1}, // Classified III
@@ -874,7 +870,7 @@ namespace BattleCities.UI
                 meter.raycastTarget=false;
                 meter.color=Color.white;
                 meter.UseBlockStyle=true;
-                meter.FilledSegments=TankRatings[index,row];
+                meter.FilledSegments=index<4?BattleCities.Core.TankProfiles.Get(index,true).Rating(row):ClassifiedTankRatings[index-4,row];
             }
         }
         public void Open()

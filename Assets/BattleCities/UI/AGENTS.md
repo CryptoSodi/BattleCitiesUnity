@@ -252,6 +252,7 @@ These are the user's approved typography, layout, and interaction rules as of 20
 
 ## Battle preparation
 
+- Health, Rounds, Speed and Power on launchable tank cards must come from `Core.TankProfiles`, the same profiles used in battle. Health is hit points, Rounds divides reload/recovery duration (two rounds means half the reload time), Speed determines movement speed, and Power determines shell damage. Keep chosen chassis and its stats through respawn and online replication; STAR upgrades enhance that chassis without replacing it with another paid tank. Locked classified cards retain their placeholder ratings.
 - After START BATTLE, normal server preparation uses an opaque navy loading surface with the existing aspect-fitted game logo and clean white `Preparing battle...` text. Do not show recording internals, a menu panel, or navigation controls during this normal wait.
 - Reveal the existing styled connection/recovery panel only when preparation reports an error or remains pending for eight seconds. Keep its Main Menu action in the shared footer slot and focus it only when recovery controls become visible. Hide the complete preparation surface as soon as the battle is ready, clearing hidden recovery focus.
 - Presentation never bypasses server session, seed, identity or MagicBlock checks. The simulation and combat input stay gated until preparation succeeds; failure must not silently start an unverified match.

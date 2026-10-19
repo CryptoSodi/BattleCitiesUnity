@@ -16,6 +16,7 @@ namespace BattleCities.Core
     {
         public float normalReload, upgradedReload, turretRange, turretCooldown, turretReload, turretTurn, turretMuzzle, turretDeploy;
         public int playerTier, turretDamage, turretHealth;
+        [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public int tankStatsVersion;
         public LandDroneConfig landDrone;
     }
     [Serializable] public sealed class ReplayInputRun
@@ -200,6 +201,7 @@ namespace BattleCities.Core
             ValidateMap(r.map);
             Require(ValidHash(r.levelHash)&&r.levelHash==Hash(r.map)&&ValidHash(r.configHash)&&r.configHash==Hash(r.config),"Replay setup hash mismatch.");
             var c=r.config;
+            Require(c.tankStatsVersion>=0&&c.tankStatsVersion<=TankProfiles.Version,"Unsupported tank stats version.");
             Require(c.playerTier>=0&&c.playerTier<=3&&c.turretDamage>=1&&c.turretDamage<=100&&c.turretHealth>=1&&c.turretHealth<=100,"Invalid weapon configuration.");
             foreach(var value in new[]{c.normalReload,c.upgradedReload,c.turretRange,c.turretCooldown,c.turretReload,c.turretMuzzle,c.turretDeploy})Require(Finite(value)&&value>0&&value<=4096,"Invalid weapon setting.");
             Require(Finite(c.turretTurn)&&c.turretTurn>=0&&c.turretTurn<=60,"Invalid turret turn setting.");
@@ -223,7 +225,8 @@ namespace BattleCities.Core
             {
                 Require(e!=null&&e.tick>=last&&e.tick<=r.durationTicks,"Invalid event order.");last=e.tick;
                 Require(e.slot>=0&&e.slot<4,"Invalid event slot.");
-                Require(e.kind=="magicpickup"||e.kind=="pickup"||e.kind=="powerup"||e.kind=="participant"||e.kind=="begin"||((r.mode=="ctf"||r.mode=="ctf1v1")&&e.kind=="flagdrop"),"Unsupported replay event.");
+                Require(e.kind=="magicpickup"||e.kind=="pickup"||e.kind=="powerup"||e.kind=="participant"||e.kind=="begin"||(c.tankStatsVersion>0&&e.kind=="tank")||((r.mode=="ctf"||r.mode=="ctf1v1")&&e.kind=="flagdrop"),"Unsupported replay event.");
+                if(e.kind=="tank")Require(r.mode!="single"&&e.value!=null&&e.value.Length==1&&e.value[0]>='0'&&e.value[0]<='3',"Invalid tank selection.");
                 if(e.kind=="magicpickup")Require(MagicDropEvent.Valid(e.value,r.map.field.widthTiles*64,r.map.field.heightTiles*64),"Invalid MagicBlock drop.");
                 else if(e.kind=="pickup"||e.kind=="powerup")Require((e.kind=="pickup"&&e.value==null)||Powerups.Contains(e.value),"Invalid replay power-up.");
                 else if(e.kind!="magicpickup")Require(r.mode!="single","Single-player replay contains a network event.");
@@ -413,7 +416,7 @@ namespace BattleCities.Core
         public static BattleSimulation CreateSimulation(BattleReplay data)
         {
             var c=data.config;
-            var sim=new BattleSimulation(ReplayJson.Copy(data.map),data.levelNumber,c.normalReload,c.upgradedReload,c.playerTier);
+            var sim=new BattleSimulation(ReplayJson.Copy(data.map),data.levelNumber,c.normalReload,c.upgradedReload,c.playerTier,c.tankStatsVersion);
             sim.ApplyReplayConfiguration(c);sim.SetReplaySeed(data.seed);
             if(data.mode!="single")sim.ConfigureMultiplayer(data.mode=="coop"?BattleMode.Coop:data.mode=="ctf1v1"?BattleMode.CaptureFlagDuel:data.mode=="ctf"?BattleMode.CaptureFlag:data.mode=="2v2"?BattleMode.TeamBattle:BattleMode.Versus);
             return sim;
@@ -471,6 +474,7 @@ namespace BattleCities.Core
                 case "pickup":sim.SpawnPickup(e.value);break;
                 case "powerup":sim.ApplyPowerup(e.value);break;
                 case "participant":sim.SetParticipant(e.slot,e.connected);break;
+                case "tank":if(!sim.SetParticipantTankTier(e.slot,int.Parse(e.value,System.Globalization.CultureInfo.InvariantCulture)))throw new FormatException("Tank selection changed after the match started.");break;
                 case "flagdrop":sim.DropCarriedFlag(e.slot);break;
                 case "begin":sim.BeginMatch();break;
                 default:throw new FormatException("Unsupported replay event.");
