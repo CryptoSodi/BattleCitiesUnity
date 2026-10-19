@@ -81,6 +81,13 @@ namespace BattleCities.Tests
             Check(MainMenuApiClient.IsMagicWebUrl("https://magic.battlecities.com/game"),"Magic host");
             Check(MainMenuApiClient.IsTestWebUrl("https://magic.battlecities.com"),"Magic must use test API");
             Check(MainMenuApiClient.IsTestWebUrl("https://test.battlecities.com"),"Test API retained");
+            foreach(var url in new[]{"http://localhost:8080/","https://LOCALHOST:8080/game","http://127.0.0.1:8080/","http://[::1]:8080/"})
+            {
+                Check(MainMenuApiClient.IsTestWebUrl(url),"Local preview must use test API and devnet: "+url);
+                Check(!MainMenuApiClient.IsMagicWebUrl(url),"Local preview must not enable MagicBlock: "+url);
+            }
+            foreach(var url in new[]{"https://play.battlecities.com/","https://battlecities.com/","https://localhost.evil.org/","https://127.0.0.1.evil.org/","https://play.battlecities.com/?host=localhost","https://localhost@play.battlecities.com/","http://user@localhost:8080/","file://localhost/game"})
+                Check(!MainMenuApiClient.IsTestWebUrl(url),"Unexpected test network activation: "+url);
             foreach(var url in new[]{"https://test.battlecities.com","https://play.battlecities.com","https://magic.battlecities.com.evil.org","http://magic.battlecities.com","https://magic.battlecities.com:444","https://play.battlecities.com/?magic.battlecities.com"})
                 Check(!MainMenuApiClient.IsMagicWebUrl(url),"Unexpected activation: "+url);
             var data=ReplayChecks.Fixture();

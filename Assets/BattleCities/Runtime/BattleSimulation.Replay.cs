@@ -12,6 +12,7 @@ namespace BattleCities.Core
         { if(Tick!=0||seed==0)throw new InvalidOperationException("Set a nonzero seed before gameplay.");random=seed; }
         public ReplayConfig ReplayConfiguration()=>new ReplayConfig {
             normalReload=PlayerNormalReloadSeconds,upgradedReload=PlayerUpgradedNormalReloadSeconds,playerTier=initialPlayerTier,tankStatsVersion=TankStatsVersion,
+            powerShotDamageVersion=PowerShotDamageVersion,
             turretRange=turretAttackRange,turretDamage=turretDamage,turretCooldown=turretFireCooldown,turretReload=turretReloadDuration,
             turretTurn=turretTurnDuration,turretMuzzle=turretMuzzleDistance,turretHealth=turretHealth,turretDeploy=turretDeployDuration,
             landDrone=ReplayJson.Copy(LandDroneSettings)
@@ -19,6 +20,7 @@ namespace BattleCities.Core
         public void ApplyReplayConfiguration(ReplayConfig c)
         {
             TankStatsVersion=c.tankStatsVersion;initialPlayerTier=c.playerTier;
+            PowerShotDamageVersion=c.powerShotDamageVersion;
             PlayerNormalReloadSeconds=ValidReloadSeconds(c.normalReload,.12f);PlayerUpgradedNormalReloadSeconds=ValidReloadSeconds(c.upgradedReload,.08f);
             ConfigureTurrets(c.turretRange,c.turretDamage,c.turretCooldown,c.turretReload,c.turretTurn,c.turretMuzzle,c.turretHealth,c.turretDeploy);LandDroneSettings=ReplayJson.Copy(c.landDrone);
         }

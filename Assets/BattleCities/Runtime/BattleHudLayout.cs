@@ -7,10 +7,11 @@ namespace BattleCities
     {
         public readonly float Scale, Width, Height;
         public bool Narrow => Width<920;
-        public float TopHeight => Narrow?84:48;
+        public float TopHeight => 48;
         public float TopHeightPixels => TopHeight*Scale;
-        public float PickupSizePixels => 96*Scale;
+        public float PickupSizePixels => 48*Scale;
         public float DetailScale => Mathf.Clamp(Width/1240f,.78f,1.15f);
+        public float OverlayScale => DetailScale*.7f;
         public BattleHudLayout(float width,float height,float minimumScale=1)
         {
             width=Mathf.Max(1,width);height=Mathf.Max(1,height);

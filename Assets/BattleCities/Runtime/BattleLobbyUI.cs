@@ -102,7 +102,7 @@ namespace BattleCities.Multiplayer
             if(SceneManager.GetActiveScene().name=="BattleCity")
             {
                 var hud=BattleHudLayout.Current;
-                float slots=RuntimePlatformInfo.PowerupUi==PowerupUiMode.WebTopLeft?94*hud.DetailScale*hud.Scale:0;
+                float slots=RuntimePlatformInfo.PowerupUi==PowerupUiMode.WebTopLeft?94*hud.OverlayScale*hud.Scale:0;
                 float y=(hud.TopHeightPixels+slots)/Mathf.Max(.01f,canvas.scaleFactor)+27;
                 ((RectTransform)open.transform).anchoredPosition=new Vector2(92,-y);
             }

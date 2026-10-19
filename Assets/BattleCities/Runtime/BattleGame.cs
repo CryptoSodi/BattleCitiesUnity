@@ -264,7 +264,9 @@ namespace BattleCities
         }
         private void Update()
         {
-            if(Simulation==null)return;PrepareMagicBeforeStart();if(UpdateResults())return;float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);fps=Mathf.Lerp(fps,1/Mathf.Max(.0001f,Time.unscaledDeltaTime),.05f);
+            if(Simulation==null)return;PrepareMagicBeforeStart();bool ending=UpdateResults();if(ResultsVisible)return;float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);fps=Mathf.Lerp(fps,1/Mathf.Max(.0001f,Time.unscaledDeltaTime),.05f);
+            if(!ending)
+            {
             if(!tvReplay){UpdateGamepadControls();
             if(DevelopmentOverlays.Visible&&debug.WasPressedThisFrame()&&!IsReplaying)showDebug=!showDebug;if(restart.WasPressedThisFrame()&&!IsOnline)RequestBattleRestart();if(overhead.WasPressedThisFrame())CameraElevation=CameraElevation>85?70:90;
             if(Multiplayer.BattleSession.Instance&&Multiplayer.BattleSession.Instance.Lobby.Visible)paused=true;
@@ -282,6 +284,7 @@ namespace BattleCities
                 while(accumulator>=BattleSimulation.StepSeconds){QueuePrimaryCommand(ref cmd);cmd.SecondaryFire=secondaryQueued;secondaryQueued=false;StepRecorded(cmd);accumulator-=BattleSimulation.StepSeconds;}
             }
             else secondaryQueued=false;
+            }
             if(SystemInfo.graphicsDeviceType==GraphicsDeviceType.Null)return;
             float presentationDt=!IsOnline&&(paused||consumePending)?0:dt*(IsReplaying?replaySpeed:1);
             SyncMines();

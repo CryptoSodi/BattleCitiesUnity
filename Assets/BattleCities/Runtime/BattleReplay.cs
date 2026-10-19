@@ -17,6 +17,7 @@ namespace BattleCities.Core
         public float normalReload, upgradedReload, turretRange, turretCooldown, turretReload, turretTurn, turretMuzzle, turretDeploy;
         public int playerTier, turretDamage, turretHealth;
         [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public int tankStatsVersion;
+        [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public int powerShotDamageVersion;
         public LandDroneConfig landDrone;
     }
     [Serializable] public sealed class ReplayInputRun
@@ -202,6 +203,7 @@ namespace BattleCities.Core
             Require(ValidHash(r.levelHash)&&r.levelHash==Hash(r.map)&&ValidHash(r.configHash)&&r.configHash==Hash(r.config),"Replay setup hash mismatch.");
             var c=r.config;
             Require(c.tankStatsVersion>=0&&c.tankStatsVersion<=TankProfiles.Version,"Unsupported tank stats version.");
+            Require(c.powerShotDamageVersion>=0&&c.powerShotDamageVersion<=1,"Unsupported power shot damage version.");
             Require(c.playerTier>=0&&c.playerTier<=3&&c.turretDamage>=1&&c.turretDamage<=100&&c.turretHealth>=1&&c.turretHealth<=100,"Invalid weapon configuration.");
             foreach(var value in new[]{c.normalReload,c.upgradedReload,c.turretRange,c.turretCooldown,c.turretReload,c.turretMuzzle,c.turretDeploy})Require(Finite(value)&&value>0&&value<=4096,"Invalid weapon setting.");
             Require(Finite(c.turretTurn)&&c.turretTurn>=0&&c.turretTurn<=60,"Invalid turret turn setting.");

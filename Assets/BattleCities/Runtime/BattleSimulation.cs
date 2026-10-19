@@ -663,7 +663,8 @@ namespace BattleCities.Core
         {
             if(!CanFire(tank))return false;
             Vector(tank.Aim,out var x,out var y);
-            var s=new ShotState{Id=++nextId,Owner=tank.Id,OwnerSlot=tank.Slot,Player=tank.Player,PowerShot=powerShot,Damage=powerShot?3*tank.FirePower:tank.FirePower,X=tank.X+x*32,Y=tank.Y+y*32,Direction=tank.Aim,Speed=powerShot?900:tank.ShellSpeed,WallDamage=powerShot?2:1};
+            int damage=powerShot?(PowerShotDamageVersion==0?3*tank.FirePower:tank.FirePower+2):tank.FirePower;
+            var s=new ShotState{Id=++nextId,Owner=tank.Id,OwnerSlot=tank.Slot,Player=tank.Player,PowerShot=powerShot,Damage=damage,X=tank.X+x*32,Y=tank.Y+y*32,Direction=tank.Aim,Speed=powerShot?900:tank.ShellSpeed,WallDamage=powerShot?2:1};
             Shots.Add(s);tank.Cooldown=tank.ReloadDuration=powerShot?.25f/tank.Rounds:NormalReloadSeconds(tank);ShotFired?.Invoke(s);return true;
         }
         private void MoveShot(ShotState s)

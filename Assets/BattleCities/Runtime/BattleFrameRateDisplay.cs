@@ -75,7 +75,7 @@ namespace BattleCities
             var key=new Vector3(layout.Width,layout.Height,layout.Scale);
             if(layoutKey==key)return;
             layoutKey=key;
-            float scale = layout.DetailScale;
+            float scale = layout.OverlayScale;
             panel.anchorMin = panel.anchorMax = new Vector2(1, 1);
             panel.pivot = new Vector2(1, 1);
             panel.anchoredPosition = new Vector2(-14 * scale, -layout.TopHeight - 162 * scale);

@@ -30,16 +30,17 @@ namespace BattleCities.Tests
             s.Terrain.Clear();for(int i=0;i<122;i++)s.Step(default);
             s.Player.X=400;s.Player.Y=800;s.Player.Shield=0;s.Player.Aim=Facing.Up;return s;
         }
-        static void Replay(BattleMode mode,int tier)
+        static void Replay(BattleMode mode,int tier,int powerShotDamageVersion=1)
         {
             var map=Map();var s=new BattleSimulation(map,playerTier:tier);
+            var config=s.ReplayConfiguration();config.powerShotDamageVersion=powerShotDamageVersion;s.ApplyReplayConfiguration(config);
             if(mode!=BattleMode.Offline)s.ConfigureMultiplayer(mode);
             var recorder=new ReplayRecorder(s,map,"tank-stats-check");
             if(s.IsMultiplayer){s.SetParticipantTankTier(0,tier);s.SetParticipantTankTier(1,3);s.SetParticipant(0,true);s.SetParticipant(1,true);s.BeginMatch();}
             for(int i=0;i<240;i++)
             {
                 if(i==140||i==160||i==180){var e=new ReplayEvent{kind="powerup",value="upgrade"};recorder.RecordEvent(e);ReplayPlayer.ApplyEvent(s,e);}
-                var cmd=new Command{Fire=i%8==0};
+                var cmd=new Command{Fire=i%8==0,PowerShot=i%16==0};
                 var commands=new Dictionary<int,Command>{{0,cmd},{1,default}};
                 recorder.BeforeStep(cmd,s.IsMultiplayer?commands:null);
                 if(s.IsMultiplayer)s.StepMultiplayer(commands);else s.Step(cmd);
@@ -74,6 +75,7 @@ namespace BattleCities.Tests
                 Check(tank.FirePower==(tier==3?2:1),"power matches selected chassis");
                 float y=tank.Y;s.Step(new Command{Move=Facing.Up});Near(y-tank.Y,tank.Speed*BattleSimulation.StepSeconds,"movement uses profile");
                 Check(s.Fire(tank),"selected tank fires");Check(s.Shots.Last().Damage==(tier==3?2:1),"normal shell uses firepower");
+                tank.Cooldown=0;s.Fire(tank,true);Check(s.Shots.Last().Damage==tank.FirePower+2,"power shot adds two damage for chassis "+tier);
                 var old=tank;s.Kill(tank);for(int i=0;i<100;i++)s.Step(default);
                 Check(s.Player!=old&&s.Player.Tier==tier&&s.Player.Health==health[tier],"respawn preserves chassis/health");
                 Replay(BattleMode.Offline,tier);
@@ -92,8 +94,16 @@ namespace BattleCities.Tests
             var battle=Ready(3);var target=new TankState{Id=9999,Tier=3,StatsVersion=1,Health=5,X=400,Y=680};battle.Tanks.Add(target);
             battle.Fire(battle.Player);for(int i=0;i<15;i++)battle.Step(default);
             Check(target.Alive&&target.Health==3,"Siegebreaker shell deals two damage on impact");
-            battle.Player.Cooldown=0;battle.Fire(battle.Player,true);for(int i=0;i<15;i++)battle.Step(default);
-            Check(!target.Alive,"charged shot scales with firepower");
+            target.Health=5;battle.Player.Cooldown=0;battle.Fire(battle.Player,true);for(int i=0;i<15;i++)battle.Step(default);
+            Check(target.Alive&&target.Health==1,"power two plus two leaves a full-health armored enemy alive");
+            var weak=Ready(0);target=new TankState{Id=9999,Tier=3,StatsVersion=1,Health=5,X=400,Y=680};weak.Tanks.Add(target);
+            weak.Fire(weak.Player,true);for(int i=0;i<15;i++)weak.Step(default);
+            Check(target.Alive&&target.Health==2,"power one plus two leaves two armor health");
+            battle=Ready(3);battle.ApplyPowerup("upgrade");battle.ApplyPowerup("upgrade");battle.ApplyPowerup("upgrade");
+            battle.Fire(battle.Player,true);Check(battle.Shots.Last().Damage==5,"STAR-enhanced power three adds two rather than multiplying");
+            var legacy=Ready(3);var legacyConfig=legacy.ReplayConfiguration();legacyConfig.powerShotDamageVersion=0;legacy.ApplyReplayConfiguration(legacyConfig);
+            legacy.Fire(legacy.Player,true);Check(legacy.Shots.Last().Damage==6,"archived replays retain their original charged damage");
+            Replay(BattleMode.Offline,3,0);
             var enemies=new BattleSimulation(Map()){DisableEnemyFire=true,Freeze=999};enemies.Player.Shield=999;
             for(int i=0;i<700;i++)enemies.Step(default);
             var spawned=enemies.Tanks.Where(t=>!t.Player).OrderBy(t=>t.Tier).ToArray();

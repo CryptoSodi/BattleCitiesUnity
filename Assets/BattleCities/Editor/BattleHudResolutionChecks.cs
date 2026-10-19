@@ -42,6 +42,12 @@ namespace BattleCities.Editor
                     Near(header.rectTransform.rect.width*canvas.scaleFactor,size.x,"header spans viewport "+size);
                     var score=canvas.GetComponentsInChildren<Text>().Single(t=>t.text=="SCORE");
                     Check(score.fontSize*canvas.scaleFactor>=16,"score label remains readable "+size);
+                    Near(layout.TopHeight,48,"single-row header at every resolution "+size);
+                    var enemies=canvas.GetComponentsInChildren<Text>().Single(t=>t.text=="ENEMIES");
+                    Check(Mathf.Abs(enemies.rectTransform.anchoredPosition.y-score.rectTransform.anchoredPosition.y)<=2,"enemies remain alongside score "+size);
+                    var enemyTexture=Resources.Load<Texture2D>("HudEnemy");
+                    var roster=canvas.GetComponentsInChildren<RawImage>().Where(image=>image.texture==enemyTexture).ToArray();
+                    Check(roster.Length==state.TotalEnemies&&roster.All(image=>Mathf.Abs(image.rectTransform.rect.width/image.rectTransform.rect.height-(float)enemyTexture.width/enemyTexture.height)<.05f),"enemy roster keeps artwork proportions "+size);
                     Near(canvas.scaleFactor,layout.Scale,"canvas uses one scale "+size);
                     camera.Render();var old=RenderTexture.active;RenderTexture.active=target;
                     var picture=new Texture2D(size.x,size.y,TextureFormat.RGB24,false);
@@ -65,7 +71,7 @@ namespace BattleCities.Editor
                 }
                 var phone=new BattleHudLayout(844,390);var retina=new BattleHudLayout(1688,780,2);
                 Near(phone.Width,retina.Width,"retina keeps logical phone width");
-                Check(phone.Narrow&&retina.Narrow,"retina keeps compact two-row header");
+                Check(phone.Narrow&&retina.Narrow,"retina keeps compact single-row spacing");
                 Near(phone.TopHeightPixels,retina.TopHeightPixels/2,"retina keeps visible header size");
                 Near(phone.PickupSizePixels,retina.PickupSizePixels/2,"retina keeps visible pickup size");
                 var hd=new BattleHudLayout(1920,1080);var uhd=new BattleHudLayout(3840,2160);

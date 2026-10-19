@@ -37,7 +37,10 @@ namespace BattleCities.UI
         {
             return Uri.TryCreate(absoluteUrl, UriKind.Absolute, out var uri)
                 && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp)
-                && (string.Equals(uri.Host, "test.battlecities.com", StringComparison.OrdinalIgnoreCase) || IsMagicWebUrl(absoluteUrl));
+                && (string.Equals(uri.Host, "test.battlecities.com", StringComparison.OrdinalIgnoreCase) || IsMagicWebUrl(absoluteUrl)
+                    || (string.IsNullOrEmpty(uri.UserInfo)
+                        && (string.Equals(uri.Host, "localhost", StringComparison.OrdinalIgnoreCase)
+                            || uri.Host == "127.0.0.1" || uri.Host == "[::1]")));
         }
 
         public static bool IsMagicWebUrl(string url) => Uri.TryCreate(url, UriKind.Absolute, out var uri)

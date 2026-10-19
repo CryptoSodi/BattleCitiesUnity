@@ -34,6 +34,7 @@ namespace BattleCities.Core
 
     public sealed partial class BattleSimulation
     {
+        public int PowerShotDamageVersion { get; private set; } = 1;
         public int TankStatsVersion { get; private set; }
         TankState NewTank(int tier,bool player) => new TankState {
             Tier=tier,Player=player,StatsVersion=TankStatsVersion,

@@ -53,11 +53,11 @@ namespace BattleCities.Editor
                     EditorApplication.update-=FlowTick;SessionState.SetString("BattleCities.ResultsFlow","PASS: victory takeover, input gate, navigation, next stage, defeat takeover and Continue to menu.");
                     Debug.Log(FlowResult);EditorApplication.isPlaying=false;return;
                 }
-                flowPhase++;flowAt=EditorApplication.timeSinceStartup+.75;
+                flowPhase++;flowAt=EditorApplication.timeSinceStartup+((flowPhase==1||flowPhase==2)?BattleEndTransition.TravelSeconds+BattleEndTransition.HoldSeconds+.75:.75);
             }
             catch(Exception error){EditorApplication.update-=FlowTick;SessionState.SetString("BattleCities.ResultsFlow","FAIL: "+error);Debug.LogError(FlowResult);EditorApplication.isPlaying=false;}
         }
-        static void EndMatch(BattleGame game,bool won)
+        internal static void EndMatch(BattleGame game,bool won)
         {
             var s=game.Simulation;
             s.ApplyFrame(new BattleFrame{Tick=s.Tick,Score=s.Score,Started=true,Won=won,Lost=!won,BaseAlive=s.BaseAlive,

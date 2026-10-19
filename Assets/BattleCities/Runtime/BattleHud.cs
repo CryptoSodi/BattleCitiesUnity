@@ -122,7 +122,7 @@ namespace BattleCities
         }
         void PowerupBar(EconomyClient economy,Texture2D atlas,bool pending,bool topLeft)
         {
-            float scale=layout.DetailScale,iconSize=82*scale,gap=5*scale;
+            float scale=layout.OverlayScale,iconSize=82*scale,gap=5*scale;
             float total=iconSize*4+gap*3;
             float px=topLeft?14*scale:Width-total-14*scale;
             float py=topLeft?TopHeight+12*scale:Height-iconSize-14*scale;
@@ -145,8 +145,8 @@ namespace BattleCities
         void Psg1Powerups(EconomyClient economy,Texture2D atlas,bool pending,bool narrow,int selectedSlot)
         {
             float scale=layout.DetailScale,size=(narrow?34:38)*scale,gap=3*scale;
-            float total=size*4+gap*3,x=Width-total-6*scale,y=narrow?46:5,badge=14*scale;
-            Fill(new Rect(x-8*scale,narrow?48:9,1,narrow?28:30),gold);
+            float total=size*4+gap*3,x=Width-total-6*scale,y=5,badge=14*scale;
+            Fill(new Rect(x-8*scale,9,1,30),gold);
             for(int i=0;i<4;i++)
             {
                 string liveType=economy?economy.SlotType(i):null;int count=economy?economy.SlotCount(i):0;bool available=count>0&&!pending;string type=string.IsNullOrEmpty(liveType)?emptySlotTypes[i]:liveType;
@@ -200,7 +200,7 @@ namespace BattleCities
         }
         void Minimap(BattleSimulation state)
         {
-            UpdateMinimap(state);float scale=layout.DetailScale,size=142*scale;
+            UpdateMinimap(state);float scale=layout.OverlayScale,size=142*scale;
             float top=TopHeight,x=Width-size-14*scale,y=top+12*scale;
             var map=Element<RawImage>(new Rect(x,y,size,size));map.texture=minimapTexture;map.uvRect=new Rect(0,0,1,1);map.color=new Color(1,1,1,.88f);
             Outline(new Rect(x,y,size,size),new Color(1,.68f,.05f,.86f),1.5f*scale);
@@ -216,7 +216,7 @@ namespace BattleCities
             Initialize();layout=viewport;canvas.scaleFactor=layout.Scale;if(frameRate)frameRate.ApplyLayout(layout);cursor=0;bool narrow=layout.Narrow;float h=TopHeight;
             bool psg1=powerupUi==PowerupUiMode.MergedTopHud;
             Fill(new Rect(0,0,Width,h),navy);Fill(new Rect(0,0,Width,2),new Color(.22f,.3f,.38f));Fill(new Rect(0,h-3,Width,3),gold);
-            float metricWidth=narrow?Width/3f:175;
+            float metricWidth=narrow?Mathf.Min(124,Width*.52f/3):175;
             Icon(new Rect(7,5,36,36),player);Text(new Rect(46,2,metricWidth-48,18),ScreenContent.Text("battle-hud","score-a60ffb","SCORE"),cream);Text(new Rect(46,18,metricWidth-48,27),state.Score.ToString("D6"),gold,true);
             float x=metricWidth;
             Fill(new Rect(x-7,9,1,28),gold);
@@ -224,9 +224,10 @@ namespace BattleCities
             Text(new Rect(x+4,2,metricWidth-8,18),ScreenContent.Text("battle-hud","time-588867","TIME"),cream);Text(new Rect(x+4,18,metricWidth-8,27),(seconds/60).ToString("D2")+":"+(seconds%60).ToString("D2"),cyan,true);
             x+=metricWidth;Fill(new Rect(x-7,9,1,28),gold);
             Text(new Rect(x+4,2,metricWidth-8,18),state.IsCaptureFlag?ScreenContent.Text("battle-hud","respawns","RESPAWNS"):ScreenContent.Text("battle-hud","lives","LIVES"),cream);Text(new Rect(x+4,18,32,27),state.IsCaptureFlag?"∞":state.Lives.ToString(),gold,true);
-            for(int i=0;i<(state.IsCaptureFlag?0:3);i++)Icon(new Rect(x+32+i*30,18,28,25),player,i>=state.Lives);
-            float enemyX=narrow?12:metricWidth*3+4,enemyY=narrow?46:4;
-            Fill(new Rect(enemyX-11,9,1,narrow?0:28),gold);
+            float lifeStep=Mathf.Min(30,(metricWidth-36)/3);
+            for(int i=0;i<(state.IsCaptureFlag?0:3);i++)Icon(new Rect(x+32+i*lifeStep,18,lifeStep-2,25),player,i>=state.Lives);
+            float enemyX=metricWidth*3+4,enemyY=4;
+            Fill(new Rect(enemyX-11,9,1,28),gold);
             int opponents=0;
             if(state.IsPvp)for(int i=0;i<BattleSimulation.MaxPlayers;i++)if(!state.AreAllies(i,state.LocalPlayerSlot)&&state.Participants[i].Connected&&state.Participants[i].Lives>0)opponents++;
             Text(new Rect(enemyX,enemyY,100,19),state.IsPvp?ScreenContent.Text("battle-hud","rivals","RIVALS"):ScreenContent.Text("battle-hud","enemies","ENEMIES"),cream);
@@ -241,8 +242,10 @@ namespace BattleCities
             float step=Mathf.Min(34,available/Mathf.Max(1,total));
             for(int i=0;i<total;i++)
             {
-                var slot=new Rect(start+i*step,enemyY+4,Mathf.Max(1,step-2),32);
-                Fill(new Rect(slot.x,slot.y+3,slot.width,26),new Color(.1f,.15f,.2f,.6f));
+                float iconWidth=Mathf.Max(1,step-2);
+                float iconHeight=enemy?Mathf.Min(32,iconWidth*enemy.height/enemy.width):32;
+                var slot=new Rect(start+i*step,enemyY+4+(32-iconHeight)*.5f,iconWidth,iconHeight);
+                Fill(new Rect(slot.x,enemyY+7,slot.width,26),new Color(.1f,.15f,.2f,.6f));
                 Icon(slot,enemy,i<deadCount);
             }
             Minimap(state);
