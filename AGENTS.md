@@ -4,6 +4,6 @@ For every game UI task, read and follow `Assets/BattleCities/UI/AGENTS.md` befor
 
 Use these approved rules and the current implemented menu as the design reference when older descriptive documents disagree.
 
-For build previews, build and launch locally on localhost. Do not upload or deploy to the test site, Magic, or live unless the user explicitly requests publication again.
+Only update game source until the user explicitly requests a build. Do not build APK or Web versions, launch a new player build, upload, or deploy without that request. When a local Web preview is requested, build and launch on localhost.
 
 Localhost and loopback WebGL previews must connect to the test API (`https://test.battlecities.com`) and use Solana devnet. Keep public live hosts on the live API.

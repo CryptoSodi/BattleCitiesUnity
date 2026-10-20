@@ -919,6 +919,7 @@ namespace BattleCities.UI
 
         private void UpdateRoundCountdown()
         {
+            UpdateRoundProgress();
             if (!roundLabel) return;
             if (!hasRoundEnd)
             {

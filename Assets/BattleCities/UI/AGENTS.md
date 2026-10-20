@@ -192,6 +192,10 @@ These are the user's approved typography, layout, and interaction rules as of 20
 
 ## Leaderboard panels
 
+- Cycle-timer progress uses cyan while more than half the cycle remains, yellow for the final 50%, orange for the final 20%, and red for the final 10%. Derive urgency from the same API start/end times as the countdown and reset to cyan for the next cycle. Keep the navy track and the rounded corners unchanged.
+
+- The home leaderboard's gold cycle-timer card includes a slim navy track with cyan progress beneath the countdown, aligned to the heading and timer text to the right of the clock icon. Both track and fill use the shared rounded sprite with sliced corners fitted to their rendered height and current width; preserve clean rounded ends even near empty, without pointed tips or square fill edges. Fill it from left to right as the API cycle elapses, using its start/end times (interval duration as fallback), and reset for a new cycle. Hide the bar when round timing is unavailable. Preserve the card size, clock proportions and readable Barlow text on every platform.
+
 - PLAYER RANKINGS uses the blue title/header container from Shop and tank selection (`PreBattleArt.tankTitlePanel`), sliced at the same scale. CYCLE STANDINGS uses the white lower status bar container (`PreBattleArt.statusPanel`), matching the fuel and Shop balance bars. The home table, subtitle, empty state, countdown and score count all use `/api/leaderboard/rewards`; a season response must never overwrite the cycle rows. Payouts paused does not mean standings are disabled. Preserve both panels' placement inside the original leaderboard frame and disable their former joined glass surfaces.
 - Use the approved Gold treatment for both headings. Supporting text keeps the clean prize amount lettering (15 SKR EACH): BarlowCondensed-Bold with FontStyle.Normal and no extra bolding, outline, or shadow. Use white supporting text on the blue Rankings header and navy `(6,29,54)` on the white Season bar. Position the heading trophy 18 units from the left edge and keep its contact shadow aligned beneath it.
 - Align the season heading and subtitle to the left, immediately after the star/coin icon. Keep the original outer frame intact.
@@ -246,6 +250,8 @@ These are the user's approved typography, layout, and interaction rules as of 20
 - Share sends the actual textual match report through the browser/Android share sheet or desktop clipboard. Report cancellation/failure honestly, and do not publish automatically.
 
 ## Downloaded screen definitions
+
+- Cold startup keeps the opaque navy logo loading screen visible while screen updates and the complete game-art pack download, verify and preload. Show a determinate gold progress bar and percentage beneath the status using the bundled Barlow font. Reach 100% only after content is ready, before restoring the player session or showing login. Cached content is verified and loaded on this same screen. Download failures stay on startup and retry automatically; never use Connect Wallet as a content-download retry action.
 
 - Android screen updates use signed display-only definitions checked at cold startup. Keep the existing fonts, action handlers, financial/account values, locked states and transaction approvals in the player. Use Content/ScreenUpdates/android-v1.json for OTA authoring and the built-in ScreenUpdates resource as offline fallback.
 - Remote row order must update controller navigation alongside its visual order. Keep shared title/footer rules, aspect-fitted replacement artwork, and platform inheritance. Validate the complete set of target bindings before applying any screen changes. Failed or incompatible releases retain a working local/cached view.

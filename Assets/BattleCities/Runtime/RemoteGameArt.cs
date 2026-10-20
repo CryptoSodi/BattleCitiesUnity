@@ -34,10 +34,10 @@ namespace BattleCities
             return Resources.Load<T>(key);
         }
 
-        public static Task EnsureReady(Action<string> status, CancellationToken cancellation)
+        public static Task EnsureReady(Action<string> status, CancellationToken cancellation, Action<float> progress = null)
         {
-            if (bundle || !Required) return Task.CompletedTask;
-            if (pending == null || pending.IsCompleted) pending = Download(status, cancellation);
+            if (bundle || !Required) { progress?.Invoke(1); return Task.CompletedTask; }
+            if (pending == null || pending.IsCompleted) pending = Download(status, cancellation, progress);
             return pending;
         }
 
@@ -59,7 +59,7 @@ namespace BattleCities
                 return BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", "").ToLowerInvariant() == config.sha256;
         }
 
-        static async Task Download(Action<string> status, CancellationToken cancellation)
+        static async Task Download(Action<string> status, CancellationToken cancellation, Action<float> progress)
         {
             var config = JsonUtility.FromJson<Manifest>(Resources.Load<TextAsset>(ConfigKey).text);
             Validate(config);
@@ -68,6 +68,7 @@ namespace BattleCities
             var path = Path.Combine(directory, config.sha256 + ".bundle");
             var partial = path + ".partial";
             status?.Invoke("Checking saved game content...");
+            progress?.Invoke(0);
             var valid = await Task.Run(() => VerifyFile(path, config), cancellation);
             cancellation.ThrowIfCancellationRequested();
             if (!valid)
@@ -87,11 +88,14 @@ namespace BattleCities
                             if (request.downloadedBytes > (ulong)config.bytes)
                             { request.Abort(); throw new InvalidDataException("Game content exceeds the expected size."); }
                             status?.Invoke($"Downloading game content: {request.downloadedBytes / 1048576f:0.0} / {config.bytes / 1048576f:0.0} MB");
+                            progress?.Invoke(.8f * Mathf.Clamp01((float)request.downloadedBytes / config.bytes));
                             await Task.Yield();
                         }
                         if (request.result != UnityWebRequest.Result.Success)
                             throw new IOException("Game content download failed: " + request.responseCode);
                     }
+                    status?.Invoke("Verifying game content...");
+                    progress?.Invoke(.8f);
                     if (!await Task.Run(() => VerifyFile(partial, config), cancellation))
                         throw new InvalidDataException("Game content failed verification.");
                     cancellation.ThrowIfCancellationRequested();
@@ -101,18 +105,37 @@ namespace BattleCities
                 finally { if (File.Exists(partial)) File.Delete(partial); }
             }
             status?.Invoke("Loading game content...");
+            progress?.Invoke(.85f);
             var load = AssetBundle.LoadFromFileAsync(path);
-            while (!load.isDone) await Task.Yield();
+            while (!load.isDone) { progress?.Invoke(.85f + .05f * load.progress); await Task.Yield(); }
             if (cancellation.IsCancellationRequested)
             { if (load.assetBundle) load.assetBundle.Unload(true); cancellation.ThrowIfCancellationRequested(); }
-            bundle = load.assetBundle;
-            if (!bundle) { File.Delete(path); throw new InvalidDataException("Game content could not be loaded."); }
-            if (!bundle.LoadAsset<GameObject>("TvReplayRig.prefab") || !bundle.LoadAsset<GameObject>("LandAttackDrone.prefab"))
-            { bundle.Unload(true); bundle = null; File.Delete(path); throw new InvalidDataException("Game models are incomplete."); }
-            // Check the complete pack before allowing any screen to consume it.
-            foreach (var key in new[] { "SettingsArt", "PlayerProfileArt", "OperationsArt", "LoadoutArt", "ShopArt", "PreBattleArt", "BattleResultsArt", "EnvironmentPalette", "RemoteBattleModels" })
-                if (!bundle.LoadAsset<ScriptableObject>(key + ".asset"))
-                { bundle.Unload(true); bundle = null; File.Delete(path); throw new InvalidDataException("Game content is incomplete."); }
+            var loaded = load.assetBundle;
+            if (!loaded) { File.Delete(path); throw new InvalidDataException("Game content could not be loaded."); }
+            try
+            {
+                // Warm the complete pack, including referenced textures/models, before login.
+                var assets = loaded.LoadAllAssetsAsync();
+                while (!assets.isDone)
+                {
+                    progress?.Invoke(.9f + .09f * assets.progress);
+                    await Task.Yield();
+                }
+                cancellation.ThrowIfCancellationRequested();
+                if (!loaded.LoadAsset<GameObject>("TvReplayRig.prefab") || !loaded.LoadAsset<GameObject>("LandAttackDrone.prefab"))
+                    throw new InvalidDataException("Game models are incomplete.");
+                foreach (var key in new[] { "SettingsArt", "PlayerProfileArt", "OperationsArt", "LoadoutArt", "ShopArt", "PreBattleArt", "BattleResultsArt", "EnvironmentPalette", "RemoteBattleModels" })
+                    if (!loaded.LoadAsset<ScriptableObject>(key + ".asset"))
+                        throw new InvalidDataException("Game content is incomplete.");
+                bundle = loaded;
+                progress?.Invoke(1);
+            }
+            catch
+            {
+                loaded.Unload(true);
+                if (!cancellation.IsCancellationRequested) File.Delete(path);
+                throw;
+            }
         }
     }
 }

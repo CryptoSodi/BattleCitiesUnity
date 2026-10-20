@@ -5,14 +5,76 @@ namespace BattleCities.UI
 {
     public sealed partial class MainMenuScene
     {
+        Image roundProgressTrack, roundProgressFill;
+
+        void LayoutRoundProgress()
+        {
+            var panel = leaderboard.Find("Round status") as RectTransform;
+            if (!panel) return;
+            var timer = panel.Find("Label") as RectTransform;
+            if (timer) HudBounds(timer, .22f, .27f, .95f, .62f);
+            roundProgressTrack = EnsurePanelImage(panel, "Cycle Progress");
+            HudBounds(roundProgressTrack.rectTransform, .22f, .12f, .94f, .21f);
+            roundProgressTrack.sprite = theme ? theme.Rounded : null;
+            roundProgressTrack.type = Image.Type.Sliced;
+            roundProgressTrack.color = new Color32(6, 29, 54, 255);
+            roundProgressTrack.raycastTarget = false;
+            var inset = EnsurePanelImage(roundProgressTrack.rectTransform, "Inset").rectTransform;
+            inset.anchorMin = Vector2.zero; inset.anchorMax = Vector2.one;
+            inset.offsetMin = new Vector2(1, 1); inset.offsetMax = new Vector2(-1, -1);
+            inset.GetComponent<Image>().enabled = false;
+            roundProgressFill = EnsurePanelImage(inset, "Fill");
+            roundProgressFill.sprite = theme ? theme.Rounded : null;
+            roundProgressFill.type = Image.Type.Sliced;
+            roundProgressFill.color = new Color32(0, 183, 255, 255);
+            roundProgressFill.raycastTarget = false;
+            roundProgressFill.rectTransform.anchorMin = Vector2.zero;
+            roundProgressFill.rectTransform.offsetMin = roundProgressFill.rectTransform.offsetMax = Vector2.zero;
+            UpdateRoundProgress();
+        }
+
+        void UpdateRoundProgress()
+        {
+            if (!roundProgressTrack || !roundProgressFill) return;
+            FitProgressCorners(roundProgressTrack);
+            roundProgressTrack.gameObject.SetActive(hasRoundEnd);
+            if (!hasRoundEnd) return;
+            double duration = System.Math.Max(1, roundSnapshot?.intervalMinutes ?? 30) * 60d;
+            if (System.DateTimeOffset.TryParse(roundSnapshot?.startsAt,
+                System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeUniversal,
+                out var start) && start < roundEndsAt)
+                duration = (roundEndsAt - start).TotalSeconds;
+            float elapsed = Mathf.Clamp01(1f - (float)((roundEndsAt - System.DateTimeOffset.UtcNow).TotalSeconds / duration));
+            roundProgressFill.rectTransform.anchorMax = new Vector2(elapsed, 1);
+            roundProgressFill.color = elapsed >= .9f ? new Color32(238, 59, 49, 255)
+                : elapsed >= .8f ? new Color32(255, 133, 24, 255)
+                : elapsed >= .5f ? new Color32(255, 211, 48, 255)
+                : new Color32(0, 183, 255, 255);
+            roundProgressFill.enabled = elapsed > 0;
+            FitProgressCorners(roundProgressFill);
+        }
+
+        static void FitProgressCorners(Image image)
+        {
+            if (!image.sprite) return;
+            var rect = image.rectTransform.rect;
+            // Fit the source's 32px corners to this thin bar, rather than letting
+            // vertical border compression leave long, pointed horizontal ends.
+            float radius = Mathf.Max(.1f, Mathf.Min(rect.height * .4f, rect.width * .5f));
+            var border = image.sprite.border;
+            float sourceCorner = Mathf.Max(Mathf.Max(border.x, border.y), Mathf.Max(border.z, border.w));
+            image.pixelsPerUnitMultiplier = Mathf.Max(.01f, sourceCorner / (radius * image.pixelsPerUnit));
+        }
+
         void LayoutLeaderboardEdges()
         {
             if(!leaderboard)return;
+            LayoutRoundProgress();
             var roundTitle=leaderboard.Find("Round status/Heading")?.GetComponent<Text>();
             if(roundTitle)
             {
                 // Use the spare space above the countdown for a larger round heading.
-                HudBounds(roundTitle.rectTransform,.22f,.58f,.97f,.92f);
+                HudBounds(roundTitle.rectTransform,.22f,.62f,.97f,.94f);
                 roundTitle.fontSize=roundTitle.resizeTextMaxSize=28;
                 roundTitle.resizeTextMinSize=14;
                 roundTitle.resizeTextForBestFit=true;
