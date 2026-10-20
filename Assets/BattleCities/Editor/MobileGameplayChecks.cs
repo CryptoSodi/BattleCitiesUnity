@@ -93,6 +93,26 @@ namespace BattleCities.Editor
         public static void Run()
         {
             if (!Application.isPlaying) throw new InvalidOperationException("Run touch input checks in Play mode so the Input System processes player events.");
+            RunChecks();
+        }
+
+        public static void RunBatch()
+        {
+            var settings=InputSystem.settings;
+            const string feature="RUN_PLAYER_UPDATES_IN_EDIT_MODE";
+            bool original=(bool)typeof(InputSettings).GetMethod("IsFeatureEnabled",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).Invoke(settings,new object[]{feature});
+            var activeInstances=typeof(UnityEngine.InputSystem.OnScreen.OnScreenControl).GetField("s_nbActiveInstances",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Static);
+            var originalInstances=activeInstances.GetValue(null);
+            try
+            {
+                settings.SetInternalFeatureFlag(feature,true);
+                RunChecks();
+            }
+            finally { settings.SetInternalFeatureFlag(feature,original);activeInstances.SetValue(null,originalInstances); }
+        }
+
+        static void RunChecks()
+        {
             BattleTouchDevice.Register();
             var root = new GameObject("Touch input check", typeof(RectTransform), typeof(Canvas));
             var events = new GameObject("Touch input check events", typeof(EventSystem));
@@ -100,6 +120,7 @@ namespace BattleCities.Editor
             var movement = map.AddAction("Move", InputActionType.Value, "<BattleTouchDevice>/move");
             movement.expectedControlType = "Vector2";
             var firing = map.AddAction("Fire", InputActionType.Button, "<BattleTouchDevice>/fire");
+            var aiming = map.AddAction("Aim", InputActionType.Value, "<BattleTouchDevice>/aim");
             var specialAction = map.AddAction("Special", InputActionType.Button, "<BattleTouchDevice>/special");
             var swapAction = map.AddAction("Swap", InputActionType.Button, "<BattleTouchDevice>/switchSpecial");
             var slotActions = Enumerable.Range(1, 4).Select(i => map.AddAction("Slot" + i, InputActionType.Button, "<BattleTouchDevice>/slot" + i)).ToArray();
@@ -119,19 +140,28 @@ namespace BattleCities.Editor
             try
             {
                 var move = Control("move", true); var fire = Control("fire"); var special = Control("special"); var swap = Control("switchSpecial");
+                var fireThumb=new GameObject("Turret Thumb",typeof(RectTransform)).GetComponent<RectTransform>();fireThumb.SetParent(fire.transform,false);
+                fire.ConfigureTurret(fireThumb);
                 var slots = Enumerable.Range(1, 4).Select(i => Control("slot" + i)).ToArray();
                 map.Enable();
                 Canvas.ForceUpdateCanvases();
                 var left = new PointerEventData(events.GetComponent<EventSystem>()) { pointerId = 101 };
                 var right = new PointerEventData(events.GetComponent<EventSystem>()) { pointerId = 202 };
                 var third = new PointerEventData(events.GetComponent<EventSystem>()) { pointerId = 303 };
+                Vector2 fireCenter=RectTransformUtility.WorldToScreenPoint(null,fire.transform.position);
+                right.position=fireCenter;
                 left.position = RectTransformUtility.WorldToScreenPoint(null, move.transform.position) + Vector2.right * 70;
                 move.OnPointerDown(left); fire.OnPointerDown(right); InputSystem.Update();
                 Check(movement.ReadValue<Vector2>().x > .9f && firing.IsPressed(), "two fingers move and fire simultaneously (move=" + movement.ReadValue<Vector2>() + ", fire=" + firing.ReadValue<float>() + ", owners=" + move.Held + "/" + fire.Held + ")");
+                right.position=fireCenter+Vector2.up*70;fire.OnDrag(right);InputSystem.Update();
+                Check(aiming.ReadValue<Vector2>().y>.9f&&movement.ReadValue<Vector2>().x>.9f&&firing.IsPressed(),"right stick aims up while moving right and holding fire");
+                third.position=fireCenter+Vector2.left*70;fire.OnDrag(third);InputSystem.Update();
+                Check(aiming.ReadValue<Vector2>().y>.9f,"another finger cannot steal turret aim");
                 fire.OnPointerDown(third); fire.OnPointerUp(third); InputSystem.Update();
                 Check(firing.IsPressed(), "another finger cannot steal or release an owned control");
                 fire.OnPointerUp(right); InputSystem.Update();
                 Check(!firing.IsPressed() && movement.ReadValue<Vector2>().x > .9f, "releasing fire preserves movement");
+                Check(aiming.ReadValue<Vector2>()==Vector2.zero&&fire.LastAim==Vector2.up&&fireThumb.anchoredPosition==Vector2.zero,"release centers stick, clears held aim and retains shot direction");
                 left.position = RectTransformUtility.WorldToScreenPoint(null, move.transform.position) + new Vector2(30, 70);
                 move.OnDrag(left); InputSystem.Update();
                 Check(movement.ReadValue<Vector2>().y > .9f && Mathf.Abs(movement.ReadValue<Vector2>().x) < .01f, "drag turns into exactly one cardinal direction");
@@ -139,18 +169,26 @@ namespace BattleCities.Editor
                 Check(movement.ReadValue<Vector2>() == Vector2.zero, "releasing movement stops the tank");
 
                 var charge = new ChargedFireInput();
+                right.position=fireCenter;
                 fire.OnPointerDown(right); fire.OnPointerUp(right); InputSystem.Update();
                 charge.Sample(firing.WasPressedThisFrame(), firing.WasReleasedThisFrame(), firing.IsPressed(), .01f, true);
                 Check(charge.TryTakeShot(true, out bool power) && !power, "tap within one input update produces a normal shot");
                 Check(!charge.TryTakeShot(true, out _), "tap cannot produce duplicate shots");
                 fire.OnPointerDown(right); InputSystem.Update();
                 charge.Sample(firing.WasPressedThisFrame(), firing.WasReleasedThisFrame(), firing.IsPressed(), .01f, true);
+                right.position=fireCenter+Vector2.left*70;fire.OnDrag(right);InputSystem.Update();
+                Check(firing.IsPressed()&&aiming.ReadValue<Vector2>().x<-.9f,"turret drag does not interrupt held charge");
                 InputSystem.Update();
                 charge.Sample(false, false, firing.IsPressed(), ChargedFireInput.ChargeDuration, true);
                 Check(charge.Ready && !charge.TryTakeShot(true, out _), "hold charges without firing");
                 fire.OnPointerUp(right); InputSystem.Update();
                 charge.Sample(firing.WasPressedThisFrame(), firing.WasReleasedThisFrame(), firing.IsPressed(), .01f, true);
                 Check(charge.TryTakeShot(true, out power) && power, "releasing a full charge produces a special shot");
+                Check(fire.LastAim==Vector2.left&&aiming.ReadValue<Vector2>()==Vector2.zero,"charged release retains final turret direction");
+                InputSystem.Update();right.position=fireCenter+Vector2.right*70;
+                fire.OnPointerDown(right);fire.OnPointerUp(right);InputSystem.Update();
+                Check(firing.WasPressedThisFrame()&&firing.WasReleasedThisFrame()&&fire.LastAim==Vector2.right,"quick aim and release within one frame preserves final aim");
+                right.position=fireCenter;
 
                 special.OnPointerDown(right); InputSystem.Update();
                 Check(specialAction.WasPressedThisFrame(), "special attack reaches its action");
@@ -166,11 +204,14 @@ namespace BattleCities.Editor
                     Check(!slotActions[i].IsPressed(), "unavailable power-up slot " + (i + 1) + " cannot activate");
                 }
                 fire.OnPointerDown(right); InputSystem.Update(); fire.Interactable = false; InputSystem.Update();
-                Check(!firing.IsPressed() && !fire.Held, "pausing cancels held fire");
+                Check(!firing.IsPressed() && !fire.Held&&aiming.ReadValue<Vector2>()==Vector2.zero&&fire.LastAim==Vector2.zero, "pausing cancels held fire and remembered aim");
                 fire.Interactable = true; fire.OnPointerDown(right); InputSystem.Update();
                 fire.CancelInput(); charge.Reset(); InputSystem.Update();
                 charge.Sample(firing.WasPressedThisFrame(), firing.WasReleasedThisFrame(), firing.IsPressed(), .01f, true);
                 Check(!charge.TryTakeShot(true, out _), "focus cancellation does not fire on release");
+                // In batch Edit mode Unity does not run player MonoBehaviour disable callbacks.
+                // Invoke those same callbacks for this fixture; Play mode uses normal lifecycle cleanup.
+                if(!Application.isPlaying)foreach(var control in root.GetComponentsInChildren<UnityEngine.InputSystem.OnScreen.OnScreenControl>())control.GetType().GetMethod("OnDisable",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).Invoke(control,null);
                 UnityEngine.Object.DestroyImmediate(root); InputSystem.Update();
                 Check(InputSystem.devices.Count(d => d is BattleTouchDevice) == originalDevices, "controls remove their virtual device on teardown");
                 Debug.Log("MOBILE INPUT PASS: " + checks + " checks (multi-touch, ownership, drag, tap, charge, special, slots, cancellation, cleanup).");

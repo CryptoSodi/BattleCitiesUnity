@@ -9,7 +9,7 @@ namespace BattleCities
     {
         private BattleTouchControls touchControls;
         internal bool HasTouchControls => touchControls;
-        internal bool TouchActionsAvailable => !IsReplaying && Simulation != null && Simulation.CanAcceptPlayerFire && !paused &&
+        internal bool TouchActionsAvailable => !BlockCombat && Simulation != null && Simulation.CanAcceptPlayerFire && !paused &&
             !consumePending && !showDebug && !TouchLobbyVisible && (!IsOnline || Simulation.MatchStarted);
         internal bool TouchLobbyVisible => Multiplayer.BattleSession.Instance && Multiplayer.BattleSession.Instance.Lobby.Visible;
         internal float TouchChargeProgress => primaryCharge.Progress;
@@ -24,6 +24,7 @@ namespace BattleCities
             BattleTouchDevice.Register();
             string[] directions = { "up", "right", "down", "left" };
             for (int i = 0; i < moveKeys.Length; i++) moveKeys[i].AddBinding("<BattleTouchDevice>/move/" + directions[i]);
+            for (int i = 0; i < aimKeys.Length; i++) aimKeys[i].AddBinding("<BattleTouchDevice>/aim/" + directions[i]);
             fire.AddBinding("<BattleTouchDevice>/fire");
             secondaryFire.AddBinding("<BattleTouchDevice>/special");
             secondarySelect.AddBinding("<BattleTouchDevice>/switchSpecial");

@@ -55,7 +55,7 @@ namespace BattleCities
         }
 
         private Facing? PlayerMove() => Latest(moveKeys, moveOrder) ?? BattleGamepadBindings.Direction(stickMove.ReadValue<Vector2>());
-        private Facing? DirectionalAim() => Latest(aimKeys, aimOrder) ?? BattleGamepadBindings.Direction(stickAim.ReadValue<Vector2>());
+        private Facing? DirectionalAim() => Latest(aimKeys, aimOrder) ?? BattleGamepadBindings.Direction(stickAim.ReadValue<Vector2>()) ?? (touchControls ? touchControls.TurretAim : null);
 
         private void BlockControllerTransition()
         {

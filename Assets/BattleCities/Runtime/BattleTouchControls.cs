@@ -31,6 +31,7 @@ namespace BattleCities
         private readonly Color navy = new Color(.025f, .10f, .18f, .8f);
         private readonly Color blue = new Color(.06f, .38f, .65f, .88f);
         private readonly Color gold = new Color(1f, .73f, .10f, .95f);
+        internal Facing? TurretAim => fire ? BattleGamepadBindings.Direction(fire.LastAim) : null;
 
         public void Initialize(BattleGame owner)
         {
@@ -149,8 +150,11 @@ namespace BattleCities
             move.Configure("move", thumb); controls.Add(move);
 
             fire = Action("Fire", "fire", Vector2.right, new Vector2(-112, 153), 148, gold);
-            Label("Title", fire.transform, "FIRE", new Vector2(0, 12), new Vector2(125, 40), 30, Color.white);
-            fireHint = Label("Charge", fire.transform, "HOLD TO CHARGE", new Vector2(0, -25), new Vector2(140, 30), 12, gold);
+            var fireThumb = Rect("Turret Thumb", fire.transform, new Vector2(.5f, .5f), Vector2.zero, Vector2.one * 84);
+            Surface(fireThumb, blue);
+            Label("Title", fireThumb, "FIRE", Vector2.zero, new Vector2(80, 40), 25, Color.white);
+            fire.ConfigureTurret(fireThumb);
+            fireHint = Label("Charge", fire.transform, "HOLD TO CHARGE", new Vector2(0, -94), new Vector2(154, 30), 12, gold);
             special = Action("Special", "special", Vector2.right, new Vector2(-272, 108), 116, blue);
             Label("Title", special.transform, "SPECIAL", new Vector2(0, 26), new Vector2(110, 24), 15, gold);
             specialName = Label("Attack", special.transform, "MINE", Vector2.zero, new Vector2(110, 28), 18, Color.white);

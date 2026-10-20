@@ -14,6 +14,8 @@ namespace BattleCities
         public FourCC format => new FourCC('B', 'C', 'T', 'H');
         [InputControl(name = "move", layout = "Stick")]
         public Vector2 move;
+        [InputControl(name = "aim", layout = "Stick")]
+        public Vector2 aim;
         [InputControl(name = "fire", layout = "Button", bit = 0)]
         [InputControl(name = "special", layout = "Button", bit = 1)]
         [InputControl(name = "switchSpecial", layout = "Button", bit = 2)]
