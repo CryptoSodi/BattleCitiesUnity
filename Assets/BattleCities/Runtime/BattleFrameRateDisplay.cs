@@ -13,7 +13,7 @@ namespace BattleCities
         Text label;
         double elapsed;
         int frames, displayedFps = -1;
-        Vector3 layoutKey;
+        Vector4 layoutKey;
         bool skipNextFrame;
 
         public void Initialize(Sprite background, Color color)
@@ -70,15 +70,15 @@ namespace BattleCities
             frames = 0;
         }
 
-        public void ApplyLayout(BattleHudLayout layout)
+        public void ApplyLayout(BattleHudLayout layout,bool androidSpecials=false)
         {
-            var key=new Vector3(layout.Width,layout.Height,layout.Scale);
+            var key=new Vector4(layout.Width,layout.Height,layout.Scale,androidSpecials?1:0);
             if(layoutKey==key)return;
             layoutKey=key;
             float scale = layout.OverlayScale;
             panel.anchorMin = panel.anchorMax = new Vector2(1, 1);
             panel.pivot = new Vector2(1, 1);
-            panel.anchoredPosition = new Vector2(-14 * scale, -layout.TopHeight - 162 * scale);
+            panel.anchoredPosition = new Vector2(-14 * scale, -layout.TopHeight - 162 * scale-(androidSpecials?78:0));
             panel.sizeDelta = new Vector2(142 * scale, 34 * scale);
             label.fontSize = Mathf.RoundToInt(22 * scale);
         }

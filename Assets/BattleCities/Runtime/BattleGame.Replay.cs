@@ -98,6 +98,10 @@ namespace BattleCities
             if(!string.IsNullOrEmpty(battleFuelRequestId))
             {BattleFuelReceipt.MarkStarted(replayArchive?.apiUrl,replayArchive?.ownerId,battleFuelRequestId);battleFuelRequestId=null;}
             ApplyPendingReplayEvents();
+            // Tick-zero checkpoints retain the historical default, including when
+            // the server reseeds a prepared match. The first input run records the
+            // chassis ability before any simulation tick, preserving old replays.
+            if(online==null&&Simulation.Tick==0)Simulation.EquippedSecondary=InitialSpecial;
             replayRecorder?.BeforeStep(command,online);
             if(online!=null)Simulation.StepMultiplayer(online);else Simulation.Step(command);
             replayRecorder?.AfterStep();

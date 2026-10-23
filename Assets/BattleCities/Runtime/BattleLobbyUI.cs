@@ -60,7 +60,7 @@ namespace BattleCities.Multiplayer
             roomLabel=Label(panel.transform,"",24,TextAnchor.MiddleCenter);Place(roomLabel.rectTransform,.06f,.94f,.38f,.45f);
             roster=Label(panel.transform,"",18,TextAnchor.MiddleCenter);Place(roster.rectTransform,.06f,.94f,.29f,.38f);
             status=Label(panel.transform,"",19,TextAnchor.MiddleCenter);Place(status.rectTransform,.06f,.94f,.17f,.29f);
-            quickControls=Label(panel.transform,ScreenContent.Text("lobby","drive-wasd-aim-arrow-keys-fire-charge-space-270d37","DRIVE  WASD     AIM  ARROW KEYS\nFIRE / CHARGE  SPACE\nCHANGE WEAPON  Q     DEPLOY  E / RIGHT CLICK"),19,TextAnchor.MiddleCenter);
+            quickControls=Label(panel.transform,"DRIVE  WASD     AIM  ARROW KEYS\nFIRE / CHARGE  SPACE\nDEPLOY  E / RIGHT CLICK",19,TextAnchor.MiddleCenter);
             Place(quickControls.rectTransform,.08f,.92f,.25f,.45f);quickControls.gameObject.SetActive(false);
             start=Button(panel.transform,ScreenContent.Text("lobby","start-match-2bf823","START MATCH"),Vector2.zero,Vector2.zero,()=>{Session.Match.RequestStart();Hide();});Place((RectTransform)start.transform,.06f,.47f,.075f,.155f);
             rematch=Button(panel.transform,ScreenContent.Text("lobby","rematch-lobby-fae500","REMATCH LOBBY"),Vector2.zero,Vector2.zero,()=>{Session.Match.RequestRematch();terminalShown=false;});Place((RectTransform)rematch.transform,.06f,.47f,.075f,.155f);
@@ -161,9 +161,12 @@ namespace BattleCities.Multiplayer
             leave.GetComponentInChildren<UnityEngine.UI.Text>().text=Session.CanCancelConnection?"CANCEL CONNECTION":"LEAVE ROOM";
             close.interactable=!Session.Busy;
             close.GetComponentInChildren<UnityEngine.UI.Text>().text=SceneManager.GetActiveScene().name=="MainMenu"?"BACK TO MENU":"BACK TO GAME";
+            var activeGame=UnityEngine.Object.FindFirstObjectByType<BattleGame>();
+            bool canSwap=activeGame&&activeGame.CanSwapSpecials;
+            quickControls.text=RuntimePlatformInfo.IsPsg1 ? BattleGamepadBindings.HelpFor(canSwap)
+                : "DRIVE  WASD     AIM  ARROW KEYS\nFIRE / CHARGE  SPACE\nDEPLOY  E / RIGHT CLICK"+(canSwap?"     SWITCH SPECIAL  Q":"");
             if(RuntimePlatformInfo.IsPsg1)
             {
-                quickControls.text=BattleGamepadBindings.Help;
                 ConfigureLobbyNavigation();
             }
         }

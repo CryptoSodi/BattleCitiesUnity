@@ -1,9 +1,71 @@
 # Over-the-air game screens
 
-The next Android APK needs to include this runtime once. Subsequent compatible
-display releases download at cold startup without an APK rebuild. Keep the next
-APK at version 1.0.4/code 5 or adjust the publisher's compatibility range explicitly.
-No new APK has been produced for the completed screen migration yet.
+Current Android APKs include the signed screen runtime. The new Web controls guide
+and Web update loader require one requested Web player build; later compatible
+display/artwork updates download at cold startup without rebuilding that player.
+
+## PSG1 controls guide
+
+`battle-guide-psg1` opens inside the TV before a PSG1 battle, using the same guarded
+loadout/fuel continuation as Web. Its separate opt-out preference is
+`battlecities.psg1.controls.dismissed.v1`. Seeker stays excluded.
+
+The guide shows D-pad/left-stick movement, right-stick aim, R1 tap/release and
+hold/release shooting, L1 deploy/conditional hold-switch, and A/B/X/Y direct
+power-up slots. Instruction cards are informational and cannot be selected. Only Continue and the
+opt-out take focus. Left/right switches footer focus; up/down scrolls instructions. A selects the opt-out or Continue; B returns to
+loadout without launching or spending fuel. No pause/restart/camera controls.
+
+Five purple controller illustrations in `Art/controls-guide/psg1/` are bundled
+through `Resources/Psg1BattleGuideArt.asset`. Existing hands/shells and selected
+3D tank models are reused. Nine signed PNG bindings and static copy are declared
+under the PSG1-only definition in `Content/ScreenUpdates/android-v1.json`, using
+the existing Android OTA channel. Artwork verifies/preloads before login. Input,
+navigation, opt-out storage and launch actions remain native.
+
+A requested APK build containing this screen is required before publishing its
+OTA definition; older APKs do not recognize the new screen ID. Set the minimum app
+version to that compatible APK when publishing. Editor checks create no APK or
+OTA release.
+
+Run `BattleCities.Editor.Psg1BattleGuideChecks.Run` to prepare bundled references,
+validate signed Android artwork/cache fallback, check navigation and
+platform/preference/launch isolation, and render native and smaller TV previews.
+
+## Web controls guide
+
+`battle-guide` is Web-only and opens inside the TV after START BATTLE, before the
+existing loadout-save/fuel-debit flow. Continue resumes that flow once. DON'T SHOW
+AGAIN is saved in browser PlayerPrefs. Seeker keeps its current flow; PSG1 uses the
+separate controller guide described below.
+
+The page reuses the existing theme/title/footer/action skins and renders the actual
+selected tank model. Five generated transparent PNGs are bundled as offline
+fallbacks through `Resources/BattleGuideArt` and declared in
+`Content/ScreenUpdates/web-v1.json`: keycap, tap, charge, normal-shell, power-shell.
+All guide copy and these illustration slots have declared OTA bindings. Live tank
+render textures and native key/launch/preference behavior are never remote images.
+
+Web uses `Resources/ScreenUpdates/web-config.json`, the same pinned public signing
+key, a separate `web-ui-v1` channel, and the independent
+`https://assets.battlecities.com/web/screens/v1/latest.json` pointer. Browser WebCrypto
+verifies RSA-SHA256 signatures; file hashes, compatibility, sequence checks and
+complete-image activation remain enforced. Failed checks retain cached/bundled UI.
+
+After the first compatible Web build, publish a strictly increasing Web sequence:
+
+```powershell
+rtk proxy powershell -NoProfile -File Tools/Publishing/Publish-ScreenUpdate.ps1 -Platform web -Sequence 1 -MinimumAppVersion 1.0.7
+```
+
+The publisher normalizes/validates artwork, adds read-only R2 CORS rules for the
+game's Web origins while preserving unrelated rules, verifies immutable uploads,
+and switches the signed Web pointer last. Android publishing remains independent.
+No Web OTA release or CORS change was published during implementation.
+
+Run `BattleCities.Editor.BattleGuideChecks.Run` for responsive Editor previews and
+preference/continue/platform checks, and `node Tools/Publishing/Check-WebScreenSignature.mjs`
+for browser signature verification and tamper rejection. These do not build a player.
 
 ## Migrated screens
 

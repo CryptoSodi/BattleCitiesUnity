@@ -18,6 +18,17 @@ namespace BattleCities
         internal int TouchSlotCount(int slot) => economy ? economy.SlotCount(slot) : 0;
         internal bool TouchSlotAvailable(int slot) => TouchActionsAvailable && !IsOnline && economy &&
             economy.Authenticated && economy.SlotCount(slot) > 0;
+        internal bool TouchOwnsSpecial(Core.SecondaryAttack ability) => BattleSpecialAbilities.Valid(ability) &&
+            System.Array.IndexOf(AvailableSpecials ?? System.Array.Empty<Core.SecondaryAttack>(),ability)>=0;
+        internal bool TouchSpecialAvailable(Core.SecondaryAttack ability) => TouchActionsAvailable && !IsReplaying &&
+            !secondaryQueued && TouchOwnsSpecial(ability) && Simulation.SecondaryCooldown<=0 &&
+            Simulation.SecondaryCountFor(ability)<Simulation.SecondaryLimitFor(ability);
+        internal void DeployTouchSpecial(Core.SecondaryAttack ability)
+        {
+            if(!TouchSpecialAvailable(ability))return;
+            if(IsOnline)onlineSecondary=ability;else Simulation.EquippedSecondary=ability;
+            secondaryQueued=true;
+        }
 
         private void ConfigureTouchBindings()
         {
@@ -33,13 +44,14 @@ namespace BattleCities
 
         private void CreateTouchControls()
         {
-            if (RuntimePlatformInfo.Current != GameRuntimePlatform.Android || touchControls) return;
+            if (!RuntimePlatformInfo.UsesTouchGameplay || touchControls || tvReplay) return;
             touchControls = gameObject.AddComponent<BattleTouchControls>();
             touchControls.Initialize(this);
         }
 
         internal void CancelTouchGameplay()
         {
+            specialGesture.Reset();
             if (touchControls) touchControls.CancelInput();
             ResetPrimaryFire();
             secondaryQueued = false;
@@ -48,7 +60,6 @@ namespace BattleCities
         private void OnApplicationPause(bool suspended)
         {
             if (!suspended) return;
-            if (!IsOnline) paused = true;
             CancelTouchGameplay();
         }
 

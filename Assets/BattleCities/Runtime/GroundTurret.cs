@@ -56,6 +56,9 @@ namespace BattleCities
         public Vector3 MuzzlePosition=>muzzleFlash?muzzleFlash.position:transform.position;
 
         void Awake(){Initialize();}
+        // For isolated UI model renders; does not initialize combat, audio or lights.
+        public void SampleDeployedPreview()
+        { if(animationRoot&&deployClip)deployClip.SampleAnimation(animationRoot,deployClip.length); }
         public void Initialize()
         {
             if(initialized)return;

@@ -88,6 +88,7 @@ namespace BattleCities.UI
         private async void PrepareSignIn()
         {
             restoringSession=true;SetButtons(false);
+            int retrySeconds = 3;
             while (this && isActiveAndEnabled && !contentReady)
             {
                 try
@@ -109,9 +110,15 @@ namespace BattleCities.UI
                 {
                     Debug.LogWarning("Startup game content unavailable: " + error.Message);
                     if (!this || !isActiveAndEnabled) return;
-                    SetStatus("Game content unavailable. Retrying...");
-                    try { await System.Threading.Tasks.Task.Delay(3000, destroyCancellationToken); }
+                    bool connectionRetry = error is RemoteGameArt.DownloadException download && download.IsTransient;
+                    SetStatus(connectionRetry
+                        ? $"Connecting to game content. Retrying in {retrySeconds}s..."
+                        : error is System.IO.InvalidDataException
+                            ? $"Game content verification failed. Retrying in {retrySeconds}s..."
+                            : $"Unable to load game content. Retrying in {retrySeconds}s...");
+                    try { await System.Threading.Tasks.Task.Delay(retrySeconds * 1000, destroyCancellationToken); }
                     catch(System.OperationCanceledException){return;}
+                    retrySeconds = Mathf.Min(30, retrySeconds * 2);
                 }
             }
             if(!this||!isActiveAndEnabled)return;

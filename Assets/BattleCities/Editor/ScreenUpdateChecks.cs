@@ -34,7 +34,7 @@ namespace BattleCities.Editor
             ScreenUpdates.ReadDocument(File.ReadAllText(path));
             string hash=ScreenUpdates.Hash(File.ReadAllBytes(path));
             var validator=new MemoryStream();
-            foreach(var name in new[]{"Assets/BattleCities/UI/Runtime/ScreenUpdates.cs","Assets/BattleCities/UI/Runtime/ScreenContent.cs","Assets/BattleCities/UI/Runtime/AuthoredScreenElement.cs","Assets/BattleCities/UI/Runtime/RemoteScreenView.cs","Assets/BattleCities/Editor/ScreenUpdateChecks.cs"}){var bytes=File.ReadAllBytes(name);validator.Write(bytes,0,bytes.Length);}
+            foreach(var name in new[]{"Assets/BattleCities/UI/Runtime/ScreenUpdates.cs","Assets/BattleCities/UI/Runtime/ScreenContent.cs","Assets/BattleCities/UI/Runtime/BattleGuideScreen.cs","Assets/BattleCities/UI/Runtime/BattleGuideScreen.Psg1.cs","Assets/BattleCities/UI/Runtime/AuthoredScreenElement.cs","Assets/BattleCities/UI/Runtime/RemoteScreenView.cs","Assets/BattleCities/Editor/ScreenUpdateChecks.cs"}){var bytes=File.ReadAllBytes(name);validator.Write(bytes,0,bytes.Length);}
             Directory.CreateDirectory("Builds/ScreenUpdateChecks");
             File.WriteAllText("Builds/ScreenUpdateChecks/"+hash+"-validation.json",JsonConvert.SerializeObject(new{sha256=hash,validatorHash=ScreenUpdates.Hash(validator.ToArray())}));
             Debug.Log("SCREEN DOCUMENT VALIDATED: "+path);

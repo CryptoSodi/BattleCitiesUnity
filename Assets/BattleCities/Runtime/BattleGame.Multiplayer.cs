@@ -22,7 +22,7 @@ namespace BattleCities
                 else LoadStage(stage);Simulation.ConfigureMultiplayer(mode);Simulation.RecordVisualEvents();
                 EnemyFire=true;Simulation.DisableEnemyFire=false;
                 if(mode==BattleMode.Versus&&eagle)eagle.SetActive(false);
-                shotSequence=secondarySequence=0;latestPowerShot=false;onlineSecondary=SecondaryAttack.Mine;
+                shotSequence=secondarySequence=0;latestPowerShot=false;onlineSecondary=InitialSpecial;
                 if(!match.Object.HasStateAuthority&&magicDrops)
                 {
                     magicDrops.StopForRecovery(Simulation);magicDrops=null;
@@ -39,9 +39,10 @@ namespace BattleCities
         {
             var result=new BattleNetworkInput{TankTier=BattlePreparation.TankTier,Move=-1,Aim=-1,ShotSequence=shotSequence,SecondarySequence=secondarySequence,Secondary=(int)onlineSecondary,PowerRequested=latestPowerShot};
             if(!IsOnline||paused||BlockCombat||!Simulation.MatchStarted||NetworkMatch.LocalSlot<0||Simulation.Lost||Simulation.Won)return result;
-            result.Move=(int?)PlayerMove()??-1;result.Aim=(int?)DirectionalAim()??-1;
+            result.Move=(int?)PlayerMove()??-1;
             result.ChargeHeld=fire.IsPressed();
             var command=default(Command);QueuePrimaryCommand(ref command);
+            result.Aim=(int?)command.Aim??-1;
             if(command.Fire){result.ShotSequence=++shotSequence;result.PowerRequested=latestPowerShot=command.PowerShot;}
             if(secondaryQueued){result.SecondarySequence=++secondarySequence;secondaryQueued=false;}
             return result;

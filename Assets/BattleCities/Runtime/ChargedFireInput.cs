@@ -11,6 +11,7 @@ namespace BattleCities.Core
         public float Progress => Math.Min(1, ChargeSeconds / ChargeDuration);
         public bool Ready => IsCharging && ChargeSeconds >= ChargeDuration;
         private bool? pendingShot;
+        public bool HasPendingShot => pendingShot.HasValue;
 
         // Keep only the released shot until the next simulation step. Normal taps
         // during reload are discarded instead of becoming an automatic-fire queue.
@@ -53,5 +54,19 @@ namespace BattleCities.Core
         }
 
         public void Reset() { IsCharging = false; ChargeSeconds = 0; pendingShot = null; }
+    }
+
+    // Presentation/input state only. Aim is carried by the existing recorded command.
+    public sealed class ShotAimLatch
+    {
+        private Facing? heldAim, releasedAim;
+        public void ObserveAim(Facing? aim) { if(aim.HasValue) heldAim = aim; }
+        public void Release(Facing? liveAim, Facing? touchReleaseAim, Facing? movement, Facing fallback)
+        {
+            releasedAim = liveAim ?? touchReleaseAim ?? heldAim ?? movement ?? fallback;
+            heldAim = null;
+        }
+        public Facing? Resolve(Facing? liveAim) => releasedAim ?? liveAim ?? heldAim;
+        public void Reset() { heldAim = releasedAim = null; }
     }
 }

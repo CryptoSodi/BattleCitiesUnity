@@ -9,29 +9,30 @@ using MobileScreen = UnityEngine.Device.Screen;
 
 namespace BattleCities
 {
-    // Built only for Android phones. All combat buttons feed the existing Gameplay actions.
-    public sealed class BattleTouchControls : MonoBehaviour
+    // Shared by Android phones and mobile browsers; uses gameplay actions and the guarded special command queue.
+    public sealed partial class BattleTouchControls : MonoBehaviour
     {
         private BattleGame game;
         private Canvas canvas;
-        private RectTransform safeRoot, pauseRect;
+        private RectTransform safeRoot;
         private CanvasGroup visibility;
         private readonly List<BattleTouchControl> controls = new List<BattleTouchControl>();
         private readonly UI.ArcadeTextStyles textStyles=new UI.ArcadeTextStyles();
-        private BattleTouchControl move, fire, special, switchSpecial;
+        private BattleTouchControl move, fire;
         private readonly BattleTouchControl[] slots = new BattleTouchControl[4];
         private readonly UnityEngine.UI.RawImage[] slotIcons = new UnityEngine.UI.RawImage[4];
-        private readonly TMP_Text[] slotCounts = new TMP_Text[4], slotNames = new TMP_Text[4];
-        private TMP_Text fireHint, specialName, specialHint, pauseLabel, stateLabel, feedback;
-        private UnityEngine.UI.Button pauseButton, resumeButton, restartButton, nextButton;
-        private GameObject statePanel;
+        private readonly TMP_Text[] slotCounts = new TMP_Text[4];
+        private readonly GameObject[] slotBadges=new GameObject[4];
+        private RectTransform leftZone,rightZone;
+        private TMP_Text fireHint, feedback;
         private Texture2D circleTexture;
         private Sprite circle;
         private bool ownsOrientation;
         private readonly Color navy = new Color(.025f, .10f, .18f, .8f);
         private readonly Color blue = new Color(.06f, .38f, .65f, .88f);
         private readonly Color gold = new Color(1f, .73f, .10f, .95f);
-        internal Facing? TurretAim => fire ? BattleGamepadBindings.Direction(fire.LastAim) : null;
+        internal Facing? TurretAim => fire && fire.Held ? BattleGamepadBindings.Direction(fire.LastAim) : null;
+        internal Facing? TakeReleasedTurretAim() => fire ? BattleGamepadBindings.Direction(fire.TakeReleasedAim()) : null;
 
         public void Initialize(BattleGame owner)
         {
@@ -105,18 +106,6 @@ namespace BattleCities
             return control;
         }
 
-        private UnityEngine.UI.Button Button(string name, Transform parent, Vector2 anchor, Vector2 position, Vector2 size, string caption, UnityEngine.Events.UnityAction action)
-        {
-            var rect = Rect(name, parent, anchor, position, size);
-            var image = Surface(rect, blue, false, true);
-            var button = rect.gameObject.AddComponent<UnityEngine.UI.Button>();
-            button.targetGraphic = image;
-            button.navigation = new UnityEngine.UI.Navigation { mode = UnityEngine.UI.Navigation.Mode.None };
-            button.onClick.AddListener(action);
-            Label("Label", rect, caption, Vector2.zero, size, 21, Color.white);
-            return button;
-        }
-
         private void Build()
         {
             MakeCircle();
@@ -149,45 +138,42 @@ namespace BattleCities
             move = pad.gameObject.AddComponent<BattleTouchControl>();
             move.Configure("move", thumb); controls.Add(move);
 
-            fire = Action("Fire", "fire", Vector2.right, new Vector2(-112, 153), 148, gold);
+            fire = Action("Fire", "fire", Vector2.right, new Vector2(-272, 148), 148, gold);
             var fireThumb = Rect("Turret Thumb", fire.transform, new Vector2(.5f, .5f), Vector2.zero, Vector2.one * 84);
             Surface(fireThumb, blue);
             Label("Title", fireThumb, "FIRE", Vector2.zero, new Vector2(80, 40), 25, Color.white);
             fire.ConfigureTurret(fireThumb);
             fireHint = Label("Charge", fire.transform, "HOLD TO CHARGE", new Vector2(0, -94), new Vector2(154, 30), 12, gold);
-            special = Action("Special", "special", Vector2.right, new Vector2(-272, 108), 116, blue);
-            Label("Title", special.transform, "SPECIAL", new Vector2(0, 26), new Vector2(110, 24), 15, gold);
-            specialName = Label("Attack", special.transform, "MINE", Vector2.zero, new Vector2(110, 28), 18, Color.white);
-            specialHint = Label("Status", special.transform, "READY", new Vector2(0, -27), new Vector2(112, 24), 13, Color.white);
-            switchSpecial = Action("Switch Special", "switchSpecial", Vector2.right, new Vector2(-275, 219), 66, blue);
-            Label("Title", switchSpecial.transform, "SWAP", Vector2.zero, new Vector2(60, 30), 15, Color.white);
+            move.ConfigureFloating();fire.ConfigureFloating();
+            leftZone=Zone("Movement touch area",move,0,.5f);
+            rightZone=Zone("Turret touch area",fire,.5f,1);
+            BuildSpecialButtons();
 
             for (int i = 0; i < 4; i++)
             {
-                slots[i] = Action("Powerup " + (i + 1), "slot" + (i + 1), new Vector2(.5f, 0), new Vector2((i - 1.5f) * 84, 64), 74, blue);
-                var iconRect = Rect("Icon", slots[i].transform, new Vector2(.5f, .5f), new Vector2(0, 5), Vector2.one * 46);
+                var slot=Rect("Powerup "+(i+1),safeRoot,new Vector2(.5f,0),new Vector2((i-1.5f)*84,64),Vector2.one*74);
+                Surface(slot,Color.clear,false,true);
+                slots[i]=slot.gameObject.AddComponent<BattleTouchControl>();slots[i].Configure("slot"+(i+1));controls.Add(slots[i]);
+                var iconRect = Rect("Icon", slots[i].transform, new Vector2(.5f, .5f), Vector2.zero, Vector2.one * 64);
                 slotIcons[i] = iconRect.gameObject.AddComponent<UnityEngine.UI.RawImage>();
                 slotIcons[i].raycastTarget = false;
-                slotCounts[i] = Label("Count", slots[i].transform, "0", new Vector2(22, -22), new Vector2(34, 26), 18, gold);
-                slotNames[i] = Label("Name", slots[i].transform, "EMPTY", new Vector2(0, -52), new Vector2(82, 22), 12, Color.white);
+                var badge=Rect("Count badge",slot,new Vector2(.5f,.5f),new Vector2(24,-24),new Vector2(28,28));
+                Surface(badge,navy);slotBadges[i]=badge.gameObject;
+                slotCounts[i] = Label("Count", badge, "0",Vector2.zero,new Vector2(30,28),20,Color.white);
             }
             feedback = Label("Action Feedback", safeRoot, "", Vector2.zero, new Vector2(590, 36), 17, gold);
             feedback.rectTransform.anchorMin = feedback.rectTransform.anchorMax = new Vector2(.5f, 0);
             feedback.rectTransform.anchoredPosition = new Vector2(0, 150);
             feedback.textWrappingMode = TextWrappingModes.Normal;
 
-            pauseButton = Button("Pause", safeRoot, new Vector2(.5f, 1), new Vector2(0, -86), new Vector2(98, 48), ScreenContent.Text("pause","pause","PAUSE"), () =>
-            { game.CancelTouchGameplay(); game.Paused = !game.Paused; });
-            pauseLabel = pauseButton.GetComponentInChildren<TMP_Text>();
-            pauseRect = (RectTransform)pauseButton.transform;
+        }
 
-            var panel = Rect("Match State", safeRoot, new Vector2(.5f, .5f), Vector2.zero, new Vector2(330, 235));
-            statePanel = panel.gameObject;
-            Surface(panel, new Color(.025f, .07f, .12f, .96f), false, true);
-            stateLabel = Label("State", panel, "PAUSED", new Vector2(0, 74), new Vector2(310, 44), 30, gold);
-            resumeButton = Button("Resume", panel, new Vector2(.5f, .5f), new Vector2(0, 15), new Vector2(256, 48), ScreenContent.Text("pause","action-resume","RESUME"), () => game.Paused = false);
-            restartButton = Button("Restart", panel, new Vector2(.5f, .5f), new Vector2(0, -46), new Vector2(256, 48), ScreenContent.Text("pause","action-restart","RESTART"), () => game.RequestBattleRestart());
-            nextButton = Button("Next Stage", panel, new Vector2(.5f, .5f), new Vector2(0, 15), new Vector2(256, 48), ScreenContent.Text("pause","action-next-stage","NEXT STAGE"), () => game.LoadStage(game.Stage + 1));
+        private RectTransform Zone(string name,BattleTouchControl target,float left,float right)
+        {
+            var zone=Rect(name,safeRoot,Vector2.zero,Vector2.zero,Vector2.zero);
+            zone.anchorMin=new Vector2(left,0);zone.anchorMax=new Vector2(right,1);zone.offsetMin=zone.offsetMax=Vector2.zero;
+            Surface(zone,Color.clear,false,true);zone.gameObject.AddComponent<BattleTouchZone>().Configure(target);
+            zone.SetAsFirstSibling();return zone;
         }
 
         private void LateUpdate() { if (game) Refresh(); }
@@ -199,50 +185,65 @@ namespace BattleCities
             safeRoot.anchorMin = new Vector2(safe.xMin / width, safe.yMin / height);
             safeRoot.anchorMax = new Vector2(safe.xMax / width, safe.yMax / height);
             safeRoot.offsetMin = safeRoot.offsetMax = Vector2.zero;
-            pauseRect.anchoredPosition = new Vector2(0, -BattleHud.TopHeightPixels / Mathf.Max(.01f, canvas.scaleFactor) - 36);
-            bool visible = width > height && !game.TouchLobbyVisible;
+            float topReserve=Mathf.Max(0,BattleHud.TopHeightPixels-(height-safe.yMax))/Mathf.Max(.001f,canvas.scaleFactor);
+            leftZone.offsetMax=rightZone.offsetMax=new Vector2(0,-topReserve);
+            bool visible = (width > height || RuntimePlatformInfo.IsMobileBrowser) && !game.TouchLobbyVisible;
             visibility.alpha = visible ? 1 : 0;
             visibility.blocksRaycasts = visible;
             bool active = visible && game.TouchActionsAvailable;
-            move.Interactable = fire.Interactable = switchSpecial.Interactable = active;
+            LayoutPowerupsInHud(width,height,safe);
+            move.Interactable = fire.Interactable = active;
             var state = game.Simulation;
-            special.Interactable = active && state.CanUseSecondary;
+            RefreshSpecialButtons(width,height,safe,visible);
             if (!visible) CancelInput();
             if (state == null) return;
             feedback.text = game.TouchConsumePending ? "USING POWER-UP…" : state.SecondaryStatus;
-            specialName.text = state.EquippedSecondary == SecondaryAttack.LandDrone ? "LAND DRONE" : state.EquippedSecondary == SecondaryAttack.PatrolDrone ? "DRONE"
-                : state.EquippedSecondary == SecondaryAttack.GroundTurret ? "TURRET" : state.EquippedSecondary == SecondaryAttack.None ? "NONE" : "MINE";
-            specialHint.text = state.SecondaryCooldown > 0 ? state.SecondaryCooldown.ToString("0.0") + "s" : state.SecondaryCount >= state.SecondaryLimit ? "LIMIT" : "READY";
             fireHint.text = game.TouchChargeProgress >= 1 ? "RELEASE!" : fire.Held ? Mathf.RoundToInt(game.TouchChargeProgress * 100) + "%" : "HOLD TO CHARGE";
             for (int i = 0; i < 4; i++)
             {
                 string type = game.TouchSlotType(i);
-                bool hasIcon = game.PowerupAtlas && BattleHud.TryPowerupUv(type, out _);
+                bool showSlots=!state.IsMultiplayer&&!game.IsReplaying;
+                if(slots[i].gameObject.activeSelf!=showSlots)slots[i].gameObject.SetActive(showSlots);
+                bool hasIcon = showSlots&&game.PowerupAtlas&&BattleHud.TryPowerupUv(type,out _);
                 slots[i].Interactable = visible && game.TouchSlotAvailable(i);
                 slotIcons[i].enabled = hasIcon;
+                slots[i].GetComponent<UnityEngine.UI.Image>().raycastTarget=hasIcon;
+                slotBadges[i].SetActive(hasIcon);
                 if (hasIcon)
                 {
-                    BattleHud.TryPowerupUv(type, out var uv);
-                    slotIcons[i].texture = game.PowerupAtlas; slotIcons[i].uvRect = uv;
-                    slotIcons[i].color = slots[i].Interactable ? Color.white : new Color(1, 1, 1, .4f);
+                    BattleHud.TryPowerupUv(type,out var uv);
+                    slotIcons[i].texture=game.PowerupAtlas;slotIcons[i].uvRect=uv;
+                    slotIcons[i].color = new Color(1,1,1,slots[i].Interactable?.3f:.15f);
                 }
                 slotCounts[i].text = game.TouchConsumePending ? "…" : game.TouchSlotCount(i).ToString();
-                slotNames[i].text = string.IsNullOrEmpty(type) ? "EMPTY" : type.ToUpperInvariant();
             }
-            pauseLabel.text = game.Paused ? ScreenContent.Text("pause","action-resume","RESUME") : ScreenContent.Text("pause","pause","PAUSE");
-            bool ended = state.Lost || state.Won;
-            pauseButton.interactable = !ended;
-            statePanel.SetActive(!game.IsOnline && (game.Paused || ended));
-            stateLabel.text=ended?state.Won?ScreenContent.Text("pause","stage-clear","STAGE CLEAR"):ScreenContent.Text("pause","game-over","GAME OVER"):ScreenContent.Text("pause","paused","PAUSED");
-            resumeButton.gameObject.SetActive(!ended);
-            nextButton.gameObject.SetActive(state.Won && game.Stage < 35);
         }
 
         public void CancelInput() { foreach (var control in controls) if (control) control.CancelInput(); }
+        private void LayoutPowerupsInHud(float screenWidth,float screenHeight,UnityEngine.Rect safe)
+        {
+            float pixelWidth=canvas.pixelRect.width>0?canvas.pixelRect.width:screenWidth;
+            float pixelHeight=canvas.pixelRect.height>0?canvas.pixelRect.height:screenHeight;
+            var layout=BattleHudLayout.ForViewport(pixelWidth,pixelHeight);
+            float scale=layout.Scale/Mathf.Max(.001f,canvas.scaleFactor);
+            float safeTop=(1-safe.yMax/screenHeight)*pixelHeight/Mathf.Max(.001f,canvas.scaleFactor);
+            for(int i=0;i<4;i++)
+            {
+                var rect=(RectTransform)slots[i].transform;rect.anchorMin=rect.anchorMax=Vector2.one;
+                rect.anchoredPosition=new Vector2(-(6+BattleHudLayout.AndroidPowerupSlotWidth*.5f+(3-i)*(BattleHudLayout.AndroidPowerupSlotWidth+BattleHudLayout.AndroidPowerupGap))*scale,
+                    -layout.TopHeight*.5f*scale+safeTop);
+                rect.sizeDelta=new Vector2(BattleHudLayout.AndroidPowerupSlotWidth,layout.TopHeight)*scale;
+                slotIcons[i].rectTransform.sizeDelta=Vector2.one*BattleHudLayout.AndroidPowerupIconSize*scale;
+                var badge=(RectTransform)slotBadges[i].transform;
+                badge.anchoredPosition=new Vector2(16,13)*scale;badge.sizeDelta=Vector2.one*18*scale;
+                slotCounts[i].rectTransform.sizeDelta=new Vector2(22,20)*scale;slotCounts[i].fontSize=14*scale;
+            }
+        }
         private void OnDisable() { CancelInput(); if (canvas) canvas.gameObject.SetActive(false); }
         private void OnEnable() { if (canvas) canvas.gameObject.SetActive(true); }
         private void OnDestroy()
         {
+            DisposeSpecialButtons();
             textStyles.Dispose();
             if (canvas) Destroy(canvas.gameObject);
             if (circle) Destroy(circle);

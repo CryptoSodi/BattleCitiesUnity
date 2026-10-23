@@ -30,7 +30,9 @@ namespace BattleCities.Editor
                 {
                     var layout=new BattleHudLayout(size.x,size.y,size.x==1688?2:1);
                     var target=new RenderTexture(size.x,size.y,24);target.Create();camera.targetTexture=target;camera.aspect=(float)size.x/size.y;
-                    hud.DrawPreview(state,atlas,layout,PowerupUiMode.WebTopLeft);
+                    bool psg1=size.x==1240;
+                    state.EquippedSecondary=SecondaryAttack.LandDrone;
+                    hud.DrawPreview(state,atlas,layout,psg1?PowerupUiMode.MergedTopHud:PowerupUiMode.WebTopLeft);
                     var canvas=UnityEngine.Object.FindAnyObjectByType<Canvas>();
                     canvas.renderMode=RenderMode.ScreenSpaceCamera;canvas.worldCamera=camera;canvas.planeDistance=1;
                     Canvas.ForceUpdateCanvases();camera.Render();Canvas.ForceUpdateCanvases();
@@ -41,18 +43,55 @@ namespace BattleCities.Editor
                     Near(top.y-bottom.y,layout.TopHeightPixels,"actual scaled header height "+size);
                     Near(header.rectTransform.rect.width*canvas.scaleFactor,size.x,"header spans viewport "+size);
                     var score=canvas.GetComponentsInChildren<Text>().Single(t=>t.text=="SCORE");
+                    var special=canvas.GetComponentsInChildren<RawImage>().SingleOrDefault(t=>t.texture&&t.texture.name=="Special icon LandDrone");
+                    Check((special!=null)==psg1,"special indicator only appears on PSG1 "+size);
+                    if(psg1)
+                    {
+                        Check(!special.raycastTarget,"special indicator does not block input");
+                        float specialTop=-special.rectTransform.anchoredPosition.y;
+                        Check(specialTop>=0&&specialTop+special.rectTransform.rect.height<=layout.TopHeight,"special indicator fits inside header");
+                        var fourth=canvas.GetComponentsInChildren<Text>().Single(t=>t.text=="Y");
+                        Check(special.rectTransform.anchoredPosition.x>fourth.rectTransform.anchoredPosition.x+fourth.rectTransform.rect.width,"special follows fourth power-up");
+                    }
                     Check(score.fontSize*canvas.scaleFactor>=16,"score label remains readable "+size);
                     Near(layout.TopHeight,48,"single-row header at every resolution "+size);
                     var enemies=canvas.GetComponentsInChildren<Text>().Single(t=>t.text=="ENEMIES");
+                    if(psg1)Check(enemies.rectTransform.anchoredPosition.x<=360,"PSG1 metrics use compact spacing");
                     Check(Mathf.Abs(enemies.rectTransform.anchoredPosition.y-score.rectTransform.anchoredPosition.y)<=2,"enemies remain alongside score "+size);
                     var enemyTexture=Resources.Load<Texture2D>("HudEnemy");
                     var roster=canvas.GetComponentsInChildren<RawImage>().Where(image=>image.texture==enemyTexture).ToArray();
                     Check(roster.Length==state.TotalEnemies&&roster.All(image=>Mathf.Abs(image.rectTransform.rect.width/image.rectTransform.rect.height-(float)enemyTexture.width/enemyTexture.height)<.05f),"enemy roster keeps artwork proportions "+size);
+                    if(psg1)Check(roster.All(image=>image.rectTransform.rect.width>=26),"PSG1 enemies use reclaimed header space");
                     Near(canvas.scaleFactor,layout.Scale,"canvas uses one scale "+size);
                     camera.Render();var old=RenderTexture.active;RenderTexture.active=target;
                     var picture=new Texture2D(size.x,size.y,TextureFormat.RGB24,false);
                     picture.ReadPixels(new Rect(0,0,size.x,size.y),0,0);picture.Apply();
                     File.WriteAllBytes(Output+"/hud-"+size.x+"x"+size.y+".png",picture.EncodeToPNG());
+                    if(psg1)
+                    {
+                        var strip=new Texture2D(size.x,60,TextureFormat.RGB24,false);
+                        strip.ReadPixels(new Rect(0,size.y-60,size.x,60),0,0);strip.Apply();
+                        File.WriteAllBytes(Output+"/psg-compact-header.png",strip.EncodeToPNG());
+                        UnityEngine.Object.DestroyImmediate(strip);
+                        foreach(var ability in new[]{SecondaryAttack.Mine,SecondaryAttack.PatrolDrone,SecondaryAttack.GroundTurret,SecondaryAttack.LandDrone})
+                        foreach(bool cooling in new[]{false,true})
+                        {
+                            state.EquippedSecondary=ability;
+                            float duration=ability==SecondaryAttack.Mine?BattleSimulation.SecondaryCooldownSeconds:4;
+                            typeof(BattleSimulation).GetProperty("SecondaryCooldown").SetValue(state,cooling?duration*.5f:0f);
+                            hud.DrawPreview(state,atlas,layout,PowerupUiMode.MergedTopHud);
+                            var rings=canvas.GetComponentsInChildren<Image>().Where(i=>i.type==Image.Type.Filled).ToArray();
+                            Check(rings.Length==3&&Mathf.Abs(rings.Last().fillAmount-(cooling?.5f:1f))<.001f,"cooldown sweep tracks simulation "+ability+" "+cooling);
+                            Check(canvas.GetComponentsInChildren<RawImage>().Any(i=>i.texture&&i.texture.name=="Special icon "+ability),"actual model icon loaded "+ability);
+                            Canvas.ForceUpdateCanvases();camera.Render();RenderTexture.active=target;
+                            picture.ReadPixels(new Rect(0,0,size.x,size.y),0,0);picture.Apply();
+                            File.WriteAllBytes(Output+"/psg-special-"+ability+(cooling?"-cooldown":"-ready")+".png",picture.EncodeToPNG());
+                            var detail=new Texture2D(240,130,TextureFormat.RGB24,false);
+                            detail.ReadPixels(new Rect(size.x-240,size.y-130,240,130),0,0);detail.Apply();
+                            File.WriteAllBytes(Output+"/psg-special-"+ability+(cooling?"-cooldown":"-ready")+"-detail.png",detail.EncodeToPNG());
+                            UnityEngine.Object.DestroyImmediate(detail);
+                        }
+                    }
                     RenderTexture.active=old;UnityEngine.Object.DestroyImmediate(picture);
                     camera.targetTexture=null;UnityEngine.Object.DestroyImmediate(target);
                 }

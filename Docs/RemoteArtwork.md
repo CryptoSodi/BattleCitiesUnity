@@ -47,10 +47,16 @@ If Unity or the machine crashes during staging, do not build or play until runni
 
 ## First launch and cache
 
-After successful sign-in, the existing login status shows download progress.
-The menu opens only when the complete artwork and model pack has been verified and loaded.
-A failure keeps login visible; Connect Wallet retries the download without asking
-the wallet to sign again. Downloads use HTTPS, disallow redirects, enforce expected
+Before session restoration or sign-in, the opaque startup screen shows download,
+verification and preload progress with a percentage and bar. Login stays hidden
+until the complete artwork and model pack has been verified and preloaded.
+Failures retry on startup, without using Connect Wallet as a download action.
+The downloader waits while Android reports no reachable network interface, then
+attempts HTTPS. Connection/temporary HTTP failures show a connection retry message;
+verification failures show a distinct content message. Retries back off from 3 to
+30 seconds. Diagnostics preserve Unity's result, HTTP code, native error and bytes
+received; HTTP 0 means no HTTP response was received, not proof of a host outage.
+Downloads use HTTPS, disallow redirects, enforce expected
 size and SHA256, and stage into a partial file before promoting a complete cache.
 The same APK reuses verified cached content on later launches, including without
 asset-host access. Login and online game services still have their own network needs.
@@ -98,6 +104,40 @@ Run `BattleCities.Editor.RemoteGameArtChecks.Run` in batch Unity. It checks vali
 missing, truncated and corrupt cache files, manifest validation, engine compatibility,
 and ordinary local resource fallback. Results are in `Builds/RemoteArtChecks`.
 These checks do not substitute for a real Android first-download test.
+
+### Delivery investigation (2026-10-20)
+
+Android 1.0.7 / version code 7 logs showed repeated immediate download failures
+with HTTP 0. Screen update requests also failed during that startup. That build
+discarded the transport error text, so DNS, TLS and other connection causes cannot
+be distinguished retrospectively. Its connected device subsequently resolved and
+reached the asset domain. R2 domain ownership/TLS were active. A public download of
+`439dd29263d9c5e213c6a8471a3d54d6cab7b8d73a88c9a18fa49d36df49fc31.bundle`
+returned HTTP 200, exactly 66,628,406 bytes and the expected SHA256; first byte was
+received in 0.55 seconds and transfer finished in 24 seconds from the workstation.
+This confirms the current object is available; it does not reproduce or explain
+the phone's earlier transport failure. Improved native diagnostics require a new
+APK when a build is requested. No hosting configuration was changed.
+
+The subsequent signed diagnostic APK 1.0.7 / version code 8 reproduced the delay
+and logged `ConnectionError, HTTP 0, received 0 bytes. Cannot resolve destination host`
+for both screen updates and the artwork request. This identifies DNS resolution
+as the failing stage; the cause of the resolver failure is still under investigation.
+The same phone's shell curl could resolve the HTTPS domain and receive HTTP 200.
+The application later recovered and began transferring the new bundle. Do not
+describe the diagnostic/backoff changes as a DNS fix or bypass HTTPS verification.
+The v8 bundle is
+`cbab26dc6d28d30080d3da33dcb784ed405dc841e209e0c5fde65a10ba814f3d.bundle`,
+66,629,393 bytes, uploaded and verified against its embedded manifest.
+
+During the next build on 2026-10-21, workstation curl also failed to resolve the
+asset domain. `Resolve-DnsName` through the default resolver returned
+`RCODE_SERVER_FAILURE`; querying `1.1.1.1` returned the expected Cloudflare addresses
+`172.67.219.12` and `104.21.86.121`. This reproduces a resolver-path failure outside
+Unity too; it does not establish which upstream component caused it. No device or
+system DNS setting was changed. A temporary curl `--resolve` can verify a hosted
+object with normal hostname/TLS checks while investigating DNS; never disable TLS
+verification or pin these CDN IPs into the app.
 
 ## Local model extraction result (2026-10-16)
 

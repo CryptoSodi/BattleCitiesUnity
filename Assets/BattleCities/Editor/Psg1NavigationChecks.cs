@@ -30,7 +30,7 @@ namespace BattleCities.Editor
 
         [MenuItem("Battle Cities/Validate All PSG1 Screen Navigation")]
         public static void Run()
-            => Begin(Screens(), "login, home, dialogs, tank grid, lobby/keypad, debug, pause and return to menu");
+            => Begin(Screens(), "login, home, dialogs, tank grid, lobby/keypad and uninterrupted battle controls");
 
         public static void RunResults()
             => Begin(ResultScreens(), "full-screen results, next stage, game over, final stage and return to menu");
@@ -228,29 +228,13 @@ namespace BattleCities.Editor
             yield return Tap(AndroidKeyCode.ButtonA);
             Check(!preBattle.IsOpen && Selected == menu.StartButton, "Tank B returns home");
 
-            Result = "Running battle pause/debug navigation checks";
+            Result = "Checking removed battle pause controls";
             yield return Scene("BattleCity");
             var game = UnityEngine.Object.FindFirstObjectByType<BattleGame>();
-            yield return Tap(AndroidKeyCode.ButtonStart); Check(game.Paused, "Start pauses battle");
-            for (int i = 0; i < 3; i++) yield return Direction(1);
-            yield return Tap(AndroidKeyCode.ButtonB);
-            var debugRoot = game.GetComponentsInChildren<Canvas>().First(c => c.name == "Touch Debug Canvas");
-            Check(debugRoot.gameObject.activeInHierarchy, "Pause menu opens debug controls");
-            Reachable(debugRoot.GetComponentsInChildren<Selectable>());
-            var slider = debugRoot.GetComponentsInChildren<Slider>().First();
-            yield return Go(slider); float value = slider.value;
-            yield return Direction(3); Check(slider.value > value, "D-pad right adjusts slider");
-            yield return Direction(2); Check(Mathf.Approximately(slider.value, value), "D-pad left restores slider");
-            var debugButtons = debugRoot.GetComponentsInChildren<Button>();
-            yield return Go(debugButtons[debugButtons.Length - 1]);
-            var debugScroll = debugRoot.GetComponentInChildren<ScrollRect>();
-            bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(debugScroll.viewport, (RectTransform)Selected.transform);
-            Check(bounds.min.y >= debugScroll.viewport.rect.yMin - 1, "Debug scroll follows focus");
-            yield return Tap(AndroidKeyCode.ButtonA);
-            Check(!debugRoot.gameObject.activeInHierarchy && game.Paused, "B returns from debug to pause");
-            yield return Direction(1); yield return Tap(AndroidKeyCode.ButtonB);
-            yield return null; yield return null;
-            Check(SceneManager.GetActiveScene().name == "MainMenu", "Controller returns from pause to MainMenu");
+            yield return Tap(AndroidKeyCode.ButtonStart); Check(!game.Paused, "Start no longer pauses battle");
+            yield return Tap(AndroidKeyCode.ButtonSelect); Check(!game.Paused, "Select no longer opens a pause/help menu");
+            Check(!game.CanSwapSpecials, "Single-special tank does not offer Swap");
+            yield return Scene("MainMenu");
             Check(UnityEngine.Device.Screen.width == 1240 && UnityEngine.Device.Screen.height == 1080, "PSG1 orientation unchanged");
         }
     }

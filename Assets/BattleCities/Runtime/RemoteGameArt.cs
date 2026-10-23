@@ -16,6 +16,16 @@ namespace BattleCities
             public string url, sha256, unityVersion;
             public long bytes;
         }
+        public sealed class DownloadException : IOException
+        {
+            public bool IsTransient { get; }
+            public DownloadException(UnityWebRequest.Result result, long responseCode, string detail, ulong received)
+                : base($"Game content request failed: {result}, HTTP {responseCode}, received {received} bytes. {detail}")
+            {
+                IsTransient = result == UnityWebRequest.Result.ConnectionError || responseCode == 408
+                    || responseCode == 429 || responseCode >= 500;
+            }
+        }
         static AssetBundle bundle;
         static Task pending;
         const string ConfigKey = "RemoteGameArtManifest";
@@ -76,6 +86,13 @@ namespace BattleCities
                 try
                 {
                     if (File.Exists(partial)) File.Delete(partial);
+                    // Android can enter the scene before its network interface is ready.
+                    // Stay on startup instead of reporting an asset outage while offline.
+                    while (Application.internetReachability == NetworkReachability.NotReachable)
+                    {
+                        status?.Invoke("Waiting for an internet connection...");
+                        await Task.Delay(500, cancellation);
+                    }
                     using (var request = UnityWebRequest.Get(config.url))
                     {
                         request.downloadHandler = new DownloadHandlerFile(partial) { removeFileOnAbort = true };
@@ -92,7 +109,7 @@ namespace BattleCities
                             await Task.Yield();
                         }
                         if (request.result != UnityWebRequest.Result.Success)
-                            throw new IOException("Game content download failed: " + request.responseCode);
+                            throw new DownloadException(request.result, request.responseCode, request.error, request.downloadedBytes);
                     }
                     status?.Invoke("Verifying game content...");
                     progress?.Invoke(.8f);

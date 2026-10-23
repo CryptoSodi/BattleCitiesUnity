@@ -890,6 +890,7 @@ namespace BattleCities.UI
         }
         public void Back()
         {
+            if(battleGuide && battleGuide.IsOpen){battleGuide.Cancel();Focus(proceed);return;}
             if(busy)return;
             if(inLoadout){launchRequested=false;ShowPage(false);status.text="";Focus(proceed);return;}
             root.gameObject.SetActive(false);
@@ -1081,6 +1082,7 @@ namespace BattleCities.UI
                 ShowPage(true);if(inventoryUnavailable&&!accountLoading)RefreshLoadoutAccount();status.text=accountLoading?"LOADING INVENTORY...":inventoryUnavailable?"INVENTORY UNAVAILABLE • REOPEN LOADOUT TO RETRY":account==null?"EMPTY LOADOUT IS READY • START WHEN YOU ARE READY":"SELECT A SLOT, THEN CHOOSE AN OWNED POWER";
                 Focus(slotButtons[activeSlot]);return;
             }
+            if(TryShowBattleGuide())return;
             if(UsesLocalGuestLoadout){LaunchLoadoutBattle();return;}
             if(accountLoading){status.text="WAITING FOR INVENTORY • PLEASE TRY START AGAIN";return;}
             if(inventoryUnavailable&&loadout.Count>0){status.text="INVENTORY UNAVAILABLE • REOPEN LOADOUT BEFORE STARTING";return;}
@@ -1144,6 +1146,7 @@ namespace BattleCities.UI
         Button RosterCard(int index)=>index<tankButtons.Length?tankButtons[index]:classifiedButtons[index-tankButtons.Length];
         public void KeepControllerFocus()
         {
+            if(battleGuide&&battleGuide.IsOpen){battleGuide.KeepControllerFocus();return;}
             Psg1UiNavigation.KeepFocus(root, inLoadout ? slotButtons[0] : tankButtons[selected]);
         }
         static void Focus(Button button){if(EventSystem.current&&button)EventSystem.current.SetSelectedGameObject(button.gameObject);}

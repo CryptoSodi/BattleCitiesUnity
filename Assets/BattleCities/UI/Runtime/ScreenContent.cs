@@ -44,6 +44,14 @@ namespace BattleCities.UI
             {"login",new Dictionary<string,string>{{"Login Layout (edit child positions freely)/Heading","login-layout-edit-child-positions-freely-heading"},{"Login Layout (edit child positions freely)/Description","login-layout-edit-child-positions-freely-description"},{"Login Layout (edit child positions freely)/Or","login-layout-edit-child-positions-freely-or"},{"Login Layout (edit child positions freely)/Choose Entry","login-layout-edit-child-positions-freely-choose-entry"},{"PSG1 Login Layout/Heading","psg1-login-layout-heading"},{"PSG1 Login Layout/Description","psg1-login-layout-description"},{"PSG1 Login Layout/Or","psg1-login-layout-or"},{"PSG1 Login Layout/Choose Entry","psg1-login-layout-choose-entry"},{"PSG1 Login Layout/PSG1 Controller Legend/NAVIGATE","psg1-login-layout-psg1-controller-legend-navigate"},{"PSG1 Login Layout/PSG1 Controller Legend/SELECT","psg1-login-layout-psg1-controller-legend-select"},{"PSG1 Login Layout/PSG1 Controller Legend/BACK","psg1-login-layout-psg1-controller-legend-back"}}},
         };
         static readonly Dictionary<string,HashSet<string>> allowed=new Dictionary<string,HashSet<string>> {
+            {"battle-guide-psg1:copy",new HashSet<string>(BattleGuideScreen.Psg1Copy.Keys)},
+            {"battle-guide-psg1:art",new HashSet<string>(BattleGuideScreen.Psg1ArtKeys)},
+            {"battle-guide-psg1:regions",new HashSet<string>()},
+            {"battle-guide-psg1:layout",new HashSet<string>()},
+            {"battle-guide:copy",new HashSet<string>(BattleGuideScreen.Copy.Keys)},
+            {"battle-guide:art",new HashSet<string>(BattleGuideScreen.ArtKeys){"controller-icon"}},
+            {"battle-guide:regions",new HashSet<string>()},
+            {"battle-guide:layout",new HashSet<string>()},
             {"settings:copy",new HashSet<string>{
                 "settings-02f6ea",
                 "back-639807",

@@ -1,0 +1,261 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-21",
+  "tool": "built-in image_gen",
+  "reference": "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-d65185fb-00b0-47c9-b4eb-aff80fa53a6c.png",
+  "purpose": "Web-only Battle Station guide; text-free transparent UI artwork",
+  "artDirection": {
+    "palette": [
+      "ivory cream",
+      "navy #06213F",
+      "warm gold"
+    ],
+    "materials": "Cream beveled keycap; clean ivory/navy hand pictograms; smooth gold toy-artillery shells",
+    "typography": "All letters, arrows, labels and captions must be native UI; not baked into these PNGs"
+  },
+  "normalization": "Alpha <8/255 removed; crop to remaining alpha; aspect-preserving Lanczos resize; 8px safe transparent margins; keycap centered in square canvas. Original sources archived unchanged.",
+  "imports": {
+    "textureType": "Sprite (2D and UI)",
+    "spriteMode": "Single",
+    "mesh": "FullRect",
+    "pixelsPerUnit": 100,
+    "pivot": "center",
+    "filter": "Trilinear",
+    "mipmaps": true,
+    "sRGB": true,
+    "alphaIsTransparency": true,
+    "readWrite": false,
+    "wrap": "Clamp",
+    "compression": "Uncompressed; WebGL RGBA32 override",
+    "keycap": "96px nine-slice border; use Simple aspect fit for square keys, Sliced for wide empty SPACE skin",
+    "otherAssets": "Simple with preserveAspect; disable image raycasts",
+    "references": "Load each Sprite by its asset path; do not assume a generated local file ID."
+  },
+  "verification": {
+    "alphaAndBounds": "passed",
+    "transparentSafetyBorder": "4px outer edge completely transparent",
+    "visual": "Inspected the native-size preview on cream and navy; readable on the intended cream guide interior. Navy hand outlines are designed for cream backing.",
+    "editor": "No live Editor process; .meta files authored directly. Editor import/runtime verification pending.",
+    "noBuild": true,
+    "noPublish": true,
+    "noRuntimeOrScreenChanges": true,
+    "metadata": "All five .meta files checked for Sprite/Single/PPU/filter/mipmap/alpha/WebGL RGBA32 settings. GUIDs unique and match the provenance manifest."
+  },
+  "assets": [
+    {
+      "name": "keycap-cream",
+      "path": "Assets/BattleCities/Art/controls-guide/keycap-cream.png",
+      "width": 512,
+      "height": 512,
+      "guid": "d4ab098bb06941298638ff7bcafb783a",
+      "bytes": 213672,
+      "sha256": "59d836dab7a111c18e52191ca8c83f7e0ebf9f3a6b274b16788e0519fe82f63d",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBounds": [
+        8,
+        20,
+        504,
+        491
+      ],
+      "transparentPixels": 34744,
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceCrop": [
+        96,
+        127,
+        1158,
+        1135
+      ],
+      "sourceSha256": "b66d63a8f36c5ae928a6ed33e4e6600238ca22f2453d002c3a9ae6ee7d3c8adc",
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\controls-guide-assets-2026-10-21\\sources\\keycap-cream-source.png",
+      "prompt": "Production asset for Battle Cities controls guide. Use supplied screenshot ONLY as visual reference. Isolate and create ONE BLANK CREAM BEVELED KEYBOARD KEYCAP matching its W/A/S/D/E/Q keys. NO LETTERS, NO ARROWS, NO TEXT. Square nearly frontal cap, mild depth visible at bottom, softly rounded but quite square corners, ivory face, narrow bright cream bevel, subtle warm gray sidewalls and navy hairline outer edge, tiny soft integrated contact shadow. Match approved toy-military game's clean illustrated UI. Large FLAT empty face for native lettering overlay. Center object tightly cropped with only ~4% transparent margins on all sides. True transparent background including outside key and shadow. Single object, no frame, no duplicate, no scenery, no watermark. Square high resolution source. Preserve a clean straight-on symmetric keycap silhouette.",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "spriteBorder": [
+        96,
+        96,
+        96,
+        96
+      ]
+    },
+    {
+      "name": "hand-tap-release",
+      "path": "Assets/BattleCities/Art/controls-guide/hand-tap-release.png",
+      "width": 309,
+      "height": 512,
+      "guid": "eb29534c87c54f828f30dde9e57611db",
+      "bytes": 97300,
+      "sha256": "46085cbcd971a58a33122f96d85b1941a42e2222747170292f7435f2911445a3",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBounds": [
+        8,
+        8,
+        301,
+        504
+      ],
+      "transparentPixels": 83614,
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceCrop": [
+        306,
+        56,
+        997,
+        1224
+      ],
+      "sourceSha256": "4b5531ae15738b92e3938acbe43ea3d7c1466a7fc62452e62003036661caee76",
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\controls-guide-assets-2026-10-21\\sources\\hand-tap-release-source.png",
+      "prompt": "Production transparent UI pictogram for Battle Cities. Reference screenshot ONLY for the small simple navy-outline hand icon below TAP + RELEASE. Create ONE matching isolated stylized hand pointing its index finger straight upward, frontal view, other fingers curled, thumb visible left, light ivory filled hand interior and clean dark navy outline. Three SHORT navy release rays just above fingertip to convey lifting/releasing a key. Soft minimal blue-gray shading, no realistic skin, no glove armor, no fingernails, no letters, no key, no text, no circle, no shell. Clean simple illustrated pictogram with bold silhouette readable at 64px. Use the guide's existing navy #06213F and cream palette. Upright hand, ALL rays and wrist fully visible. Tightly composed on a truly transparent square canvas with ~4% safe margin. No opaque backdrop, no checkerboard baked in, no frame, no duplicate hand.",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "spriteBorder": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "hand-charge-release",
+      "path": "Assets/BattleCities/Art/controls-guide/hand-charge-release.png",
+      "width": 737,
+      "height": 512,
+      "guid": "68879d602f304d32865b87fe1a18b296",
+      "bytes": 241819,
+      "sha256": "9f0063c341f4efa8b69e47fb3a6ae8c257d9bd5baea7eb244af280b545d4cdaf",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBounds": [
+        9,
+        8,
+        729,
+        504
+      ],
+      "transparentPixels": 197460,
+      "sourceSize": [
+        1683,
+        935
+      ],
+      "sourceCrop": [
+        276,
+        54,
+        1485,
+        886
+      ],
+      "sourceSha256": "2eed90af693dd606e208637ea6a81f90e4547d6a6a895d1b9ff3c9b097bdba63",
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\controls-guide-assets-2026-10-21\\sources\\hand-charge-release-source.png",
+      "prompt": "Production transparent UI pictogram for Battle Cities controls guide. Two references: first is the existing completed controls screen for composition; second is the new approved hand-tap-release sprite for exact hand identity. Create ONE compound CHARGE THEN RELEASE hand illustration matching that hand sprite's ivory fill, soft blue-gray shading, bold dark navy outline and upright finger anatomy. On LEFT, the same upright-index hand touches a small concentric warm GOLD ring at fingertip to indicate holding/charging. In MIDDLE a small navy right-pointing transition arrow. On RIGHT the identical hand is lifted/released with three short navy release rays above fingertip. Hands same size, aligned at wrist baseline. Whole icon about 1.8:1 landscape. Clear silhouette readable at 160x88px. No text, digits, keycaps, shells, timers or progress meters. No frame, no environment, no extra hands. Both full hands, ring, rays and arrow remain uncropped with just 4% safe transparent margins. True transparent background, not fake checkerboard. Preserve exact clean navy/ivory/gold game-art family.",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "spriteBorder": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "shell-normal",
+      "path": "Assets/BattleCities/Art/controls-guide/shell-normal.png",
+      "width": 512,
+      "height": 94,
+      "guid": "da46603b88124de2895b9c1e9d6c2b9d",
+      "bytes": 42271,
+      "sha256": "790a0eef5fbba01cbc7bd679f721fb850311693f53007dddd7f20edfec58b446",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBounds": [
+        9,
+        8,
+        504,
+        86
+      ],
+      "transparentPixels": 24864,
+      "sourceSize": [
+        2172,
+        724
+      ],
+      "sourceCrop": [
+        295,
+        235,
+        1905,
+        489
+      ],
+      "sourceSha256": "4f88d237851271ce47ce59c03fcc49872b901d3d964b3032598737a5a6f578d3",
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\controls-guide-assets-2026-10-21\\sources\\shell-normal-source.png",
+      "prompt": "Production transparent UI asset for Battle Cities controls guide. Use screenshot ONLY as style reference for the normal FIRE shell. ONE small horizontal toy-artillery shell flying to the RIGHT, metallic golden pointed tip at far RIGHT, short dark navy/steel-gray body band behind it, warm gold base. Three-quarter side illustration, smooth chunky game shape, crisp navy rim, restrained bright specular highlights. Short elegant thin golden muzzle/speed trail tapering to the LEFT behind shell, like screenshot. SINGLE shell only, no tank, hand, keycap, text or panels. Not a real-life rifle cartridge. Cohesive friendly toy military UI artwork. Strong legibility at ~120 x 40 display pixels. Entire shell plus faint trail fits tightly in a wide ~3:1 transparent composition, small safe transparent margins around every effect. Background truly transparent, no ground, no frame, no checkerboard.",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "spriteBorder": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "shell-power",
+      "path": "Assets/BattleCities/Art/controls-guide/shell-power.png",
+      "width": 512,
+      "height": 95,
+      "guid": "55223f562a33446fb109ebf652eb2c79",
+      "bytes": 43091,
+      "sha256": "be7ffd05baeb8471be8cef2bb6789f4879e0f2ff61c2f2741af86f63867b590a",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBounds": [
+        8,
+        8,
+        504,
+        87
+      ],
+      "transparentPixels": 24015,
+      "sourceSize": [
+        2172,
+        724
+      ],
+      "sourceCrop": [
+        68,
+        203,
+        2101,
+        527
+      ],
+      "sourceSha256": "34d7dba16e817a90a3ecb6b45bfa3afd7b6e28b74cdff330687a7c79715fe343",
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\controls-guide-assets-2026-10-21\\sources\\shell-power-source.png",
+      "prompt": "Create a matching POWER SHOT variant of the supplied normal-shell transparent sprite for Battle Cities. Style reference normal shell is input 1; screenshot input 2 only for guide context. ONE horizontal stylized chunky GOLD power shell flying RIGHT, tip at far right, warmer full gold main body instead of the normal shell's dark steel body. Same navy outlines, bright smooth highlights, friendly toy military shape and perspective. Slightly larger and more powerful feeling than normal, with 2 clean engraved gold bands, a brighter thicker GOLD/yellow trail tapering LEFT behind it. Trail must not be mostly white, use controlled gold glow and clean taper, no messy particles. Distinct from normal at small UI size, around 140x36px display. Single shell only. No text, labels, digits, power meter, frame, tank or other objects. Entire shell and trail fit tightly into a wide transparent canvas with small safe transparent margins, never cropped. Keep gold tip and navy edge crisp. Actual transparent background.",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "spriteBorder": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}

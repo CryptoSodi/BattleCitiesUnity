@@ -73,14 +73,18 @@ namespace BattleCities.UI
     {
         public const string RuntimeId = "battlecities-screens-v1";
         public const string BaseUrl = "https://assets.battlecities.com/android/screens/v1/";
+        public const string WebBaseUrl = "https://assets.battlecities.com/web/screens/v1/";
         const int MaxDocument = 262144, MaxEnvelope = 65536, MaxImage = 8388608;
         static readonly HashSet<string> ScreenIds = new HashSet<string> {
             "home", "login", "settings", "shop", "ranking", "profile", "quarters", "treasury",
-            "manual", "manualdetail", "socials", "select-tank", "loadout", "battle-results", "replay", "lobby", "battle-hud", "pause" };
+            "manual", "manualdetail", "socials", "select-tank", "loadout", "battle-results", "replay", "lobby", "battle-hud", "pause", "battle-guide", "battle-guide-psg1" };
         static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings {
             MaxDepth = 24, TypeNameHandling = TypeNameHandling.None, MissingMemberHandling = MissingMemberHandling.Error };
         static ScreenDocument current;
         static Task pending;
+#if UNITY_WEBGL && !UNITY_EDITOR
+        [System.Runtime.InteropServices.DllImport("__Internal")] static extern void BattleCitiesSyncScreenCache();
+#endif
         static readonly Dictionary<string, Sprite> sprites = new Dictionary<string, Sprite>();
         public static string ReleaseId { get; private set; } = "built-in";
         public static int Revision { get; private set; }
@@ -129,7 +133,7 @@ namespace BattleCities.UI
         { var result=new Dictionary<string,T>(baseline);foreach(var pair in specific)result[pair.Key]=pair.Value;return result; }
         public static Task EnsureReady(Action<string> status, CancellationToken cancellation)
         {
-#if UNITY_ANDROID && !UNITY_EDITOR
+#if (UNITY_ANDROID || UNITY_WEBGL) && !UNITY_EDITOR
             if (pending == null) pending = Initialize(status, cancellation);
             return pending;
 #else
@@ -228,16 +232,19 @@ namespace BattleCities.UI
         public static void ValidateFile(ScreenFile file, string extension, int maximum)
         {
             if (file == null || file.bytes < 1 || file.bytes > maximum || !System.Text.RegularExpressions.Regex.IsMatch(file.sha256 ?? "", "\\A[a-f0-9]{64}\\z")
-                || file.url != BaseUrl + file.sha256 + extension) throw new InvalidDataException("Invalid screen content reference.");
+                || (file.url != BaseUrl + file.sha256 + extension && file.url != WebBaseUrl + file.sha256 + extension)) throw new InvalidDataException("Invalid screen content reference.");
         }
         public static ScreenRelease VerifyRelease(string envelopeJson, ScreenUpdateConfig config, string appVersion)
+            => VerifyReleaseCore(envelopeJson,config,appVersion,false);
+        static ScreenRelease VerifyReleaseCore(string envelopeJson, ScreenUpdateConfig config, string appVersion,bool browserVerified)
         {
             if (string.IsNullOrEmpty(envelopeJson) || Encoding.UTF8.GetByteCount(envelopeJson) > MaxEnvelope || config == null
-                || config.manifestUrl != BaseUrl + "latest.json" || config.channel != "android-ui-v1") throw new InvalidDataException("Invalid screen release configuration.");
+                || !((config.manifestUrl == BaseUrl + "latest.json" && config.channel == "android-ui-v1")
+                    || (config.manifestUrl == WebBaseUrl + "latest.json" && config.channel == "web-ui-v1"))) throw new InvalidDataException("Invalid screen release configuration.");
             var envelope = JsonConvert.DeserializeObject<SignedScreenRelease>(envelopeJson, JsonSettings);
             byte[] payload = Convert.FromBase64String(envelope.payload), signature = Convert.FromBase64String(envelope.signature);
             if (payload.Length > 32768) throw new InvalidDataException("Screen release payload is too large.");
-            using (var rsa = RSA.Create())
+            if(!browserVerified) using (var rsa = RSA.Create())
             {
                 rsa.ImportParameters(new RSAParameters { Modulus = Convert.FromBase64String(config.modulus), Exponent = Convert.FromBase64String(config.exponent) });
                 if (rsa.KeySize < 2048 || !rsa.VerifyData(payload, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1))
@@ -251,16 +258,28 @@ namespace BattleCities.UI
                 throw new InvalidDataException("Screen release is not compatible with this game version.");
             ValidateFile(release.document, ".json", MaxDocument); return release;
         }
+        static async Task<ScreenRelease> VerifyForRuntime(string envelope,ScreenUpdateConfig config,string version)
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            if(string.IsNullOrEmpty(envelope)||Encoding.UTF8.GetByteCount(envelope)>MaxEnvelope)throw new InvalidDataException("Invalid screen envelope.");
+            var signed=JsonConvert.DeserializeObject<SignedScreenRelease>(envelope,JsonSettings);
+            if(!await BrowserScreenSignature.Verify(config.modulus,config.exponent,signed.payload,signed.signature))
+                throw new InvalidDataException("Screen release signature did not verify.");
+            return VerifyReleaseCore(envelope,config,version,true);
+#else
+            await Task.CompletedTask;return VerifyRelease(envelope,config,version);
+#endif
+        }
         public static bool CanReplace(ScreenRelease next, ScreenRelease previous) => previous == null || next.sequence > previous.sequence
             || (next.sequence == previous.sequence && next.document.sha256 == previous.document.sha256 && next.releaseId == previous.releaseId);
 
         static async Task Initialize(Action<string> status, CancellationToken cancellation, ScreenUpdateConfig supplied = null, string cacheDirectory = null, string appVersion = null)
         {
             var fallback = Current;
-            string directory = cacheDirectory ?? Path.Combine(Application.persistentDataPath, "ScreenUpdates-v1");
+            string directory = cacheDirectory ?? Path.Combine(Application.persistentDataPath, "ScreenUpdates-v1"+(Application.platform==RuntimePlatform.WebGLPlayer?"-web":""));
             string version = appVersion ?? Application.version;
             ScreenRelease saved = null; string savedEnvelope = null;
-            var resource = Resources.Load<TextAsset>("ScreenUpdates/config");
+            var resource = Resources.Load<TextAsset>(Application.platform==RuntimePlatform.WebGLPlayer?"ScreenUpdates/web-config":"ScreenUpdates/config");
             if (!resource && supplied == null) return;
             ScreenUpdateConfig config;
             try { config = supplied ?? JsonConvert.DeserializeObject<ScreenUpdateConfig>(resource.text, JsonSettings); }
@@ -272,7 +291,7 @@ namespace BattleCities.UI
                 if (File.Exists(active))
                 {
                     if(new FileInfo(active).Length>MaxEnvelope)throw new InvalidDataException("Saved screen release is too large.");
-                    savedEnvelope = File.ReadAllText(active); saved = VerifyRelease(savedEnvelope, config, version);
+                    savedEnvelope = File.ReadAllText(active); saved = await VerifyForRuntime(savedEnvelope, config, version);
                     var cached = ReadCached(directory, saved.document, ".json");
                     if (cached == null) { saved = null; savedEnvelope = null; }
                     else { var document = ReadDocument(Encoding.UTF8.GetString(cached)); Activate(document, saved.releaseId, directory); }
@@ -283,7 +302,7 @@ namespace BattleCities.UI
             {
                 status?.Invoke("Checking for screen updates...");
                 var envelope = Encoding.UTF8.GetString(await Fetch(config.manifestUrl + "?check=" + DateTimeOffset.UtcNow.ToUnixTimeSeconds(), MaxEnvelope, 8, cancellation));
-                var release = VerifyRelease(envelope, config, version);
+                var release = await VerifyForRuntime(envelope, config, version);
                 if (!CanReplace(release, saved)) throw new InvalidDataException("Stale screen release rejected.");
                 var bytes = await GetFile(directory, release.document, ".json", cancellation);
                 var next = ReadDocument(Encoding.UTF8.GetString(bytes));
@@ -291,10 +310,13 @@ namespace BattleCities.UI
                 cancellation.ThrowIfCancellationRequested();
                 Activate(next, release.releaseId, directory);
                 WriteAtomic(Path.Combine(directory, "active.json"), Encoding.UTF8.GetBytes(envelope));
+#if UNITY_WEBGL && !UNITY_EDITOR
+                BattleCitiesSyncScreenCache();
+#endif
                 Debug.Log("Screen update ready: " + release.releaseId);
             }
             catch (OperationCanceledException) { throw; }
-            catch (Exception) { Debug.Log("Screen update check unavailable; using " + ReleaseId + "."); }
+            catch (Exception error) { Debug.Log("Screen update check unavailable; using " + ReleaseId + ". " + error.Message); }
         }
         static void Activate(ScreenDocument document, string releaseId, string directory)
         {
@@ -356,7 +378,7 @@ namespace BattleCities.UI
                     await Task.Yield();
                 }
                 if (request.result != UnityWebRequest.Result.Success || request.downloadHandler.data.Length > limit)
-                    throw new IOException("Screen update download unavailable.");
+                    throw new IOException($"Screen update download unavailable: {request.result}, HTTP {request.responseCode}. {request.error}");
                 return request.downloadHandler.data;
             }
         }

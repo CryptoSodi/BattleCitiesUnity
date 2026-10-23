@@ -103,7 +103,7 @@ namespace BattleCities.UI
             if(UnityEngine.EventSystems.EventSystem.current&&UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject==clearSlot.gameObject)Focus(slotButtons[activeSlot]);
         }
         void CancelLoadoutRequests()
-        {loadoutGeneration++;StopAllCoroutines();inventoryRoutine=null;accountLoading=busy=launchRequested=false;}
+        {if(battleGuide)battleGuide.Cancel();loadoutGeneration++;StopAllCoroutines();inventoryRoutine=null;accountLoading=busy=launchRequested=false;}
         public void Close(bool restoreFocus=true)
         {
             CancelLoadoutRequests();

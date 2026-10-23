@@ -14,6 +14,8 @@ namespace BattleCities
         private UnityEngine.UI.Image surface;
         private Color normalColor;
         private BattleTouchAimControl turret;
+        private bool releasedAimAvailable;
+        private CanvasGroup floatingVisual;
         public bool Held => owner.HasValue;
         public Vector2 LastAim { get; private set; }
 
@@ -44,10 +46,24 @@ namespace BattleCities
             turret = gameObject.AddComponent<BattleTouchAimControl>();
             turret.Configure();
         }
+        public void ConfigureFloating()
+        {
+            floatingVisual=gameObject.AddComponent<CanvasGroup>();
+            floatingVisual.alpha=0;floatingVisual.blocksRaycasts=false;
+            surface.raycastTarget=false;
+        }
 
         public void OnPointerDown(PointerEventData data)
         {
             if (!interactable || owner.HasValue || data.button != PointerEventData.InputButton.Left) return;
+            if(floatingVisual)
+            {
+                var rect=(RectTransform)transform;
+                if(!RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)rect.parent,data.position,data.pressEventCamera,out var origin))return;
+                rect.anchorMin=rect.anchorMax=new Vector2(.5f,.5f);rect.anchoredPosition=origin;
+                floatingVisual.alpha=.3f;
+            }
+            if(turret) { LastAim = Vector2.zero; releasedAimAvailable = false; }
             owner = data.pointerId;
             if (stick) OnDrag(data); else SendValueToControl(1f);
             if (turret) OnDrag(data);
@@ -83,9 +99,18 @@ namespace BattleCities
             Release(true);
         }
 
+        public Vector2 TakeReleasedAim()
+        {
+            var value = releasedAimAvailable ? LastAim : Vector2.zero;
+            releasedAimAvailable = false;
+            return value;
+        }
+
         private void Release(bool cancelled)
         {
+            releasedAimAvailable = !cancelled && owner.HasValue && turret;
             owner = null;
+            if(floatingVisual)floatingVisual.alpha=0;
             if (stick) { SendValueToControl(Vector2.zero); if (thumb) thumb.anchoredPosition = Vector2.zero; }
             else SendValueToControl(0f);
             if (turret) turret.SetAim(Vector2.zero);
@@ -96,6 +121,7 @@ namespace BattleCities
 
         private void RefreshColor()
         {
+            if(surface&&normalColor.a==0){surface.color=Color.clear;return;}
             if (surface) surface.color = !interactable ? new Color(normalColor.r, normalColor.g, normalColor.b, .3f)
                 : Held ? new Color(1f, .72f, .12f, .95f) : normalColor;
         }

@@ -134,8 +134,10 @@ namespace BattleCities.Core
         public event Action<TurretState> TurretFired;
         public event Action<TurretState> TurretHit;
         public event Action<TurretState> TurretDestroyed;
-        public int SecondaryCount => EquippedSecondary==SecondaryAttack.LandDrone?LandDrones.Count(d=>d.Alive&&OwnedSecondary(d.OwnerSlot)):EquippedSecondary==SecondaryAttack.PatrolDrone?Drones.Count(d=>OwnedSecondary(d.OwnerSlot)):EquippedSecondary==SecondaryAttack.GroundTurret?Turrets.Count(t=>OwnedSecondary(t.OwnerSlot)):Mines.Count(m=>OwnedSecondary(m.OwnerSlot));
-        public int SecondaryLimit => EquippedSecondary==SecondaryAttack.LandDrone?1:EquippedSecondary==SecondaryAttack.PatrolDrone?MaximumDrones:EquippedSecondary==SecondaryAttack.GroundTurret?MaximumTurrets:MaximumMines;
+        public int SecondaryCount => SecondaryCountFor(EquippedSecondary);
+        public int SecondaryLimit => SecondaryLimitFor(EquippedSecondary);
+        public int SecondaryCountFor(SecondaryAttack ability) => ability==SecondaryAttack.LandDrone?LandDrones.Count(d=>d.Alive&&OwnedSecondary(d.OwnerSlot)):ability==SecondaryAttack.PatrolDrone?Drones.Count(d=>OwnedSecondary(d.OwnerSlot)):ability==SecondaryAttack.GroundTurret?Turrets.Count(t=>OwnedSecondary(t.OwnerSlot)):Mines.Count(m=>OwnedSecondary(m.OwnerSlot));
+        public int SecondaryLimitFor(SecondaryAttack ability) => ability==SecondaryAttack.LandDrone?1:ability==SecondaryAttack.PatrolDrone?MaximumDrones:ability==SecondaryAttack.GroundTurret?MaximumTurrets:MaximumMines;
         public const float MineArmSeconds = .8f, SecondaryCooldownSeconds = 2f;
         public const int MaximumMines = 5;
         private SecondaryAttack offlineSecondary = SecondaryAttack.Mine;
@@ -187,6 +189,7 @@ namespace BattleCities.Core
         public float PlayerUpgradedNormalReloadSeconds { get; private set; }
 
         private int initialPlayerTier;
+        public int SelectedTankTier => initialPlayerTier;
         public BattleSimulation(MapData map, int stage = 1, float normalReloadSeconds = .12f, float upgradedNormalReloadSeconds = .08f, int playerTier = 0, int tankStatsVersion = TankProfiles.Version)
         {
             if(tankStatsVersion<0||tankStatsVersion>TankProfiles.Version)throw new ArgumentOutOfRangeException(nameof(tankStatsVersion));

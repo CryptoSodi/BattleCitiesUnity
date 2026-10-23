@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
  [Parameter(Mandatory=$true)][ValidateRange(1,2147483647)][int]$Sequence,
+ [ValidateSet('android','web')][string]$Platform='android',
  [string]$DocumentPath,
  [string]$MinimumAppVersion='1.0.4',
  [string]$MaximumAppVersion='2.0.0'
@@ -8,11 +9,12 @@ param(
 $ErrorActionPreference='Stop'
 if([Version]::Parse($MinimumAppVersion) -ge [Version]::Parse($MaximumAppVersion)){throw 'Maximum app version must be greater than minimum app version.'}
 $gameRoot=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-if(-not $DocumentPath){$DocumentPath=Join-Path $gameRoot 'Content/ScreenUpdates/android-v1.json'}
+if(-not $DocumentPath){$DocumentPath=Join-Path $gameRoot "Content/ScreenUpdates/$Platform-v1.json"}
 $DocumentPath=[IO.Path]::GetFullPath($DocumentPath)
-$baseUrl='https://assets.battlecities.com/android/screens/v1/'
+$objectPrefix="$Platform/screens/v1/"
+$baseUrl="https://assets.battlecities.com/$objectPrefix"
 $bucket='battlecities-game-assets'
-$output=Join-Path $gameRoot "Builds/ScreenUpdates/$Sequence"
+$output=Join-Path $gameRoot "Builds/ScreenUpdates/$Platform/$Sequence"
 [IO.Directory]::CreateDirectory($output)|Out-Null
 $utf8=[Text.UTF8Encoding]::new($false)
 function Hash([byte[]]$bytes){$sha=[Security.Cryptography.SHA256]::Create();try{return ([BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}}
@@ -29,7 +31,7 @@ function EnsureObject([string]$hash,[string]$extension,[string]$path,[string]$ty
  $exists=$false
  try{$bytes=GetPublic $url;if((Hash $bytes) -ne $hash){throw 'Existing content-hashed object does not match its hash.'};$exists=$true}
  catch [Net.WebException]{if($_.Exception.Response -and [int]$_.Exception.Response.StatusCode -ne 404){throw}}
- if(-not $exists){Upload "android/screens/v1/$hash$extension" $path $type}
+ if(-not $exists){Upload "$objectPrefix$hash$extension" $path $type}
  $actual=GetPublic $url
  if((Hash $actual) -ne $hash){throw "Public download verification failed: $url"}
 }
@@ -42,7 +44,8 @@ $rsa=New-Object Security.Cryptography.RSACryptoServiceProvider
 $rsa.PersistKeyInCsp=$false
 try{
  $rsa.FromXmlString([Text.Encoding]::UTF8.GetString($plain))
- $config=Get-Content -LiteralPath (Join-Path $gameRoot 'Assets/BattleCities/Resources/ScreenUpdates/config.json') -Raw|ConvertFrom-Json
+ $configFile=if($Platform -eq 'web'){'web-config.json'}else{'config.json'}
+ $config=Get-Content -LiteralPath (Join-Path $gameRoot "Assets/BattleCities/Resources/ScreenUpdates/$configFile") -Raw|ConvertFrom-Json
  $publicKey=$rsa.ExportParameters($false)
  if($config.modulus -ne [Convert]::ToBase64String($publicKey.Modulus) -or $config.exponent -ne [Convert]::ToBase64String($publicKey.Exponent)){throw 'Publishing key does not match the APK public key.'}
  # Guard against accidentally reusing a sequence or overwriting a newer production release.
@@ -77,7 +80,7 @@ try{
  # A receipt is valid only for these exact bytes and the current validator sources.
  $validationPath=Join-Path $gameRoot "Builds/ScreenUpdateChecks/$documentHash-validation.json"
  $validatorBytes=New-Object 'System.Collections.Generic.List[byte]'
- foreach($name in @('Assets/BattleCities/UI/Runtime/ScreenUpdates.cs','Assets/BattleCities/UI/Runtime/ScreenContent.cs','Assets/BattleCities/UI/Runtime/AuthoredScreenElement.cs', 'Assets/BattleCities/UI/Runtime/RemoteScreenView.cs','Assets/BattleCities/Editor/ScreenUpdateChecks.cs')){$validatorBytes.AddRange([IO.File]::ReadAllBytes((Join-Path $gameRoot $name)))}
+ foreach($name in @('Assets/BattleCities/UI/Runtime/ScreenUpdates.cs','Assets/BattleCities/UI/Runtime/ScreenContent.cs','Assets/BattleCities/UI/Runtime/BattleGuideScreen.cs','Assets/BattleCities/UI/Runtime/BattleGuideScreen.Psg1.cs','Assets/BattleCities/UI/Runtime/AuthoredScreenElement.cs', 'Assets/BattleCities/UI/Runtime/RemoteScreenView.cs','Assets/BattleCities/Editor/ScreenUpdateChecks.cs')){$validatorBytes.AddRange([IO.File]::ReadAllBytes((Join-Path $gameRoot $name)))}
  $validatorHash=Hash $validatorBytes.ToArray();$validated=$false
  if(Test-Path -LiteralPath $validationPath){$receipt=Get-Content -LiteralPath $validationPath -Raw|ConvertFrom-Json;$validated=$receipt.sha256 -eq $documentHash -and $receipt.validatorHash -eq $validatorHash}
  if(-not $validated){
@@ -87,6 +90,7 @@ try{
    if($LASTEXITCODE -ne 0 -or -not(Test-Path -LiteralPath $validationPath)){throw 'Unity rejected the screen definition.'}
   }finally{$env:BATTLECITIES_SCREEN_DOCUMENT=$prior}
  }
+ if($Platform -eq 'web'){& (Join-Path $PSScriptRoot 'Ensure-WebScreenCors.ps1') -Bucket $bucket}
  foreach($image in $document.images){
   $imagePath=Join-Path $output ($image.file.sha256+'.png')
   if(Test-Path -LiteralPath $imagePath){EnsureObject $image.file.sha256 '.png' $imagePath 'image/png'}
@@ -94,13 +98,13 @@ try{
  }
  EnsureObject $documentHash '.json' $publishedDocument 'application/json'
  $engine=([regex]::Match([IO.File]::ReadAllText((Join-Path $gameRoot 'ProjectSettings/ProjectVersion.txt')),'m_EditorVersion:\s*(\S+)')).Groups[1].Value
- $release=[ordered]@{schemaVersion=1;sequence=$Sequence;releaseId="screens-$Sequence";channel='android-ui-v1';runtimeId='battlecities-screens-v1';unityVersion=$engine;minimumAppVersion=$MinimumAppVersion;maximumAppVersion=$MaximumAppVersion;document=[ordered]@{url=$baseUrl+$documentHash+'.json';sha256=$documentHash;bytes=$documentBytes.Length}}
+ $release=[ordered]@{schemaVersion=1;sequence=$Sequence;releaseId="screens-$Sequence";channel="$Platform-ui-v1";runtimeId='battlecities-screens-v1';unityVersion=$engine;minimumAppVersion=$MinimumAppVersion;maximumAppVersion=$MaximumAppVersion;document=[ordered]@{url=$baseUrl+$documentHash+'.json';sha256=$documentHash;bytes=$documentBytes.Length}}
  $payload=$utf8.GetBytes(($release|ConvertTo-Json -Depth 20 -Compress))
  $envelope=[ordered]@{payload=[Convert]::ToBase64String($payload);signature=[Convert]::ToBase64String($rsa.SignData($payload,'SHA256'))}
  $envelopePath=Join-Path $output 'release.json';[IO.File]::WriteAllText($envelopePath,($envelope|ConvertTo-Json -Compress),$utf8)
  # Publish the pointer only after immutable content is available and verified.
- Upload "android/screens/v1/releases/$Sequence.json" $envelopePath 'application/json'
- Upload 'android/screens/v1/latest.json' $envelopePath 'application/json'
+ Upload "${objectPrefix}releases/$Sequence.json" $envelopePath 'application/json'
+ Upload "${objectPrefix}latest.json" $envelopePath 'application/json'
  $public=$utf8.GetString((GetPublic ($baseUrl+'latest.json?verify='+[DateTimeOffset]::UtcNow.ToUnixTimeSeconds())))|ConvertFrom-Json
  if($public.payload -ne $envelope.payload -or $public.signature -ne $envelope.signature){throw 'Public release pointer does not match the signed release.'}
  Write-Host "Published screens-$Sequence. Document: $($documentBytes.Length) bytes. APK rebuild not required for installed compatible players."

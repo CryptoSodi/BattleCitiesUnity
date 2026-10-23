@@ -55,7 +55,7 @@ namespace BattleCities
         private EagleNightTint eagleTint;
         private InputActionMap input;
         private InputAction[] moveKeys,aimKeys;
-        private InputAction fire,chaseFire,secondaryFire,secondarySelect,pause,restart,debug,overhead;
+        private InputAction fire,chaseFire,secondaryFire,secondarySelect,debug;
         private readonly long[] moveOrder=new long[4],aimOrder=new long[4];
         private long order;
         private float accumulator,trauma,dayTime;
@@ -92,22 +92,9 @@ namespace BattleCities
             }
             Debug.Log("[BattleCities] Runtime: "+RuntimePlatformInfo.Current+" ("+RuntimePlatformInfo.DeviceIdentity+")");
             pickupSparkles=new PickupSparkles();
-            input=new InputActionMap("Gameplay");
-            moveKeys=Keys("Drive",new[]{"w","d","s","a"},moveOrder);
-            aimKeys=Keys("Turret",new[]{"upArrow","rightArrow","downArrow","leftArrow"},aimOrder);
-            fire=input.AddAction("Fire",InputActionType.Button,"<Keyboard>/space");
-            chaseFire=input.AddAction("ChaseFire",InputActionType.Button,"<Mouse>/leftButton");
-            secondaryFire=input.AddAction("SecondaryFire",InputActionType.Button,"<Keyboard>/e");
-            secondaryFire.AddBinding("<Mouse>/rightButton");
-            secondarySelect=input.AddAction("SelectSecondary",InputActionType.Button,"<Keyboard>/q");
-            pause=input.AddAction("Pause",InputActionType.Button,"<Keyboard>/p");
-            restart=input.AddAction("Restart",InputActionType.Button,"<Keyboard>/r");
-            debug=input.AddAction("Debug",InputActionType.Button,"<Keyboard>/f1");
-            overhead=input.AddAction("Camera",InputActionType.Button,"<Keyboard>/c");
-            ConfigureDayNightShortcuts();
-            slots=Enumerable.Range(1,4).Select(i=>input.AddAction("Powerup"+i,InputActionType.Button,"<Keyboard>/digit"+i)).ToArray();
+            ConfigureGameplayInput();
             economy=tvReplay||LevelEditor.LevelEditorPlaytest.IsActive?null:GetComponent<EconomyClient>();
-            if(!tvReplay){ConfigureTouchBindings();ConfigureGamepadBindings();input.Enable();}
+            if(!tvReplay)input.Enable();
             street=Material(new Color(.24f,.28f,.29f));pavement=Material(new Color(.58f,.58f,.51f));paint=Material(new Color(.82f,.81f,.65f));
             var visualAssets=Resources.Load<BattleVisualAssets>("BattleVisualAssets");
             water=visualAssets&&visualAssets.WaterMaterial?visualAssets.WaterMaterial:Material(new Color(.03f,.40f,.56f));
@@ -121,6 +108,21 @@ namespace BattleCities
             var tex=new Texture2D(32,32,TextureFormat.RGBA32,false);tex.name="Soft tank dust";
             for(int y=0;y<32;y++)for(int x=0;x<32;x++){float a=Mathf.Clamp01(1-Vector2.Distance(new Vector2(x,y),new Vector2(15.5f,15.5f))/15.5f);tex.SetPixel(x,y,new Color(1,1,1,a*a));}tex.Apply();particleMaterial.SetTexture("_BaseMap",tex);
             effects=gameObject.AddComponent<BattleAnimations>();debris=gameObject.AddComponent<BattleDebris>();weather=gameObject.AddComponent<BattleWeather>();weather.ApplyGlobalLighting=!tvReplay;BuildParts();SetupLighting();if(tvReplay)PlayReplay(tvReplayData);else LoadStage(!tvReplay&&BattlePreparation.Ready?BattlePreparation.StartStage:Stage);
+        }
+        private void ConfigureGameplayInput()
+        {
+            input=new InputActionMap("Gameplay");
+            moveKeys=Keys("Drive",new[]{"w","d","s","a"},moveOrder);
+            aimKeys=Keys("Turret",new[]{"upArrow","rightArrow","downArrow","leftArrow"},aimOrder);
+            fire=input.AddAction("Fire",InputActionType.Button,"<Keyboard>/space");
+            chaseFire=input.AddAction("ChaseFire",InputActionType.Button,"<Mouse>/leftButton");
+            secondaryFire=input.AddAction("SecondaryFire",InputActionType.Button,"<Keyboard>/e");
+            secondaryFire.AddBinding("<Mouse>/rightButton");
+            secondarySelect=input.AddAction("SelectSecondary",InputActionType.Button,"<Keyboard>/q");
+            debug=input.AddAction("Debug",InputActionType.Button,"<Keyboard>/f1");
+            ConfigureDayNightShortcuts();
+            slots=Enumerable.Range(1,4).Select(i=>input.AddAction("Powerup"+i,InputActionType.Button,"<Keyboard>/"+i)).ToArray();
+            if(!tvReplay){ConfigureTouchBindings();ConfigureGamepadBindings();}
         }
         private InputAction[] Keys(string name,string[] keys,long[] stamps)
         {
@@ -268,10 +270,10 @@ namespace BattleCities
             if(!ending)
             {
             if(!tvReplay){UpdateGamepadControls();
-            if(DevelopmentOverlays.Visible&&debug.WasPressedThisFrame()&&!IsReplaying)showDebug=!showDebug;if(restart.WasPressedThisFrame()&&!IsOnline)RequestBattleRestart();if(overhead.WasPressedThisFrame())CameraElevation=CameraElevation>85?70:90;
+            if(DevelopmentOverlays.Visible&&debug.WasPressedThisFrame()&&!IsReplaying)showDebug=!showDebug;
             if(Multiplayer.BattleSession.Instance&&Multiplayer.BattleSession.Instance.Lobby.Visible)paused=true;
             UpdateDayNightShortcuts(dt);
-            for(int i=0;i<slots.Length;i++)if(slots[i].WasPressedThisFrame()&&!paused)UsePowerupSlot(i);
+            for(int i=0;i<slots.Length;i++)if(slots[i].WasPressedThisFrame()&&!paused&&!BlockCombat&&!TouchLobbyVisible)UsePowerupSlot(i);
             SamplePrimaryFire(dt);}
             if(IsReplaying)TickReplay(dt);
             else if(!paused&&!consumePending&&!BlockCombat&&ReplayReady)
@@ -448,14 +450,9 @@ namespace BattleCities
         }
         private void CycleSecondary()
         {
-            if(IsOnline){onlineSecondary=(SecondaryAttack)((int)onlineSecondary%(int)SecondaryAttack.LandDrone+1);return;}
-            switch(Simulation.EquippedSecondary)
-            {
-                case SecondaryAttack.Mine:Simulation.EquippedSecondary=SecondaryAttack.PatrolDrone;break;
-                case SecondaryAttack.PatrolDrone:Simulation.EquippedSecondary=SecondaryAttack.GroundTurret;break;
-                case SecondaryAttack.GroundTurret:Simulation.EquippedSecondary=SecondaryAttack.LandDrone;break;
-                default:Simulation.EquippedSecondary=SecondaryAttack.Mine;break;
-            }
+            if(Simulation==null||!Simulation.CanAcceptPlayerFire||!CanSwapSpecials)return;
+            if(IsOnline)onlineSecondary=BattleSpecialAbilities.Next(AvailableSpecials,onlineSecondary);
+            else Simulation.EquippedSecondary=BattleSpecialAbilities.Next(AvailableSpecials,Simulation.EquippedSecondary);
         }
         private void SyncDrones()
         {
@@ -496,7 +493,7 @@ namespace BattleCities
             if(Simulation==null||tvReplay)return;
             if(!ReplayReady||HasMatchResult||ResultsVisible){hud.SetVisible(false);return;}
             hud.SetVisible(true);
-            hud.Draw(Simulation,IsOnline||IsReplaying?null:economy,PowerupAtlas,consumePending,selectedPowerup,!IsReplaying);
+            hud.Draw(Simulation,IsOnline||IsReplaying?null:economy,PowerupAtlas,consumePending,selectedPowerup,!IsReplaying,Psg1&&!IsReplaying?(SecondaryAttack?)SelectedSpecial:null);
             if(IsReplaying)return;
             if(Multiplayer.BattleSession.Instance&&Multiplayer.BattleSession.Instance.Lobby.Visible)return;
             if(ChaseCamera&&!IsOnline&&Simulation.Player!=null&&!paused&&!showDebug)
@@ -516,17 +513,16 @@ namespace BattleCities
             var secondaryRect=new Rect(12,Screen.height-secondaryBottom,156,58);
             string secondaryStatus=Simulation.SecondaryCooldown>0?Simulation.SecondaryCooldown.ToString("0.0")+"s":Simulation.SecondaryCount>=Simulation.SecondaryLimit?"LIMIT":"READY";
             string secondaryName=Simulation.EquippedSecondary==SecondaryAttack.LandDrone?"LAND DRONE":Simulation.EquippedSecondary==SecondaryAttack.PatrolDrone?"DRONE":Simulation.EquippedSecondary==SecondaryAttack.GroundTurret?"TURRET":"MINE";
-            if(GUI.Button(new Rect(12,Screen.height-secondaryBottom-30,156,26),(Psg1?"[Y] Switch: ":"[Q] Switch: ")+secondaryName))CycleSecondary();
+            if(CanSwapSpecials&&GUI.Button(new Rect(12,Screen.height-secondaryBottom-30,156,26),(Psg1?"[HOLD L1] Switch: ":"[Q] Switch: ")+secondaryName))CycleSecondary();
             bool previousEnabled=GUI.enabled;GUI.enabled=!paused&&!consumePending&&Simulation.CanUseSecondary;
-            if(GUI.Button(secondaryRect,secondaryName+(Psg1?"  [B]\n":"  [E / RMB]\n")+secondaryStatus+"   "+Simulation.SecondaryCount+"/"+Simulation.SecondaryLimit+" deployed"))secondaryQueued=true;
+            if(GUI.Button(secondaryRect,secondaryName+(Psg1?"  [L1 TAP]\n":"  [E / RMB]\n")+secondaryStatus+"   "+Simulation.SecondaryCount+"/"+Simulation.SecondaryLimit+" deployed"))secondaryQueued=true;
             GUI.enabled=previousEnabled;
             if(!string.IsNullOrEmpty(Simulation.SecondaryStatus))GUI.Label(new Rect(180,Screen.height-secondaryBottom+2,Screen.width-200,44),Simulation.SecondaryStatus);
             }
             if(DevelopmentOverlays.Visible&&economy&&showDebug)GUI.Label(new Rect(12,Screen.height-84,650,24),consumePending?"Confirming power-upÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦":economy.Status);
             DrawLivePickup();
-            if(DevelopmentOverlays.Visible&&!HasTouchControls&&!Psg1)GUI.Label(new Rect(12,Screen.height-28,Screen.width-24,24),"WASD drive | Arrows aim | Space: tap / hold + release | P pause | R restart | C camera");
+            if(DevelopmentOverlays.Visible&&!HasTouchControls&&!Psg1)GUI.Label(new Rect(12,Screen.height-28,Screen.width-24,24),"WASD drive | Arrows aim | Space: tap / hold + release | E / RMB deploy"+(CanSwapSpecials?" | Q swap":""));
             DrawPsg1Controls();
-            if(!HasTouchControls&&!Psg1&&!IsOnline&&(paused||Simulation.Lost||Simulation.Won)){GUI.Box(new Rect(Screen.width/2-130,Screen.height/2-35,260,70),(paused?"PAUSED":Simulation.Won?"STAGE CLEAR":"GAME OVER")+"\nR: Restart");if(Simulation.Won&&Stage<35&&GUI.Button(new Rect(Screen.width/2-65,Screen.height/2+45,130,30),"Next stage"))LoadStage(Stage+1);}
             if(!DevelopmentOverlays.Visible||IsOnline||!showDebug||RuntimePlatformInfo.IsPsg1)return;
             GUILayout.BeginArea(new Rect(Mathf.Max(8,Screen.width-282),92,270,Mathf.Max(120,Screen.height-132)),"Battle Cities ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Debug",GUI.skin.window);
             debugScroll=GUILayout.BeginScrollView(debugScroll);
@@ -579,7 +575,7 @@ namespace BattleCities
             QueueReplayEvent(new ReplayEvent{kind="powerup",value=type});
             debugPowerupStatus="Applied: "+debugPowerupNames[index]+(paused?" (paused)":"");
         }
-        private void OnApplicationFocus(bool focus){if(!focus){if(!IsOnline)paused=true;CancelTouchGameplay();}}
+        private void OnApplicationFocus(bool focus){if(!focus)CancelTouchGameplay();}
         private async void RollDrop(BattleSimulation current)
         {
             if(IsReplaying)return;

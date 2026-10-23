@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50f83f6b9dbc3c24d9791ba2b5400c2e, type: 3}
+  m_Name: Psg1BattleGuideArt
+  m_EditorClassIdentifier: Assembly-CSharp::BattleCities.UI.Psg1BattleGuideArt
+  stick: {fileID: 21300000, guid: 8eac60b829bf44d08a88cb7f8b65e9ba, type: 3}
+  dpad: {fileID: 21300000, guid: 9781aec9eec3474e80b4b7557f827a05, type: 3}
+  shoulder: {fileID: 21300000, guid: a034474d862a44b9a97138c6824f7a0b, type: 3}
+  face: {fileID: 21300000, guid: 3974ac5adde141bfa86406980ef51b93, type: 3}
+  device: {fileID: 21300000, guid: c0f99ea66ffb4191b5ef81f5374e85bd, type: 3}

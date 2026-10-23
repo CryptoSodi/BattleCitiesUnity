@@ -41,6 +41,18 @@ namespace BattleCities.Editor
                 manifest = Good(); manifest.unityVersion = "different-engine"; Reject(manifest, "incompatible engine rejected");
                 Reject(null, "missing manifest rejected");
                 Check(RemoteGameArt.Load<UI.ShopArt>("ShopArt") != null, "ordinary build keeps local artwork");
+                var connection = new RemoteGameArt.DownloadException(UnityEngine.Networking.UnityWebRequest.Result.ConnectionError,
+                    0, "Cannot resolve destination host", 0);
+                Check(connection.IsTransient, "pre-HTTP connection failures retry as connectivity issues");
+                Check(connection.Message.Contains("Cannot resolve destination host") && connection.Message.Contains("HTTP 0"),
+                    "preserve native transport diagnostics instead of only HTTP zero");
+                foreach (long code in new long[] { 408, 429, 500, 503 })
+                    Check(new RemoteGameArt.DownloadException(UnityEngine.Networking.UnityWebRequest.Result.ProtocolError,
+                        code, "unavailable", 0).IsTransient, "transient HTTP failure " + code);
+                Check(!new RemoteGameArt.DownloadException(UnityEngine.Networking.UnityWebRequest.Result.ProtocolError,
+                    404, "missing", 0).IsTransient, "missing content is not reported as a connection issue");
+                Check(!new RemoteGameArt.DownloadException(UnityEngine.Networking.UnityWebRequest.Result.DataProcessingError,
+                    200, "file write failed", 20).IsTransient, "local storage failure is not reported as a connection issue");
                 Debug.Log("REMOTE ART CHECKS PASSED: " + checks);
                 Directory.CreateDirectory("Builds/RemoteArtChecks");
                 File.WriteAllText("Builds/RemoteArtChecks/result.txt", "PASS " + checks);

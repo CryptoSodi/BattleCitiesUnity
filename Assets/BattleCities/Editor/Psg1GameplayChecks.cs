@@ -18,6 +18,11 @@ namespace BattleCities.Editor
         public static void Run()
         {
             if (!Application.isPlaying) throw new InvalidOperationException("Run PSG1 input checks in Play mode.");
+            RunBindings();
+        }
+
+        public static void RunBindings()
+        {
             var pad = InputSystem.AddDevice<PSG1>();
             var map = new InputActionMap("PSG1 verification");
             int checks = 0;
@@ -27,17 +32,25 @@ namespace BattleCities.Editor
             try
             {
                 for (int i = 0; i < 4; i++) map.AddAction("Drive" + i, InputActionType.Button);
-                foreach (var name in new[] { "Fire", "SecondaryFire", "SelectSecondary", "Pause" }) map.AddAction(name, InputActionType.Button);
+                foreach (var name in new[] { "Fire", "SecondaryFire", "SelectSecondary" }) map.AddAction(name, InputActionType.Button);
+                for (int i = 1; i <= 4; i++) map.AddAction("Powerup" + i, InputActionType.Button);
                 BattleGamepadBindings.Configure(map); map.Enable();
-                var buttons = new[] { AndroidKeyCode.ButtonB, AndroidKeyCode.ButtonA, AndroidKeyCode.ButtonX, AndroidKeyCode.ButtonY, AndroidKeyCode.ButtonL1, AndroidKeyCode.ButtonR1, AndroidKeyCode.ButtonStart, AndroidKeyCode.ButtonSelect };
-                var actions = new[] { "Fire", "SecondaryFire", "SelectSecondary", "UsePowerup", "PreviousPowerup", "NextPowerup", "Pause", "ControllerHelp" };
+                var buttons = new[] { AndroidKeyCode.ButtonB, AndroidKeyCode.ButtonA, AndroidKeyCode.ButtonX, AndroidKeyCode.ButtonY, AndroidKeyCode.ButtonL1, AndroidKeyCode.ButtonR1 };
+                var actions = new[] { "Powerup1", "Powerup2", "Powerup4", "Powerup3", "GamepadSpecial", "Fire" };
                 for (int i = 0; i < buttons.Length; i++)
                 {
                     State(new PSG1StateController().WithButton(buttons[i]));
                     Check(map[actions[i]].WasPressedThisFrame(), actions[i] + " uses the physical PSG1 button");
                     Check(actions.Count(a => map[a].IsPressed()) == 1, "face/shoulder action is exclusive");
+                    Check(!map["SecondaryFire"].IsPressed() && !map["SelectSecondary"].IsPressed(), "face/shoulder does not bypass special tap/hold");
                     State(new PSG1StateController());
                     Check(!map[actions[i]].IsPressed(), "release clears " + actions[i]);
+                }
+                foreach (var removed in new[] { AndroidKeyCode.ButtonStart, AndroidKeyCode.ButtonSelect })
+                {
+                    State(new PSG1StateController().WithButton(removed));
+                    Check(!actions.Any(a => map[a].IsPressed()), "Start/Select do not pause or trigger combat");
+                    State(new PSG1StateController());
                 }
                 for (int i = 0; i < 4; i++)
                 {
@@ -93,39 +106,26 @@ namespace BattleCities.Editor
                     Check(game && Application.isPlaying, "Match closed during verification");
                     switch (step++)
                     {
-                        case 0: State(new PSG1StateController().WithAxis(AndroidAxis.HatY, -1).WithButton(AndroidKeyCode.ButtonB)); next += 1.4; break;
+                        case 0: State(new PSG1StateController().WithAxis(AndroidAxis.HatY, -1).WithButton(AndroidKeyCode.ButtonR1)); next += 1.4; break;
                         case 1: Check(Vector2.Distance(start, new Vector2(player.X, player.Y)) > 1 && shots == 0, "D-pad movement while charging"); State(); break;
-                        case 2: Check(shots == 1 && power, "A release fires exactly one charged shot"); State(new PSG1StateController().WithAxis(AndroidAxis.X, 1).WithAxis(AndroidAxis.Z, 1)); break;
+                        case 2: Check(shots == 1 && power, "R1 release fires exactly one charged shot"); State(new PSG1StateController().WithAxis(AndroidAxis.X, 1).WithAxis(AndroidAxis.Z, 1)); break;
                         case 3: Check(player.Direction == Facing.Right && player.Aim == Facing.Right, "sticks drive and aim"); State(); break;
-                        case 4: Press(AndroidKeyCode.ButtonA); break;
-                        case 5: Check(sim.Mines.Count == mines + 1, "B deploys a mine"); State(); break;
-                        case 6: Press(AndroidKeyCode.ButtonX); break;
-                        case 7: Check(sim.EquippedSecondary == SecondaryAttack.PatrolDrone, "Y switches special"); Press(AndroidKeyCode.ButtonR1); break;
-                        case 8: Check(game.SelectedPowerupSlot == 1, "R1 selects next power-up"); State(); break;
-                        case 9: Press(AndroidKeyCode.ButtonL1); break;
-                        case 10: Check(game.SelectedPowerupSlot == 0, "L1 selects previous power-up"); State(); break;
-                        case 11: Press(AndroidKeyCode.ButtonB); break;
-                        case 12: State(new PSG1StateController().WithButton(AndroidKeyCode.ButtonB).WithButton(AndroidKeyCode.ButtonStart)); break;
-                        case 13: Check(game.Paused, "Start pauses"); State(); break;
-                        case 14: Check(shots == 1, "pause cancels charged fire"); Press(AndroidKeyCode.ButtonA); break;
-                        case 15: Check(!game.Paused && sim.Drones.Count == 0, "B resumes without deploying"); State(); break;
-                        case 16: Press(AndroidKeyCode.ButtonStart); break;
-                        case 17: State(); break;
-                        case 18: Press(AndroidKeyCode.ButtonB); next += 1.2; break;
-                        case 19: State(); break;
-                        case 20: Check(!game.Paused && shots == 1, "A resume does not leak a held/released shot"); BattleSession.Instance.Lobby.Show(); break;
-                        case 21: Press(AndroidKeyCode.ButtonB); break;
-                        case 22: Check(!BattleSession.Instance.Lobby.Visible && !game.Paused, "lobby A selects Back to Game"); State(); break;
-                        case 23: Check(shots == 1, "lobby submit cannot fire"); BattleSession.Instance.Lobby.Show(); break;
-                        case 24: Press(AndroidKeyCode.ButtonA); break;
-                        case 25: Check(!BattleSession.Instance.Lobby.Visible && !game.Paused && sim.Drones.Count == 0, "lobby B cancels without deploying"); State(); break;
-                        case 26: Press(AndroidKeyCode.ButtonSelect); break;
-                        case 27: Check(game.Paused, "Select opens help"); State(); break;
-                        case 28: Press(AndroidKeyCode.ButtonSelect); break;
-                        case 29: Check(!game.Paused, "Select closes help"); State(); break;
-                        case 30: Press(AndroidKeyCode.ButtonB); break;
-                        case 31: InputSystem.RemoveDevice(pad); break;
-                        case 32: Check(game.Paused && shots == 1, "disconnect pauses and cancels firing"); Finish("PASS: PSG1 SDK events drove/aimed, charged/fired, deployed/switched special, selected power-ups, navigated pause/help/lobby, and handled disconnect without leaked attacks."); break;
+                        case 4: Press(AndroidKeyCode.ButtonL1); break;
+                        case 5: Check(sim.Mines.Count == mines, "L1 press waits for release"); State(); break;
+                        case 6: Check(sim.Mines.Count == mines + 1, "L1 tap deploys a mine"); Press(AndroidKeyCode.ButtonX); break;
+                        case 7: Check(game.SelectedPowerupSlot == 3, "Y directly targets fourth slot"); State(); break;
+                        case 8: Press(AndroidKeyCode.ButtonA); break;
+                        case 9: Check(game.SelectedPowerupSlot == 1, "B directly targets second slot"); State(); break;
+                        case 10: State(); break;
+                        case 11: Press(AndroidKeyCode.ButtonStart); break;
+                        case 12: Check(!game.Paused && shots == 1, "Start does not pause or fire"); State(); break;
+                        case 13: Press(AndroidKeyCode.ButtonSelect); break;
+                        case 14: Check(!game.Paused && shots == 1, "Select does not open a pause/help menu"); State(); BattleSession.Instance.Lobby.Show(); break;
+                        case 15: Press(AndroidKeyCode.ButtonB); break;
+                        case 16: Check(!BattleSession.Instance.Lobby.Visible && !game.Paused, "lobby A selects Back to Game"); State(); break;
+                        case 17: Check(shots == 1, "lobby submit cannot fire"); Press(AndroidKeyCode.ButtonR1); break;
+                        case 18: InputSystem.RemoveDevice(pad); break;
+                        case 19: Check(!game.Paused && shots == 1, "disconnect clears firing without entering a pause menu"); Finish("PASS: PSG1 SDK events drove/aimed, charged/fired on R1, deployed on L1 release, directly targeted power-ups and handled disconnect without leaked attacks."); break;
                     }
                 }
                 catch (Exception error) { Finish("FAIL at step " + (step - 1) + ": " + error.Message); }

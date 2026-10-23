@@ -32,6 +32,11 @@ namespace BattleCities
     public static class RuntimePlatformInfo
     {
         private static readonly GameRuntimePlatform detectedPlatform;
+        private static readonly bool detectedMobileBrowser;
+#if UNITY_WEBGL && !UNITY_EDITOR
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern int BattleCitiesIsMobileBrowser();
+#endif
         public static GameRuntimePlatform Current
         {
             get
@@ -49,10 +54,15 @@ namespace BattleCities
         public static bool IsWeb => Current == GameRuntimePlatform.WebGl;
         public static bool IsAndroid => Current == GameRuntimePlatform.Android || IsPsg1;
         public static bool IsPsg1 => Current == GameRuntimePlatform.Psg1;
-        public static PowerupUiMode PowerupUi => PowerupUiFor(Current);
+        public static bool IsMobileBrowser => IsWeb && detectedMobileBrowser;
+        public static bool UsesTouchGameplay => UsesTouchGameplayFor(Current, IsMobileBrowser);
+        public static bool UsesTouchGameplayFor(GameRuntimePlatform platform,bool mobileBrowser) =>
+            platform==GameRuntimePlatform.Android || (platform==GameRuntimePlatform.WebGl && mobileBrowser);
+        public static PowerupUiMode PowerupUi => PowerupUiFor(Current,IsMobileBrowser);
 
-        public static PowerupUiMode PowerupUiFor(GameRuntimePlatform platform)
+        public static PowerupUiMode PowerupUiFor(GameRuntimePlatform platform,bool mobileBrowser=false)
         {
+            if(UsesTouchGameplayFor(platform,mobileBrowser))return PowerupUiMode.ExternalController;
             if (platform == GameRuntimePlatform.WebGl) return PowerupUiMode.WebTopLeft;
             if (platform == GameRuntimePlatform.Psg1) return PowerupUiMode.MergedTopHud;
             if (platform == GameRuntimePlatform.Android) return PowerupUiMode.ExternalController;
@@ -79,6 +89,7 @@ namespace BattleCities
 
 #if UNITY_WEBGL && !UNITY_EDITOR
             detectedPlatform = GameRuntimePlatform.WebGl;
+            detectedMobileBrowser = BattleCitiesIsMobileBrowser()!=0;
 #elif UNITY_ANDROID && !UNITY_EDITOR
 #if BATTLE_CITIES_PSG1
             detectedPlatform = GameRuntimePlatform.Psg1;

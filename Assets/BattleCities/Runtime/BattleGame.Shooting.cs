@@ -24,31 +24,18 @@ namespace BattleCities
         }
 
         private readonly ChargedFireInput primaryCharge = new ChargedFireInput();
+        private readonly ShotAimLatch shotAim = new ShotAimLatch();
         private int chargingTankId;
 
         private Facing? PlayerAim()
         {
-            var keyboardAim = DirectionalAim();
-            if (!ChaseCamera || IsOnline)
-            {
-                chaseAim = null;
-                chaseAimTankId = 0;
-                return keyboardAim;
-            }
-            var player = Simulation.Player;
-            if (player == null) return keyboardAim;
-            if (chaseAimTankId != player.Id)
-            {
-                chaseAimTankId = player.Id;
-                chaseAim = player.Aim;
-            }
-            if (keyboardAim.HasValue) chaseAim = keyboardAim;
-            return chaseAim;
+            return shotAim.Resolve(DirectionalAim());
         }
 
         private void ResetPrimaryFire()
         {
             primaryCharge.Reset();
+            shotAim.Reset();
             chargingTankId = 0;
         }
 
@@ -64,22 +51,38 @@ namespace BattleCities
             bool mouseEnabled = !HasTouchControls && ChaseCamera && !IsOnline && !showDebug && Mouse.current != null &&
                 Mouse.current.position.ReadValue().y >= 150 &&
                 Mouse.current.position.ReadValue().y <= Screen.height - BattleHud.TopHeightPixels;
-            primaryCharge.Sample(
-                fire.WasPressedThisFrame() || (mouseEnabled && chaseFire.WasPressedThisFrame()),
-                fire.WasReleasedThisFrame() || (mouseEnabled && chaseFire.WasReleasedThisFrame()),
-                fire.IsPressed() || (mouseEnabled && chaseFire.IsPressed()),
-                dt, Simulation.CanFire(player));
+            bool pressed = fire.WasPressedThisFrame() || (mouseEnabled && chaseFire.WasPressedThisFrame());
+            bool released = fire.WasReleasedThisFrame() || (mouseEnabled && chaseFire.WasReleasedThisFrame());
+            bool held = fire.IsPressed() || (mouseEnabled && chaseFire.IsPressed());
+            if(pressed) shotAim.Reset();
+            var aim = DirectionalAim();
+            if(pressed || primaryCharge.IsCharging) shotAim.ObserveAim(aim);
+            primaryCharge.Sample(pressed, released, held, dt, Simulation.CanFire(player));
+            if(released && !held)
+            {
+                var touchAim = touchControls ? touchControls.TakeReleasedTurretAim() : null;
+                if(primaryCharge.HasPendingShot) shotAim.Release(aim, touchAim, PlayerMove(), player.Aim);
+            }
+            if(!primaryCharge.IsCharging && !primaryCharge.HasPendingShot) shotAim.Reset();
         }
 
         private void QueuePrimaryCommand(ref Command command)
         {
             command.Fire = false;
             command.PowerShot = false;
+            command.Aim = PlayerAim();
             var player = Simulation.Player;
-            if (player == null || player.Id != chargingTankId) { ResetPrimaryFire(); return; }
-            if (!primaryCharge.TryTakeShot(Simulation.CanFire(player), out var powerShot)) return;
+            if (player == null || player.Id != chargingTankId) { ResetPrimaryFire(); command.Aim = PlayerAim(); return; }
+            if (!primaryCharge.TryTakeShot(Simulation.CanFire(player), out var powerShot))
+            {
+                if(!primaryCharge.IsCharging && !primaryCharge.HasPendingShot) { shotAim.Reset(); command.Aim = PlayerAim(); }
+                return;
+            }
             command.Fire = true;
             command.PowerShot = powerShot;
+            // Keep this command's release direction through simulation.Fire. Only
+            // later commands may fall back to the tank's movement direction.
+            shotAim.Reset();
         }
     }
 }

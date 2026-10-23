@@ -1,7 +1,44 @@
 {
   "schemaVersion": 1,
   "runtimeId": "battlecities-screens-v1",
-  "images": [],
+  "images": [
+    {
+      "id": "psg-guide-stick",
+      "source": "Assets/BattleCities/Art/controls-guide/psg1/stick.png"
+    },
+    {
+      "id": "psg-guide-dpad",
+      "source": "Assets/BattleCities/Art/controls-guide/psg1/dpad.png"
+    },
+    {
+      "id": "psg-guide-shoulder",
+      "source": "Assets/BattleCities/Art/controls-guide/psg1/shoulder.png"
+    },
+    {
+      "id": "psg-guide-face",
+      "source": "Assets/BattleCities/Art/controls-guide/psg1/face.png"
+    },
+    {
+      "id": "psg-guide-device",
+      "source": "Assets/BattleCities/Art/controls-guide/psg1/device.png"
+    },
+    {
+      "id": "psg-guide-tap",
+      "source": "Assets/BattleCities/Art/controls-guide/hand-tap-release.png"
+    },
+    {
+      "id": "psg-guide-charge",
+      "source": "Assets/BattleCities/Art/controls-guide/hand-charge-release.png"
+    },
+    {
+      "id": "psg-guide-normal-shell",
+      "source": "Assets/BattleCities/Art/controls-guide/shell-normal.png"
+    },
+    {
+      "id": "psg-guide-power-shell",
+      "source": "Assets/BattleCities/Art/controls-guide/shell-power.png"
+    }
+  ],
   "screens": [
     {
       "id": "settings",
@@ -3279,6 +3316,54 @@
       "layout": {
         "card-gap-y": 6
       }
+    },
+    {
+      "id": "battle-guide-psg1",
+      "platform": "psg1",
+      "copy": {
+        "title": "BATTLE STATION",
+        "continue": "CONTINUE",
+        "dont-show": "DON'T SHOW AGAIN",
+        "move-title": "MOVE TANK",
+        "move-body": "LEFT STICK / D-PAD\nMove up, down, left and right.",
+        "aim-title": "AIM TURRET",
+        "aim-body": "RIGHT STICK\nIndependent turret aim.",
+        "fire-title": "FIRE",
+        "fire-body": "TAP + RELEASE\nFire a normal shot.",
+        "charge-title": "POWER SHOT",
+        "charge-body": "HOLD 1 SEC + RELEASE\nPower shot adds +2 power.",
+        "turret-title": "HOW YOUR TURRET WORKS",
+        "step-1-title": "1  FOLLOW MOVEMENT",
+        "step-1-body": "Without aiming input, the turret follows movement.",
+        "step-2-title": "2  RELEASE TO SHOOT",
+        "step-2-body": "Release R1 to fire in your selected aim direction.",
+        "step-3-title": "3  FOLLOW AGAIN",
+        "step-3-body": "Your shot keeps its aim. The turret follows movement again after firing.",
+        "special-title": "SPECIAL ABILITIES",
+        "special-body": "Tap and release to deploy your tank's special.",
+        "switch-title": "SWITCH SPECIAL",
+        "switch-body": "Hold 1 second to switch. Only available with multiple special abilities.",
+        "powers-title": "EQUIPPED POWER-UPS",
+        "powers-body": "A / B / X / Y consume equipped slots 1 / 2 / 3 / 4.",
+        "deploy-title": "DEPLOY SPECIAL",
+        "single-special": "Current tanks each have one special.",
+        "menu-hint": "D-PAD: SCROLL / SELECT    A: CONFIRM    B: BACK"
+      },
+      "art": {
+        "stick": "psg-guide-stick",
+        "dpad": "psg-guide-dpad",
+        "shoulder": "psg-guide-shoulder",
+        "face": "psg-guide-face",
+        "device": "psg-guide-device",
+        "tap": "psg-guide-tap",
+        "charge": "psg-guide-charge",
+        "normal-shell": "psg-guide-normal-shell",
+        "power-shell": "psg-guide-power-shell"
+      },
+      "regions": {},
+      "layout": {},
+      "patches": [],
+      "flows": []
     }
   ]
 }
