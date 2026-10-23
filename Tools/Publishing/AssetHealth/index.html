@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Battle Cities — Asset health</title>
+  <link rel="stylesheet" href="/health/health.css?v=1">
+  <script type="module" src="/health/health.mjs?v=1"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <span class="eyebrow">BATTLE CITIES · DELIVERY CHECK</span>
+      <h1>Asset health</h1>
+      <p>Test the files used by the Android game from this browser.</p>
+      <code>assets.battlecities.com</code>
+    </header>
+    <section class="summary" aria-live="polite">
+      <h2 id="summary">Preparing checks…</h2>
+      <p id="description">Loading the current asset information.</p>
+      <p class="muted" id="release"></p>
+    </section>
+    <section aria-label="Delivery checks"><div id="checks"></div></section>
+    <section class="full-test">
+      <div>
+        <h2>Test the complete download</h2>
+        <p>The quick check reads only 64 KiB of the game file. This optional test downloads the whole file and verifies its SHA-256.</p>
+      </div>
+      <button id="full" disabled>Verify full download</button>
+      <button id="cancel" hidden>Cancel download</button>
+      <progress id="progress" max="1" value="0" hidden aria-label="Full download progress"></progress>
+      <p id="full-status" role="status"></p>
+    </section>
+    <footer>
+      <label><input id="repeat" type="checkbox"> Repeat quick checks every 15 seconds</label>
+      <div class="actions">
+        <button id="copy" disabled>Copy report</button>
+        <button id="run" class="primary" disabled>Run checks again</button>
+      </div>
+      <p id="copy-status" role="status"></p>
+    </footer>
+    <details>
+      <summary>How to interpret a failure</summary>
+      <p>Other websites working does not guarantee this hostname is reachable. If this page cannot open, keep the browser's exact error code and the time of the failure.</p>
+      <p>A browser request failure can come from DNS, TLS, connectivity or browser policy. This page cannot reliably distinguish those causes by itself. A 404 means the host responded but the requested file was missing.</p>
+      <p>Results describe this browser and network at the time of the test. The Android app may have different cached DNS or connections. A successful sample does not verify the entire game file or Unity loading.</p>
+      <p><a href="/health/ping.json" target="_blank" rel="noopener">Open the small probe directly</a> · <a href="https://dns.google/resolve?name=assets.battlecities.com&amp;type=A" target="_blank" rel="noopener">View public DNS record</a></p>
+    </details>
+    <details><summary>Report</summary><pre id="report">No completed check yet.</pre></details>
+    <noscript><p>JavaScript is required to run the delivery checks. <a href="/health/ping.json">Open the small probe directly</a>.</p></noscript>
+  </main>
+</body>
+</html>

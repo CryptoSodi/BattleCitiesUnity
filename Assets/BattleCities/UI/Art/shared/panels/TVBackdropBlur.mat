@@ -46,7 +46,7 @@ Material:
     - _UseUIAlphaClip: 0
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _GlassRect: {r: -604, g: -367.02222, b: 1208, a: 891.0222}
-    - _GlassUVRect: {r: 0, g: 0, b: 1.8875, a: 1.5992707}
+    - _GlassRect: {r: -601.5536, g: -344.20935, b: 950.6664, a: 699.00006}
+    - _GlassUVRect: {r: 0.1828736, g: 0.15339419, b: 0.50117123, a: 0.70386666}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

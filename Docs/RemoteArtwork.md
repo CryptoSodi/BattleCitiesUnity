@@ -91,6 +91,44 @@ Android first-download, interrupted-download and retry tests against this live h
 remain pending. Previous device tests used a manually preloaded bundle.
 The manifest remains embedded in the APK; this does not enable live content revisions.
 
+## Browser delivery diagnostics
+
+Open **https://assets.battlecities.com/health.html** on the computer or phone
+experiencing the problem. This standalone page is hosted in the same production
+R2 bucket. Its script and styles are included in the HTML so checks can still run
+if later resource requests fail after the page opens. It does not launch Unity.
+
+Quick checks request fresh, cache-busted responses for the small host probe, the
+diagnostic catalog, 64 KiB from the exact configured APK bundle, and the Android
+screen-update pointer. The sample's SHA256 and Content-Range total are checked
+against values generated from the locally verified bundle. The optional full
+download checks every byte and the full SHA256; it can be cancelled.
+
+Use **Repeat quick checks every 15 seconds** to capture intermittent failures.
+**Copy report** includes the last 20 runs, browser, online hint, UTC timestamps,
+HTTP status, response/download timings, bytes, and available Cloudflare headers.
+The online hint is not proof this hostname is reachable. Browser failures without
+an HTTP response must not be labelled conclusively as DNS or a server outage.
+Browser and native Android networking can behave differently.
+
+If DNS prevents the page itself from opening, retain the browser's exact error
+code and time. This page cannot diagnose a failure that prevents its HTML loading.
+The bare asset-domain root intentionally has no homepage.
+
+After hosting a new APK's immutable bundle, update the diagnostic target:
+
+    Tools/Publishing/Publish-AssetHealth.ps1 -ArtManifestPath <build>/RemoteArt/content-manifest.json -Publish
+
+Without -Publish, this prepares the config, probe and standalone HTML locally.
+The script verifies the full local bundle against the APK manifest before deriving
+the sample hash. It uploads only health.html, health/config.json, health/ping.json
+and the small bundled font through cf. No game build, signed screen pointer,
+existing asset, DNS or CORS configuration is changed. The page displays its
+configured APK version/code; it does not claim to check every historical APK.
+
+Browser regression checks: Tools/Publishing/Test-AssetHealth.cjs (Playwright).
+Use --live to check the deployed page and perform one full download.
+
 ## Future updates
 
 This phase reduces APK size. Its content is pinned to each APK, so it does not yet

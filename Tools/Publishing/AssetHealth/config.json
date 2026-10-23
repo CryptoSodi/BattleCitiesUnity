@@ -1,0 +1,17 @@
+{
+    "schema":  1,
+    "publishedAt":  "2026-10-23T03:10:57.9974157Z",
+    "artifact":  {
+                     "url":  "https://assets.battlecities.com/android/art/f717e7d7fc7b8e0e626acac19f4b4c3d18ded584d74296ac26e40e70309d46d5.bundle",
+                     "bytes":  66629046,
+                     "sha256":  "f717e7d7fc7b8e0e626acac19f4b4c3d18ded584d74296ac26e40e70309d46d5",
+                     "unityVersion":  "6000.6.0f1",
+                     "versionName":  "1.0.9",
+                     "versionCode":  10
+                 },
+    "sample":  {
+                   "bytes":  65536,
+                   "sha256":  "f4e9080597241f375e9fda281cdbc09a375bce621adcaa5692747b4496a169f1"
+               },
+    "probeSha256":  "c952e43b757916bc38ccf79e39945c8923cfe2c64b879502ab2c43361accbf86"
+}
