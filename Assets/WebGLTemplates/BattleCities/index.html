@@ -7,6 +7,7 @@
     <title>Battle Cities</title>
     <link rel="icon" type="image/png" href="TemplateData/battle-cities-logo.png">
     <link rel="stylesheet" href="TemplateData/style.css">
+    <script id="battle-cities-loading" src="TemplateData/battle-cities-loading.js" defer></script>
     <link id="battle-cities-viewport" rel="stylesheet" href="TemplateData/battle-cities-viewport.css">
 #if SHOW_DIAGNOSTICS
     <link rel="stylesheet" href="<<<TemplateData/diagnostics.css>>>">
@@ -26,6 +27,7 @@
             <div id="unity-progress-bar-empty" role="progressbar" aria-label="Loading Battle Cities" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
               <div id="unity-progress-bar-full"></div>
             </div>
+            <output id="unity-progress-percentage" aria-hidden="true">0%</output>
           </div>
         </div>
       </div>

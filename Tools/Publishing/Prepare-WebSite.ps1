@@ -86,6 +86,11 @@ $index = [regex]::Replace($index, $logoPattern, $logoElement)
 $index = $index.Replace('href="TemplateData/style.css"', 'href="TemplateData/' + $styleName + '"')
 $index = [regex]::Replace($index, '<link[^>]+rel="(?:shortcut )?icon"[^>]*>', '<link rel="icon" type="image/png" href="' + $logoUrl + '">')
 $index = $index.Replace('</head>', '    <link rel="preload" as="image" href="' + $logoUrl + '">' + "`n  </head>")
+$loadingSource = Join-Path $brandDirectory 'battle-cities-loading.js'
+$loadingName = 'battle-cities-loading.' + (Get-ReleaseSha256 $loadingSource).Substring(0, 12) + '.js'
+Copy-Item -LiteralPath $loadingSource -Destination (Join-Path $templateDirectory $loadingName)
+$index = [regex]::Replace($index, '<script id="battle-cities-loading"[^>]*>\s*</script>\s*', '')
+$index = $index.Replace('</head>', '    <script id="battle-cities-loading" src="TemplateData/' + $loadingName + '" defer></script>' + "`n  </head>")
 [IO.File]::WriteAllText($indexPath, $index, [Text.UTF8Encoding]::new($false))
 [IO.File]::WriteAllText((Join-Path $siteDirectory '.nojekyll'), '')
 $releaseInfo = [ordered]@{

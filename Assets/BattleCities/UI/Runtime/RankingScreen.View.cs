@@ -38,15 +38,18 @@ namespace BattleCities.UI
             var lineTop=Panel("Divider",eligibility,null);lineTop.GetComponent<UnityEngine.UI.Image>().color=new Color32(6,29,54,65);Fit(lineTop,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-0-0-1-d0ce80",new Rect(0,0,1,.015f)));
             eligibilityText=Label("Label",eligibility,"",ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-02f-1-d9ecfd",new Rect(.02f,.10f,.96f,.80f)),22,ArcadeTextTreatment.PrizeAmount);
 
-            table=Panel("Standings",root,theme.CreamPanel);table.GetComponent<UnityEngine.UI.Image>().pixelsPerUnitMultiplier=2;
+            table=Panel("Standings",root,theme.Rounded);table.GetComponent<UnityEngine.UI.Image>().color=new Color32(3,40,79,255);
             tableHeading=Panel("Heading",table,null);
             tableTitle=Label("Period title",tableHeading,ScreenContent.Text("ranking","live-player-rankings-40fcc9","LIVE PLAYER RANKINGS"),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-02f-0-cb9adc",new Rect(.02f,.05f,.96f,.45f)),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            tableTitle.color=Color.white;
             string[] columns={"#","PLAYER","SCORE","MATCHES"};
             var positions=new[]{ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-025f--3558fc",new Rect(.025f,.51f,.07f,.40f)),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-12f-5-e9624c",new Rect(.12f,.51f,.43f,.40f)),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-56f-5-ce3c0c",new Rect(.56f,.51f,.21f,.40f)),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-79f-5-e063dd",new Rect(.79f,.51f,.18f,.40f))};
-            for(int i=0;i<4;i++){var label=Label(columns[i],tableHeading,ScreenContent.Text("ranking","columns-"+i,columns[i]),positions[i],19,ArcadeTextTreatment.PrizeAmount,i==1?TextAlignmentOptions.MidlineLeft:TextAlignmentOptions.Center);label.color=new Color32(63,89,115,255);}
+            positions=new[]{new Rect(.025f,.51f,.10f,.40f),new Rect(.24f,.51f,.38f,.40f),new Rect(.63f,.51f,.22f,.40f),new Rect(.86f,.51f,.13f,.40f)};
+            for(int i=0;i<4;i++){var label=Label(columns[i],tableHeading,ScreenContent.Text("ranking","columns-"+i,columns[i]),positions[i],19,ArcadeTextTreatment.PrizeAmount,i==1?TextAlignmentOptions.MidlineLeft:TextAlignmentOptions.Center);label.color=Color.white;}
             var tableDivider=Panel("Divider",tableHeading,null);tableDivider.GetComponent<UnityEngine.UI.Image>().color=new Color32(52,82,102,120);Fit(tableDivider,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-016f--81f2af",new Rect(.016f,.975f,.968f,.02f)));
             tableScroll=BuildScroll("Rows",table);
-            empty=Panel("Empty standings",table,null);
+            var personal=Panel("Your rank card",table,null);personalCard=personal.GetComponent<RankingRowCard>();if(!personalCard)personalCard=personal.gameObject.AddComponent<RankingRowCard>();personal.gameObject.SetActive(false);
+            empty=Panel("Empty standings",table,theme.CreamPanel);
             var trophy=Icon("Trophy",empty,theme.TrophyIcon,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-33f-1-3d3f87",new Rect(.33f,.12f,.34f,.43f)));
             var shadowRect=Panel("Ground shadow",empty,null);Fit(shadowRect,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-37f-5-d90dcb",new Rect(.37f,.515f,.26f,.045f)));shadowRect.SetSiblingIndex(0);
             var oval=shadowRect.Find("Oval") as RectTransform;
@@ -107,9 +110,13 @@ namespace BattleCities.UI
             TvSidebarStyle.PlaceHeaderIcon(historyHeading.Find("Chest").GetComponent<UnityEngine.UI.Image>(),new Rect(0,0,1,1));
             float tableHeaderHeight=Mathf.Clamp(height*.105f,44,62),tableRowsTop=tableHeaderHeight+15;
             MainMenuScene.Place(tableHeading,6,7,table.rect.width-12,tableHeaderHeight);
-            MainMenuScene.Place(tableScroll.transform as RectTransform,6,tableRowsTop,table.rect.width-12,height-tableRowsTop-8);
-            MainMenuScene.Place(empty,14,tableRowsTop,table.rect.width-40,height-tableRowsTop-10);
-            foreach(var button in rowButtons)button.GetComponent<LayoutElement>().preferredHeight=ScreenContent.Number("ranking","row-height",58f);
+            bool personalVisible=personalCard&&personalCard.gameObject.activeSelf;float personalHeight=personalVisible?64:0;
+            MainMenuScene.Place(tableScroll.transform as RectTransform,6,tableRowsTop,table.rect.width-12,height-tableRowsTop-8-(personalVisible?personalHeight+12:0));
+            MainMenuScene.Place(empty,14,tableRowsTop,table.rect.width-40,height-tableRowsTop-10-(personalVisible?personalHeight+12:0));
+            if(personalVisible){MainMenuScene.Place(personalCard.transform as RectTransform,12,height-personalHeight-8,table.rect.width-24,personalHeight);personalCard.Layout();}
+            float rowHeight=Mathf.Max(60,ScreenContent.Number("ranking","row-height",64f));
+            foreach(var button in rowButtons){button.GetComponent<LayoutElement>().preferredHeight=rowHeight;button.GetComponent<RankingRowCard>().Layout();}
+            var playerHeader=tableHeading.Find("PLAYER") as RectTransform;if(playerHeader)Fit(playerHeader,new Rect(.31f,.51f,.31f,.40f));
             LayoutPicker();
         }
         void LayoutPicker()
@@ -130,20 +137,18 @@ namespace BattleCities.UI
             for(int i=0;i<count;i++)
             {
                 var row=snapshot.Rows[i];var rect=Panel("Row "+i,tableScroll.content,theme.Rounded);rect.gameObject.SetActive(true);
-                rect.GetComponent<UnityEngine.UI.Image>().pixelsPerUnitMultiplier=5;
-                rect.GetComponent<UnityEngine.UI.Image>().color=i%2==0?new Color32(245,233,205,255):new Color32(255,247,226,255);
                 var button=rect.GetComponent<UnityEngine.UI.Button>();if(!button)button=rect.gameObject.AddComponent<UnityEngine.UI.Button>();
                 button.targetGraphic=rect.GetComponent<UnityEngine.UI.Image>();button.image.raycastTarget=true;button.onClick.RemoveAllListeners();
                 string playerId=row.playerId;if(ProfileLinks.ValidPlayerId(playerId))button.onClick.AddListener(()=>menu.OpenPlayerProfile(playerId));
-                var colors=ColorBlock.defaultColorBlock;colors.highlightedColor=colors.selectedColor=new Color(.65f,.85f,1f);colors.pressedColor=new Color(.55f,.8f,1f);button.colors=colors;
-                var fit=rect.GetComponent<LayoutElement>();if(!fit)fit=rect.gameObject.AddComponent<LayoutElement>();fit.preferredHeight=ScreenContent.Number("ranking","row-height",58f);
-                Label("Rank",rect,row.rank.ToString(),ScreenContent.Rect("ranking","rankingscreen-view-buildrankingrows-new-rec-393431",new Rect(.025f,.10f,.08f,.80f)),28,row.rank<=3?ArcadeTextTreatment.Gold:ArcadeTextTreatment.PrizeAmount);
-                var name=Label("Player",rect,row.displayName,ScreenContent.Rect("ranking","rankingscreen-view-buildrankingrows-new-rec-79d9bb",new Rect(.12f,.10f,.43f,.80f)),27,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);name.overflowMode=TextOverflowModes.Ellipsis;
-                Label("Score",rect,row.totalPoints.ToString("N0"),ScreenContent.Rect("ranking","rankingscreen-view-buildrankingrows-new-rec-2ec34f",new Rect(.56f,.10f,.21f,.80f)),27,ArcadeTextTreatment.PrizeAmount);
-                Label("Matches",rect,row.matches.ToString("N0"),ScreenContent.Rect("ranking","rankingscreen-view-buildrankingrows-new-rec-e1bf0c",new Rect(.79f,.10f,.18f,.80f)),27,ArcadeTextTreatment.PrizeAmount);
+                button.transition=Selectable.Transition.None;
+                var fit=rect.GetComponent<LayoutElement>();if(!fit)fit=rect.gameObject.AddComponent<LayoutElement>();fit.preferredHeight=Mathf.Max(60,ScreenContent.Number("ranking","row-height",64f));
+                var card=rect.GetComponent<RankingRowCard>();if(!card)card=rect.gameObject.AddComponent<RankingRowCard>();card.Configure(row,i,false,theme);
                 var focus=rect.GetComponent<RankingRowFocus>();if(!focus)focus=rect.gameObject.AddComponent<RankingRowFocus>();focus.Configure(tableScroll);
                 rowButtons.Add(button);
             }
+            bool hasPersonal=snapshot?.CurrentPlayer!=null;
+            personalCard.gameObject.SetActive(hasPersonal);if(hasPersonal)personalCard.Configure(snapshot.CurrentPlayer,0,true,theme);
+            ApplyLayout(menu.Resolve(new Vector2(UnityEngine.Device.Screen.width,UnityEngine.Device.Screen.height)));
             LayoutRebuilder.MarkLayoutForRebuild(tableScroll.content);
         }
         void BuildPeriodRows()

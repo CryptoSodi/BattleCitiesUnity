@@ -76,6 +76,7 @@ namespace BattleCities.UI
         {
             public string playerId, displayName;
             public int rank, totalPoints, matches;
+            public bool matchesKnown=true,pointsKnown=true,restricted,guest;
         }
 
         public sealed class RankingsSnapshot
@@ -580,7 +581,10 @@ namespace BattleCities.UI
                 displayName = (string)source["displayName"] ?? "PLAYER",
                 rank = Math.Max(0, (int?)source["rank"] ?? fallbackRank),
                 totalPoints = Math.Max(0, (int?)source["totalPoints"] ?? 0),
-                matches = Math.Max(0, (int?)source["matches"] ?? 0)
+                matches = Math.Max(0, (int?)source["matches"] ?? 0),
+                matchesKnown=source["matches"]!=null&&source["matches"].Type!=JTokenType.Null,
+                pointsKnown=source["totalPoints"]!=null&&source["totalPoints"].Type!=JTokenType.Null,
+                restricted=(bool?)source["restricted"]==true,guest=(bool?)source["guest"]==true
             };
         }
 

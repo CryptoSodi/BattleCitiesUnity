@@ -18,6 +18,7 @@ namespace BattleCities.UI
     {
         public readonly List<MainMenuApiClient.RankingRow> Rows=new List<MainMenuApiClient.RankingRow>();
         public int? MyRank;
+        public MainMenuApiClient.RankingRow CurrentPlayer;
         public bool Cycle, PayoutsEnabled;
         public int IntervalMinutes=30;
         public DateTimeOffset? EndsAt;
@@ -55,7 +56,13 @@ namespace BattleCities.UI
             }
             var me=response[period.IsCycle?"currentPlayer":"me"] as JObject;
             int rank=Integer(me?["rank"]);
-            if(rank>0&&(bool?)me?["restricted"]!=true&&(bool?)me?["guest"]!=true)data.MyRank=rank;
+            if(rank>0&&(bool?)me?["restricted"]!=true&&(bool?)me?["guest"]!=true){
+                data.MyRank=rank;
+                data.CurrentPlayer=new MainMenuApiClient.RankingRow{rank=rank,playerId=(string)me["playerId"],displayName=(string)me["displayName"],
+                    totalPoints=Integer(me["totalPoints"]),matches=Integer(me["matches"]),
+                    pointsKnown=me["totalPoints"]!=null&&me["totalPoints"].Type!=JTokenType.Null,
+                    matchesKnown=me["matches"]!=null&&me["matches"].Type!=JTokenType.Null};
+            }
             return data;
         }
 

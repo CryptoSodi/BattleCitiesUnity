@@ -1,4 +1,9 @@
 mergeInto(LibraryManager.library, {
+  BattleCitiesFullscreenAvailable: function () {
+    var root = document.getElementById('unity-fullscreen-container') || Module['canvas'];
+    return root && ((document.fullscreenEnabled && root.requestFullscreen) ||
+      (document.webkitFullscreenEnabled && root.webkitRequestFullscreen)) ? 1 : 0;
+  },
   BattleCitiesIsMobileBrowser: function () {
     var ua = navigator.userAgent || '';
     // iPadOS can identify itself as a desktop Mac. Touch-capable Windows PCs

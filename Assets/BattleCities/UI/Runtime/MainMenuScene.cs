@@ -179,7 +179,6 @@ namespace BattleCities.UI
         private float controllerLegendHideAt = -1;
         private bool controllerLegendHidden;
         private string[] rows = Array.Empty<string>();
-        private readonly List<Text[]> rankingCells = new List<Text[]>();
         private Text roundLabel, roundHeading, rankingAvailability, rankingTitle, matchesColumn, rankingFooter, rankingFooterSubtitle;
         private RectTransform scoresPanel;
         private GameObject emptyTrophy;
@@ -526,6 +525,7 @@ namespace BattleCities.UI
         private void ApplyMenuPresentation()
         {
             LayoutLeaderboardEdges();
+            LayoutHomeRankCards();
             ArcadeTextStyles.ApplyGold(scoreLabel,theme?theme.HeadingFont:null);
             ArcadeTextStyles.ApplyGold(leaderboard?leaderboard.Find("Heading/Title")?.GetComponent<Text>():null,
                 theme?theme.HeadingFont:null);
@@ -550,6 +550,7 @@ namespace BattleCities.UI
             ScreenContent.BindAuthored(content,"home");
             ApplyNavigationTypography();
             RefreshNavigationState();
+            LayoutWebFullscreen();
         }
         // Navigation plates fill their slots; their reference composition is slightly wider than tall.
         private const float NavigationAspect=9f/8f;
@@ -848,56 +849,13 @@ namespace BattleCities.UI
                 leaderboardDetail.text = snapshot == null ? "Waiting for live player standings." : "Play a ranked match to join this cycle.";
             }
             rows = hasRows ? new string[ranked.Length] : Array.Empty<string>();
-            if (hasRows && scoresPanel) EnsureRankingCells(ranked.Length);
-            for (var index = 0; index < rankingCells.Count; index++)
+            for (var index = 0; index < rows.Length; index++)
             {
-                var visible = hasRows && index < ranked.Length;
-                foreach (var cell in rankingCells[index]) cell.gameObject.SetActive(visible);
-                if (!visible) continue;
                 var row = ranked[index];
-                rankingCells[index][0].text = row.rank.ToString();
-                rankingCells[index][1].text = string.IsNullOrWhiteSpace(row.displayName) ? "UNKNOWN" : row.displayName;
-                rankingCells[index][2].text = row.totalPoints.ToString("N0", CultureInfo.InvariantCulture);
-                rankingCells[index][3].text = row.matches.ToString("N0", CultureInfo.InvariantCulture);
                 rows[index] = string.Format(CultureInfo.InvariantCulture, "{0}. {1}  •  {2:N0} points  •  {3:N0} matches",
-                    row.rank, rankingCells[index][1].text, row.totalPoints, row.matches);
+                    row.rank, row.displayName, row.totalPoints, row.matches);
             }
-        }
-
-        private void EnsureRankingCells(int count)
-        {
-            while (rankingCells.Count < count)
-            {
-                var index = rankingCells.Count;
-                var cells = new Text[4];
-                var names = new[] { "Rank", "Player", "Score", "Matches" };
-                var left = new[] { .025f, .15f, .53f, .77f };
-                var widths = new[] { .10f, .36f, .22f, .21f };
-                for (var column = 0; column < cells.Length; column++)
-                {
-                    var child = new GameObject("Live " + (index + 1) + " " + names[column], typeof(RectTransform), typeof(Text));
-                    child.transform.SetParent(scoresPanel, false);
-                    var rect = (RectTransform)child.transform;
-                    var top = .025f + index * .069f;
-                    rect.anchorMin = new Vector2(left[column], 1 - top - .064f);
-                    rect.anchorMax = new Vector2(left[column] + widths[column], 1 - top);
-                    rect.offsetMin = rect.offsetMax = Vector2.zero;
-                    var cell = child.GetComponent<Text>();
-                    cell.font = theme && theme.BodyFont ? theme.BodyFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                    cell.fontSize = 20;
-                    cell.resizeTextForBestFit = true;
-                    cell.resizeTextMinSize = 13;
-                    cell.resizeTextMaxSize = 20;
-                    cell.color = new Color(.04f, .14f, .20f);
-                    cell.alignment = column == 1 ? TextAnchor.MiddleLeft : TextAnchor.MiddleCenter;
-                    cell.horizontalOverflow = HorizontalWrapMode.Wrap;
-                    cell.verticalOverflow = VerticalWrapMode.Truncate;
-                    cell.supportRichText = false;
-                    cell.raycastTarget = false;
-                    cells[column] = cell;
-                }
-                rankingCells.Add(cells);
-            }
+            RenderHomeRankCards(snapshot);
         }
 
         private void OnApiRoundLoaded(MainMenuApiClient.RoundSnapshot snapshot)
@@ -911,8 +869,8 @@ namespace BattleCities.UI
             {
                 var count = snapshot?.rows?.Length ?? 0;
                 rankingFooterSubtitle.text = snapshot == null ? "Round status unavailable" :
-                    string.Format(CultureInfo.InvariantCulture, "{0} SCORES  •  PAYOUTS {1}",
-                        count, snapshot.payoutsEnabled ? "ACTIVE" : "PAUSED");
+                    string.Format(CultureInfo.InvariantCulture, "{0}  •  PAYOUTS {1}",
+                        count==10?"TOP 10":count.ToString(CultureInfo.InvariantCulture)+" SCORES", snapshot.payoutsEnabled ? "ACTIVE" : "PAUSED");
             }
             UpdateRoundCountdown();
         }

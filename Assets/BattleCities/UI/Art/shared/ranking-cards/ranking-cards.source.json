@@ -1,0 +1,431 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-23",
+  "tool": "built-in image_gen",
+  "purpose": "Blank reusable row-card ranking backgrounds and empty-center laurel rank emblems for home leaderboard and full Ranking page.",
+  "reference": "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-d90a9739-9829-47b8-af4a-31e69de79b4f.png",
+  "artworkReferences": [
+    "Assets/BattleCities/UI/Art/results/commander-scout.png",
+    "Assets/BattleCities/UI/Art/results/commander-pilot.png",
+    "Assets/BattleCities/UI/Art/results/commander-beret.png"
+  ],
+  "rawSeeds": [
+    {
+      "source": "exec-e1be69ee-daec-4164-aec7-309fcc87c16f.png",
+      "prompt": "Use case: precise-object-edit. Production game UI asset for Battle Cities, extracted/recreated from approved ranking reference image 1.\nCreate ONE completely BLANK first-place GOLD ranking row background. Reference only the gold row's material, restrained bevel and shape, not the medals, portraits, text or numbers on it. Wide horizontal rounded rectangle, approximate visible aspect ratio 7.5:1. Straight-on orthographic, symmetric rounded corners, slim warm gold outer lip and bright pale-yellow inner hairline like reference; cream-yellow to warm yellow gold face, clean and light enough for dark navy text. Restrained illustrated toy-metal/game UI polish, light from upper left, no photorealism. A quiet smooth face; no localized reflection, seams or illustration in the long center. Thin identical continuous horizontal top/bottom rims, useful for horizontal 9-slice stretching; endcaps contain all corner curvature. The entire center must be completely empty.\nTechnical: one isolated horizontal card on genuinely transparent RGBA background with a narrow transparent safety margin and all edges intact. Fill most of width. No bolts, medallions, wreath, rank box, portrait holder, avatar, icons, letters, digits, baked names, score or matches, labels, watermark, shadows extending far outside, surrounding UI or extra objects. No table or composite sheet. Only the single blank GOLD row skin.",
+      "role": "Gold row seed revised for flatter corners before final family"
+    }
+  ],
+  "normalization": "Alpha <8 removed; alpha >=248 made opaque; central connected silhouette retained; trimmed; row skins normalized to common 760x104 visible region on 768x112 RGBA canvas with 4px padding; laurel aspect fit to 240px on 256px square with 8px minimum padding. No recoloring, content painting or lettering added in normalization.",
+  "imports": {
+    "type": "Sprite (2D and UI)",
+    "mode": "Single",
+    "mesh": "FullRect",
+    "pixelsPerUnit": 100,
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "filtering": "Trilinear",
+    "mipmaps": true,
+    "sRGB": true,
+    "wrap": "Clamp",
+    "readWrite": false,
+    "compression": "Uncompressed; explicit RGBA32 WebGL and Android overrides"
+  },
+  "usage": {
+    "rows": {
+      "rendering": "Image.Type.Sliced",
+      "borderPixels": [
+        32,
+        24,
+        32,
+        24
+      ],
+      "borderOrder": "left,bottom,right,top",
+      "pixelsPerUnitMultiplier": 2,
+      "previewSizes": [
+        [
+          310,
+          40
+        ],
+        [
+          780,
+          58
+        ]
+      ],
+      "text": "All rank, player, score and matches text native; do not use a whole-image stretch for corners."
+    },
+    "laurels": {
+      "rendering": "Image.Type.Simple; preserveAspect=true",
+      "intendedSize": "32-46 logical px; QA also at 36/44/96",
+      "rankText": "Native overlay at plaque center; no rank digit in asset"
+    },
+    "portraits": "Reuse BattleResultsArt commander portraits; none generated.",
+    "spacing": "Keep row cards inset from containing border; add visible vertical navy gaps. Padding belongs to layout, not baked into backgrounds."
+  },
+  "verification": {
+    "alpha": true,
+    "transparentSafetyBorders": true,
+    "blankContent": "visually checked",
+    "nativeSlicePreview": true,
+    "runtimeVerified": false,
+    "deviceVerified": false,
+    "sourceCodeChanged": false,
+    "buildOrPublish": false
+  },
+  "assets": [
+    {
+      "name": "row-gold",
+      "path": "Assets/BattleCities/UI/Art/shared/ranking-cards/row-gold.png",
+      "kind": "row",
+      "width": 768,
+      "height": 112,
+      "border": [
+        32,
+        24,
+        32,
+        24
+      ],
+      "guid": "0bc4761775564dd5b1a9b582ffc67973",
+      "bytes": 70591,
+      "sha256": "7e1988fb0e505eb4071236b7727f7df78a5133b7c5e773cdfc6a2641ab90beb5",
+      "sourceFile": "exec-98c9df7c-299d-49ee-b8df-3869c638d49a.png",
+      "sourceSize": [
+        2172,
+        724
+      ],
+      "sourceCrop": [
+        31,
+        179,
+        2142,
+        525
+      ],
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\ranking-cards-assets-2026-10-23\\sources\\row-gold-source.png",
+      "sourceSHA256": "8201ef0c9a2a9444947aaee9325896046f9c789dd4f946b5e8b6ee9b7ed494be",
+      "alphaBounds": [
+        4,
+        4,
+        764,
+        108
+      ],
+      "references": [
+        "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-e1be69ee-daec-4164-aec7-309fcc87c16f.png",
+        "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-d90a9739-9829-47b8-af4a-31e69de79b4f.png"
+      ],
+      "prompt": "Edit image 1 blank GOLD Battle Cities row background to match the RECTANGULAR row silhouette in reference image 2 more closely. Preserve its clean gold color face, illustrated polish and transparency. Change ONLY geometry and rim: much flatter horizontal rounded RECTANGLE, visible width to height about 7.5:1. Corner radius is ONLY 18% of the card's height, NOT 50%; the left and right sides each have a long straight vertical middle segment covering about 64% of height. Squared soft corners, NOT capsule/pill ends. Slimmer tasteful rim, outer warm gold edge plus fine bright inner hairline. All lighting uniform and restrained along the long blank center; horizontal top and bottom edges straight. Blank stretchable skin for horizontal nine-slicing. One isolated empty card on genuine transparent RGBA with small safety margin, no text, digits, medals, portraits, rank box, bolts, icons, surrounding UI, backdrop or other objects. Do not copy any text from image 2."
+    },
+    {
+      "name": "row-silver",
+      "path": "Assets/BattleCities/UI/Art/shared/ranking-cards/row-silver.png",
+      "kind": "row",
+      "width": 768,
+      "height": 112,
+      "border": [
+        32,
+        24,
+        32,
+        24
+      ],
+      "guid": "190288b730434b73997632f629706cf8",
+      "bytes": 72504,
+      "sha256": "e537e18266e7942f8ad93f9244896ff13fd360ff887b66dc712fac9de12d419b",
+      "sourceFile": "exec-e7ace640-5282-4588-a7d9-e76387b5a5f2.png",
+      "sourceSize": [
+        2164,
+        727
+      ],
+      "sourceCrop": [
+        32,
+        178,
+        2134,
+        527
+      ],
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\ranking-cards-assets-2026-10-23\\sources\\row-silver-source.png",
+      "sourceSHA256": "89e8ede086c8f99d3610b2f6ef1540d1ea1469131b509ed2a10abe55144beb4e",
+      "alphaBounds": [
+        4,
+        4,
+        764,
+        108
+      ],
+      "references": [
+        "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-98c9df7c-299d-49ee-b8df-3869c638d49a.png"
+      ],
+      "prompt": "Edit supplied blank Battle Cities ranking row skin into the specified material variant. Preserve EXACT outer rounded-rectangle silhouette, corner radius, long straight horizontal/vertical edges, canvas framing, narrow transparent margin, orthographic view and blank layout. This is one empty horizontally stretchable nine-slice UI background. Preserve small rounded corners, NOT pill/capsule ends. Clean quiet center with no localized gloss, no details crossing stretch area. All textures must remain subtle and suitable behind native text. One isolated blank card on genuine transparent RGBA. No words, names, digits, numerals, icons, rank plaque, avatars, medals, portrait frames, bolts, separator columns, baked content, backdrop, extra objects, or surrounding UI. \nVARIANT: SILVER second-place skin: pale neutral silver face with a gentle white-gray metal gradient, thin cool-gray outer rim and pale silver/white inner highlight line, restrained slate-gray lower edge. High-key center for dark navy lettering. No yellow gold remains. Match the reference's silver podium row."
+    },
+    {
+      "name": "row-bronze",
+      "path": "Assets/BattleCities/UI/Art/shared/ranking-cards/row-bronze.png",
+      "kind": "row",
+      "width": 768,
+      "height": 112,
+      "border": [
+        32,
+        24,
+        32,
+        24
+      ],
+      "guid": "1b9814b2032a4eaab322318dd576fd51",
+      "bytes": 70313,
+      "sha256": "2622a0a1357f5f41876c9efb306c21385e3415ff2536291692ff435a061a95ed",
+      "sourceFile": "exec-084203d7-1c60-4489-a8a4-0323579581eb.png",
+      "sourceSize": [
+        2172,
+        724
+      ],
+      "sourceCrop": [
+        30,
+        176,
+        2143,
+        527
+      ],
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\ranking-cards-assets-2026-10-23\\sources\\row-bronze-source.png",
+      "sourceSHA256": "49cfe4978a1fe18d5517315c025d904dc015e84b3cdacb0a9fc0bd798bb56d19",
+      "alphaBounds": [
+        4,
+        4,
+        764,
+        108
+      ],
+      "references": [
+        "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-98c9df7c-299d-49ee-b8df-3869c638d49a.png"
+      ],
+      "prompt": "Edit supplied blank Battle Cities ranking row skin into the specified material variant. Preserve EXACT outer rounded-rectangle silhouette, corner radius, long straight horizontal/vertical edges, canvas framing, narrow transparent margin, orthographic view and blank layout. This is one empty horizontally stretchable nine-slice UI background. Preserve small rounded corners, NOT pill/capsule ends. Clean quiet center with no localized gloss, no details crossing stretch area. All textures must remain subtle and suitable behind native text. One isolated blank card on genuine transparent RGBA. No words, names, digits, numerals, icons, rank plaque, avatars, medals, portrait frames, bolts, separator columns, baked content, backdrop, extra objects, or surrounding UI. \nVARIANT: BRONZE third-place skin: light peach/copper face, gentle warm copper-orange rim, cream-copper thin inner highlight and subtle chestnut bottom edge. Friendly pale center for dark navy lettering; much lighter than a dark bronze medal. Clearly distinct from gold. Match the reference's warm peach bronze podium row."
+    },
+    {
+      "name": "row-cream",
+      "path": "Assets/BattleCities/UI/Art/shared/ranking-cards/row-cream.png",
+      "kind": "row",
+      "width": 768,
+      "height": 112,
+      "border": [
+        32,
+        24,
+        32,
+        24
+      ],
+      "guid": "4c862742aa23446ab24dd98d9a1bccd6",
+      "bytes": 68370,
+      "sha256": "3e145d7fdc07b2c5197ab277592a03a5295b15923089aaa1a3adb69fa8f6b210",
+      "sourceFile": "exec-40ff5e35-3246-4eab-8f74-6d18dff237d9.png",
+      "sourceSize": [
+        2172,
+        724
+      ],
+      "sourceCrop": [
+        33,
+        179,
+        2139,
+        524
+      ],
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\ranking-cards-assets-2026-10-23\\sources\\row-cream-source.png",
+      "sourceSHA256": "2b1a5e86d3a16dbdd2c1e9d4d2b49c4aec70c0b369a8ba78b214ffaed3417c13",
+      "alphaBounds": [
+        4,
+        4,
+        764,
+        108
+      ],
+      "references": [
+        "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-98c9df7c-299d-49ee-b8df-3869c638d49a.png"
+      ],
+      "prompt": "Edit supplied blank Battle Cities ranking row skin into the specified material variant. Preserve EXACT outer rounded-rectangle silhouette, corner radius, long straight horizontal/vertical edges, canvas framing, narrow transparent margin, orthographic view and blank layout. This is one empty horizontally stretchable nine-slice UI background. Preserve small rounded corners, NOT pill/capsule ends. Clean quiet center with no localized gloss, no details crossing stretch area. All textures must remain subtle and suitable behind native text. One isolated blank card on genuine transparent RGBA. No words, names, digits, numerals, icons, rank plaque, avatars, medals, portrait frames, bolts, separator columns, baked content, backdrop, extra objects, or surrounding UI. \nVARIANT: REGULAR CREAM alternating row: warm ivory/cream face #FFF5DF with subtle soft cream-glass shading, simple thin silver-white edge, almost no heavy metal bevel. Remove all yellow gold and amber rim hues. Keep low visual weight, calm flat light center for navy lettering. Same silhouette as seed. No golden accents."
+    },
+    {
+      "name": "row-ice-blue",
+      "path": "Assets/BattleCities/UI/Art/shared/ranking-cards/row-ice-blue.png",
+      "kind": "row",
+      "width": 768,
+      "height": 112,
+      "border": [
+        32,
+        24,
+        32,
+        24
+      ],
+      "guid": "d160bd40a7db419e8ae42daf289a8574",
+      "bytes": 66739,
+      "sha256": "a8daa99c34ea4ed3f6e90357394259b32149736430764b222db603ce36a83688",
+      "sourceFile": "exec-6b2285d4-9310-409e-ad05-3b2b75606948.png",
+      "sourceSize": [
+        2172,
+        724
+      ],
+      "sourceCrop": [
+        33,
+        176,
+        2143,
+        524
+      ],
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\ranking-cards-assets-2026-10-23\\sources\\row-ice-blue-source.png",
+      "sourceSHA256": "60b6a546e1eb58dd811464863dfd4d1493f53f8a6a277c9179b5aa2223781786",
+      "alphaBounds": [
+        4,
+        4,
+        764,
+        108
+      ],
+      "references": [
+        "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-98c9df7c-299d-49ee-b8df-3869c638d49a.png"
+      ],
+      "prompt": "Edit supplied blank Battle Cities ranking row skin into the specified material variant. Preserve EXACT outer rounded-rectangle silhouette, corner radius, long straight horizontal/vertical edges, canvas framing, narrow transparent margin, orthographic view and blank layout. This is one empty horizontally stretchable nine-slice UI background. Preserve small rounded corners, NOT pill/capsule ends. Clean quiet center with no localized gloss, no details crossing stretch area. All textures must remain subtle and suitable behind native text. One isolated blank card on genuine transparent RGBA. No words, names, digits, numerals, icons, rank plaque, avatars, medals, portrait frames, bolts, separator columns, baked content, backdrop, extra objects, or surrounding UI. \nVARIANT: REGULAR ICE-BLUE alternating row: pale icy blue face #D9EFFB with subtle cool glass shading, simple thin silver-white edge, almost no heavy metal bevel. Remove all yellow gold and amber rim hues. Keep low visual weight, calm light center for navy lettering. Same silhouette as seed."
+    },
+    {
+      "name": "row-you",
+      "path": "Assets/BattleCities/UI/Art/shared/ranking-cards/row-you.png",
+      "kind": "row",
+      "width": 768,
+      "height": 112,
+      "border": [
+        32,
+        24,
+        32,
+        24
+      ],
+      "guid": "4c7eb2c881384744a25884aa86d40c92",
+      "bytes": 66962,
+      "sha256": "cd730a2583cb37d68998ffc098b9126f902d9ec4b7334a757045a0215844ff63",
+      "sourceFile": "exec-32cc6f4c-6a2f-4a7e-ac8e-b40d46b5a9c4.png",
+      "sourceSize": [
+        2172,
+        724
+      ],
+      "sourceCrop": [
+        31,
+        175,
+        2144,
+        525
+      ],
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\ranking-cards-assets-2026-10-23\\sources\\row-you-source.png",
+      "sourceSHA256": "eec799995ee1b17dfaca8db223d4d03262757a84c9200b1dc436fb775e76c8e5",
+      "alphaBounds": [
+        4,
+        4,
+        764,
+        108
+      ],
+      "references": [
+        "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-98c9df7c-299d-49ee-b8df-3869c638d49a.png"
+      ],
+      "prompt": "Edit supplied blank Battle Cities ranking row skin into the specified material variant. Preserve EXACT outer rounded-rectangle silhouette, corner radius, long straight horizontal/vertical edges, canvas framing, narrow transparent margin, orthographic view and blank layout. This is one empty horizontally stretchable nine-slice UI background. Preserve small rounded corners, NOT pill/capsule ends. Clean quiet center with no localized gloss, no details crossing stretch area. All textures must remain subtle and suitable behind native text. One isolated blank card on genuine transparent RGBA. No words, names, digits, numerals, icons, rank plaque, avatars, medals, portrait frames, bolts, separator columns, baked content, backdrop, extra objects, or surrounding UI. \nVARIANT: LOCAL PLAYER / YOU row: saturated cobalt and deep royal-blue blank face, elegant slim bright CYAN border with a narrow white-cyan inner highlight and dark navy lower edge. Gentle blue gradient, restrained glow tightly contained to border, no wide external halo. High contrast for WHITE native lettering. Same silhouette as seed. Remove all yellow gold and amber hues. Match approved reference's cyan-bordered own-rank row. No YOU label baked into asset."
+    },
+    {
+      "name": "laurel-gold",
+      "path": "Assets/BattleCities/UI/Art/shared/ranking-cards/laurel-gold.png",
+      "kind": "laurel",
+      "width": 256,
+      "height": 256,
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "guid": "ffe086ab77134456abc68772755f8044",
+      "bytes": 84010,
+      "sha256": "8937fa003a5141c393eae0962f8242ada68d6c2544982b3b908204811e197094",
+      "sourceFile": "exec-55aeaeac-f2fe-450b-9aa9-9b61812ffce2.png",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceCrop": [
+        17,
+        110,
+        1237,
+        1162
+      ],
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\ranking-cards-assets-2026-10-23\\sources\\laurel-gold-source.png",
+      "sourceSHA256": "6b00e34a7856269df4c9129a81338674c80230fb491ab0154a210b40bd56d461",
+      "alphaBounds": [
+        8,
+        24,
+        248,
+        231
+      ],
+      "references": [
+        "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-d90a9739-9829-47b8-af4a-31e69de79b4f.png"
+      ],
+      "prompt": "Use case: precise-object-edit. Production Battle Cities rank emblem, referencing the approved first-place laurel badge in input image 1.\nCreate ONE isolated GOLD LAUREL RANK EMBLEM with a completely EMPTY smooth central face for a native rank digit to be added at runtime. NO DIGITS or letters. Front-facing, vertically balanced, compact near-square silhouette. A small rounded gold shield/medallion plaque encircled along its left, bottom and right by a symmetrical gold laurel wreath; leaves sweep upward and leave the upper center open, like first-place badge in reference. Thick readable broad leaves at 36\u201344 logical pixel display. Clear central blank yellow-gold plaque, bright enough for navy digit overlay, no engraved features. Friendly illustrated polished gold metal matching Battle Cities gold UI, warm amber recessed edges, pale-yellow upper-left highlights, restrained shadows within object.\nTechnical: single emblem centered, full silhouette intact, genuinely transparent RGBA background, small safety margin, no backdrop or card. No rank digit, number, lettering, star, crown, wings, separate ribbons, portrait, trophy, circular text, watermark or mockup. EMPTY blank center is critical."
+    },
+    {
+      "name": "laurel-silver",
+      "path": "Assets/BattleCities/UI/Art/shared/ranking-cards/laurel-silver.png",
+      "kind": "laurel",
+      "width": 256,
+      "height": 256,
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "guid": "ea77c73e96ea4d21937c6d3a4712c53d",
+      "bytes": 88372,
+      "sha256": "987e2af691f36a7ef4c3d35e33c66ad8c1b9234f10497d05513f613217b9b60b",
+      "sourceFile": "exec-79bb7f51-06c1-46fb-a5b3-6daec9d8f26b.png",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceCrop": [
+        16,
+        108,
+        1238,
+        1165
+      ],
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\ranking-cards-assets-2026-10-23\\sources\\laurel-silver-source.png",
+      "sourceSHA256": "dd28c0880a47d6aa9b567f9ec3c4d7a4ebfd3fc7b9c4b1bc0848f085cdff7558",
+      "alphaBounds": [
+        8,
+        24,
+        248,
+        232
+      ],
+      "references": [
+        "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-55aeaeac-f2fe-450b-9aa9-9b61812ffce2.png"
+      ],
+      "prompt": "Edit the supplied Battle Cities GOLD blank laurel rank emblem into its SILVER second-place material variant. Preserve exact silhouette, geometry, proportions, leaf shapes and placement, large EMPTY central face, lighting direction, framing and transparent background. Change only metal colors to polished pale silver/steel with cool gray recessed edges and restrained white-blue highlights. Center is a blank pale silver face suitable for dark navy native rank digit overlay. No gold or yellow remains. No digits, numbers, letters, icons, engravings, text or additional objects. One complete isolated SILVER laurel emblem on genuine transparent RGBA."
+    },
+    {
+      "name": "laurel-bronze",
+      "path": "Assets/BattleCities/UI/Art/shared/ranking-cards/laurel-bronze.png",
+      "kind": "laurel",
+      "width": 256,
+      "height": 256,
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "guid": "73afc5a9ee1542a296ea9c08857d10d5",
+      "bytes": 89844,
+      "sha256": "266855372c28af48c0b8c816c3ada8f6499a75ab76683adb3173ae040b8dbac6",
+      "sourceFile": "exec-0a09bd3c-8a08-416d-986a-0b8ad0ec0487.png",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceCrop": [
+        16,
+        107,
+        1238,
+        1164
+      ],
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\ranking-cards-assets-2026-10-23\\sources\\laurel-bronze-source.png",
+      "sourceSHA256": "b8ee2b508440363a77e9708e14779e75ad5fabc89941486045f1a292ec07df8c",
+      "alphaBounds": [
+        8,
+        24,
+        248,
+        232
+      ],
+      "references": [
+        "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-55aeaeac-f2fe-450b-9aa9-9b61812ffce2.png"
+      ],
+      "prompt": "Edit the supplied Battle Cities GOLD blank laurel rank emblem into its BRONZE third-place material variant. Preserve exact silhouette, geometry, proportions, leaf shapes and placement, large EMPTY central face, lighting direction, framing and transparent background. Change only metal colors to warm polished copper/bronze with peach highlights and chestnut recessed edges, clearly distinct from yellow gold. Center is a blank light warm copper face suitable for dark navy native rank digit overlay. No digits, numbers, letters, icons, engravings, text or additional objects. One complete isolated BRONZE laurel emblem on genuine transparent RGBA."
+    }
+  ]
+}

@@ -16,6 +16,7 @@ namespace BattleCities.UI
         MainMenuScene menu;MenuTheme theme;PreBattleArt art;MainMenuApiClient api;
         RectTransform root,header,tabsBar,footer,history,historyPaper,historyHeading,table,tableHeading;
         RectTransform empty,historyEmpty,eligibility,pickerOverlay,pickerPanel;
+        RankingRowCard personalCard;
         TMP_Text rankValue,countdown,periodCaption,tableTitle,emptyTitle,emptyDetail,historyPeriod,eligibilityText;
         UnityEngine.UI.Button picker,back;
         readonly UnityEngine.UI.Button[] tabs=new UnityEngine.UI.Button[3];

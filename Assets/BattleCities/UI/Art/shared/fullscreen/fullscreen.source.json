@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-23",
+  "tool": "built-in image_gen",
+  "purpose": "Web-only home panel fullscreen control, 44\u201348 logical square",
+  "artworkReferences": [
+    "Assets/BattleCities/UI/Art/pre-battle/tank-cost-active-blue.png",
+    "Assets/BattleCities/UI/Art/pre-battle/tank-cost-selected-gold.png"
+  ],
+  "states": {
+    "enter": "four outer corner brackets",
+    "exit": "four inward corner brackets",
+    "normal": "blue with white glyph",
+    "hoverPressed": "gold with navy glyph"
+  },
+  "normalization": "Alpha <8 removed; near-opaque alpha >=248 made opaque; central connected button retained; trim; aspect-preserving Lanczos fit to 240px; 256px square canvas with at least 8px margins.",
+  "imports": {
+    "type": "Sprite (2D and UI)",
+    "mode": "Single",
+    "pixelsPerUnit": 100,
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "mesh": "FullRect",
+    "filtering": "Trilinear",
+    "mipmaps": true,
+    "sRGB": true,
+    "wrap": "Clamp",
+    "readWrite": false,
+    "compression": "Uncompressed; WebGL RGBA32 override",
+    "rendering": "Simple, preserveAspect=true",
+    "intendedSize": "44\u201348 logical pixels square",
+    "references": "Load each Sprite by path; no assumed local fileID."
+  },
+  "verification": {
+    "alpha": "passed",
+    "transparentSafetyBorder": "passed",
+    "nativePreview": "Visually checked at 44px and 48px on cream and navy; enter/exit glyphs remain distinct and blue/gold states readable.",
+    "runtimeVerified": false,
+    "sourceCodeChanged": false,
+    "buildOrPublish": false,
+    "metadata": "Four unique GUIDs, matching image hashes, Sprite Single/100 PPU/center pivot/clamp/trilinear/mipmap/alpha/WebGL RGBA32 settings verified."
+  },
+  "assets": [
+    {
+      "name": "enter-fullscreen-blue",
+      "path": "Assets/BattleCities/UI/Art/shared/fullscreen/enter-fullscreen-blue.png",
+      "width": 256,
+      "height": 256,
+      "guid": "d08b00625ebc45339f0dcdb88c387d3c",
+      "sha256": "8a28f50ae19e970309122f12d58de63a40360f751bc93e62335b41fc8e32ba4f",
+      "bytes": 51634,
+      "sourceFile": "exec-cbe56d07-7fb4-437a-b11c-d5404faf7f10.png",
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\fullscreen-controls-2026-10-23\\sources\\enter-fullscreen-blue-source.png",
+      "sourceSHA256": "514252b9688b48ddddf49e34476294d3ccb0091796b083037f78c9b846322202",
+      "sourceCrop": [
+        80,
+        105,
+        1173,
+        1154
+      ],
+      "visibleBounds": [
+        8,
+        13,
+        248,
+        243
+      ],
+      "reference": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-cost-active-blue.png",
+      "prompt": "Production UI asset for Battle Cities: ONE compact square ENTER-FULLSCREEN icon button for a 44\u201348 logical pixel control. Referenced image is the APPROVED text-free button skin and must supply the same material, bevel, colors and light direction. Adapt that existing artwork to a SQUARE without stretching its highlights; square with modest 10\u201312% corner radius, not a pill or circle. Tight transparent safety margin ~3%, all rounded outer edges intact, straight-on orthographic view, no tilt. Slim illustrated metal/gloss rim and a clean central face. No bolts, text, letters, numbers, extra badges, background, mockup or additional buttons.\n\nCENTER GLYPH: a very crisp simple flat-color conventional ENTER FULLSCREEN symbol consisting of EXACTLY FOUR separated thick L-SHAPED CORNER BRACKETS. Their elbows sit at the OUTER corners of an imaginary square: upper-left, upper-right, lower-left, lower-right, with short arms along its edges pointing toward the center. All four corners symmetrically positioned. No continuous square, no arrows, no diagonal lines, no maximize-window rectangle or extra inset square. Symbol spans roughly 56% of button width, stroke about 7% of button width, equal clean strokes and arm lengths, no texture/glow on the glyph, read clearly when displayed at 44px.\nSTATE: normal BLUE. Reuse approved cobalt-blue face with deep-blue bottom edge, bright cyan thin bevel at top/left and restrained glossy reflections. Glyph solid WHITE, high contrast, no outline or shadow. Keep all shine away from glyph so white brackets remain obvious. Background genuinely transparent RGBA, not black or fake checkerboard. One isolated square button only."
+    },
+    {
+      "name": "enter-fullscreen-gold",
+      "path": "Assets/BattleCities/UI/Art/shared/fullscreen/enter-fullscreen-gold.png",
+      "width": 256,
+      "height": 256,
+      "guid": "f06512f92acf41439ae5d47525141ba1",
+      "sha256": "6dbbc4dcb50e359a9f650ebf188766ef06a97342d2e2134601f231fdf2f9d810",
+      "bytes": 51746,
+      "sourceFile": "exec-ca4d9e52-55bf-44ca-9ea0-32120b0d1324.png",
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\fullscreen-controls-2026-10-23\\sources\\enter-fullscreen-gold-source.png",
+      "sourceSHA256": "0d2216ce2ea73cfbfcef0ba30a6e6fd6bb6432f45b0e8af3f44c40b692222742",
+      "sourceCrop": [
+        59,
+        82,
+        1194,
+        1172
+      ],
+      "visibleBounds": [
+        8,
+        13,
+        248,
+        243
+      ],
+      "reference": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/pre-battle/tank-cost-selected-gold.png",
+      "prompt": "Production UI asset for Battle Cities: ONE compact square ENTER-FULLSCREEN icon button for a 44\u201348 logical pixel control. Referenced image is the APPROVED text-free button skin and must supply the same material, bevel, colors and light direction. Adapt that existing artwork to a SQUARE without stretching its highlights; square with modest 10\u201312% corner radius, not a pill or circle. Tight transparent safety margin ~3%, all rounded outer edges intact, straight-on orthographic view, no tilt. Slim illustrated metal/gloss rim and a clean central face. No bolts, text, letters, numbers, extra badges, background, mockup or additional buttons.\n\nCENTER GLYPH: a very crisp simple flat-color conventional ENTER FULLSCREEN symbol consisting of EXACTLY FOUR separated thick L-SHAPED CORNER BRACKETS. Their elbows sit at the OUTER corners of an imaginary square: upper-left, upper-right, lower-left, lower-right, with short arms along its edges pointing toward the center. All four corners symmetrically positioned. No continuous square, no arrows, no diagonal lines, no maximize-window rectangle or extra inset square. Symbol spans roughly 56% of button width, stroke about 7% of button width, equal clean strokes and arm lengths, no texture/glow on the glyph, read clearly when displayed at 44px.\nSTATE: hover/pressed GOLD. Reuse approved warm yellow/gold face, golden bright top bevel and amber/orange lower edge. Glyph solid dark NAVY #06213F, high contrast, no outline or shadow. Same clean square geometry and compact rim as normal blue button. Background genuinely transparent RGBA, not black or fake checkerboard. One isolated square button only."
+    },
+    {
+      "name": "exit-fullscreen-blue",
+      "path": "Assets/BattleCities/UI/Art/shared/fullscreen/exit-fullscreen-blue.png",
+      "width": 256,
+      "height": 256,
+      "guid": "dc79f7b9d62e4b72a4aad38fbf450d7d",
+      "sha256": "3989b5e0e0e20957020d20a760fd806891531ec41e91cc08560c3ac2b91048ea",
+      "bytes": 53988,
+      "sourceFile": "exec-b6f738d9-35ec-4e7c-b651-fdc87a91591d.png",
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\fullscreen-controls-2026-10-23\\sources\\exit-fullscreen-blue-source.png",
+      "sourceSHA256": "679a152830f7c82630f6e7e553a6edce4ec546b1fad294a6668b48418e55a50b",
+      "sourceCrop": [
+        79,
+        103,
+        1175,
+        1156
+      ],
+      "visibleBounds": [
+        8,
+        12,
+        248,
+        243
+      ],
+      "reference": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-cbe56d07-7fb4-437a-b11c-d5404faf7f10.png",
+      "prompt": "Edit supplied Battle Cities square fullscreen button. Preserve the ENTIRE button base, exact square silhouette, corner radius, bevel, highlights, color, position, canvas, transparent background and small margin pixel-faithfully. Change ONLY the central ENTER fullscreen corner glyph into the standard EXIT / RESTORE fullscreen glyph.\n\nExit glyph is EXACTLY FOUR isolated thick right-angle corner brackets with their ELBOWS moved INWARD TOWARD THE CENTER. It is the familiar material-design fullscreen_exit symbol. Each bracket is the corresponding enter bracket ROTATED 180 degrees IN PLACE inside its quadrant. Their arrangement is like:\ntop row: bottom-right-corner bracket, bottom-left-corner bracket\nbottom row: top-right-corner bracket, top-left-corner bracket.\nPrecise path description on the glyph's imaginary square: top-left path goes from LEFT middle-upper inward to an elbow then UP to the top edge; top-right goes from TOP down to inward elbow then RIGHT; bottom-left goes from BOTTOM up to inward elbow then LEFT; bottom-right goes from RIGHT to inward elbow then DOWN. Four clearly separated L bends, empty gap in center. No full square, no diagonals, no arrows, no overlapping brackets, no words/letters/digits.\n\nKeep same overall glyph bounding box as source and same stroke/arm thickness, perfectly symmetric, crisp flat symbol readable at 44\u201348 pixels. Preserve original glyph color. Nothing else changes. One isolated square transparent button only, no sheet or backdrop.\nSTATE: BLUE base with solid WHITE exit glyph."
+    },
+    {
+      "name": "exit-fullscreen-gold",
+      "path": "Assets/BattleCities/UI/Art/shared/fullscreen/exit-fullscreen-gold.png",
+      "width": 256,
+      "height": 256,
+      "guid": "33fb84181ec946acb397ef19348227fe",
+      "sha256": "d03d4373ed76fd695f8825ae548e27da16e6733d9b9ece990b6d595a811d71cf",
+      "bytes": 53983,
+      "sourceFile": "exec-ec422ce5-bd80-4c03-9734-be841d3d810d.png",
+      "sourceArchive": "C:\\repos\\BattleCity\\art_exports\\fullscreen-controls-2026-10-23\\sources\\exit-fullscreen-gold-source.png",
+      "sourceSHA256": "1c53f27335cd052a2b288bcda9ee7ffe17e810e44069180c23d073019b5095a4",
+      "sourceCrop": [
+        58,
+        81,
+        1197,
+        1172
+      ],
+      "visibleBounds": [
+        8,
+        13,
+        248,
+        243
+      ],
+      "reference": "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-ca4d9e52-55bf-44ca-9ea0-32120b0d1324.png",
+      "prompt": "Edit supplied Battle Cities square fullscreen button. Preserve the ENTIRE button base, exact square silhouette, corner radius, bevel, highlights, color, position, canvas, transparent background and small margin pixel-faithfully. Change ONLY the central ENTER fullscreen corner glyph into the standard EXIT / RESTORE fullscreen glyph.\n\nExit glyph is EXACTLY FOUR isolated thick right-angle corner brackets with their ELBOWS moved INWARD TOWARD THE CENTER. It is the familiar material-design fullscreen_exit symbol. Each bracket is the corresponding enter bracket ROTATED 180 degrees IN PLACE inside its quadrant. Their arrangement is like:\ntop row: bottom-right-corner bracket, bottom-left-corner bracket\nbottom row: top-right-corner bracket, top-left-corner bracket.\nPrecise path description on the glyph's imaginary square: top-left path goes from LEFT middle-upper inward to an elbow then UP to the top edge; top-right goes from TOP down to inward elbow then RIGHT; bottom-left goes from BOTTOM up to inward elbow then LEFT; bottom-right goes from RIGHT to inward elbow then DOWN. Four clearly separated L bends, empty gap in center. No full square, no diagonals, no arrows, no overlapping brackets, no words/letters/digits.\n\nKeep same overall glyph bounding box as source and same stroke/arm thickness, perfectly symmetric, crisp flat symbol readable at 44\u201348 pixels. Preserve original glyph color. Nothing else changes. One isolated square transparent button only, no sheet or backdrop.\nSTATE: GOLD base with solid NAVY exit glyph."
+    }
+  ]
+}
