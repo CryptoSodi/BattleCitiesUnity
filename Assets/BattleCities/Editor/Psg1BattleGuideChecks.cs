@@ -79,7 +79,9 @@ namespace BattleCities.Editor
                     typeof(BattleGuideScreen).GetMethod("Layout",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(guide,null);Canvas.ForceUpdateCanvases();
                     Check(continued==0,"opening does not launch or charge");
                     var scroll=go.GetComponentInChildren<ScrollRect>();
-                    if(size.x==1240)Check(scroll.content.rect.height<=scroll.viewport.rect.height+1,"native PSG1 guide fits without scrolling");
+                    Check(!scroll.enabled&&!scroll.vertical&&scroll.content.rect.height*scroll.content.localScale.y<=scroll.viewport.rect.height+1,"complete PSG1 guide fits without scrolling");
+                    Check(Mathf.Abs(go.transform.Find("Title").GetComponent<RectTransform>().rect.height-Mathf.Clamp(root.rect.height*.083f,46,64))<.1f,"PSG1 shared title height");
+                    Check(Mathf.Abs(go.transform.Find("Footer").GetComponent<RectTransform>().rect.height-Mathf.Clamp(root.rect.height*.078f,50,64))<.1f,"PSG1 shared footer height");
                     var labels=go.GetComponentsInChildren<TMP_Text>();
                     foreach(var label in labels)label.ForceMeshUpdate();
                     Check(!labels.Any(t=>t.isTextOverflowing),"all instruction text fits: "+string.Join(", ",labels.Where(t=>t.isTextOverflowing).Select(t=>t.transform.parent.name+"/"+t.name)));
@@ -99,8 +101,8 @@ namespace BattleCities.Editor
                     Check(EventSystem.current.currentSelectedGameObject==first.gameObject,"guide opens with Continue focused");
                     Check(!scroll.content.GetComponentsInChildren<Selectable>().Any(),"information cards are not selectable");
                     BattleGuideChecks.Capture(canvas,(int)size.x,(int)size.y,prefix:"psg1");
-                    typeof(BattleGuideScreen).GetMethod("ScrollPsg1",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(guide,new object[]{-1f,10f});
-                    Check(scroll.content.anchoredPosition.y>=0&&scroll.content.anchoredPosition.y<=Mathf.Max(0,scroll.content.rect.height-scroll.viewport.rect.height)+1,"controller reveal remains within scroll bounds");
+                    Check(scroll.content.anchoredPosition==Vector2.zero,"information sheet stays fixed");
+                    Check(!labels.Any(t=>t.text.Contains("SCROLL")),"footer does not advertise scrolling");
                     BattleGuideChecks.Capture(canvas,(int)size.x,(int)size.y,"-bottom","psg1");
                     guide.Cancel();Check(continued==0,"Back/cancel never launches");
                 }

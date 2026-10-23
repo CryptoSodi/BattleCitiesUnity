@@ -53,7 +53,7 @@ namespace BattleCities.Editor
                 var root=(RectTransform)go.transform;root.anchorMin=Vector2.zero;root.anchorMax=Vector2.one;root.offsetMin=Vector2.one*12;root.offsetMax=-Vector2.one*12;
                 var guide=go.AddComponent<BattleGuideScreen>();guide.Configure(theme,skin);
                 int continued=0;
-                foreach(var size in new[]{new Vector2(1600,900),new Vector2(1280,720),new Vector2(844,390),new Vector2(560,620)})
+                foreach(var size in new[]{new Vector2(1600,900),new Vector2(1280,720),new Vector2(1000,740),new Vector2(960,540),new Vector2(844,390),new Vector2(560,620)})
                 {
                     ((RectTransform)canvasObject.transform).sizeDelta=size;Canvas.ForceUpdateCanvases();
                     guide.Open(0,()=>continued++);Canvas.ForceUpdateCanvases();
@@ -61,8 +61,16 @@ namespace BattleCities.Editor
                     Canvas.ForceUpdateCanvases();
                     Check(guide.IsOpen&&continued==0,"opening never launches or charges");
                     var scroll=go.GetComponentInChildren<ScrollRect>();
-                    Check(scroll.content.rect.width>0&&scroll.content.rect.height>0&&scroll.viewport.rect.height>0&&scroll.vertical,"instructions have usable scroll geometry");
-                    if(size.x==1600)Check(scroll.content.rect.height<=scroll.viewport.rect.height+1,"desktop guide shows Q and powerups without scrolling");
+                    Check(scroll.content.rect.width>0&&scroll.content.rect.height>0&&scroll.viewport.rect.height>0&&!scroll.vertical&&!scroll.enabled,"desktop instructions never scroll");
+                    Check(scroll.content.rect.height*scroll.content.localScale.y<=scroll.viewport.rect.height+1,"complete desktop sheet fits the TV height");
+                    Check(Mathf.Abs(go.transform.Find("Title").GetComponent<RectTransform>().rect.height-Mathf.Clamp(root.rect.height*.083f,46,64))<.1f,"desktop header matches shared title height");
+                    Check(Mathf.Abs(go.transform.Find("Footer").GetComponent<RectTransform>().rect.height-Mathf.Clamp(root.rect.height*.078f,50,64))<.1f,"desktop footer matches shared white bar height");
+                    foreach(var card in scroll.content.GetComponentsInChildren<RectTransform>()){
+                        if(card.parent!=scroll.content)continue;
+                        var corners=new Vector3[4];card.GetWorldCorners(corners);
+                        var view=scroll.viewport.rect;view.xMin-=.1f;view.xMax+=.1f;view.yMin-=.1f;view.yMax+=.1f;
+                        foreach(var corner in corners){var local=scroll.viewport.InverseTransformPoint(corner);Check(view.Contains((Vector2)local),"instruction card is fully visible: "+card.name);}
+                    }
                     var button=go.GetComponentInChildren<Button>();
                     Check(button.image.sprite==skin.tankCostButton,"Continue uses approved blue skin");
                     Check(button.image.raycastTarget&&button.interactable,"Continue accepts pointer input");

@@ -3347,7 +3347,7 @@
         "powers-body": "A / B / X / Y consume equipped slots 1 / 2 / 3 / 4.",
         "deploy-title": "DEPLOY SPECIAL",
         "single-special": "Current tanks each have one special.",
-        "menu-hint": "D-PAD: SCROLL / SELECT    A: CONFIRM    B: BACK"
+        "menu-hint": "D-PAD: SELECT    A: CONFIRM    B: BACK"
       },
       "art": {
         "stick": "psg-guide-stick",

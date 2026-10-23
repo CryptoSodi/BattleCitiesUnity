@@ -3,7 +3,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 
 namespace BattleCities.UI
 {
@@ -24,7 +23,7 @@ namespace BattleCities.UI
             ["step-2-title"]="2  RELEASE TO SHOOT",["step-2-body"]="Release R1 to fire in your selected aim direction.",
             ["step-3-title"]="3  FOLLOW AGAIN",["step-3-body"]="Your shot keeps its aim. The turret follows movement again after firing.",
             ["deploy-title"]="DEPLOY SPECIAL",["single-special"]="Current tanks each have one special.",
-            ["menu-hint"]="D-PAD: SCROLL / SELECT    A: CONFIRM    B: BACK"
+            ["menu-hint"]="D-PAD: SELECT    A: CONFIRM    B: BACK"
         };
         public static readonly string[] Psg1ArtKeys={"stick","dpad","shoulder","face","device","tap","charge","normal-shell","power-shell"};
         Psg1BattleGuideArt psgArt;
@@ -32,20 +31,6 @@ namespace BattleCities.UI
         Sprite PsgArt(string key,Sprite fallback)=>ScreenContent.Sprite(Psg1ScreenId,key,fallback);
         public void KeepControllerFocus()
         { if(IsOpen)Psg1UiNavigation.KeepFocus(transform,proceed); }
-        void UpdatePsg1Scrolling()
-        {
-            var pad=Gamepad.current;if(pad==null)return;
-            float axis=pad.dpad.y.ReadValue();
-            if(Mathf.Abs(axis)<.35f)axis=pad.leftStick.y.ReadValue();
-            ScrollPsg1(axis,Time.unscaledDeltaTime);
-        }
-        void ScrollPsg1(float axis,float dt)
-        {
-            if(Mathf.Abs(axis)<.35f)return;
-            var scroll=viewport.parent.GetComponent<ScrollRect>();scroll.StopMovement();
-            float range=Mathf.Max(0,content.rect.height-viewport.rect.height);
-            content.anchoredPosition=new Vector2(0,Mathf.Clamp(content.anchoredPosition.y-axis*480*dt,0,range));
-        }
 
         void BuildPsg1Cards()
         {
@@ -122,18 +107,17 @@ namespace BattleCities.UI
         }
         void LayoutPsg1(float width,float height)
         {
-            float gap=8;int columns=width>=900?4:2;
-            float topHeight=width>=1150?Mathf.Clamp(height*.29f,210,255):320,topWidth=(width-gap*(columns-1))/columns;
-            for(int i=0;i<4;i++)Place(cards[i],i%columns*(topWidth+gap),i/columns*(topHeight+gap),topWidth,topHeight);
-            float y=Mathf.Ceil(4f/columns)*(topHeight+gap);
-            float specialHeight=width>=900?156:300;
+            float availableWidth=width,scale=Mathf.Min(1,width/1150f,height/840f);
+            width/=scale;height/=scale;
+            content.localScale=new Vector3(scale,scale,1);
+            content.sizeDelta=new Vector2(width-availableWidth,height);content.anchoredPosition=Vector2.zero;
+            var scroll=viewport.parent.GetComponent<ScrollRect>();scroll.StopMovement();scroll.vertical=scroll.horizontal=false;scroll.enabled=false;
+            float gap=8,topHeight=height*.2857f,topWidth=(width-gap*3)/4;
+            for(int i=0;i<4;i++)Place(cards[i],i*(topWidth+gap),0,topWidth,topHeight);
+            float y=topHeight+gap;
+            float specialHeight=height*.195f;
             Place(cards[7],0,y,width,specialHeight);y+=specialHeight+gap;
-            if(width<900)
-            {
-                Place((RectTransform)cards[7].Find("Deploy"),12,42,width-24,116);
-                Place((RectTransform)cards[7].Find("Switch"),12,166,width-24,122);
-            }
-            float powerHeight=width>=900?164:180;
+            float powerHeight=height*.185f;
             Place(cards[8],0,y,width,powerHeight);y+=powerHeight+gap;
             // Keep each face button and its example icon paired on one line.
             var powers=cards[8];float pairWidth=(width-40)/4f;
@@ -144,12 +128,10 @@ namespace BattleCities.UI
                 Place((RectTransform)powers.Find("Key "+button),x,40,size,size);
                 Place((RectTransform)powers.Find("Power example "+i),x+size+10,40,size,size);
             }
-            Place(turretHeading,6,y,width-12,36);y+=40;
-            int steps=width>=1000?3:1;float stepWidth=(width-gap*(steps-1))/steps,stepHeight=width>=1150?200:240;
-            for(int i=0;i<3;i++)Place(cards[4+i],i%steps*(stepWidth+gap),y+i/steps*(stepHeight+gap),stepWidth,stepHeight);
-            y+=Mathf.Ceil(3f/steps)*(stepHeight+gap);
+            Place(turretHeading,6,y,width-12,32);y+=36;
+            float stepWidth=(width-gap*2)/3,stepHeight=height-y-gap;
+            for(int i=0;i<3;i++)Place(cards[4+i],i*(stepWidth+gap),y,stepWidth,stepHeight);
             foreach(var card in cards)Place((RectTransform)card.Find("Heading"),12,5,card.rect.width-24,32);
-            content.sizeDelta=new Vector2(0,y);content.anchoredPosition=new Vector2(0,Mathf.Clamp(content.anchoredPosition.y,0,Mathf.Max(0,y-height)));
             float footerSpace=footer.rect.width*TvStatusFooterLayout.ActionArea.x-36;
             float optWidth=Mathf.Min(330,footerSpace*.44f),lineHeight=footer.rect.height-16;
             Place((RectTransform)hideAgain.transform,18,8,optWidth,lineHeight);

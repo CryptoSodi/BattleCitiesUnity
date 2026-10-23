@@ -104,20 +104,24 @@ namespace BattleCities.UI
         }
         public void Cancel(){confirmed=null;gameObject.SetActive(false);}
         void OnDisable(){confirmed=null;}
-        void LateUpdate(){if(built&&(needsLayout||lastSize!=bounds.rect.size))Layout();if(psg1Guide&&IsOpen){KeepControllerFocus();UpdatePsg1Scrolling();}}
+        void LateUpdate(){if(built&&(needsLayout||lastSize!=bounds.rect.size))Layout();if(psg1Guide&&IsOpen)KeepControllerFocus();}
         void OnRectTransformDimensionsChange(){needsLayout=true;}
         void Layout()
         {
             if(!built)return;needsLayout=false;lastSize=bounds.rect.size;
-            float headerHeight=Mathf.Clamp(bounds.rect.height*.095f,72,88),footerHeight=Mathf.Clamp(bounds.rect.height*.09f,72,84);
+            float headerHeight=new TvTitleHeaderLayout(bounds).Height;
+            float footerHeight=new TvStatusFooterLayout(bounds).Height;
             Place(header,4,4,bounds.rect.width-8,headerHeight);
             float iconHeight=headerHeight*.64f;
             float iconWidth=headerIcon.sprite?Mathf.Min(headerHeight*.95f,iconHeight*headerIcon.sprite.rect.width/headerIcon.sprite.rect.height):iconHeight;
             Place(headerIcon.rectTransform,24,(headerHeight-iconHeight)*.5f,iconWidth,iconHeight);
             MainMenuScene.Place(title.rectTransform,24+iconWidth+12,8,header.rect.width-48-iconWidth-12,headerHeight-16);
+            new TvTitleHeaderLayout(bounds).PlaceTitle(header,headerIcon.rectTransform,title.rectTransform,true);
+            title.fontSize=title.fontSizeMax=TvTitleHeaderLayout.TextSize;
+            title.textWrappingMode=TextWrappingModes.NoWrap;
             Place(footer,4,bounds.rect.height-footerHeight-4,bounds.rect.width-8,footerHeight);TvStatusFooterLayout.PlaceAction((RectTransform)proceed.transform);
             Place((RectTransform)hideAgain.transform,18,8,Mathf.Max(120,footer.rect.width*.72f-24),footerHeight-16);
-            var checkBox=(RectTransform)hideAgain.transform.Find("Box");float checkSize=Mathf.Min(40,footerHeight-24);
+            var checkBox=(RectTransform)hideAgain.transform.Find("Box");float checkSize=Mathf.Min(psg1Guide?40:28,footerHeight-24);
             Place(checkBox,0,(footerHeight-16-checkSize)*.5f,checkSize,checkSize);
             var checkLabel=hideAgain.transform.Find("Caption") as RectTransform;
             Place(checkLabel,checkSize+14,0,((RectTransform)hideAgain.transform).rect.width-checkSize-14,footerHeight-16);
@@ -125,23 +129,44 @@ namespace BattleCities.UI
             float y=headerHeight+14,height=Mathf.Max(1,bounds.rect.height-y-footerHeight-14);
             Place((RectTransform)viewport.parent,10,y,Mathf.Max(1,bounds.rect.width-20),height);
             if(psg1Guide){LayoutPsg1(width:viewport.rect.width,height:height);return;}
-            float width=viewport.rect.width,gap=8;int columns=width>=1000?4:width>=440?2:1;
-            float cardWidth=(width-gap*(columns-1))/columns;
-            float topCard=Mathf.Clamp(height*.30f,210,260),stepCard=Mathf.Clamp(height*.30f,210,280),bottomCard=Mathf.Clamp(height*.28f,200,260);
-            for(int i=0;i<4;i++)Place(cards[i],i%columns*(cardWidth+gap),i/columns*(topCard+gap),cardWidth,topCard);
+            LayoutDesktopInstructions(viewport.rect.width,height);
+        }
+        void LayoutDesktopInstructions(float availableWidth,float availableHeight)
+        {
+            // Fit the complete information sheet inside the TV, including short desktop windows.
+            // A shared scale keeps text, keycaps and tank illustrations in proportion.
+            float scale=Mathf.Min(1,availableWidth/1100f,availableHeight/620f);
+            float width=availableWidth/scale,height=availableHeight/scale,gap=8;
+            content.localScale=new Vector3(scale,scale,1);
+            content.sizeDelta=new Vector2(width-availableWidth,height);content.anchoredPosition=Vector2.zero;
+            var scroll=viewport.parent.GetComponent<ScrollRect>();
+            scroll.StopMovement();scroll.vertical=scroll.horizontal=false;scroll.enabled=false;
+            float topCard=height*.35f,stepCard=height*.31f,bottomCard=height-topCard-stepCard-30-gap*3;
+            float cardWidth=(width-gap*3)/4;
+            for(int i=0;i<4;i++){
+                Place(cards[i],i*(cardWidth+gap),0,cardWidth,topCard);
+                Area(cards[i].Find("Description") as RectTransform,new Rect(.04f,.72f,.92f,.26f));
+            }
             LayoutKeyGrid(cards[0],new[]{"W","A","S","D"});
             LayoutKeyGrid(cards[1],new[]{"↑","←","↓","→"});
-            y=Mathf.Ceil(4f/columns)*(topCard+gap);
-            Place(turretHeading,6,y,width-12,36);y+=40;
-            int steps=width>=1100?3:1;float stepWidth=(width-gap*(steps-1))/steps;
-            for(int i=0;i<3;i++)Place(cards[4+i],i%steps*(stepWidth+gap),y+i/steps*(stepCard+gap),stepWidth,stepCard);
-            y+=Mathf.Ceil(3f/steps)*(stepCard+gap);
-            int bottomColumns=width>=650?2:1;float bottomWidth=(width-gap*(bottomColumns-1))/bottomColumns;
+            float y=topCard+gap;
+            Place(turretHeading,6,y,width-12,30);y+=30;
+            float stepWidth=(width-gap*2)/3;
+            for(int i=0;i<3;i++){
+                Place(cards[4+i],i*(stepWidth+gap),y,stepWidth,stepCard);
+                Area(cards[4+i].Find("Tank bounds") as RectTransform,new Rect(.10f,.19f,.8f,.38f));
+                Area(cards[4+i].Find("Description") as RectTransform,new Rect(.04f,.59f,.92f,.39f));
+            }
+            y+=stepCard+gap;
+            float bottomWidth=(width-gap)/2;
             Place(cards[7],0,y,bottomWidth,bottomCard);
-            Place(cards[8],bottomColumns==2?bottomWidth+gap:0,bottomColumns==2?y:y+bottomCard+gap,bottomWidth,bottomCard);
+            Place(cards[8],bottomWidth+gap,y,bottomWidth,bottomCard);
             LayoutSpecial(cards[7]);LayoutPowerups(cards[8]);
-            y+=bottomColumns==2?bottomCard+gap:2*(bottomCard+gap);
-            content.sizeDelta=new Vector2(0,y);content.anchoredPosition=new Vector2(0,Mathf.Clamp(content.anchoredPosition.y,0,Mathf.Max(0,y-height)));
+            foreach(var label in content.GetComponentsInChildren<TMP_Text>()){
+                if(label.name=="Description"||label.name=="Switch availability"){
+                    label.fontSize=label.fontSizeMax=24;label.fontSizeMin=20;
+                }
+            }
             foreach(var key in content.GetComponentsInChildren<Image>())
                 if(key.type==Image.Type.Sliced&&key.name.StartsWith("Key ")&&key.sprite&&key.sprite.border.x>0)
                     TvTitleHeaderLayout.FitSkin(key,key.rectTransform.rect.height,.18f);
