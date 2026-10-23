@@ -202,7 +202,7 @@ namespace BattleCities
             pickupIcon.SetTexture("_BaseMap",atlas);pickupStar.SetTexture("_BaseMap",star);
             pickupQuad.uv=new[]{new Vector2(uv.xMin,uv.yMin),new Vector2(uv.xMax,uv.yMin),new Vector2(uv.xMax,uv.yMax),new Vector2(uv.xMin,uv.yMax)};
             properties.SetColor("_BaseColor",Color.white);
-            float size=BattleHudLayout.PickupWorldSize(camera,position);
+            float size=BattlePickupSizing.WorldSize;
             Graphics.DrawMesh(pickupQuad,Matrix4x4.TRS(position,camera.transform.rotation,Vector3.one*size),pickupIcon,camera.gameObject.layer,camera,0,properties,false,false,false);
             for(int i=0;i<6;i++)
             {

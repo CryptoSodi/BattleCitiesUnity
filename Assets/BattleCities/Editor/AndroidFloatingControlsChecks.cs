@@ -17,9 +17,11 @@ namespace BattleCities.Editor
     public static class AndroidFloatingControlsChecks
     {
         const BindingFlags Private=BindingFlags.Instance|BindingFlags.NonPublic;
-        public static void Run()
+        public static void Run()=>Run(false);
+        public static void CaptureHudAndDrop()=>Run(true);
+        static void Run(bool captureOnly)
         {
-            BattleControlChecks.Run();
+            if(!captureOnly)BattleControlChecks.Run();
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
             var materials=new List<Material>();var meshes=new List<Mesh>();
             var prefab=Resources.Load<GameObject>("TvReplayRig").GetComponent<BattleGame>();
@@ -32,7 +34,7 @@ namespace BattleCities.Editor
             var world=new GameObject("Gameplay geometry preview");BattleGame.BuildEditorMap(world.transform,document,materials,meshes);
             documentObject.SetActive(false);
             var camera=new GameObject("Android preview camera",typeof(Camera)).GetComponent<Camera>();camera.enabled=false;camera.orthographic=true;
-            camera.orthographicSize=4.05f;camera.transform.rotation=Quaternion.Euler(70,0,0);
+            camera.orthographicSize=captureOnly?3.2f:4.05f;camera.transform.rotation=Quaternion.Euler(70,0,0);
             camera.transform.position=new Vector3(6.5f,0,-8.7f)-camera.transform.forward*28;
             camera.backgroundColor=new Color(.13f,.18f,.20f);camera.clearFlags=CameraClearFlags.SolidColor;
             var sun=new GameObject("Preview sunlight",typeof(Light)).GetComponent<Light>();sun.type=LightType.Directional;
@@ -50,19 +52,39 @@ namespace BattleCities.Editor
             typeof(EconomyClient).GetField("account",Private).SetValue(economy,JObject.Parse("{\"loadout\":{\"active-one\":\"shield\",\"active-two\":\"freeze\",\"active-three\":\"speed\",\"active-four\":\"upgrade\"},\"inventory\":{\"shield\":3,\"freeze\":2,\"speed\":1,\"upgrade\":4}}"));
             typeof(EconomyClient).GetProperty("Authenticated").GetSetMethod(true).Invoke(economy,new object[]{true});
             typeof(BattleGame).GetField("economy",Private).SetValue(game,economy);
+            BattleHudLayout.PreviewPixelRatio=captureOnly?2:1;
+            BattleHudLayout.PreviewMobileBrowser=captureOnly;
             var controls=carrier.AddComponent<BattleTouchControls>();controls.Initialize(game);
             var touchCanvas=carrier.GetComponentInChildren<Canvas>(true);touchCanvas.renderMode=RenderMode.ScreenSpaceCamera;touchCanvas.worldCamera=camera;touchCanvas.planeDistance=1;
             var scaler=touchCanvas.GetComponent<CanvasScaler>();scaler.uiScaleMode=CanvasScaler.ScaleMode.ConstantPixelSize;
-            var hud=new BattleHud();var target=new RenderTexture(1280,720,24);target.Create();camera.targetTexture=target;camera.aspect=1280f/720;
+            var hud=new BattleHud();var target=new RenderTexture(captureOnly?1600:1280,captureOnly?746:720,24);target.Create();camera.targetTexture=target;camera.aspect=(float)target.width/target.height;
             int checks=0;void Check(bool value,string message){if(!value)throw new Exception("ANDROID FLOATING: "+message);checks++;}
             try
             {
                 carrier.SetActive(true);Canvas.ForceUpdateCanvases();
                 typeof(BattleTouchControls).GetMethod("Refresh",Private).Invoke(controls,null);Canvas.ForceUpdateCanvases();
-                hud.DrawPreview(sim,prefab.PowerupAtlas,new BattleHudLayout(1280,720),PowerupUiMode.ExternalController);
+                hud.DrawPreview(sim,prefab.PowerupAtlas,BattleHudLayout.ForViewport(target.width,target.height),PowerupUiMode.ExternalController,economy);
                 var hudCanvas=UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None).Single(c=>c.name=="Battle HUD");
                 hudCanvas.renderMode=RenderMode.ScreenSpaceCamera;hudCanvas.worldCamera=camera;hudCanvas.planeDistance=.8f;
                 foreach(var fps in hudCanvas.GetComponentsInChildren<BattleFrameRateDisplay>(true))fps.gameObject.SetActive(false);
+                if(captureOnly){
+                    float px=0,py=0;
+                    foreach(int row in new[]{8,9,7,10})foreach(int column in new[]{9,8,10,7}){
+                        float cx=(column+.5f)*64,cy=(row+.5f)*64;
+                        if(px==0&&sim.Terrain.All(w=>!w.Alive||(!w.Brick&&w.Type!="steel")||cx<w.Bounds.X||cx>w.Bounds.Right||cy<w.Bounds.Y||cy>w.Bounds.Bottom)){px=cx;py=cy;}
+                    }
+                    var position=BattleGame.World(px,py,.7f);var screen=camera.WorldToScreenPoint(position);
+                    var previewDrop=new GameObject("Tile-sized shield drop preview",typeof(RectTransform),typeof(RawImage));
+                    var previewRect=(RectTransform)previewDrop.transform;previewRect.SetParent(touchCanvas.transform,false);
+                    previewRect.anchorMin=previewRect.anchorMax=new Vector2(.5f,.5f);
+                    RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)touchCanvas.transform,screen,camera,out var local);
+                    previewRect.anchoredPosition=local;previewRect.sizeDelta=Vector2.one*BattlePickupSizing.ScreenSize(camera,position)/touchCanvas.scaleFactor;
+                    var picture=previewDrop.GetComponent<RawImage>();picture.texture=prefab.PowerupAtlas;picture.raycastTarget=false;
+                    BattleHud.TryPowerupUv("shield",out var uv);picture.uvRect=uv;
+                    Capture(camera,target,"mobile-hud-tile-drop.png");
+                    Debug.Log("MOBILE HUD/DROP PREVIEW: Builds/AndroidControlPreviews/mobile-hud-tile-drop.png; shield drop is 90% of one world tile; sample equipped stock only.");
+                    return;
+                }
                 var all=carrier.GetComponentsInChildren<BattleTouchControl>(true);var move=all.Single(c=>c.name=="Movement");var fire=all.Single(c=>c.name=="Fire");
                 Check(move.GetComponent<CanvasGroup>().alpha==0&&fire.GetComponent<CanvasGroup>().alpha==0,"idle sticks hidden");
                 foreach(var slot in all.Where(c=>c.name.StartsWith("Powerup ")))
@@ -77,13 +99,13 @@ namespace BattleCities.Editor
                     Check(position.y>=720-48&&position.y<=720,"power-up is positioned inside top HUD");
                 }
                 Capture(camera,target,"android-floating-idle.png");
-                // Preview the live drop's exact atlas art and Android logical size.
+                // Preview the live drop's exact atlas art at 90% of a world tile.
                 // Keep it separate from sample inventory and simulation/account state.
                 var drop=new GameObject("Android battlefield drop preview",typeof(RectTransform),typeof(RawImage));
                 var dropRect=drop.GetComponent<RectTransform>();dropRect.SetParent(touchCanvas.transform,false);
                 dropRect.anchorMin=dropRect.anchorMax=new Vector2(.5f,.5f);
                 dropRect.anchoredPosition=new Vector2(220,-80);
-                dropRect.sizeDelta=Vector2.one*BattleHudLayout.TouchPickupSize;
+                dropRect.sizeDelta=Vector2.one*BattlePickupSizing.ScreenSize(camera,Vector3.zero)/touchCanvas.scaleFactor;
                 var dropImage=drop.GetComponent<RawImage>();dropImage.texture=prefab.PowerupAtlas;
                 BattleHud.TryPowerupUv("shield",out var dropUv);dropImage.uvRect=dropUv;dropImage.raycastTarget=false;
                 Capture(camera,target,"android-larger-powerup-drop.png");
@@ -140,6 +162,8 @@ namespace BattleCities.Editor
             }
             finally
             {
+                BattleHudLayout.PreviewPixelRatio=1;
+                BattleHudLayout.PreviewMobileBrowser=false;
                 controls.CancelInput();hud.Dispose();camera.targetTexture=null;target.Release();UnityEngine.Object.DestroyImmediate(target);
                 if(!Application.isPlaying)foreach(var control in carrier.GetComponentsInChildren<UnityEngine.InputSystem.OnScreen.OnScreenControl>(true))control.GetType().GetMethod("OnDisable",Private).Invoke(control,null);
                 UnityEngine.Object.DestroyImmediate(carrier);UnityEngine.Object.DestroyImmediate(world);UnityEngine.Object.DestroyImmediate(documentObject);UnityEngine.Object.DestroyImmediate(camera.gameObject);UnityEngine.Object.DestroyImmediate(sun.gameObject);

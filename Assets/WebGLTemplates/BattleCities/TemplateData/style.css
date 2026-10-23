@@ -6,6 +6,11 @@
 #unity-progress-bar-empty { width: 76%; height: 10px; margin: 16px auto 0; box-sizing: border-box; border: 1px solid #28517a; border-radius: 6px; background: #152a43; overflow: hidden }
 #unity-progress-bar-full { width: 0%; height: 100%; border-radius: 5px; background: #29b6f6 }
 #unity-progress-percentage { display: block; margin-top: 8px; color: #fff; font: 700 28px/1.2 "Battle Cities Barlow", sans-serif; text-align: center; font-variant-numeric: tabular-nums }
+#unity-loading-fullscreen { display: block; width: 240px; max-width: 90vw; min-height: 52px; margin: 14px auto 0; padding: 8px 20px; border: 0; border-radius: 12px; background: #0875d9 url("battle-cities-fullscreen-blue.png") center / 100% 100% no-repeat; color: #fff; font: 700 24px/1.1 "Battle Cities Barlow", sans-serif; text-align: center; cursor: pointer; touch-action: manipulation }
+#unity-loading-fullscreen:active, #unity-loading-fullscreen:focus-visible { background-image: url("battle-cities-fullscreen-gold.png"); color: #061d36; outline: 2px solid #25dfff; outline-offset: 3px }
+#unity-loading-fullscreen[hidden] { display: none }
+#unity-loading-fullscreen.unity-startup-fullscreen { position: absolute; left: 50%; bottom: max(8px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 3; margin: 0 }
+@media (max-height: 500px) { #unity-loading-bar:has(#unity-loading-fullscreen) { width: min(220px, 40vw, 46vh) } #unity-loading-bar #unity-loading-fullscreen { width: 220px; position: relative; left: 50%; transform: translateX(-50%); margin-left: 0; margin-right: 0 } }
 #unity-warning { position: absolute; left: 50%; top: 5%; transform: translate(-50%); background: white; color: black; padding: 10px; display: none; max-width: 90%; overflow-wrap: anywhere }
 #unity-debug-controls { position: absolute; top: 10px; right: 10px; z-index: 4 }
 #diagnostics-icon { position: absolute; bottom: 10px; right: 10px; z-index: 4; cursor: pointer }

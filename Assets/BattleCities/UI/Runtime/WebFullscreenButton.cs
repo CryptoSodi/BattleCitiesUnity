@@ -12,6 +12,7 @@ namespace BattleCities.UI
         Sprite blue,gold;
         WebFullscreenArt art;
         bool hovered,focused,pressed,lastFullscreen;
+        public static float TargetSize(bool mobile,float pixelScale,float canvasScale)=>mobile?64*Mathf.Max(1,pixelScale)/Mathf.Max(.001f,canvasScale):48;
         public static bool Supported {
             get {
 #if UNITY_WEBGL && !UNITY_EDITOR

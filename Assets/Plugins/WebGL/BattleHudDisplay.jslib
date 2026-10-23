@@ -1,4 +1,7 @@
 mergeInto(LibraryManager.library, {
+  BattleCitiesLoadingFullscreenVisible: function (visible) {
+    if (window.BattleCitiesLoadingFullscreen) window.BattleCitiesLoadingFullscreen.setStartupVisible(!!visible);
+  },
   BattleCitiesFullscreenAvailable: function () {
     var root = document.getElementById('unity-fullscreen-container') || Module['canvas'];
     return root && ((document.fullscreenEnabled && root.requestFullscreen) ||

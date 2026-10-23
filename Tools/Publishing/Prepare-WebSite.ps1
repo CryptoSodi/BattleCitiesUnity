@@ -68,6 +68,9 @@ if ($index -notmatch '<meta[^>]+name="viewport"') {
 $brandDirectory = Join-Path $PSScriptRoot '../../Assets/WebGLTemplates/BattleCities/TemplateData'
 $logoSource = Join-Path $brandDirectory 'battle-cities-logo.png'
 $styleSource = Join-Path $brandDirectory 'style.css'
+foreach ($skin in @('battle-cities-fullscreen-blue.png','battle-cities-fullscreen-gold.png')) {
+    Copy-Item -LiteralPath (Join-Path $brandDirectory $skin) -Destination (Join-Path $templateDirectory $skin)
+}
 $logoBytes = [IO.File]::ReadAllBytes($logoSource)
 if ($logoBytes.Length -lt 8 -or [BitConverter]::ToString($logoBytes, 0, 8) -ne '89-50-4E-47-0D-0A-1A-0A') {
     throw 'The game logo is not a PNG. Download Git LFS assets before preparing the site.'

@@ -97,14 +97,15 @@ namespace BattleCities.Editor
                 }
                 foreach(var size in new[]{new Vector2Int(1280,720),new Vector2Int(1920,1080),new Vector2Int(3840,2160)})
                 {
-                    var target=new RenderTexture(size.x,size.y,24);target.Create();camera.targetTexture=target;
+                    var target=new RenderTexture(size.x,size.y,24);target.Create();camera.targetTexture=target;camera.aspect=(float)size.x/size.y;
                     foreach(bool orthographic in new[]{true,false})foreach(float zoom in new[]{.7f,1f,2f})
                     {
                         camera.orthographic=orthographic;camera.orthographicSize=7/zoom;camera.fieldOfView=65;
-                        var position=Vector3.zero;float worldSize=BattleHudLayout.PickupWorldSize(camera,position);
+                        var position=Vector3.zero;float worldSize=BattlePickupSizing.WorldSize;
                         var top=camera.WorldToScreenPoint(position+camera.transform.up*worldSize*.5f);
                         var bottom=camera.WorldToScreenPoint(position-camera.transform.up*worldSize*.5f);
-                        Near(top.y-bottom.y,new BattleHudLayout(size.x,size.y).PickupSizePixels,"pickup projection stays constant through zoom "+size+" "+orthographic+" "+zoom);
+                        Near(top.y-bottom.y,BattlePickupSizing.ScreenSize(camera,position),"live and replay pickup sizes match "+size+" "+orthographic+" "+zoom);
+                        Near(worldSize,.9f,"pickup remains 90 percent of a world tile "+size+" "+orthographic+" "+zoom);
                     }
                     camera.targetTexture=null;UnityEngine.Object.DestroyImmediate(target);
                 }
@@ -112,11 +113,9 @@ namespace BattleCities.Editor
                 Near(phone.Width,retina.Width,"retina keeps logical phone width");
                 Check(phone.Narrow&&retina.Narrow,"retina keeps compact single-row spacing");
                 Near(phone.TopHeightPixels,retina.TopHeightPixels/2,"retina keeps visible header size");
-                Near(phone.PickupSizePixels,retina.PickupSizePixels/2,"retina keeps visible pickup size");
                 var hd=new BattleHudLayout(1920,1080);var uhd=new BattleHudLayout(3840,2160);
                 Near(hd.Width,uhd.Width,"4K keeps logical HUD layout");
                 Near(uhd.TopHeightPixels,hd.TopHeightPixels*2,"4K doubles HUD pixels");
-                Near(uhd.PickupSizePixels,hd.PickupSizePixels*2,"4K doubles pickup pixels");
                 Debug.Log("HUD resolution checks passed: "+checks+". Previews: "+Output);
             }
             finally {hud.Dispose();UnityEngine.Object.DestroyImmediate(camera.gameObject);}

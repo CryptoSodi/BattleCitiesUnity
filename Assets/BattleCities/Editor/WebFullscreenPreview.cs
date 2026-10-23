@@ -25,6 +25,10 @@ namespace BattleCities.Editor
             if(!button)throw new Exception("Web fullscreen button missing");
             var rect=(RectTransform)button.transform;
             if(rect.rect.width!=48||rect.rect.height!=48)throw new Exception("Fullscreen target must be compact 48x48");
+            foreach(float ratio in new[]{1f,2f,3f})foreach(float menuScale in new[]{.5f,1f,1.5f}){
+                float mobileSize=WebFullscreenButton.TargetSize(true,ratio,menuScale);
+                if(Mathf.Abs(mobileSize*menuScale/ratio-64)>.01f)throw new Exception("Mobile fullscreen must retain a 64 CSS-pixel target");
+            }
             if(button.GetComponent<Image>().type!=Image.Type.Simple||!button.GetComponent<Image>().preserveAspect)throw new Exception("Fullscreen artwork must use aspect fit");
             if(button.GetComponentsInChildren<TMPro.TMP_Text>().Length!=0)throw new Exception("Fullscreen must be icon only");
             var camera=Camera.main;var target=new RenderTexture(1920,1080,24);target.Create();camera.targetTexture=target;

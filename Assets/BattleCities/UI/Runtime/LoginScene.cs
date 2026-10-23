@@ -35,6 +35,16 @@ namespace BattleCities.UI
         private UnityEngine.UI.Text startupStatus;
         private Image startupProgress;
         private Text startupPercentage;
+#if UNITY_WEBGL && !UNITY_EDITOR
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        static extern void BattleCitiesLoadingFullscreenVisible(int visible);
+#endif
+        static void ShowLoadingFullscreen(bool visible)
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            BattleCitiesLoadingFullscreenVisible(visible?1:0);
+#endif
+        }
         private Psg1UiInput controllerInput;
         private bool? previousGuestAccess;
         private bool showingDefaultStatus;
@@ -215,6 +225,15 @@ namespace BattleCities.UI
             startupPercentage.alignment = TextAnchor.MiddleCenter; startupPercentage.raycastTarget = false;
             ArcadeTextStyles.ApplyWhite(startupPercentage, startupStatus.font);
             SetStartupProgress(0);
+            if(RuntimePlatformInfo.IsMobileBrowser&&WebFullscreenButton.Supported){
+                // Leave a real touch-sized button below the percentage on short phone viewports.
+                var logo=startupView.transform.Find("Battle Cities Logo") as RectTransform;
+                if(logo)logo.anchorMin=logo.anchorMax=new Vector2(.5f,.66f);
+                statusRect.anchorMin=new Vector2(.1f,.30f);statusRect.anchorMax=new Vector2(.9f,.40f);
+                trackRect.anchorMin=new Vector2(.2f,.26f);trackRect.anchorMax=new Vector2(.8f,.26f);
+                percentageRect.anchorMin=new Vector2(.2f,.17f);percentageRect.anchorMax=new Vector2(.8f,.23f);
+                ShowLoadingFullscreen(true);
+            }
         }
         private void SetStartupProgress(float value)
         {
@@ -228,6 +247,7 @@ namespace BattleCities.UI
         }
         private void ShowSignIn()
         {
+            ShowLoadingFullscreen(false);
             if (loginVisibility)
             {
                 loginVisibility.alpha = 1;
@@ -240,6 +260,7 @@ namespace BattleCities.UI
         }
         private void OnDisable()
         {
+            ShowLoadingFullscreen(false);
             StopAllCoroutines(); restoringSession = false;
             if (startupView) { startupView.SetActive(false); Destroy(startupView); }
             controllerInput?.Dispose(); controllerInput = null;

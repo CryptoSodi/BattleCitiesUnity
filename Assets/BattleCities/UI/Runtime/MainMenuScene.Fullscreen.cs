@@ -28,7 +28,8 @@ namespace BattleCities.UI
             var corners=new Vector3[4];leaderboard.GetWorldCorners(corners);
             var corner=content.InverseTransformPoint(corners[2]);
             float right=corner.x-content.rect.xMin,top=content.rect.yMax-corner.y;
-            const float size=48;
+            var canvas=content.GetComponentInParent<Canvas>();
+            float size=WebFullscreenButton.TargetSize(RuntimePlatformInfo.IsMobileBrowser,BattleHudLayout.BrowserPixelRatio,canvas?canvas.scaleFactor:1);
             Place((RectTransform)fullscreenButton.transform,right-size,Mathf.Max(8,(top-size)*.5f),size,size);
             fullscreenButton.FitSkin();
             fullscreenButton.navigation=new Navigation{mode=Navigation.Mode.Explicit,selectOnLeft=settingsButton,selectOnDown=startButton};

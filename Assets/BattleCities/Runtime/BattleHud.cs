@@ -33,7 +33,8 @@ namespace BattleCities
         {
             if(canvas)return;
             canvas=new GameObject("Battle HUD",typeof(Canvas)).GetComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceOverlay;canvas.sortingOrder=100;
-            font=Font.CreateDynamicFontFromOSFont(new[]{"Bahnschrift","Arial"},23);
+            font=UI.ArcadeTextStyles.HeadingFont;
+            if(!font)font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             player=Resources.Load<Texture2D>("HudPlayer");enemy=Resources.Load<Texture2D>("HudEnemy");
             roundedTexture=new Texture2D(64,64,TextureFormat.RGBA32,false){name="HUD rounded panel",filterMode=FilterMode.Bilinear,wrapMode=TextureWrapMode.Clamp};
             var pixels=new Color32[64*64];
@@ -106,11 +107,20 @@ namespace BattleCities
         }
         void Text(Rect rect,string text,Color color,bool value=false,TextAnchor alignment=TextAnchor.MiddleLeft,int size=0)
         {
-            var t=Element<Text>(rect);t.font=font;t.fontSize=size>0?size:value?23:16;t.fontSize=Mathf.RoundToInt(t.fontSize*ScreenContent.Number("battle-hud","font-scale",1));t.fontStyle=FontStyle.Bold;t.color=color;t.text=text;t.alignment=alignment;t.horizontalOverflow=HorizontalWrapMode.Overflow;t.verticalOverflow=VerticalWrapMode.Overflow;
+            var t=Element<Text>(rect);t.font=font;t.fontSize=size>0?size:value?23:16;t.fontSize=Mathf.RoundToInt(t.fontSize*ScreenContent.Number("battle-hud","font-scale",1));t.fontStyle=FontStyle.Normal;t.color=color;t.text=text;t.alignment=alignment;
+            t.resizeTextForBestFit=true;t.resizeTextMaxSize=t.fontSize;t.resizeTextMinSize=Mathf.Min(t.fontSize,value?16:12);
+            t.horizontalOverflow=HorizontalWrapMode.Wrap;t.verticalOverflow=VerticalWrapMode.Truncate;
             if(UI.ArcadeTextStyles.IsWhite(color))UI.ArcadeTextStyles.ApplyWhite(t);
             else if(t.TryGetComponent<UI.ArcadeWhiteText>(out var style))style.enabled=false;
         }
-        void Icon(Rect rect,Texture2D texture,bool dead=false){var image=Element<RawImage>(rect);image.texture=texture;image.uvRect=new Rect(0,0,1,1);image.color=dead?new Color(.025f,.03f,.04f,1):Color.white;}
+        void Icon(Rect rect,Texture2D texture,bool dead=false){
+            if(texture){
+                float scale=Mathf.Min(rect.width/texture.width,rect.height/texture.height);
+                var size=new Vector2(texture.width*scale,texture.height*scale);
+                rect=new Rect(rect.center-size*.5f,size);
+            }
+            var image=Element<RawImage>(rect);image.texture=texture;image.uvRect=new Rect(0,0,1,1);image.color=dead?new Color(.025f,.03f,.04f,1):Color.white;
+        }
         public static int PowerupIcon(string type)
         {
             switch(type)
@@ -251,8 +261,8 @@ namespace BattleCities
         public void Draw(BattleSimulation state,EconomyClient economy,Texture2D powerupAtlas,bool consumePending,int selectedSlot=0,bool showPowerups=true,SecondaryAttack? special=null)
             => DrawLayout(state,economy,powerupAtlas,consumePending,BattleHudLayout.Current,RuntimePlatformInfo.PowerupUi,selectedSlot,showPowerups,special);
 #if UNITY_EDITOR
-        public void DrawPreview(BattleSimulation state,Texture2D atlas,BattleHudLayout preview,PowerupUiMode mode)
-            => DrawLayout(state,null,atlas,false,preview,mode,0,true,state.EquippedSecondary);
+        public void DrawPreview(BattleSimulation state,Texture2D atlas,BattleHudLayout preview,PowerupUiMode mode,EconomyClient economy=null)
+            => DrawLayout(state,economy,atlas,false,preview,mode,0,true,state.EquippedSecondary);
 #endif
         void DrawLayout(BattleSimulation state,EconomyClient economy,Texture2D powerupAtlas,bool consumePending,BattleHudLayout viewport,PowerupUiMode powerupUi,int selectedSlot,bool showPowerups,SecondaryAttack? special)
         {
@@ -264,10 +274,11 @@ namespace BattleCities
             float specialWidth=hasSpecial?((narrow?34:38)+3)*layout.DetailScale:0;
             Fill(new Rect(0,0,Width,h),navy);Fill(new Rect(0,0,Width,2),new Color(.22f,.3f,.38f));Fill(new Rect(0,h-3,Width,3),gold);
             float metricWidth=narrow?Mathf.Min(124,Width*.52f/3):175;
-            float scoreWidth=compact?(narrow?metricWidth:138):metricWidth;
-            float timeWidth=compact?Mathf.Min(metricWidth,82):metricWidth;
-            float livesWidth=compact?(narrow?metricWidth:136):metricWidth;
-            Icon(new Rect(7,5,36,36),player);Text(new Rect(46,2,scoreWidth-48,18),ScreenContent.Text("battle-hud","score-a60ffb","SCORE"),cream);Text(new Rect(46,18,scoreWidth-48,27),state.Score.ToString("D6"),gold,true);
+            float scoreWidth=android&&narrow?112:compact?(narrow?metricWidth:138):metricWidth;
+            float timeWidth=android&&narrow?72:compact?Mathf.Min(metricWidth,82):metricWidth;
+            float livesWidth=android&&narrow?88:compact?(narrow?metricWidth:136):metricWidth;
+            float scoreTextX=android&&narrow?34:46,scoreIcon=android&&narrow?26:36;
+            Icon(new Rect(5,(h-scoreIcon)*.5f,scoreIcon,scoreIcon),player);Text(new Rect(scoreTextX,2,scoreWidth-scoreTextX-8,18),ScreenContent.Text("battle-hud","score-a60ffb","SCORE"),cream);Text(new Rect(scoreTextX,18,scoreWidth-scoreTextX-8,27),state.Score.ToString("D6"),gold,true);
             float x=scoreWidth;
             Fill(new Rect(x-7,9,1,28),gold);
             int seconds=state.Tick/60;
@@ -282,8 +293,14 @@ namespace BattleCities
             if(state.IsPvp)for(int i=0;i<BattleSimulation.MaxPlayers;i++)if(!state.AreAllies(i,state.LocalPlayerSlot)&&state.Participants[i].Connected&&state.Participants[i].Lives>0)opponents++;
             Text(new Rect(enemyX,enemyY,100,19),state.IsPvp?ScreenContent.Text("battle-hud","rivals","RIVALS"):ScreenContent.Text("battle-hud","enemies","ENEMIES"),cream);
             Text(new Rect(enemyX,enemyY+18,100,23),(state.IsPvp?opponents:state.Remaining).ToString()+" LEFT",new Color(1,.42f,.32f));
-            float start=enemyX+(compact?76:100),reserved=psg1?Psg1PowerupWidth(narrow)+specialWidth:
-                android&&showPowerups&&!state.IsMultiplayer?layout.AndroidPowerupWidth+Mathf.Max(0,Screen.width-Screen.safeArea.xMax)/layout.Scale:0;
+            float start=enemyX+(android&&narrow?66:compact?76:100),reserved=psg1?Psg1PowerupWidth(narrow)+specialWidth:0;
+            if(android&&showPowerups&&!state.IsMultiplayer&&powerupAtlas){
+                // Touch slots have fixed positions. Reserve only the occupied span, as empty slots are hidden.
+                for(int i=0;i<4;i++)if(economy&&TryPowerupUv(economy.SlotType(i),out _)){
+                    reserved=(4-i)*(BattleHudLayout.AndroidPowerupSlotWidth+BattleHudLayout.AndroidPowerupGap)+8;break;
+                }
+            }
+            if(android)reserved+=Mathf.Max(0,Screen.width-Screen.safeArea.xMax)/layout.Scale;
             float available=Mathf.Max(1,Width-start-10-reserved);
             if(state.IsCaptureFlag)
             {
@@ -291,10 +308,10 @@ namespace BattleCities
                 Text(new Rect(start,enemyY+22,available,19),ScreenContent.Text("battle-hud","first-to-3-own-flag-must-be-home-57a971","FIRST TO 3 · OWN FLAG MUST BE HOME"),cream);
             }
             int total=state.IsCaptureFlag?0:state.TotalEnemies,deadCount=total-state.Remaining;
-            float step=Mathf.Min(compact?40:34,available/Mathf.Max(1,total));
+            float step=Mathf.Min(android?48:compact?40:34,available/Mathf.Max(1,total));
             for(int i=0;i<total;i++)
             {
-                float iconWidth=Mathf.Max(1,step-2);
+                float iconWidth=Mathf.Max(1,step-(android&&step<20?.5f:2));
                 float iconHeight=enemy?Mathf.Min(32,iconWidth*enemy.height/enemy.width):32;
                 var slot=new Rect(start+i*step,enemyY+4+(32-iconHeight)*.5f,iconWidth,iconHeight);
                 Fill(new Rect(slot.x,enemyY+7,slot.width,26),new Color(.1f,.15f,.2f,.6f));
@@ -311,6 +328,6 @@ namespace BattleCities
             while(cursor<elements.Count)elements[cursor++].gameObject.SetActive(false);
         }
         public void SetVisible(bool visible){if(canvas)canvas.gameObject.SetActive(visible);}
-        public void Dispose(){specialIcons.Dispose();if(specialRing)BattleVisualLifetime.Release(specialRing);if(specialRingTexture)BattleVisualLifetime.Release(specialRingTexture);if(canvas)BattleVisualLifetime.Release(canvas.gameObject);if(font)BattleVisualLifetime.Release(font);if(roundedSprite)BattleVisualLifetime.Release(roundedSprite);if(roundedTexture)BattleVisualLifetime.Release(roundedTexture);if(minimapTexture)BattleVisualLifetime.Release(minimapTexture);}
+        public void Dispose(){specialIcons.Dispose();if(specialRing)BattleVisualLifetime.Release(specialRing);if(specialRingTexture)BattleVisualLifetime.Release(specialRingTexture);if(canvas)BattleVisualLifetime.Release(canvas.gameObject);if(roundedSprite)BattleVisualLifetime.Release(roundedSprite);if(roundedTexture)BattleVisualLifetime.Release(roundedTexture);if(minimapTexture)BattleVisualLifetime.Release(minimapTexture);}
     }
 }
