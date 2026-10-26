@@ -15,7 +15,7 @@ namespace BattleCities.UI
         ShopArt loadoutShopArt;
         LoadoutArt loadoutArt;
         TankRosterScroll loadoutInventoryScroll;
-        readonly Button[] loadoutRows=new Button[8];
+        readonly Button[] loadoutRows=new Button[Items.Length];
         readonly Image[] equippedArt=new Image[4],emptyArt=new Image[4],slotActionSkin=new Image[4];
         readonly TMP_Text[] slotActions=new TMP_Text[4],equippedNames=new TMP_Text[4];
         readonly TankGroundShadow[] equipmentShadows=new TankGroundShadow[4];
@@ -71,7 +71,7 @@ namespace BattleCities.UI
         {
             if(!loadoutShopArt||string.IsNullOrEmpty(item))return null;
             for(int i=0;i<ShopCatalog.Products.Length;i++)if(ShopCatalog.Products[i].InventoryId==item&&i<loadoutShopArt.products.Length)return loadoutShopArt.products[i];
-            return null;
+            return ExtendedPowerupArt.Illustration(item);
         }
         static string PowerName(string item)
         {if(string.IsNullOrEmpty(item))return "EMPTY";foreach(var product in ShopCatalog.Products)if(product.InventoryId==item)return ScreenContent.Text("loadout","power-"+item,product.Title);return "EMPTY";}
@@ -124,7 +124,7 @@ namespace BattleCities.UI
             var sliding=LoadoutPanel("Sliding area",rail,null);Fit(sliding,ScreenContent.Rect("loadout","prebattlescreen-loadout-view-ensureloadoutv-a388b6",new Rect(.12f,.01f,.76f,.98f)));var thumb=LoadoutPanel("Thumb",sliding,theme.GoldPanel);Fit(thumb,new Rect(0,0,1,1));thumb.GetComponent<Image>().pixelsPerUnitMultiplier=4;
             var bar=rail.GetComponent<Scrollbar>();if(!bar)bar=rail.gameObject.AddComponent<Scrollbar>();bar.handleRect=thumb;bar.targetGraphic=thumb.GetComponent<Image>();bar.direction=Scrollbar.Direction.BottomToTop;bar.navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.None};
             loadoutInventoryScroll.verticalScrollbar=bar;loadoutInventoryScroll.verticalScrollbarVisibility=ScrollRect.ScrollbarVisibility.Permanent;
-            for(int i=0;i<8;i++)
+            for(int i=0;i<Items.Length;i++)
             {
                 int index=i;string item=Items[i];var row=LoadoutPanel(item,content,theme.Rounded);row.SetSiblingIndex(i);row.GetComponent<Image>().pixelsPerUnitMultiplier=5;
                 var element=row.GetComponent<LayoutElement>();if(!element)element=row.gameObject.AddComponent<LayoutElement>();element.preferredHeight=48;
@@ -132,7 +132,8 @@ namespace BattleCities.UI
                 BindClick(button,()=>EquipLoadoutPower(item));var colors=ColorBlock.defaultColorBlock;colors.normalColor=Color.white;colors.highlightedColor=colors.selectedColor=new Color(.68f,.88f,1);colors.disabledColor=Color.white;button.colors=colors;
                 var plate=LoadoutPanel("Icon tile",row,theme.CreamPanel);plate.GetComponent<Image>().pixelsPerUnitMultiplier=3;
                 LoadoutShadow(plate,"Ground shadow",ScreenContent.Rect("loadout","prebattlescreen-loadout-view-ensureloadoutv-f26705",new Rect(.12f,.77f,.76f,.14f)));LoadoutIcon("Artwork",plate,PowerArtwork(item),ScreenContent.Rect("loadout","prebattlescreen-loadout-view-ensureloadoutv-484ec6",new Rect(.02f,.015f,.96f,.96f)));
-                var label=LoadoutLabel("Name",row,PowerName(item),ScreenContent.Rect("loadout","prebattlescreen-loadout-view-ensureloadoutv-a2bc66",new Rect(.29f,.05f,.49f,.9f)),20);label.alignment=TextAlignmentOptions.MidlineLeft;
+                string inventoryName=item=="health-healer"?"+2 HEALTH":item=="rapid-shooter"?"RAPID 10S":item=="rapid-shooter-long"?"RAPID 60S":PowerName(item);
+                var label=LoadoutLabel("Name",row,inventoryName,ScreenContent.Rect("loadout","prebattlescreen-loadout-view-ensureloadoutv-a2bc66",new Rect(.29f,.05f,.49f,.9f)),20);label.alignment=TextAlignmentOptions.MidlineLeft;
                 if(item=="base-defence"||item=="extra-life"||item=="zoom-out"){label.text=PowerName(item).Replace(' ','\n');label.textWrappingMode=TextWrappingModes.Normal;}
                 var badge=LoadoutPanel("Count badge",row,theme.DarkPanel);badge.GetComponent<Image>().pixelsPerUnitMultiplier=3;
                 inventoryLabels[index]=LoadoutLabel("Count",badge,"—",ScreenContent.Rect("loadout","prebattlescreen-loadout-view-ensureloadoutv-f30759",new Rect(.04f,.04f,.92f,.92f)),28,true);
@@ -225,7 +226,7 @@ namespace BattleCities.UI
                 slotNames[i].text="SLOT "+(i+1);equippedNames[i].text=filled?PowerName(item):"";equippedNames[i].gameObject.SetActive(filled);textStyles.Apply(equippedNames[i],ArcadeTextTreatment.PrizeAmount);equipmentShadows[i].gameObject.SetActive(filled);slotActionSkin[i].sprite=active?art.tankCostButtonSelected:art.tankCostButton;
                 textStyles.ApplyCleanButton(slotActions[i],active);textStyles.Apply(slotNames[i],ArcadeTextTreatment.PrizeAmount);
             }
-            for(int i=0;i<8;i++)
+            for(int i=0;i<Items.Length;i++)
             {
                 string item=Items[i];int count=OwnedPowerCount(item);inventoryLabels[i].text=account!=null&&!inventoryUnavailable?count.ToString("N0"):"—";
                 loadoutRows[i].interactable=!busy&&!accountLoading;loadoutRows[i].image.color=EquippedPower(activeSlot)==item?new Color32(255,223,119,255):Color.white;

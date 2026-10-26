@@ -87,6 +87,7 @@ namespace BattleCities.Core
         public int Id, Tier, Health = 3;
         [Newtonsoft.Json.JsonProperty(DefaultValueHandling=Newtonsoft.Json.DefaultValueHandling.Ignore)] public int StatsVersion;
         [Newtonsoft.Json.JsonProperty(DefaultValueHandling=Newtonsoft.Json.DefaultValueHandling.Ignore)] public int UpgradeLevel;
+        [Newtonsoft.Json.JsonProperty(DefaultValueHandling=Newtonsoft.Json.DefaultValueHandling.Ignore)] public float RapidFire;
         public static int StartingHealth(int tier,bool player) => player?5:tier==3?6:tier==2?4:3;
         public TankStats Stats => TankProfiles.Get(Tier,Player);
         public int MaxHealth => StatsVersion==0?StartingHealth(Tier,Player):Stats.Health;
@@ -136,10 +137,13 @@ namespace BattleCities.Core
         public event Action<TurretState> TurretDestroyed;
         public int SecondaryCount => SecondaryCountFor(EquippedSecondary);
         public int SecondaryLimit => SecondaryLimitFor(EquippedSecondary);
-        public int SecondaryCountFor(SecondaryAttack ability) => ability==SecondaryAttack.LandDrone?LandDrones.Count(d=>d.Alive&&OwnedSecondary(d.OwnerSlot)):ability==SecondaryAttack.PatrolDrone?Drones.Count(d=>OwnedSecondary(d.OwnerSlot)):ability==SecondaryAttack.GroundTurret?Turrets.Count(t=>OwnedSecondary(t.OwnerSlot)):Mines.Count(m=>OwnedSecondary(m.OwnerSlot));
-        public int SecondaryLimitFor(SecondaryAttack ability) => ability==SecondaryAttack.LandDrone?1:ability==SecondaryAttack.PatrolDrone?MaximumDrones:ability==SecondaryAttack.GroundTurret?MaximumTurrets:MaximumMines;
+        public int SecondaryCountFor(SecondaryAttack ability) => ability==SecondaryAttack.LandDrone?LandDrones.Count(d=>d.Alive&&OwnedSecondary(d.OwnerSlot)):ability==SecondaryAttack.PatrolDrone?Drones.Count(d=>OwnedSecondary(d.OwnerSlot)):ability==SecondaryAttack.GroundTurret?Turrets.Count(t=>OwnedSecondary(t.OwnerSlot)):Mines.Count(m=>m.Alive&&OwnedSecondary(m.OwnerSlot));
+        public int SecondaryLimitFor(SecondaryAttack ability) => ability==SecondaryAttack.LandDrone?1:ability==SecondaryAttack.PatrolDrone?MaximumDrones:ability==SecondaryAttack.GroundTurret?MaximumTurrets:MineLimitVersion==0?5:MaximumMines;
         public const float MineArmSeconds = .8f, SecondaryCooldownSeconds = 2f;
-        public const int MaximumMines = 5;
+        public const int MaximumMines = 4;
+        public int MineLimitVersion { get; private set; } = 1;
+        public int PowerupRosterVersion { get; private set; } = 1;
+        public int WipeoutDamageVersion { get; private set; } = 1;
         private SecondaryAttack offlineSecondary = SecondaryAttack.Mine;
         public SecondaryAttack EquippedSecondary { get => IsMultiplayer ? Participants[actingSlot >= 0 ? actingSlot : LocalPlayerSlot].Secondary : offlineSecondary; set { if(IsMultiplayer) Participants[actingSlot >= 0 ? actingSlot : LocalPlayerSlot].Secondary=value; else offlineSecondary=value; } }
         private float offlineSecondaryCooldown;
@@ -290,7 +294,7 @@ namespace BattleCities.Core
                 }
             }
             if(PickupType!=null){PickupTime-=dt;if(PickupTime<=0)PickupType=null;}
-            foreach(var t in Tanks) { t.Shield=Math.Max(0,t.Shield-dt);t.Cooldown=Math.Max(0,t.Cooldown-dt);t.SpeedBoost=Math.Max(0,t.SpeedBoost-dt);t.Moving=false;PrepareTerrain(t); }
+            foreach(var t in Tanks) { t.Shield=Math.Max(0,t.Shield-dt);t.Cooldown=Math.Max(0,t.Cooldown-dt);t.SpeedBoost=Math.Max(0,t.SpeedBoost-dt);t.RapidFire=Math.Max(0,t.RapidFire-dt);t.Moving=false;PrepareTerrain(t); }
             if(IsMultiplayer) UpdateParticipants(dt);
             else
             {
@@ -661,14 +665,14 @@ namespace BattleCities.Core
         private static float ValidReloadSeconds(float seconds,float fallback)
         {return float.IsNaN(seconds)||float.IsInfinity(seconds)?fallback:Math.Max(StepSeconds,seconds);}
         public float NormalReloadSeconds(TankState tank)
-        {return (tank.Player?((tank.StatsVersion==0?tank.Tier:tank.UpgradeLevel)>=2?PlayerUpgradedNormalReloadSeconds:PlayerNormalReloadSeconds):.16f)/tank.Rounds;}
+        {return (tank.Player?((tank.StatsVersion==0?tank.Tier:tank.UpgradeLevel)>=2?PlayerUpgradedNormalReloadSeconds:PlayerNormalReloadSeconds):.16f)/tank.Rounds/(tank.Player&&tank.RapidFire>0?4:1);}
         public bool Fire(TankState tank,bool powerShot=false)
         {
             if(!CanFire(tank))return false;
             Vector(tank.Aim,out var x,out var y);
             int damage=powerShot?(PowerShotDamageVersion==0?3*tank.FirePower:tank.FirePower+2):tank.FirePower;
             var s=new ShotState{Id=++nextId,Owner=tank.Id,OwnerSlot=tank.Slot,Player=tank.Player,PowerShot=powerShot,Damage=damage,X=tank.X+x*32,Y=tank.Y+y*32,Direction=tank.Aim,Speed=powerShot?900:tank.ShellSpeed,WallDamage=powerShot?2:1};
-            Shots.Add(s);tank.Cooldown=tank.ReloadDuration=powerShot?.25f/tank.Rounds:NormalReloadSeconds(tank);ShotFired?.Invoke(s);return true;
+            Shots.Add(s);tank.Cooldown=tank.ReloadDuration=powerShot?.25f/tank.Rounds/(tank.Player&&tank.RapidFire>0?4:1):NormalReloadSeconds(tank);ShotFired?.Invoke(s);return true;
         }
         private void MoveShot(ShotState s)
         {
@@ -822,7 +826,8 @@ namespace BattleCities.Core
         }
         public void SpawnPickup(string type=null,string claim=null)
         {
-            string[] types={"defence","freeze","life","shield","speed","upgrade","zoomout","wipeout"};
+            string[] types=PowerupRosterVersion==0?new[]{"defence","freeze","life","shield","speed","upgrade","zoomout","wipeout"}:
+                new[]{"defence","freeze","life","shield","speed","upgrade","zoomout","wipeout","healmax","heal2","rapid","rapidlong"};
             PickupType=type??types[Next(0,types.Length)];PickupClaim=claim;PickupTime=30;
             var positions=new List<Point>();
             for(int y=32;y<Height-32;y+=32)for(int x=32;x<Width-32;x+=32)
@@ -842,12 +847,25 @@ namespace BattleCities.Core
             var p=Player;
             switch(type)
             {
+                case "healmax":if(p!=null)p.Health=p.MaxHealth;break;
+                case "heal2":if(p!=null)p.Health=Math.Min(p.MaxHealth,p.Health+2);break;
+                case "rapid":if(p!=null)p.RapidFire=Math.Max(p.RapidFire,10);break;
+                case "rapidlong":if(p!=null)p.RapidFire=Math.Max(p.RapidFire,60);break;
                 case "shield":if(p!=null)p.Shield=10;break;
                 case "upgrade":if(p!=null){if(p.StatsVersion==0)p.Tier=Math.Min(3,p.Tier+1);else p.UpgradeLevel=Math.Min(3,p.UpgradeLevel+1);}break;
                 case "speed":if(p!=null)p.SpeedBoost=10;break;
                 case "life":Lives++;break;
                 case "freeze":Freeze=10;break;
-                case "wipeout":foreach(var t in Tanks.Where(t=>!t.Player&&t.Alive).ToArray())Kill(t,actingSlot);break;
+                case "wipeout":
+                    if(WipeoutDamageVersion==0)
+                    {foreach(var t in Tanks.Where(t=>!t.Player&&t.Alive).ToArray())Kill(t,actingSlot);}
+                    else
+                    {
+                        int owner=IsMultiplayer?(actingSlot>=0?actingSlot:LocalPlayerSlot):-1;
+                        foreach(var t in Tanks.Where(t=>!t.Player&&t.Alive&&(!IsTeamBattle||!AreAllies(t.Slot,owner))).ToArray())
+                            DamageTank(t,1,owner);
+                    }
+                    break;
                 case "zoomout":ZoomOut=10;break;
                 case "defence":
                     if(defenceTimer>0)

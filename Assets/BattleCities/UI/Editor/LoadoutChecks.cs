@@ -62,7 +62,7 @@ namespace BattleCities.Editor
                     screen.EditorResetLoadoutFixture();screen.Open();yield return Wait(screen);proceed.onClick.Invoke();yield return Wait(screen);
                 }
                 Check(screen.IsLoadout&&launched==0,"Continue opens Loadout without launching");
-                Check(screen.InventoryScroll.content.childCount==8,"all inventory powers represented");
+                Check(screen.InventoryScroll.content.childCount==ShopCatalog.InventoryIds.Length,"all inventory powers represented");
                 string[] inventoryOrder={"shield","base-defence","freeze","speed","upgrade","zoom-out","wipeout","extra-life"};for(int i=0;i<inventoryOrder.Length;i++)Check(screen.InventoryScroll.content.GetChild(i).name==inventoryOrder[i],"inventory row order "+i);
                 Check(screen.Root.Find("Loadout/Workspace/Slot 1/Item name").GetComponent<TMP_Text>().text=="SLOT 1","empty slot displays its numbered slot caption");
                 screen.ChooseLoadoutSlot(0);screen.EquipLoadoutPower("shield");Check(screen.EquippedPower(0)=="shield","owned Shield equips selected slot");
@@ -78,7 +78,7 @@ namespace BattleCities.Editor
                     var preview=(RectTransform)workspace.Find("Tank preview");var tankBounds=(RectTransform)preview.Find("Selected tank bounds");var pedestal=(RectTransform)preview.Find("Deployment platform");Check(tankBounds.rect.width<=pedestal.rect.width*.73f,v.Item4+" tank smaller than platform");
                     foreach(var label in screen.Root.GetComponentsInChildren<TMP_Text>().Where(t=>t.transform.IsChildOf(screen.Root.Find("Loadout"))||t.transform.IsChildOf(screen.Root.Find("Fuel summary")))){label.ForceMeshUpdate();Check(!label.isTextOverflowing,v.Item4+" text fits "+label.name);}
                     foreach(var button in screen.Root.GetComponentsInChildren<Button>().Where(b=>b.IsInteractable()))Check(button.navigation.mode==Navigation.Mode.Explicit,v.Item4+" navigation "+button.name);
-                    var last=screen.InventoryScroll.content.Find("extra-life") as RectTransform;if(EventSystem.current)EventSystem.current.SetSelectedGameObject(last.gameObject);screen.InventoryScroll.Reveal(last);Canvas.ForceUpdateCanvases();
+                    var last=screen.InventoryScroll.content.Find(ShopCatalog.InventoryIds.Last()) as RectTransform;if(EventSystem.current)EventSystem.current.SetSelectedGameObject(last.gameObject);screen.InventoryScroll.Reveal(last);Canvas.ForceUpdateCanvases();
                     var bounds=RectTransformUtility.CalculateRelativeRectTransformBounds(screen.InventoryScroll.viewport,last);Check(bounds.min.y>=screen.InventoryScroll.viewport.rect.yMin-1&&bounds.max.y<=screen.InventoryScroll.viewport.rect.yMax+1,v.Item4+" full inventory row reveal");
                     screen.InventoryScroll.verticalNormalizedPosition=1;MainMenuChecks.Capture(v.Item1,v.Item2,v.Item3,"loadout-"+v.Item4);
                 }

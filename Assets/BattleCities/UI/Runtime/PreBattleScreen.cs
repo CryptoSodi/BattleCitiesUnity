@@ -25,8 +25,8 @@ namespace BattleCities.UI
             {2,3,2,1}, // Classified III
             {4,2,1,3}  // Classified IV
         };
-        static readonly string[] Items={"shield","base-defence","freeze","speed","upgrade","zoom-out","wipeout","extra-life"};
-        static readonly string[] ItemNames={"SHIELD","BASE DEFENCE","FREEZE","SPEED","STAR","ZOOM OUT","WIPEOUT","EXTRA LIFE"};
+        static readonly string[] Items={"shield","base-defence","freeze","speed","upgrade","zoom-out","wipeout","extra-life","max-healer","health-healer","rapid-shooter","rapid-shooter-long"};
+        static readonly string[] ItemNames={"SHIELD","BASE DEFENCE","FREEZE","SPEED","STAR","ZOOM OUT","WIPEOUT","EXTRA LIFE","MAX HEALER","+2 HEALTH HEALER","RAPID SHOOTER","RAPID SHOOTER 60S"};
         static readonly string[] Slots={"active-one","active-two","active-three","active-four"};
         MenuTheme theme; MainMenuApiClient api; Action launch; Button home;
         RectTransform root,tankPage,loadoutPage;
@@ -37,7 +37,7 @@ namespace BattleCities.UI
         readonly Button[] tankButtons=new Button[4],slotButtons=new Button[4];
         readonly Button[] classifiedButtons=new Button[4];
         TankRosterScroll rosterScroll;
-        readonly TMP_Text[] slotNames=new TMP_Text[4],slotEmpty=new TMP_Text[4],inventoryLabels=new TMP_Text[8];
+        readonly TMP_Text[] slotNames=new TMP_Text[4],slotEmpty=new TMP_Text[4],inventoryLabels=new TMP_Text[Items.Length];
         readonly RawImage[] slotIcons=new RawImage[4];
         Button back,proceed;
         PreBattleArt art;
@@ -1037,7 +1037,7 @@ namespace BattleCities.UI
                 slotButtons[i].interactable=!busy;
             }
             wallet.text="WALLET\n"+(account==null?"NOT CONNECTED":"CONNECTED")+"\nBATC  "+Number(account?["tokenBalance"])+"\nSOL  "+Number(account?["solBalance"]);
-            for(int i=0;i<8;i++)inventoryLabels[i].text=Number(account?["inventory"]?[Items[i]]);
+            for(int i=0;i<Items.Length;i++)inventoryLabels[i].text=Number(account?["inventory"]?[Items[i]]);
             back.interactable=!busy;
             foreach(var card in classifiedButtons)if(card)card.interactable=!busy&&paidTier<0&&pendingFuel==null;
             proceed.interactable=!busy&&!launchRequested;RefreshLoadoutView();
@@ -1179,9 +1179,9 @@ namespace BattleCities.UI
         }
         void SetIcon(RawImage image,string item)
         {
-            string type=item=="base-defence"?"defence":item=="zoom-out"?"zoomout":item=="extra-life"?"life":item;
+            string type=ShopCatalog.PowerupType(item);
             image.texture=art?art.powerups:null;
-            if(image.texture&&BattleHud.TryPowerupUv(type,out var uv)){image.uvRect=uv;image.color=Color.white;}
+            if(ExtendedPowerupArt.TryImage(art?art.powerups:null,type,out var texture,out var uv)){image.texture=texture;image.uvRect=uv;image.color=Color.white;}
             else image.color=Color.clear;
         }
         static void Fit(RectTransform rect,Rect a)

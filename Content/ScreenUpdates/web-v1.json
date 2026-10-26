@@ -1961,7 +1961,7 @@
         "entry-wipeout-name": "WIPEOUT",
         "entry-wipeout-role": "OFFENSIVE POWERUP",
         "entry-wipeout-lore": "DANGER CLOSE. EVERYTHING BURNS.",
-        "entry-wipeout-effect": "DESTROYS ALL ENEMIES ON THE FIELD.",
+        "entry-wipeout-effect": "DEALS 1 DAMAGE TO EACH ENEMY NPC. TOUGHER TANKS SURVIVE.",
         "entry-wipeout-source": "DROP / SHOP",
         "entry-extra-life-name": "EXTRA LIFE",
         "entry-extra-life-role": "SUPPORT POWERUP",

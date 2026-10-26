@@ -32,6 +32,6 @@ namespace BattleCities
         }
         private void ResetMovementPrediction(){pendingMovement.Clear();predictedTank=null;}
         private static TankState CloneMovement(TankState t)=>new TankState {Id=t.Id,Slot=t.Slot,Player=true,Tier=t.Tier,StatsVersion=t.StatsVersion,UpgradeLevel=t.UpgradeLevel,Health=t.Health,
-            X=t.X,Y=t.Y,Direction=t.Direction,Aim=t.Aim,Slide=t.Slide,SpeedBoost=t.SpeedBoost,InQuicksand=t.InQuicksand,SinkDepth=t.SinkDepth};
+            X=t.X,Y=t.Y,Direction=t.Direction,Aim=t.Aim,Slide=t.Slide,SpeedBoost=t.SpeedBoost,RapidFire=t.RapidFire,InQuicksand=t.InQuicksand,SinkDepth=t.SinkDepth};
     }
 }

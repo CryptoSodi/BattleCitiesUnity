@@ -204,15 +204,15 @@ namespace BattleCities
                 string type = game.TouchSlotType(i);
                 bool showSlots=!state.IsMultiplayer&&!game.IsReplaying;
                 if(slots[i].gameObject.activeSelf!=showSlots)slots[i].gameObject.SetActive(showSlots);
-                bool hasIcon = showSlots&&game.PowerupAtlas&&BattleHud.TryPowerupUv(type,out _);
+                bool hasIcon = showSlots&&ExtendedPowerupArt.TryImage(game.PowerupAtlas,type,out _,out _);
                 slots[i].Interactable = visible && game.TouchSlotAvailable(i);
                 slotIcons[i].enabled = hasIcon;
                 slots[i].GetComponent<UnityEngine.UI.Image>().raycastTarget=hasIcon;
                 slotBadges[i].SetActive(hasIcon);
                 if (hasIcon)
                 {
-                    BattleHud.TryPowerupUv(type,out var uv);
-                    slotIcons[i].texture=game.PowerupAtlas;slotIcons[i].uvRect=uv;
+                    ExtendedPowerupArt.TryImage(game.PowerupAtlas,type,out var texture,out var uv);
+                    slotIcons[i].texture=texture;slotIcons[i].uvRect=uv;
                     slotIcons[i].color = new Color(1,1,1,slots[i].Interactable?.3f:.15f);
                 }
                 slotCounts[i].text = game.TouchConsumePending ? "…" : game.TouchSlotCount(i).ToString();

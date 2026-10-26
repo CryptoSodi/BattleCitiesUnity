@@ -28,11 +28,12 @@ namespace BattleCities.Multiplayer
         public float SinkDepth;
         public NetworkBool InQuicksand;
         public float SpeedBoost;
+        public float RapidFire;
         public float ReloadDuration;
         public Facing Direction;
         public Facing Aim;
-        public static NetTankState From(TankState s) => new NetTankState { Id=s.Id, Slot=s.Slot, Tier=s.Tier, StatsVersion=s.StatsVersion, UpgradeLevel=s.UpgradeLevel, Health=s.Health, Player=s.Player, Drop=s.Drop, Alive=s.Alive, Moving=s.Moving, X=s.X, Y=s.Y, Shield=s.Shield, Cooldown=s.Cooldown, Slide=s.Slide, SinkDepth=s.SinkDepth, InQuicksand=s.InQuicksand, SpeedBoost=s.SpeedBoost, ReloadDuration=s.ReloadDuration, Direction=s.Direction, Aim=s.Aim };
-        public TankState ToState() => new TankState { Id=Id, Slot=Slot, Tier=Tier, StatsVersion=StatsVersion, UpgradeLevel=UpgradeLevel, Health=Health, Player=Player, Drop=Drop, Alive=Alive, Moving=Moving, X=X, Y=Y, Shield=Shield, Cooldown=Cooldown, Slide=Slide, SinkDepth=SinkDepth, InQuicksand=InQuicksand, SpeedBoost=SpeedBoost, ReloadDuration=ReloadDuration, Direction=Direction, Aim=Aim };
+        public static NetTankState From(TankState s) => new NetTankState { Id=s.Id, Slot=s.Slot, Tier=s.Tier, StatsVersion=s.StatsVersion, UpgradeLevel=s.UpgradeLevel, Health=s.Health, Player=s.Player, Drop=s.Drop, Alive=s.Alive, Moving=s.Moving, X=s.X, Y=s.Y, Shield=s.Shield, Cooldown=s.Cooldown, Slide=s.Slide, SinkDepth=s.SinkDepth, InQuicksand=s.InQuicksand, SpeedBoost=s.SpeedBoost, RapidFire=s.RapidFire, ReloadDuration=s.ReloadDuration, Direction=s.Direction, Aim=s.Aim };
+        public TankState ToState() => new TankState { Id=Id, Slot=Slot, Tier=Tier, StatsVersion=StatsVersion, UpgradeLevel=UpgradeLevel, Health=Health, Player=Player, Drop=Drop, Alive=Alive, Moving=Moving, X=X, Y=Y, Shield=Shield, Cooldown=Cooldown, Slide=Slide, SinkDepth=SinkDepth, InQuicksand=InQuicksand, SpeedBoost=SpeedBoost, RapidFire=RapidFire, ReloadDuration=ReloadDuration, Direction=Direction, Aim=Aim };
     }
     public struct NetShotState : INetworkStruct
     {

@@ -49,8 +49,8 @@ namespace BattleCities
         }
         void DrawTvReplayPickup()
         {
-            if(Simulation.PickupType==null||!PowerupAtlas||!BattleHud.TryPowerupUv(Simulation.PickupType,out var uv))return;
-            effects.Pickup(World(Simulation.PickupX,Simulation.PickupY,.7f),PowerupAtlas,uv,
+            if(Simulation.PickupType==null||!ExtendedPowerupArt.TryImage(PowerupAtlas,Simulation.PickupType,out var texture,out var uv))return;
+            effects.Pickup(World(Simulation.PickupX,Simulation.PickupY,.7f),texture,uv,
                 pickupSparkles.Texture,Simulation.Tick*BattleSimulation.StepSeconds,gameCamera);
         }
         void IsolateTvReplayVisuals()

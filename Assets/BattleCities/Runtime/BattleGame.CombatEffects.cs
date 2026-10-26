@@ -18,43 +18,14 @@ namespace BattleCities
         private readonly Dictionary<string, Material> bulletPaint = new Dictionary<string, Material>();
         private readonly Dictionary<string, Material> deployablePaint = new Dictionary<string, Material>();
 
+        // Legacy projectile effects stay independent of the owner-coloured tank/deployable surfaces.
         private string TankTint(TankState tank) => Simulation!=null&&Simulation.IsTeamBattle&&tank.Slot>=0 ? (BattleSimulation.TeamForSlot(tank.Slot)==0?"#f3bf32":"#4fc76d") : tank.Player ? (tank.Slot<0?"#f3bf32":new[]{"#f3bf32","#4fc76d","#df689a","#88ce68"}[tank.Slot]) : tank.Drop ? "#f0d7c0" :
             new[] { "#c55343", "#769995", "#9296b5", "#736d82" }[tank.Tier];
 
-        private Color PlayerColor(int slot)
-        {
-            ColorUtility.TryParseHtmlString(TankTint(new TankState { Player=true, Slot=slot }),out var color);
-            return color;
-        }
+        private Color PlayerColor(int slot) => BattleTankAppearance.PlayerPrimary(slot);
 
         private void TintDeployable(GameObject root,int ownerSlot)
-        {
-            var color=PlayerColor(ownerSlot);
-            foreach(var renderer in root.GetComponentsInChildren<Renderer>(true))
-            {
-                var materials=renderer.sharedMaterials;
-                bool changed=false;
-                for(int i=0;i<materials.Length;i++)
-                {
-                    var source=materials[i];
-                    bool shadow=source.name=="MAT_Armor_Yellow_Shadow"||source.name=="Armor_Shade";
-                    bool painted=shadow||source.name=="Yellow enamel"||source.name=="Warm enamel"||
-                        source.name=="Golden side armor"||source.name=="Upper yellow enamel"||source.name=="Warm yellow enamel"||
-                        source.name=="MAT_Armor_Yellow"||source.name=="Armor_Yellow";
-                    if(!painted)continue;
-                    string key=source.GetEntityId()+":"+ownerSlot;
-                    if(!deployablePaint.TryGetValue(key,out var material))
-                    {
-                        material=new Material(source);
-                        material.color=shadow?color*.68f:color;
-                        material.color=new Color(material.color.r,material.color.g,material.color.b,1);
-                        deployablePaint.Add(key,material);ownedMaterials.Add(material);
-                    }
-                    materials[i]=material;changed=true;
-                }
-                if(changed)renderer.sharedMaterials=materials;
-            }
-        }
+            => BattleDeployableAppearance.Apply(root,ownerSlot,deployablePaint,ownedMaterials);
 
         private Color ShotColor(ShotState shot)
         {

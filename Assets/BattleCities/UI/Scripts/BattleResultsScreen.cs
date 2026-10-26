@@ -114,7 +114,10 @@ namespace BattleCities.UI
                 row.Portrait=Icon("Portrait",row.Root,art.portraits[i]).rectTransform;
                 row.Name=Label("Player name",row.Root,"",30,TextAlignmentOptions.MidlineLeft);row.Name.overflowMode=TextOverflowModes.Ellipsis;
                 row.Kills=Label("Kills",row.Root,"",22,TextAlignmentOptions.MidlineLeft);
-                row.You=Panel("You badge",row.Root,art.theme.Rounded);row.You.GetComponent<Image>().color=new Color32(0,143,231,255);
+                row.You=Panel("You badge",row.Root,art.theme.Rounded);
+                var youSkin=row.You.GetComponent<Image>();youSkin.color=new Color32(0,143,231,255);
+                // Keep four-unit corners on the 48-by-23 badge instead of a pill.
+                youSkin.pixelsPerUnitMultiplier=8;
                 Label("Label",row.You,ScreenContent.Text("battle-results","you-a0d4a6","YOU"),18).color=Color.white;
                 for(int t=0;t<4;t++)row.Tiers[t]=Label("Tier " + t,row.Root,"",32);
                 row.Bonus=Label("Bonus",row.Root,"",30);row.Points=Label("Points",row.Root,"",38);

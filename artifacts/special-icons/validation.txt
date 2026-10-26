@@ -1,0 +1,1 @@
+PASS: 114 checks. Actual model pixels and lost-target recovery for Mine, PatrolDrone, GroundTurret and LandDrone. Unity Editor/URP validation; Web browser visual verification pending.

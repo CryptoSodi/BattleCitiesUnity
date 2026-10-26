@@ -22,7 +22,7 @@ namespace BattleCities
         private readonly Dictionary<string,string> uncertain=new Dictionary<string,string>();
         private readonly HashSet<string> claiming=new HashSet<string>();
         private readonly string[] slots={"active-one","active-two","active-three","active-four"};
-        private static readonly Dictionary<string,string> Types=new Dictionary<string,string>{{"shield","shield"},{"base-defence","defence"},{"freeze","freeze"},{"speed","speed"},{"upgrade","upgrade"},{"zoom-out","zoomout"},{"wipeout","wipeout"}};
+        private static readonly Dictionary<string,string> Types=new Dictionary<string,string>{{"shield","shield"},{"base-defence","defence"},{"freeze","freeze"},{"speed","speed"},{"upgrade","upgrade"},{"zoom-out","zoomout"},{"wipeout","wipeout"},{"extra-life","life"},{"max-healer","healmax"},{"health-healer","heal2"},{"rapid-shooter","rapid"},{"rapid-shooter-long","rapidlong"}};
         public sealed class Drop { public string Type,ClaimId; }
         private sealed class Response { public long Code;public JObject Body; }
         private async void Start()
@@ -89,7 +89,7 @@ namespace BattleCities
         public async Task<Drop> Roll(int stage)
         {
             if(!Authenticated)return null;
-            try {var r=await Api("/api/economy/drops/roll",new JObject{{"requestId",Guid.NewGuid().ToString()},{"levelNumber",stage}});if(r.Code<200||r.Code>=300)return null;var type=(string)r.Body["dropType"];if(Array.IndexOf(new[]{"shield","defence","freeze","life","speed","upgrade","zoomout","wipeout","batc100","batc200"},type)<0)return null;bool currency=type.StartsWith("batc");var claim=(string)r.Body["claimId"];if(currency&&string.IsNullOrEmpty(claim))return null;return new Drop{Type=type,ClaimId=currency?claim:null};}catch{return null;}
+            try {var r=await Api("/api/economy/drops/roll",new JObject{{"requestId",Guid.NewGuid().ToString()},{"levelNumber",stage},{"powerupRosterVersion",1}});if(r.Code<200||r.Code>=300)return null;var type=(string)r.Body["dropType"];if(Array.IndexOf(new[]{"shield","defence","freeze","life","speed","upgrade","zoomout","wipeout","healmax","heal2","rapid","rapidlong","batc100","batc200"},type)<0)return null;bool currency=type.StartsWith("batc");var claim=(string)r.Body["claimId"];if(currency&&string.IsNullOrEmpty(claim))return null;return new Drop{Type=type,ClaimId=currency?claim:null};}catch{return null;}
         }
         private List<string> Pending()
         {try{return JsonConvert.DeserializeObject<List<string>>(PlayerPrefs.GetString("battlecities.pendingBatcDropClaims","[]"))??new List<string>();}catch{return new List<string>();}}

@@ -1,0 +1,35 @@
+{
+  "game": "Battle Cities",
+  "release": "v1.0.12",
+  "launchUrl": "https://play.battlecities.com/",
+  "localBuild": "Builds/Releases/1.0.12/WebGL/20261023-053955-7c190060",
+  "releaseCommit": "629b689c06b3c88a4fa8047df8aa298a081bc9ba",
+  "repositoryHeadAtCapture": "f8b33f5570d1ff65b9855c735d82a245e86ed52e",
+  "buildProvenance": {
+    "baseRevision": "28f5a13b730536642d56723278c22c560308df1c",
+    "dirty": true,
+    "unityVersion": "6000.6.0f1",
+    "builtAtUtc": "2026-10-23T05:46:29.191Z"
+  },
+  "capture": {
+    "file": "C:/repos/Unity/BattleCitiesUnity/artifacts/colosseum-update/battle-cities-v1.0.12-shot.png",
+    "capturedAtUtc": "2026-10-23T22:22:03.969Z",
+    "width": 2560,
+    "height": 1305,
+    "format": "PNG",
+    "method": "Chrome DevTools Protocol Page.captureScreenshot, PNG/fromSurface; game surface bounds x=0,y=0,width=2560,height=1305,scale=1. Original returned PNG bytes saved directly; no postprocessing.",
+    "sha256": "0d230a7813f571a22fae6b11aba926c0abd5f9b1769b9aa5bc2db0c705dbe633"
+  },
+  "gameplay": {
+    "input": "Normal UI launch, WASD movement, Space fire/charge and arrow aim controls.",
+    "visible": "Yellow player and three enemy tanks, projectiles, impact sparks, flying brick debris, steel obstacles, score/time/lives/enemy HUD.",
+    "gameTime": "00:26",
+    "score": 0,
+    "lives": 3
+  },
+  "notes": [
+    "Release-info.json on published play site verified v1.0.12 during capture.",
+    "Build was originally produced with uncommitted release changes; release commit 629b689 records those changes. Build provenance is retained here rather than claiming a clean-commit build.",
+    "No source or assets changed. No showcase harness, forced spawns, scripted destruction, overlays, upscaling, or image editing."
+  ]
+}

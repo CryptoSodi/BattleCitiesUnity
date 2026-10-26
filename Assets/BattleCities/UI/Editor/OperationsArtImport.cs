@@ -49,6 +49,12 @@ namespace BattleCities.Editor
                     entries.Add(new FieldManualEntry{category=category.Groups["category"].Value,slug=Read("slug"),name=Read("name"),role=Read("role"),lore=Read("lore"),effect=Read("effect"),source=Read("source")});
                 }
             var jsonPath=Destination+"/field-manual.json";
+            foreach(var entry in entries)if(entry.category=="powerups"&&entry.slug=="wipeout")entry.effect="DEALS 1 DAMAGE TO EACH ENEMY NPC. TOUGHER TANKS SURVIVE.";
+            foreach(var power in new[]{("max-healer","MAX HEALER","RESTORES YOUR TANK TO ITS MAXIMUM HEALTH."),("health-healer","+2 HEALTH HEALER","RESTORES TWO HEALTH, UP TO YOUR TANK MAXIMUM."),("rapid-shooter","RAPID SHOOTER","4X FIRING RATE FOR 10 SECONDS."),("rapid-shooter-long","RAPID SHOOTER 60S","4X FIRING RATE FOR 60 SECONDS.")})
+            {
+                entries.RemoveAll(e=>e.category=="powerups"&&e.slug==power.Item1);
+                entries.Add(new FieldManualEntry{category="powerups",slug=power.Item1,name=power.Item2,role=power.Item1.Contains("healer")?"SUPPORT POWERUP":"OFFENSIVE POWERUP",lore="FIELD SUPPLY FOR YOUR EQUIPPED TANK.",effect=power.Item3,source="DROP / SHOP"});
+            }
             File.WriteAllText(jsonPath,JsonUtility.ToJson(new FieldManualEntries{entries=entries.ToArray()},true));
             AssetDatabase.ImportAsset(jsonPath);art.manual=AssetDatabase.LoadAssetAtPath<TextAsset>(jsonPath);
             File.WriteAllText(Destination+"/sources.json","{\n  \"source\": \"BattleCity/public/assets/headquarters-v2, socials-v2, headquarters/manual\",\n  \"artChat\": \"01a094c4-7348-79f3-9b5b-13a6013430db\",\n  \"manualContent\": \"BattleCity/src/wiki/WikiData.ts\",\n  \"purpose\": \"Quarters, Treasury, Field Manual and Socials UI\",\n  \"importer\": \"OperationsArtImport; whole transparent sprites, preserved proportions\"\n}\n");

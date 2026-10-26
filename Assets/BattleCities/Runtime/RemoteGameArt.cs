@@ -141,7 +141,7 @@ namespace BattleCities
                 cancellation.ThrowIfCancellationRequested();
                 if (!loaded.LoadAsset<GameObject>("TvReplayRig.prefab") || !loaded.LoadAsset<GameObject>("LandAttackDrone.prefab"))
                     throw new InvalidDataException("Game models are incomplete.");
-                foreach (var key in new[] { "SettingsArt", "PlayerProfileArt", "OperationsArt", "LoadoutArt", "ShopArt", "PreBattleArt", "BattleResultsArt", "EnvironmentPalette", "RemoteBattleModels" })
+                foreach (var key in new[] { "SettingsArt", "PlayerProfileArt", "OperationsArt", "LoadoutArt", "ShopArt", "ExtendedPowerupArt", "PreBattleArt", "BattleResultsArt", "EnvironmentPalette", "RemoteBattleModels" })
                     if (!loaded.LoadAsset<ScriptableObject>(key + ".asset"))
                         throw new InvalidDataException("Game content is incomplete.");
                 bundle = loaded;

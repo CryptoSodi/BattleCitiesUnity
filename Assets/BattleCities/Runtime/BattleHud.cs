@@ -29,6 +29,8 @@ namespace BattleCities
         Sprite roundedSprite,specialRing;
         Texture2D specialRingTexture;
         readonly BattleSpecialIconCache specialIcons=new BattleSpecialIconCache();
+        // Generate model previews during Update, before IMGUI starts drawing the HUD.
+        public void PrepareSpecialIcon(SecondaryAttack special,int ownerSlot=0)=>specialIcons.Get(special,ownerSlot);
         void Initialize()
         {
             if(canvas)return;
@@ -126,7 +128,7 @@ namespace BattleCities
             switch(type)
             {
                 case "shield":return 0;case "defence":return 1;case "freeze":return 2;case "life":return 3;case "upgrade":return 4;
-                case "wipeout":return 5;case "speed":return 7;case "batc100":return 12;case "batc200":return 13;case "zoomout":return 14;
+                case "wipeout":return 5;case "speed":return 7;case "rapid":return 8;case "batc100":return 12;case "batc200":return 13;case "zoomout":return 14;
                 default:return -1;
             }
         }
@@ -143,7 +145,7 @@ namespace BattleCities
         void PowerupIcon(Rect rect,Texture2D atlas,string type,bool available)
         {
             var image=Element<RawImage>(rect);image.texture=atlas;
-            if(atlas&&TryPowerupUv(type,out var uv)){image.uvRect=uv;image.color=available?Color.white:new Color(.72f,.76f,.8f,.78f);}
+            if(ExtendedPowerupArt.TryImage(atlas,type,out var texture,out var uv)){image.texture=texture;image.uvRect=uv;image.color=available?Color.white:new Color(.72f,.76f,.8f,.78f);}
             else {image.texture=Texture2D.whiteTexture;image.uvRect=new Rect(0,0,1,1);image.color=new Color(.12f,.17f,.22f,.35f);}
         }
         void PowerupBar(EconomyClient economy,Texture2D atlas,bool pending,bool topLeft)
@@ -264,8 +266,8 @@ namespace BattleCities
             Ring(new Rect(x+unit,y+unit,80*unit,80*unit),new Color(accent.r,accent.g,accent.b,cooling?.10f:.12f+pulse*.16f),1);
             Ring(new Rect(x+4*unit,y+4*unit,74*unit,74*unit),new Color(.12f,.22f,.32f),1);
             var icon=Element<RawImage>(new Rect(x+7*unit,y+7*unit,68*unit,68*unit));
-            icon.texture=specialIcons.Get(special);icon.uvRect=new Rect(0,0,1,1);
-            icon.color=cooling||limited?new Color(.6f,.65f,.72f,.7f):Color.white;
+            icon.texture=specialIcons.Cached(special,state.LocalPlayerSlot);icon.uvRect=new Rect(0,0,1,1);
+            icon.color=!icon.texture?Color.clear:cooling||limited?new Color(.6f,.65f,.72f,.7f):Color.white;
             Ring(new Rect(x+4*unit,y+4*unit,74*unit,74*unit),accent,limited?1:progress);
             if(!belowMap)
             {
@@ -284,7 +286,10 @@ namespace BattleCities
             => DrawLayout(state,economy,powerupAtlas,consumePending,BattleHudLayout.Current,RuntimePlatformInfo.PowerupUi,selectedSlot,showPowerups,special);
 #if UNITY_EDITOR
         public void DrawPreview(BattleSimulation state,Texture2D atlas,BattleHudLayout preview,PowerupUiMode mode,EconomyClient economy=null)
-            => DrawLayout(state,economy,atlas,false,preview,mode,0,true,state.EquippedSecondary);
+        {
+            PrepareSpecialIcon(state.EquippedSecondary,state.LocalPlayerSlot);
+            DrawLayout(state,economy,atlas,false,preview,mode,0,true,state.EquippedSecondary);
+        }
 #endif
         void DrawLayout(BattleSimulation state,EconomyClient economy,Texture2D powerupAtlas,bool consumePending,BattleHudLayout viewport,PowerupUiMode powerupUi,int selectedSlot,bool showPowerups,SecondaryAttack? special)
         {
@@ -321,7 +326,7 @@ namespace BattleCities
             if(web&&showPowerups&&!state.IsMultiplayer)reserved=layout.AndroidPowerupWidth;
             if(android&&showPowerups&&!state.IsMultiplayer&&powerupAtlas){
                 // Touch slots have fixed positions. Reserve only the occupied span, as empty slots are hidden.
-                for(int i=0;i<4;i++)if(economy&&TryPowerupUv(economy.SlotType(i),out _)){
+                for(int i=0;i<4;i++)if(economy&&ExtendedPowerupArt.TryImage(powerupAtlas,economy.SlotType(i),out _,out _)){
                     reserved=(4-i)*(BattleHudLayout.AndroidPowerupSlotWidth+BattleHudLayout.AndroidPowerupGap)+8;break;
                 }
             }

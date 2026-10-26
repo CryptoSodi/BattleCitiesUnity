@@ -1,0 +1,44 @@
+{
+  "release": "v1.0.12",
+  "url": "https://play.battlecities.com/",
+  "releaseCommit": "629b689c06b3c88a4fa8047df8aa298a081bc9ba",
+  "build": "20261023-053955-7c190060",
+  "method": "Chrome Page.captureScreenshot PNG/fromSurface; native game surface 2560x1305, scale 1. Original PNG bytes saved directly, no image editing.",
+  "screens": [
+    {
+      "file": "C:/repos/Unity/BattleCitiesUnity/artifacts/colosseum-update/shop-sol.png",
+      "width": 2560,
+      "height": 1305,
+      "capturedAtUtc": "2026-10-23T22:25:14.389Z",
+      "sha256": "57ab2714877f032df6153eede44962c9c73180f3c62950675dcd34b966d148d3"
+    },
+    {
+      "file": "C:/repos/Unity/BattleCitiesUnity/artifacts/colosseum-update/shop-skr.png",
+      "width": 2560,
+      "height": 1305,
+      "capturedAtUtc": "2026-10-23T22:25:40.786Z",
+      "sha256": "34180856aa108cd6a592a98129585c441ec585f9abf95a736f038f30f5d7e731"
+    },
+    {
+      "file": "C:/repos/Unity/BattleCitiesUnity/artifacts/colosseum-update/leaderboard-cycle.png",
+      "width": 2560,
+      "height": 1305,
+      "capturedAtUtc": "2026-10-23T22:26:07.297Z",
+      "sha256": "b10afdd00d8311881e4695851d12f9045f4cb6febf90433e71dd797c3d664164"
+    },
+    {
+      "file": "C:/repos/Unity/BattleCitiesUnity/artifacts/colosseum-update/leaderboard-season.png",
+      "width": 2560,
+      "height": 1305,
+      "capturedAtUtc": "2026-10-23T22:27:00.056Z",
+      "sha256": "5a070d15dcc2b81811b2e0eea50047c7bcf8528f6ae04b179a28b7ad34f37f9e"
+    }
+  ],
+  "observations": {
+    "shopSol": "Live catalog SOL prices displayed for fuel and powers.",
+    "shopSkr": "SKR tab exists; displayed items marked UNAVAILABLE.",
+    "cycle": "Real current cycle: one player 7P5t...xYUM, rank 1, score 0, one match. Payouts paused.",
+    "season": "Season 3 implemented and loaded: NO PLAYERS RANKED YET; current player UNRANKED. Current cycle panel remains visible."
+  },
+  "integrity": "No mock data, price changes, ranking edits, source/asset changes or purchases."
+}

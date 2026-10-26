@@ -24,7 +24,7 @@ namespace BattleCities.UI
         Sprite InventoryIcon(string id)
         {
             if(shopArt)for(int i=0;i<ShopCatalog.Products.Length;i++)if(ShopCatalog.Products[i].InventoryId==id&&i<shopArt.products.Length)return shopArt.products[i];
-            return shopArt?shopArt.supplyCrate:null;
+            var extra=ExtendedPowerupArt.Illustration(id);return extra?extra:shopArt?shopArt.supplyCrate:null;
         }
         Sprite ManualIcon(FieldManualEntry entry)=>entry==null?null:ScreenContent.Sprite(ScreenId,"entry-"+entry.slug,NativeManualIcon(entry));
         Sprite NativeManualIcon(FieldManualEntry entry)

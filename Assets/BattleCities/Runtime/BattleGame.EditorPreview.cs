@@ -51,13 +51,7 @@ namespace BattleCities
                 {
                     var tank = Instantiate(document.TankModel,World(element.X+32,element.Y+32),Quaternion.Euler(0,element.Kind == LevelElementKind.PlayerSpawn ? 0 : 180,0),root);
                     tank.name = element.Kind == LevelElementKind.PlayerSpawn ? "Player spawn" : "Enemy spawn"; tank.transform.localScale = Vector3.one*.86f;
-                    foreach (var renderer in tank.GetComponentsInChildren<Renderer>())
-                        renderer.sharedMaterials = renderer.sharedMaterials.Select(source => {
-                            if (source.name != "PrimaryPaint" && source.name != "SecondaryArmor") return source;
-                            var material = new Material(source); builder.ownedMaterials.Add(material);
-                            Color color = element.Kind == LevelElementKind.PlayerSpawn ? new Color(.93f,.66f,.09f) : new Color(.65f,.19f,.12f);
-                            if (source.name == "SecondaryArmor") color *= .68f; color.a=1; material.color=color; return material;
-                        }).ToArray();
+                    BattleTankAppearance.Apply(tank,new TankState{Player=element.Kind==LevelElementKind.PlayerSpawn},builder.tankPaint,builder.ownedMaterials);
                 }
             }
             finally

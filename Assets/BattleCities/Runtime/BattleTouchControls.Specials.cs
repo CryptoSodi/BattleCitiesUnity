@@ -77,8 +77,8 @@ namespace BattleCities
                 bool limited=state.SecondaryCountFor(item.Ability)>=state.SecondaryLimitFor(item.Ability);
                 bool ready=visible&&game.TouchSpecialAvailable(item.Ability);
                 item.Button.interactable=ready;
-                item.Icon.texture=specialIcons.Get(item.Ability);
-                item.Icon.color=cooling||limited?new Color(.6f,.65f,.72f,.7f):Color.white;
+                item.Icon.texture=specialIcons.Get(item.Ability,state.LocalPlayerSlot);
+                item.Icon.color=!item.Icon.texture?Color.clear:cooling||limited?new Color(.6f,.65f,.72f,.7f):Color.white;
                 Color accent=limited?new Color(1,.32f,.16f):cooling?new Color(.1f,.84f,1):gold;
                 item.Ring.color=accent;
                 // Cooldown is shared between specials; use the last deployed ability's duration.

@@ -30,9 +30,13 @@ namespace BattleCities.UI
             new ShopProduct("wipeout","WIPEOUT",600,.04m,ShopCategory.Power,"+1 ITEM",inventory:"wipeout"),
             new ShopProduct("extra-life","EXTRA LIFE",525,.035m,ShopCategory.Power,"+1 ITEM",inventory:"extra-life"),
             new ShopProduct("starter-pack","STARTER PACK",1200,.08m,ShopCategory.Packs,"5 FUEL + 2 ITEMS",5),
-            new ShopProduct("season-pass","SEASON PASS",0,0m,ShopCategory.SeasonPass,"CURRENT SEASON")
+            new ShopProduct("season-pass","SEASON PASS",0,0m,ShopCategory.SeasonPass,"CURRENT SEASON"),
+            new ShopProduct("max-healer","MAX HEALER",450,.02m,ShopCategory.Power,"FULL HEALTH",inventory:"max-healer"),
+            new ShopProduct("health-healer","+2 HEALTH HEALER",450,.01m,ShopCategory.Power,"+2 HEALTH",inventory:"health-healer"),
+            new ShopProduct("rapid-shooter","RAPID SHOOTER",450,.01m,ShopCategory.Power,"4X FIRE RATE - 10 SEC",inventory:"rapid-shooter"),
+            new ShopProduct("rapid-shooter-long","RAPID SHOOTER 60S",900,.02m,ShopCategory.Power,"4X FIRE RATE - 60 SEC",inventory:"rapid-shooter-long")
         };
-        public static readonly string[] InventoryIds={"shield","base-defence","freeze","speed","upgrade","zoom-out","wipeout","extra-life"};
-        public static string PowerupType(string id)=>id=="base-defence"?"defence":id=="zoom-out"?"zoomout":id=="extra-life"?"life":id;
+        public static readonly string[] InventoryIds={"shield","base-defence","freeze","speed","upgrade","zoom-out","wipeout","extra-life","max-healer","health-healer","rapid-shooter","rapid-shooter-long"};
+        public static string PowerupType(string id)=>id=="base-defence"?"defence":id=="zoom-out"?"zoomout":id=="extra-life"?"life":id=="max-healer"?"healmax":id=="health-healer"?"heal2":id=="rapid-shooter"?"rapid":id=="rapid-shooter-long"?"rapidlong":id;
     }
 }

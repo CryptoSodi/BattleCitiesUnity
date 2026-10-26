@@ -143,8 +143,8 @@ namespace BattleCities.LevelEditor
                             var runtime=RemoteGameArt.Load<Material>("RuntimeShaders/Terrain/"+source.name);
                             var mat=runtime?new Material(runtime):source.shader.name.Contains("glTF")?ConvertMaterial(source):new Material(source);
                             owned.Add(mat);
-                            if((key=="player"||key=="enemy")&&(source.name=="PrimaryPaint"||source.name=="SecondaryArmor"))
-                            {var tint=key=="player"?new Color(.93f,.66f,.09f):new Color(.65f,.19f,.12f);if(source.name=="SecondaryArmor")tint*=.68f;tint.a=1;mat.color=tint;}
+                            if((key=="player"||key=="enemy")&&BattleTankAppearance.TrySurface(new TankState{Player=key=="player"},BattleTankAppearance.Part(renderer),source.name,out var tint,out _))
+                                mat.color=tint;
                             return mat;
                         }).ToArray();
                     }

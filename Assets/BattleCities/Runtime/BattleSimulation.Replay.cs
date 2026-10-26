@@ -13,14 +13,21 @@ namespace BattleCities.Core
         public ReplayConfig ReplayConfiguration()=>new ReplayConfig {
             normalReload=PlayerNormalReloadSeconds,upgradedReload=PlayerUpgradedNormalReloadSeconds,playerTier=initialPlayerTier,tankStatsVersion=TankStatsVersion,
             powerShotDamageVersion=PowerShotDamageVersion,
+            mineLimitVersion=MineLimitVersion,powerupRosterVersion=PowerupRosterVersion,wipeoutDamageVersion=WipeoutDamageVersion,
             turretRange=turretAttackRange,turretDamage=turretDamage,turretCooldown=turretFireCooldown,turretReload=turretReloadDuration,
             turretTurn=turretTurnDuration,turretMuzzle=turretMuzzleDistance,turretHealth=turretHealth,turretDeploy=turretDeployDuration,
             landDrone=ReplayJson.Copy(LandDroneSettings)
         };
         public void ApplyReplayConfiguration(ReplayConfig c)
         {
+            if(c.mineLimitVersion<0||c.mineLimitVersion>1)throw new ArgumentOutOfRangeException(nameof(c.mineLimitVersion));
             TankStatsVersion=c.tankStatsVersion;initialPlayerTier=c.playerTier;
             PowerShotDamageVersion=c.powerShotDamageVersion;
+            MineLimitVersion=c.mineLimitVersion;
+            if(c.powerupRosterVersion<0||c.powerupRosterVersion>1)throw new ArgumentOutOfRangeException(nameof(c.powerupRosterVersion));
+            PowerupRosterVersion=c.powerupRosterVersion;
+            if(c.wipeoutDamageVersion<0||c.wipeoutDamageVersion>1)throw new ArgumentOutOfRangeException(nameof(c.wipeoutDamageVersion));
+            WipeoutDamageVersion=c.wipeoutDamageVersion;
             PlayerNormalReloadSeconds=ValidReloadSeconds(c.normalReload,.12f);PlayerUpgradedNormalReloadSeconds=ValidReloadSeconds(c.upgradedReload,.08f);
             ConfigureTurrets(c.turretRange,c.turretDamage,c.turretCooldown,c.turretReload,c.turretTurn,c.turretMuzzle,c.turretHealth,c.turretDeploy);LandDroneSettings=ReplayJson.Copy(c.landDrone);
         }
@@ -79,7 +86,7 @@ namespace BattleCities.Core
         private static TankState Snapshot(TankState t)=>t==null?null:new TankState{
             Slot=t.Slot,Id=t.Id,Tier=t.Tier,StatsVersion=t.StatsVersion,UpgradeLevel=t.UpgradeLevel,Health=t.Health,Player=t.Player,Drop=t.Drop,Alive=t.Alive,Moving=t.Moving,
             X=t.X,Y=t.Y,Shield=t.Shield,Cooldown=t.Cooldown,Think=t.Think,FireDelay=t.FireDelay,Slide=t.Slide,
-            SpeedBoost=t.SpeedBoost,SinkDepth=t.SinkDepth,InQuicksand=t.InQuicksand,ReloadDuration=t.ReloadDuration,
+            SpeedBoost=t.SpeedBoost,RapidFire=t.RapidFire,SinkDepth=t.SinkDepth,InQuicksand=t.InQuicksand,ReloadDuration=t.ReloadDuration,
             AiState=t.AiState,Direction=t.Direction,Aim=t.Aim
         };
         private static ShotState Snapshot(ShotState s)=>s==null?null:new ShotState{

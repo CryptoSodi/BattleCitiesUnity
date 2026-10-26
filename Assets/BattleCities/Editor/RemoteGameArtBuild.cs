@@ -15,7 +15,7 @@ namespace BattleCities.Editor
         const string Staging = "Assets/BattleCities/RemoteArtBuildStaging";
         const string Config = "Assets/BattleCities/Resources/RemoteGameArtManifest.json";
         const string Journal = "Builds/RemoteArtRecovery.json";
-        static readonly string[] Names = { "SettingsArt", "PlayerProfileArt", "OperationsArt", "LoadoutArt", "ShopArt", "PreBattleArt", "BattleResultsArt", "EnvironmentPalette" };
+        static readonly string[] Names = { "SettingsArt", "PlayerProfileArt", "OperationsArt", "LoadoutArt", "ShopArt", "ExtendedPowerupArt", "PreBattleArt", "BattleResultsArt", "EnvironmentPalette" };
         [Serializable] sealed class Move { public string source, destination; }
         [Serializable] sealed class Moves { public Move[] entries; }
         public static bool Active { get; private set; }

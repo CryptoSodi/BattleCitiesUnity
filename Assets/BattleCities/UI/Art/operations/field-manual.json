@@ -132,7 +132,7 @@
             "name": "WIPEOUT",
             "role": "OFFENSIVE POWERUP",
             "lore": "DANGER CLOSE. EVERYTHING BURNS.",
-            "effect": "DESTROYS ALL ENEMIES ON THE FIELD.",
+            "effect": "DEALS 1 DAMAGE TO EACH ENEMY NPC. TOUGHER TANKS SURVIVE.",
             "source": "DROP / SHOP"
         },
         {
@@ -179,6 +179,42 @@
             "lore": "A FORTRESS THAT DECIDED TO DRIVE.",
             "effect": "TAKES FOUR HITS. DROPS POWERUPS WHEN FLASHING.",
             "source": "LATE LEVELS"
+        },
+        {
+            "category": "powerups",
+            "slug": "max-healer",
+            "name": "MAX HEALER",
+            "role": "SUPPORT POWERUP",
+            "lore": "FIELD SUPPLY FOR YOUR EQUIPPED TANK.",
+            "effect": "RESTORES YOUR TANK TO ITS MAXIMUM HEALTH.",
+            "source": "DROP / SHOP"
+        },
+        {
+            "category": "powerups",
+            "slug": "health-healer",
+            "name": "+2 HEALTH HEALER",
+            "role": "SUPPORT POWERUP",
+            "lore": "FIELD SUPPLY FOR YOUR EQUIPPED TANK.",
+            "effect": "RESTORES TWO HEALTH, UP TO YOUR TANK MAXIMUM.",
+            "source": "DROP / SHOP"
+        },
+        {
+            "category": "powerups",
+            "slug": "rapid-shooter",
+            "name": "RAPID SHOOTER",
+            "role": "OFFENSIVE POWERUP",
+            "lore": "FIELD SUPPLY FOR YOUR EQUIPPED TANK.",
+            "effect": "4X FIRING RATE FOR 10 SECONDS.",
+            "source": "DROP / SHOP"
+        },
+        {
+            "category": "powerups",
+            "slug": "rapid-shooter-long",
+            "name": "RAPID SHOOTER 60S",
+            "role": "OFFENSIVE POWERUP",
+            "lore": "FIELD SUPPLY FOR YOUR EQUIPPED TANK.",
+            "effect": "4X FIRING RATE FOR 60 SECONDS.",
+            "source": "DROP / SHOP"
         }
     ]
 }

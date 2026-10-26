@@ -1,0 +1,23 @@
+{
+  "source": "User-supplied PNG attachments; original artwork copied without alteration.",
+  "importer": "ExtendedPowerupArtImport",
+  "shortShooter": "Existing atlas tile 8; original atlas layout unchanged.",
+  "hudFrames": "Separate textures reusing the existing gold frame; no legacy atlas replacement.",
+  "assets": [
+    {
+      "file": "max-healer.png",
+      "source": "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-747415a6-93ca-4556-bd4d-4ee5b730adf7.png",
+      "sha256": "4b6dc7ac5dabfec0ce83f7a6519cfe23ea7f01be8d90ca02fa69dc327ad50552"
+    },
+    {
+      "file": "health-healer.png",
+      "source": "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-fdf88d43-5113-4148-bb02-f44a29aa6dc4.png",
+      "sha256": "a9aa57b1d42565500c976ec742759d767fb3e952307c7d12e66b4d10d8ef5d64"
+    },
+    {
+      "file": "rapid-shooter-long.png",
+      "source": "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-387f6001-538e-4e03-ad37-25f17e4e9164.png",
+      "sha256": "e6b00f51ebd1368471d0b169d8d86fc8c3f0be50b9cd40bb6eba2e05944439d2"
+    }
+  ]
+}

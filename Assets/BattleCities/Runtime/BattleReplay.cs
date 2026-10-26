@@ -18,6 +18,9 @@ namespace BattleCities.Core
         public int playerTier, turretDamage, turretHealth;
         [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public int tankStatsVersion;
         [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public int powerShotDamageVersion;
+        [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public int mineLimitVersion;
+        [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public int powerupRosterVersion;
+        [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public int wipeoutDamageVersion;
         public LandDroneConfig landDrone;
     }
     [Serializable] public sealed class ReplayInputRun
@@ -204,6 +207,8 @@ namespace BattleCities.Core
             var c=r.config;
             Require(c.tankStatsVersion>=0&&c.tankStatsVersion<=TankProfiles.Version,"Unsupported tank stats version.");
             Require(c.powerShotDamageVersion>=0&&c.powerShotDamageVersion<=1,"Unsupported power shot damage version.");
+            Require(c.powerupRosterVersion>=0&&c.powerupRosterVersion<=1,"Unsupported power-up roster version.");
+            Require(c.wipeoutDamageVersion>=0&&c.wipeoutDamageVersion<=1,"Unsupported Wipeout damage version.");
             Require(c.playerTier>=0&&c.playerTier<=3&&c.turretDamage>=1&&c.turretDamage<=100&&c.turretHealth>=1&&c.turretHealth<=100,"Invalid weapon configuration.");
             foreach(var value in new[]{c.normalReload,c.upgradedReload,c.turretRange,c.turretCooldown,c.turretReload,c.turretMuzzle,c.turretDeploy})Require(Finite(value)&&value>0&&value<=4096,"Invalid weapon setting.");
             Require(Finite(c.turretTurn)&&c.turretTurn>=0&&c.turretTurn<=60,"Invalid turret turn setting.");
@@ -241,7 +246,7 @@ namespace BattleCities.Core
             Require(r.claimedResult.score>=0&&r.claimedResult.lives>=0&&r.claimedResult.remaining>=0&&r.claimedResult.winnerSlot>=-1&&r.claimedResult.winnerSlot<4,"Invalid claimed result.");
             Require(r.completion!="completed"||r.claimedResult.won||r.claimedResult.lost,"Completed replay has no outcome.");
         }
-        public static readonly string[] Powerups={"shield","defence","freeze","life","speed","upgrade","zoomout","wipeout","batc100","batc200"};
+        public static readonly string[] Powerups={"shield","defence","freeze","life","speed","upgrade","zoomout","wipeout","healmax","heal2","rapid","rapidlong","batc100","batc200"};
         private static bool Finite(float v)=>!float.IsNaN(v)&&!float.IsInfinity(v);
         private static void ValidateMap(MapData m)
         {

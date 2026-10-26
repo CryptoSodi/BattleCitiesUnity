@@ -1,0 +1,4 @@
+PASS: 19526 appearance checks; existing TankStats/ShootingHealth/Multiplayer suites completed.
+Editor model captures; not device or live network tests.
+Columns: Player 1 green, Player 2 yellow, Player 3 blue, Player 4 purple. Rows: Vanguard, Striker, Twin Fang, Siegebreaker.
+NPCs: Normal, Speed, Fast-shell (existing tier 2), Armoured, Power Dropper. No standalone Bunker NPC exists.

@@ -16,11 +16,11 @@ namespace BattleCities.UI
         const float ShopCardAspect=1f;
         MainMenuScene menu;MenuTheme theme;PreBattleArt art;ShopArt shopArt;MainMenuApiClient api;
         RectTransform root,heading,currencyBar,inventory,inventoryPaper,inventoryHeading,catalog,filterRow,filterBar,footer,swapPage,notice,noticeCard;
-        RectTransform[] inventoryTiles=new RectTransform[8];
-        TMP_Text[] inventoryCounts=new TMP_Text[8];
-        readonly Image[] inventoryArt=new Image[8];
-        readonly RawImage[] inventoryFallbacks=new RawImage[8];
-        readonly TankGroundShadow[] inventoryShadows=new TankGroundShadow[8];
+        RectTransform[] inventoryTiles=new RectTransform[ShopCatalog.InventoryIds.Length];
+        TMP_Text[] inventoryCounts=new TMP_Text[ShopCatalog.InventoryIds.Length];
+        readonly Image[] inventoryArt=new Image[ShopCatalog.InventoryIds.Length];
+        readonly RawImage[] inventoryFallbacks=new RawImage[ShopCatalog.InventoryIds.Length];
+        readonly TankGroundShadow[] inventoryShadows=new TankGroundShadow[ShopCatalog.InventoryIds.Length];
         TMP_Text itemCount,connection,skrBalance,solBalance,fuelBalance,noticeTitle,noticeBody,swapFrom,swapTo,swapBalance;
         TMP_InputField swapAmount;
         Button back,connect,swapDirection,swapAction,noticeClose;
@@ -32,7 +32,7 @@ namespace BattleCities.UI
         readonly TMP_Text[] filterLabels=new TMP_Text[5];
         readonly List<ButtonCaption> buttonCaptions=new List<ButtonCaption>();
         readonly List<Image> tokenIcons=new List<Image>();
-        readonly Card[] cards=new Card[13];
+        readonly Card[] cards=new Card[ShopCatalog.Products.Length];
         readonly List<int> visible=new List<int>();
         readonly ArcadeTextStyles textStyles=new ArcadeTextStyles();
         TankRosterScroll scroll;GridLayoutGroup grid;
@@ -91,7 +91,7 @@ namespace BattleCities.UI
             var oldHeading=inventory.Find("Heading");if(oldHeading)oldHeading.SetParent(inventoryHeading,false);
             Icon("Crate",inventoryHeading,shopArt?shopArt.supplyCrate:null,ScreenContent.Rect("shop","shopscreen-buildinventory-new-rect-025f-10f-8072a3",new Rect(.025f,.10f,.18f,.80f)));
             Label("Heading",inventoryHeading,ScreenContent.Text("shop","inventory-44e764","INVENTORY"),ScreenContent.Rect("shop","shopscreen-buildinventory-new-rect-23f-02f--1f894f",new Rect(.23f,.02f,.74f,.96f)),24,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
-            for(int i=0;i<8;i++)
+            for(int i=0;i<ShopCatalog.InventoryIds.Length;i++)
             {
                 string id=ShopCatalog.InventoryIds[i];var old=inventory.Find(id);if(old)old.SetParent(inventoryPaper,false);
                 var row=inventoryTiles[i]=Panel(id,inventoryPaper,null);
@@ -104,11 +104,13 @@ namespace BattleCities.UI
                 inventoryFallbacks[i]=Raw("Atlas fallback",plate,ScreenContent.Rect("shop","shopscreen-buildinventory-new-rect-02f-025f-56faa4",new Rect(.02f,.025f,.96f,.95f)));SetInventoryIcon(inventoryFallbacks[i],id);
                 int product=InventoryProduct(id);string name=product>=0?ShopCatalog.Products[product].Title:id.ToUpperInvariant();
                 if(id=="base-defence")name="BASE\nDEFENCE";else if(id=="extra-life")name="EXTRA\nLIFE";
+                else if(id=="max-healer")name="MAX HEALER";else if(id=="health-healer")name="+2 HEALTH";
+                else if(id=="rapid-shooter")name="RAPID 10S";else if(id=="rapid-shooter-long")name="RAPID 60S";
                 Label("Name",row,ScreenContent.Text("shop","power-"+ShopCatalog.InventoryIds[i],name),ScreenContent.Rect("shop","shopscreen-buildinventory-new-rect-29f-08f--12ac26",new Rect(.29f,.08f,.50f,.84f)),20,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
                 var count=Panel("Count badge",row,theme.DarkPanel);count.GetComponent<Image>().pixelsPerUnitMultiplier=3;
                 var oldCount=row.Find("Count");if(oldCount)oldCount.SetParent(count,false);
                 inventoryCounts[i]=Label("Count",count,"0",ScreenContent.Rect("shop","shopscreen-buildinventory-new-rect-08f-04f--b56b36",new Rect(.08f,.04f,.84f,.92f)),28,ArcadeTextTreatment.PrizeAmount);inventoryCounts[i].color=Color.white;
-                var divider=Panel("Divider",row,null);divider.GetComponent<Image>().color=new Color32(6,29,54,85);divider.gameObject.SetActive(i<7);
+                var divider=Panel("Divider",row,null);divider.GetComponent<Image>().color=new Color32(6,29,54,85);divider.gameObject.SetActive(i<ShopCatalog.InventoryIds.Length-1);
             }
         }
         static int InventoryProduct(string id)
@@ -120,13 +122,13 @@ namespace BattleCities.UI
         {
             menu.ApplyShopInventorySurface(inventory,inventoryPaper);
             float width=inventoryPaper.rect.width,height=inventoryPaper.rect.height;
-            float header=TvSidebarStyle.HeaderHeight,rowTop=header+7f,rowHeight=(height-rowTop-4f)/8f;
+            float header=TvSidebarStyle.HeaderHeight,rowTop=header+7f,rowHeight=(height-rowTop-4f)/ShopCatalog.InventoryIds.Length;
             MainMenuScene.Place(inventoryHeading,3,3,width-6,header);
             var headingText=inventoryHeading.Find("Heading").GetComponent<TMP_Text>();
             TvSidebarStyle.Apply(headingText,TvSidebarStyle.HeadingSize(largerText),textStyles);
             TvSidebarStyle.PlaceHeaderIcon(inventoryHeading.Find("Crate").GetComponent<Image>(),TvSidebarStyle.InventoryCrateBounds);
             MainMenuScene.Place(headingText.rectTransform,inventoryHeading.rect.width*.25f,header*.02f,inventoryHeading.rect.width*.72f,header*.96f);
-            for(int i=0;i<8;i++)
+            for(int i=0;i<ShopCatalog.InventoryIds.Length;i++)
             {
                 var row=inventoryTiles[i];float rowWidth=width-10f,iconSize=Mathf.Min(rowHeight-8f,rowWidth*.27f),countSize=Mathf.Min(rowHeight*.57f,rowWidth*.18f);
                 MainMenuScene.Place(row,5,rowTop+i*rowHeight,rowWidth,rowHeight);
@@ -394,15 +396,17 @@ namespace BattleCities.UI
         {
             shopArt=RemoteGameArt.Load<ShopArt>("ShopArt");SetSprite(heading.Find("Shop icon").GetComponent<Image>(),theme.NavigationIcons[2]);
             SetSprite(inventoryHeading.Find("Crate").GetComponent<Image>(),shopArt?shopArt.supplyCrate:null);
-            for(int i=0;i<8;i++)
+            for(int i=0;i<ShopCatalog.InventoryIds.Length;i++)
             {
                 int product=InventoryProduct(ShopCatalog.InventoryIds[i]);var sprite=shopArt&&product>=0&&product<shopArt.products.Length?shopArt.products[product]:null;
+                if(!sprite)sprite=ExtendedPowerupArt.Illustration(ShopCatalog.InventoryIds[i]);
                 SetSprite(inventoryArt[i],sprite);inventoryArt[i].gameObject.SetActive(sprite);inventoryFallbacks[i].transform.parent.gameObject.SetActive(!sprite);inventoryShadows[i].gameObject.SetActive(sprite);
             }
             if(shopArt){SetSprite(currencyTabs[0].transform.Find("Icon").GetComponent<Image>(),shopArt.skr);SetSprite(currencyTabs[1].transform.Find("Icon").GetComponent<Image>(),shopArt.solana);SetSprite(currencyTabs[2].transform.Find("Icon").GetComponent<Image>(),shopArt.swap);SetSprite(footer.Find("SKR balance/Icon").GetComponent<Image>(),shopArt.skr);SetSprite(footer.Find("SOL balance/Icon").GetComponent<Image>(),shopArt.solana);}
             for(int i=0;i<cards.Length;i++)
             {
                 var c=cards[i];var p=ShopCatalog.Products[i];var sprite=shopArt&&shopArt.products!=null&&i<shopArt.products.Length?shopArt.products[i]:null;
+                if(!sprite)sprite=ExtendedPowerupArt.Illustration(p.Id);
                 if(!sprite&&p.Category==ShopCategory.Fuel)sprite=art.fuelCan;
                 if(!sprite&&p.Category==ShopCategory.SeasonPass)sprite=RemoteGameArt.Load<PlayerProfileArt>("PlayerProfileArt")?.insignia;
                 SetSprite(c.Art,sprite);c.Art.gameObject.SetActive(sprite);c.Fallback.gameObject.SetActive(!sprite);
@@ -453,7 +457,7 @@ namespace BattleCities.UI
                 shadow.sizeDelta=new Vector2(widthVisible*1.1f,heightVisible*.10f);
                 shadow.localPosition=card.Rect.InverseTransformPoint(card.Art.rectTransform.TransformPoint(basePoint));
             }
-            for(int i=0;i<8;i++)
+            for(int i=0;i<ShopCatalog.InventoryIds.Length;i++)
             {
                 var image=inventoryArt[i];if(!image.sprite)continue;
                 var drawn=image.rectTransform.rect;float aspect=image.sprite.rect.width/image.sprite.rect.height;
@@ -475,7 +479,7 @@ namespace BattleCities.UI
         }
         void RefreshAccount()
         {
-            for(int i=0;i<8;i++)inventoryCounts[i].text=account!=null?Count(account?["inventory"]?[ShopCatalog.InventoryIds[i]]).ToString(CultureInfo.InvariantCulture):"—";
+            for(int i=0;i<ShopCatalog.InventoryIds.Length;i++)inventoryCounts[i].text=account!=null?Count(account?["inventory"]?[ShopCatalog.InventoryIds[i]]).ToString(CultureInfo.InvariantCulture):"—";
             connection.text=api&&api.IsWalletReadyForPurchases?"REFRESH":"CONNECT WALLET";
             // The older tokenBalance field represents BATC; it must never be presented as SKR.
             skrBalance.text=Amount(walletBalances?["skrBalance"],"0.#########");solBalance.text=Amount(walletBalances?["solBalance"],"0.#########");fuelBalance.text=account!=null?Count(account?["fuelBalance"]).ToString("N0",CultureInfo.InvariantCulture):"—";UpdateCards();RefreshSwap();
@@ -516,7 +520,7 @@ namespace BattleCities.UI
             if(child)image=child.GetComponent<RawImage>();else{var go=new GameObject(name,typeof(RectTransform),typeof(RawImage),typeof(AspectRatioFitter));go.layer=parent.gameObject.layer;go.transform.SetParent(holder,false);image=go.GetComponent<RawImage>();}
             Fit(image.rectTransform,new Rect(0,0,1,1));var aspect=image.GetComponent<AspectRatioFitter>();aspect.aspectMode=AspectRatioFitter.AspectMode.FitInParent;aspect.aspectRatio=1;image.raycastTarget=false;return image;
         }
-        void SetInventoryIcon(RawImage image,string id){image.texture=art.powerups;if(BattleHud.TryPowerupUv(ShopCatalog.PowerupType(id),out var uv)){image.uvRect=uv;image.color=Color.white;}else image.color=Color.clear;}
+        void SetInventoryIcon(RawImage image,string id){if(ExtendedPowerupArt.TryImage(art.powerups,ShopCatalog.PowerupType(id),out var texture,out var uv)){image.texture=texture;image.uvRect=uv;image.color=Color.white;}else image.color=Color.clear;}
         TMP_Text Label(string name,Transform parent,string caption,Rect area,float size,ArcadeTextTreatment style,TextAlignmentOptions alignment=TextAlignmentOptions.Center)
         {
             var child=parent.Find(name);TMP_Text text;if(child)text=child.GetComponent<TMP_Text>();else{var go=new GameObject(name,typeof(RectTransform),typeof(TextMeshProUGUI));go.layer=parent.gameObject.layer;go.transform.SetParent(parent,false);text=go.GetComponent<TextMeshProUGUI>();}

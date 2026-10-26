@@ -9,6 +9,7 @@ namespace BattleCities.UI
     {
         GameObject rig; Camera previewCamera; RenderTexture target; Light previewLight;
         readonly List<Material> paint = new List<Material>();
+        readonly Dictionary<string,Material> paintCache = new Dictionary<string,Material>();
         const int PreviewLayer = 29;
         static int slot;
         public void Configure(int tier, bool aimUp)
@@ -28,12 +29,7 @@ namespace BattleCities.UI
             var turret = model.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "TurretPivot");
             if (turret && aimUp) turret.rotation = Quaternion.identity;
             var renderers = model.GetComponentsInChildren<Renderer>();
-            foreach(var renderer in renderers)renderer.sharedMaterials=renderer.sharedMaterials.Select(source=>
-            {
-                if(!source||(source.name!="PrimaryPaint"&&source.name!="SecondaryArmor"))return source;
-                var material=new Material(source);material.color=source.name=="PrimaryPaint"?new Color32(255,195,20,255):new Color32(173,132,14,255);
-                paint.Add(material);return material;
-            }).ToArray();
+            BattleTankAppearance.Apply(model,new Core.TankState{Player=true,Tier=tier},paintCache,paint);
             var bounds = new Bounds(origin, Vector3.zero);
             foreach (var renderer in renderers) bounds.Encapsulate(renderer.bounds);
             target = new RenderTexture(512, 320, 16, RenderTextureFormat.ARGB32) { name = "Controls tank", antiAliasing = 1 };
@@ -67,7 +63,7 @@ namespace BattleCities.UI
             if (previewCamera) previewCamera.targetTexture = null;
             if (target) { target.Release(); Dispose(target); } target = null;
             if (rig) Dispose(rig); rig = null;
-            foreach(var material in paint)if(material)Dispose(material);paint.Clear();
+            foreach(var material in paint)if(material)Dispose(material);paint.Clear();paintCache.Clear();
         }
         static void Dispose(Object value) { if(Application.isPlaying)Destroy(value);else DestroyImmediate(value); }
         void OnDestroy() => Release();

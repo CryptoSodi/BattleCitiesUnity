@@ -19,7 +19,7 @@ MonoBehaviour:
     AppIdChat: 
     AppIdVoice: 
     AppIdVideo: 
-    AppVersion: battlecities-10
+    AppVersion: battlecities-11
     UseNameServer: 1
     FixedRegion: 
     Server: 

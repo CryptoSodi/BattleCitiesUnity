@@ -62,8 +62,8 @@ namespace BattleCities
         private bool paused,showDebug,terrainDirty;
         private Vector2 debugScroll;
         private string debugPowerupStatus="Free test use - inventory is unchanged.";
-        private static readonly string[] debugPowerupTypes={"shield","defence","freeze","life","upgrade","wipeout","speed","zoomout"};
-        private static readonly string[] debugPowerupNames={"Tank shield","Base steel shield","Freeze enemies","Extra life","Upgrade tank","Destroy enemies","Speed boost","Zoom out"};
+        private static readonly string[] debugPowerupTypes={"shield","defence","freeze","life","upgrade","wipeout","speed","zoomout","healmax","heal2","rapid","rapidlong"};
+        private static readonly string[] debugPowerupNames={"Tank shield","Base steel shield","Freeze enemies","Extra life","Upgrade tank","Damage enemies -1 HP","Speed boost","Zoom out","Max healer","+2 health","Rapid 10 sec","Rapid 60 sec"};
         private int requestedStage=1;
         private Vector3 cameraTarget;
         private Facing? chaseAim;
@@ -78,7 +78,7 @@ namespace BattleCities
         private bool consumePending;
         private InputAction[] slots;
         public bool Paused {get=>paused;set{if(paused==value)return;paused=value;BlockControllerTransition();}}
-        private sealed class Actor { public GameObject Root,Model; public Transform Turret; public Transform[] Muzzles; public ParticleSystem Dust; public Light[] Lights; public int Tier; public bool Drop; public Color Color; public TankAnimation Animation; public TankShield Shield; }
+        private sealed class Actor { public GameObject Root,Model; public Transform Turret; public Transform[] Muzzles; public ParticleSystem Dust; public Light[] Lights; public int Tier,PaintIdentity; public bool Drop; public Color Color; public TankAnimation Animation; public TankShield Shield; public BattleTankDropperBlink DropperBlink; }
         private sealed class Part { public Mesh Mesh;public Material Material;public int Submesh;public Matrix4x4 Local; }
         private sealed class Batch { public Part Part;public Matrix4x4[] Matrices; }
 
@@ -288,6 +288,7 @@ namespace BattleCities
             else secondaryQueued=false;
             }
             if(SystemInfo.graphicsDeviceType==GraphicsDeviceType.Null)return;
+            if(!tvReplay&&!IsReplaying&&(Psg1||RuntimePlatformInfo.PowerupUi==PowerupUiMode.WebTopLeft))hud.PrepareSpecialIcon(SelectedSpecial,Simulation.LocalPlayerSlot);
             float presentationDt=!IsOnline&&(paused||consumePending)?0:dt*(IsReplaying?replaySpeed:1);
             SyncMines();
             SyncTurrets(presentationDt);
@@ -346,20 +347,13 @@ namespace BattleCities
         {foreach(var r in g.GetComponentsInChildren<Renderer>()){r.shadowCastingMode=ShadowCastingMode.On;r.receiveShadows=true;}}
         private Actor CreateTank(TankState t)
         {
-            var a=new Actor{Root=new GameObject((t.Player?"Player":"Enemy")+" "+t.Id),Tier=t.Tier,Drop=t.Drop};a.Root.transform.SetParent(actorsRoot);
+            var a=new Actor{Root=new GameObject((t.Player?"Player":"Enemy")+" "+t.Id),Tier=t.Tier,Drop=t.Drop,PaintIdentity=BattleTankAppearance.Identity(t,Simulation)};a.Root.transform.SetParent(actorsRoot);
             var model=!t.Player&&t.Tier==1&&SpeedEnemyModel?SpeedEnemyModel:TankModels[t.Tier];
             a.Model=Instantiate(model,a.Root.transform);a.Model.transform.localScale=Vector3.one*.86f;Shadows(a.Model);
             string tint=TankTint(t);
             ColorUtility.TryParseHtmlString(tint,out a.Color);
-            foreach(var renderer in a.Model.GetComponentsInChildren<Renderer>())
-            {
-                renderer.sharedMaterials=renderer.sharedMaterials.Select(source=>{
-                    if(source.name!="PrimaryPaint"&&source.name!="SecondaryArmor")return source;
-                    string key=source.GetEntityId()+tint;
-                    if(!tankPaint.TryGetValue(key,out var material)){material=new Material(source);ColorUtility.TryParseHtmlString(tint,out var color);if(source.name=="SecondaryArmor")color*=.68f;color.a=1;material.color=color;tankPaint.Add(key,material);ownedMaterials.Add(material);}
-                    return material;
-                }).ToArray();
-            }
+            BattleTankAppearance.Apply(a.Model,t,tankPaint,ownedMaterials,Simulation);
+            if(!t.Player&&t.Drop)a.DropperBlink=new BattleTankDropperBlink(a.Model,t,Simulation);
             a.Turret=a.Model.GetComponentsInChildren<Transform>(true).FirstOrDefault(n=>n.name=="TurretPivot");
             var muzzleNodes=a.Model.GetComponentsInChildren<Transform>(true);
             a.Muzzles=muzzleNodes.Where(n=>n.name=="MuzzleLeft"||n.name=="MuzzleRight").ToArray();
@@ -380,13 +374,14 @@ namespace BattleCities
             var living=new HashSet<int>();
             foreach(var t in Simulation.Tanks.Where(t=>t.Alive))
             {
-                living.Add(t.Id);if(actors.TryGetValue(t.Id,out var old)&&(old.Tier!=t.Tier||old.Drop!=t.Drop)){Destroy(old.Root);actors.Remove(t.Id);}if(!actors.TryGetValue(t.Id,out var a)){a=CreateTank(t);actors.Add(t.Id,a);}
+                living.Add(t.Id);if(actors.TryGetValue(t.Id,out var old)&&(old.Tier!=t.Tier||old.Drop!=t.Drop||old.PaintIdentity!=BattleTankAppearance.Identity(t,Simulation))){Destroy(old.Root);actors.Remove(t.Id);}if(!actors.TryGetValue(t.Id,out var a)){a=CreateTank(t);actors.Add(t.Id,a);}
                 var pose=IsOnline&&!NetworkMatch.Object.HasStateAuthority&&predictedTank!=null&&predictedTank.Id==t.Id?predictedTank:t;
                 var targetPosition=World(pose.X,pose.Y,-pose.SinkDepth*.43f);
                 a.Root.transform.position=IsOnline&&!NetworkMatch.Object.HasStateAuthority&&Vector3.Distance(a.Root.transform.position,targetPosition)<2?Vector3.Lerp(a.Root.transform.position,targetPosition,1-Mathf.Exp(-dt*24)):targetPosition;a.Model.transform.rotation=Quaternion.Slerp(a.Model.transform.rotation,Quaternion.Euler(0,(int)pose.Direction*90,0),1-Mathf.Exp(-dt*22));
                 if(a.Turret)a.Turret.rotation=Quaternion.Slerp(a.Turret.rotation,Quaternion.Euler(0,(int)pose.Aim*90,0),1-Mathf.Exp(-dt*16));
                 bool local=t==Simulation.Player;
                 a.Animation.Tick(t,dt);a.Shield.Tick(t.Shield,dt);
+                a.DropperBlink?.Tick(Simulation.Tick*BattleSimulation.StepSeconds);
                 effects.HealthBar(World(pose.X,pose.Y,.4f)+gameCamera.transform.up*.64f,t.Health,t.MaxHealth,a.Color,gameCamera);
                 float charge=replayPlayer!=null&&t.Player?replayPlayer.ChargeProgress(Mathf.Max(0,t.Slot)):IsOnline&&t.Player&&t.Slot>=0&&t.Slot!=NetworkMatch.LocalSlot?
                     NetworkMatch.ChargeProgress[t.Slot]:primaryCharge.IsCharging&&local?primaryCharge.Progress:0;

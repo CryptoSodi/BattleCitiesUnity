@@ -40,8 +40,8 @@ namespace BattleCities.Editor
                     foreach(var b in screen.Root.GetComponentsInChildren<UnityEngine.UI.Button>().Where(b=>b.IsInteractable()))Check(b.navigation.mode==UnityEngine.UI.Navigation.Mode.Explicit,p+" explicit navigation "+b.name);
                     var first=scroll.content.Find("Card 0").gameObject;EventSystem.current.SetSelectedGameObject(first);ExecuteEvents.Execute(first,new BaseEventData(EventSystem.current),ExecuteEvents.submitHandler);
                     Check(screen.CurrentPage==OperationsScreen.Page.Treasury,p+" submit opens Treasury");screen.Back();Check(screen.CurrentPage==OperationsScreen.Page.Quarters,p+" Treasury Back");
-                    screen.OpenManual();Check(screen.ItemCount==4,p+" tank entries");screen.SelectManualCategory(2);Check(screen.ItemCount==8,p+" all powerups");
-                    screen.OpenManualEntry("extra-life");Check(screen.CurrentPage==OperationsScreen.Page.ManualDetail,p+" manual detail");screen.Back();Check(screen.ItemCount==8,p+" detail returns to category");screen.Back();Check(screen.CurrentPage==OperationsScreen.Page.Quarters,p+" manual Back");
+                    screen.OpenManual();Check(screen.ItemCount==4,p+" tank entries");screen.SelectManualCategory(2);Check(screen.ItemCount==ShopCatalog.InventoryIds.Length,p+" all powerups");
+                    screen.OpenManualEntry("extra-life");Check(screen.CurrentPage==OperationsScreen.Page.ManualDetail,p+" manual detail");screen.Back();Check(screen.ItemCount==ShopCatalog.InventoryIds.Length,p+" detail returns to category");screen.Back();Check(screen.CurrentPage==OperationsScreen.Page.Quarters,p+" manual Back");
                     menu.OpenShop();Check(!screen.IsOpen&&menu.IsShopOpen,p+" Shop closes operations");menu.OpenRanking();Check(!menu.IsShopOpen&&menu.IsRankingOpen,p+" Ranking closes Shop");menu.OpenSocials();Check(!menu.IsRankingOpen&&menu.IsSocialsOpen&&screen.ItemCount==6,p+" Socials opens exclusively");
                     screen.Close();
                 }

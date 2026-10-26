@@ -1,0 +1,62 @@
+{
+  "release": "v1.0.12",
+  "releaseCommit": "629b689c06b3c88a4fa8047df8aa298a081bc9ba",
+  "repositoryHead": "f8b33f5570d1ff65b9855c735d82a245e86ed52e",
+  "build": "20261023-053955-7c190060",
+  "url": "https://play.battlecities.com/",
+  "method": "In-app Chromium, normal Continue as Guest, tank selection and keyboard W/E/Space. CDP Page.captureScreenshot PNG/fromSurface; original bytes unchanged at 1280x720. Landscape viewport restored to initial dimensions for gameplay and reset afterward.",
+  "implementationSources": [
+    "Assets/BattleCities/Runtime/BattleTankAbilities.cs",
+    "Assets/BattleCities/Runtime/BattleSimulation.cs",
+    "Assets/BattleCities/Runtime/BattleSimulation.LandDrone.cs"
+  ],
+  "files": [
+    {
+      "name": "ability-vanguard-mine.png",
+      "tank": "Vanguard",
+      "ability": "Mine",
+      "visible": "Armed mine placed in corridor behind player; enemies, sparks and destructible maze visible. No detonation claimed.",
+      "path": "C:/repos/Unity/BattleCitiesUnity/artifacts/colosseum-update/ability-vanguard-mine.png",
+      "width": 1280,
+      "height": 720,
+      "savedAtUtc": "2026-10-23T22:39:46.129Z",
+      "sha256": "094dbdae656283065b0899d55eeb8d46423dcb6d56166d928cad6ec03ffee3b1"
+    },
+    {
+      "name": "ability-striker-drone.png",
+      "tank": "Striker",
+      "ability": "Patrol drone",
+      "visible": "Airborne quadcopter visibly separated from player, patrol radius and shadow over brick maze; battle projectiles visible. No drone detonation claimed.",
+      "path": "C:/repos/Unity/BattleCitiesUnity/artifacts/colosseum-update/ability-striker-drone.png",
+      "width": 1280,
+      "height": 720,
+      "savedAtUtc": "2026-10-23T22:43:05.488Z",
+      "sha256": "7a954cf1051eb364205708763ed8cecb2ee27e7d0821d4777b75563ea1492f72"
+    },
+    {
+      "name": "ability-twin-fang-turret-deployed.png",
+      "tank": "Twin Fang",
+      "ability": "Ground turret",
+      "visible": "Fully unfolded turret with muzzle flash/projectile visible in active combat, after player cleared its safety radius.",
+      "path": "C:/repos/Unity/BattleCitiesUnity/artifacts/colosseum-update/ability-twin-fang-turret-deployed.png",
+      "width": 1280,
+      "height": 720,
+      "savedAtUtc": "2026-10-23T22:41:23.148Z",
+      "sha256": "8438f9eba2ecbcdf8926692903caf8a92b806bdb1de94256f62462902c436c9f"
+    },
+    {
+      "name": "ability-siegebreaker-land-drone.png",
+      "tank": "Siegebreaker",
+      "ability": "Land attack drone (tank drone)",
+      "visible": "Deployed yellow ground vehicle navigating beside maze and player. No impact or explosion claimed.",
+      "path": "C:/repos/Unity/BattleCitiesUnity/artifacts/colosseum-update/ability-siegebreaker-land-drone.png",
+      "width": 1280,
+      "height": 720,
+      "savedAtUtc": "2026-10-23T22:38:05.166Z",
+      "sha256": "b7af1c316e1bb78b96076becc50417e28932161f23730a82f9f06c7c348a7507"
+    }
+  ],
+  "unimplementedRequestedAbilities": [],
+  "limits": "Still screenshots show deployment/patrol and a firing turret, not every ability impact/detonation. No MP4 recorded.",
+  "integrity": "No game source, assets, state injection, fixtures, fake enemies, scripted kills, promotional artwork or overlays used."
+}
