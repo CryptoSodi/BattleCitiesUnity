@@ -160,10 +160,15 @@ namespace BattleCities.UI
             Canvas.ForceUpdateCanvases();float w=root.rect.width,h=root.rect.height;
             var top=new TvTitleHeaderLayout(root);top.PlaceTitle(header,(RectTransform)header.Find("Medal"),title.rectTransform,true);
             Place(title.rectTransform,90,4,w*.62f-90,top.Height-8);
-            Place((RectTransform)share.transform,header.rect.width*.75f,6,header.rect.width*.24f,top.Height-12);
+            float shareWidth=Mathf.Min(200,header.rect.width*.24f);
+            Place((RectTransform)share.transform,header.rect.width*.99f-shareWidth,6,shareWidth,top.Height-12);
             FitButtonSkin(share);
             Fit((RectTransform)share.transform.Find("Icon"),.045f,.18f,.15f,.64f);Fit((RectTransform)share.transform.Find("Caption"),.22f,.06f,.73f,.88f);
             var bottom=new TvStatusFooterLayout(root);bottom.Place(footer);TvStatusFooterLayout.PlaceAction((RectTransform)next.transform);
+            float continueWidth=Mathf.Min(200,footer.rect.width*TvStatusFooterLayout.ActionArea.width);
+            var actionArea=TvStatusFooterLayout.ActionArea;
+            Place((RectTransform)next.transform,footer.rect.width*(actionArea.x+actionArea.width)-continueWidth,
+                footer.rect.height*actionArea.y,continueWidth,footer.rect.height*actionArea.height);
             FitButtonSkin(next);
             float bodyTop=top.Height+14,bodyHeight=h-bodyTop-bottom.Height-14,leftWidth=w*ScreenContent.Number("battle-results","report-ratio",0.255f);
             Place(sidebar,10,bodyTop,leftWidth-15,bodyHeight);Place(paper,7,7,sidebar.rect.width-14,bodyHeight-14);

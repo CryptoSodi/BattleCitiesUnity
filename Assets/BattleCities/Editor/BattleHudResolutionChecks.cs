@@ -44,7 +44,7 @@ namespace BattleCities.Editor
                     Near(header.rectTransform.rect.width*canvas.scaleFactor,size.x,"header spans viewport "+size);
                     var score=canvas.GetComponentsInChildren<Text>().Single(t=>t.text=="SCORE");
                     var special=canvas.GetComponentsInChildren<RawImage>().SingleOrDefault(t=>t.texture&&t.texture.name=="Special icon LandDrone");
-                    Check((special!=null)==psg1,"special indicator only appears on PSG1 "+size);
+                    Check(special!=null,"owned special indicator appears on Web and PSG1 "+size);
                     if(psg1)
                     {
                         Check(!special.raycastTarget,"special indicator does not block input");
@@ -62,6 +62,16 @@ namespace BattleCities.Editor
                     var roster=canvas.GetComponentsInChildren<RawImage>().Where(image=>image.texture==enemyTexture).ToArray();
                     Check(roster.Length==state.TotalEnemies&&roster.All(image=>Mathf.Abs(image.rectTransform.rect.width/image.rectTransform.rect.height-(float)enemyTexture.width/enemyTexture.height)<.05f),"enemy roster keeps artwork proportions "+size);
                     if(psg1)Check(roster.All(image=>image.rectTransform.rect.width>=26),"PSG1 enemies use reclaimed header space");
+                    if(!psg1)
+                    {
+                        var slots=canvas.GetComponentsInChildren<RawImage>().Where(image=>image.texture==atlas).ToArray();
+                        Check(slots.Length==4,"Web retains all four numbered power-up slots");
+                        Check(slots.All(image=>-image.rectTransform.anchoredPosition.y>=0&&-image.rectTransform.anchoredPosition.y+image.rectTransform.rect.height<=layout.TopHeight),"Web slots fit inside the single-row header");
+                        Check(roster.Last().rectTransform.anchoredPosition.x+roster.Last().rectTransform.rect.width<slots.First().rectTransform.anchoredPosition.x,"Web roster stays clear of power-up slots");
+                        float mapBottom=layout.TopHeight+154*layout.OverlayScale;
+                        Check(-special.rectTransform.anchoredPosition.y>mapBottom,"Web special sits below minimap");
+                        Check(!special.raycastTarget,"Web special indicator preserves combat pointer input");
+                    }
                     Near(canvas.scaleFactor,layout.Scale,"canvas uses one scale "+size);
                     camera.Render();var old=RenderTexture.active;RenderTexture.active=target;
                     var picture=new Texture2D(size.x,size.y,TextureFormat.RGB24,false);

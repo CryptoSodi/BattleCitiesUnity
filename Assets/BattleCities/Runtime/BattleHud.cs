@@ -163,6 +163,24 @@ namespace BattleCities
                 Text(new Rect(x+iconSize-badge-2*scale,py+1*scale,badge,badge),pending?"…":count.ToString(),available?new Color(1,.78f,.03f):new Color(.74f,.79f,.82f),false,TextAnchor.MiddleCenter,Mathf.RoundToInt(16*scale));
             }
         }
+        void WebPowerups(EconomyClient economy,Texture2D atlas,bool pending)
+        {
+            float slot=BattleHudLayout.AndroidPowerupSlotWidth,gap=BattleHudLayout.AndroidPowerupGap,size=BattleHudLayout.AndroidPowerupIconSize;
+            float left=Width-6-(slot*4+gap*3),y=(TopHeight-size)*.5f;
+            for(int i=0;i<4;i++)
+            {
+                string liveType=economy?economy.SlotType(i):null;
+                string type=string.IsNullOrEmpty(liveType)?emptySlotTypes[i]:liveType;
+                int count=economy?economy.SlotCount(i):0;bool available=count>0&&!pending;
+                float x=left+i*(slot+gap)+(slot-size)*.5f;
+                PowerupIcon(new Rect(x,y,size,size),atlas,type,available);
+                elements[cursor-1].color=new Color(1,1,1,available?.3f:.15f);
+                Rounded(new Rect(x,y,14,14),new Color(.92f,.95f,.94f,.98f));
+                Text(new Rect(x,y,14,14),(i+1).ToString(),new Color(.04f,.1f,.17f),false,TextAnchor.MiddleCenter,11);
+                Rounded(new Rect(x+size-12,y-2,18,18),new Color(.015f,.045f,.08f,.94f));
+                Text(new Rect(x+size-14,y-3,22,20),pending?"...":count.ToString(),Color.white,false,TextAnchor.MiddleCenter,14);
+            }
+        }
         float Psg1PowerupWidth(bool narrow)
         {
             float scale=layout.DetailScale,size=(narrow?34:38)*scale,gap=3*scale;
@@ -231,12 +249,13 @@ namespace BattleCities
             var map=Element<RawImage>(new Rect(x,y,size,size));map.texture=minimapTexture;map.uvRect=new Rect(0,0,1,1);map.color=new Color(1,1,1,.88f);
             Outline(new Rect(x,y,size,size),new Color(1,.68f,.05f,.86f),1.5f*scale);
         }
-        void Psg1Special(BattleSimulation state,SecondaryAttack special)
+        void SpecialIndicator(BattleSimulation state,SecondaryAttack special,bool belowMap=false)
         {
             if(!BattleSpecialAbilities.Valid(special))return;
-            float scale=layout.DetailScale,size=(layout.Narrow?34:38)*scale;
-            float x=Width-6*scale-size,y=5,unit=size/82f;
-            bool cooling=state.SecondaryCooldown>0,limited=state.SecondaryCount>=state.SecondaryLimit;
+            float scale=belowMap?1:layout.DetailScale,size=belowMap?60:(layout.Narrow?34:38)*scale;
+            float x=belowMap?Width-14*layout.OverlayScale-size:Width-6*scale-size;
+            float y=belowMap?TopHeight+154*layout.OverlayScale+12:5,unit=size/82f;
+            bool cooling=state.SecondaryCooldown>0,limited=state.SecondaryCountFor(special)>=state.SecondaryLimitFor(special);
             float duration=special==SecondaryAttack.Mine?BattleSimulation.SecondaryCooldownSeconds:4f;
             float progress=Mathf.Clamp01(1-state.SecondaryCooldown/duration);
             Color accent=limited?new Color(1,.32f,.16f):cooling?cyan:gold;
@@ -248,9 +267,12 @@ namespace BattleCities
             icon.texture=specialIcons.Get(special);icon.uvRect=new Rect(0,0,1,1);
             icon.color=cooling||limited?new Color(.6f,.65f,.72f,.7f):Color.white;
             Ring(new Rect(x+4*unit,y+4*unit,74*unit,74*unit),accent,limited?1:progress);
-            var badge=new Rect(x+scale,y,20*scale,14*scale);
-            Rounded(badge,new Color(.92f,.95f,.94f,.98f));
-            Text(badge,"L1",new Color(.04f,.1f,.17f),false,TextAnchor.MiddleCenter,Mathf.RoundToInt(10*scale));
+            if(!belowMap)
+            {
+                var badge=new Rect(x+scale,y,20*scale,14*scale);
+                Rounded(badge,new Color(.92f,.95f,.94f,.98f));
+                Text(badge,"L1",new Color(.04f,.1f,.17f),false,TextAnchor.MiddleCenter,Mathf.RoundToInt(10*scale));
+            }
         }
         void Ring(Rect rect,Color color,float progress)
         {
@@ -266,18 +288,20 @@ namespace BattleCities
 #endif
         void DrawLayout(BattleSimulation state,EconomyClient economy,Texture2D powerupAtlas,bool consumePending,BattleHudLayout viewport,PowerupUiMode powerupUi,int selectedSlot,bool showPowerups,SecondaryAttack? special)
         {
-            Initialize();layout=viewport;canvas.scaleFactor=layout.Scale;if(frameRate)frameRate.ApplyLayout(layout,powerupUi==PowerupUiMode.ExternalController);cursor=0;bool narrow=layout.Narrow;float h=TopHeight;
+            Initialize();layout=viewport;canvas.scaleFactor=layout.Scale;if(frameRate)frameRate.ApplyLayout(layout,powerupUi==PowerupUiMode.ExternalController||powerupUi==PowerupUiMode.WebTopLeft);cursor=0;bool narrow=layout.Narrow;float h=TopHeight;
             bool psg1=powerupUi==PowerupUiMode.MergedTopHud;
             bool android=powerupUi==PowerupUiMode.ExternalController;
-            bool compact=psg1||android;
+            bool web=powerupUi==PowerupUiMode.WebTopLeft;
+            bool cornerSlots=android||web;
+            bool compact=psg1||cornerSlots;
             bool hasSpecial=psg1&&special.HasValue&&BattleSpecialAbilities.Valid(special.Value);
             float specialWidth=hasSpecial?((narrow?34:38)+3)*layout.DetailScale:0;
             Fill(new Rect(0,0,Width,h),navy);Fill(new Rect(0,0,Width,2),new Color(.22f,.3f,.38f));Fill(new Rect(0,h-3,Width,3),gold);
             float metricWidth=narrow?Mathf.Min(124,Width*.52f/3):175;
-            float scoreWidth=android&&narrow?112:compact?(narrow?metricWidth:138):metricWidth;
-            float timeWidth=android&&narrow?72:compact?Mathf.Min(metricWidth,82):metricWidth;
-            float livesWidth=android&&narrow?88:compact?(narrow?metricWidth:136):metricWidth;
-            float scoreTextX=android&&narrow?34:46,scoreIcon=android&&narrow?26:36;
+            float scoreWidth=cornerSlots&&narrow?112:compact?(narrow?metricWidth:138):metricWidth;
+            float timeWidth=cornerSlots&&narrow?72:compact?Mathf.Min(metricWidth,82):metricWidth;
+            float livesWidth=cornerSlots&&narrow?88:compact?(narrow?metricWidth:136):metricWidth;
+            float scoreTextX=cornerSlots&&narrow?34:46,scoreIcon=cornerSlots&&narrow?26:36;
             Icon(new Rect(5,(h-scoreIcon)*.5f,scoreIcon,scoreIcon),player);Text(new Rect(scoreTextX,2,scoreWidth-scoreTextX-8,18),ScreenContent.Text("battle-hud","score-a60ffb","SCORE"),cream);Text(new Rect(scoreTextX,18,scoreWidth-scoreTextX-8,27),state.Score.ToString("D6"),gold,true);
             float x=scoreWidth;
             Fill(new Rect(x-7,9,1,28),gold);
@@ -293,7 +317,8 @@ namespace BattleCities
             if(state.IsPvp)for(int i=0;i<BattleSimulation.MaxPlayers;i++)if(!state.AreAllies(i,state.LocalPlayerSlot)&&state.Participants[i].Connected&&state.Participants[i].Lives>0)opponents++;
             Text(new Rect(enemyX,enemyY,100,19),state.IsPvp?ScreenContent.Text("battle-hud","rivals","RIVALS"):ScreenContent.Text("battle-hud","enemies","ENEMIES"),cream);
             Text(new Rect(enemyX,enemyY+18,100,23),(state.IsPvp?opponents:state.Remaining).ToString()+" LEFT",new Color(1,.42f,.32f));
-            float start=enemyX+(android&&narrow?66:compact?76:100),reserved=psg1?Psg1PowerupWidth(narrow)+specialWidth:0;
+            float start=enemyX+(cornerSlots&&narrow?66:compact?76:100),reserved=psg1?Psg1PowerupWidth(narrow)+specialWidth:0;
+            if(web&&showPowerups&&!state.IsMultiplayer)reserved=layout.AndroidPowerupWidth;
             if(android&&showPowerups&&!state.IsMultiplayer&&powerupAtlas){
                 // Touch slots have fixed positions. Reserve only the occupied span, as empty slots are hidden.
                 for(int i=0;i<4;i++)if(economy&&TryPowerupUv(economy.SlotType(i),out _)){
@@ -308,7 +333,7 @@ namespace BattleCities
                 Text(new Rect(start,enemyY+22,available,19),ScreenContent.Text("battle-hud","first-to-3-own-flag-must-be-home-57a971","FIRST TO 3 · OWN FLAG MUST BE HOME"),cream);
             }
             int total=state.IsCaptureFlag?0:state.TotalEnemies,deadCount=total-state.Remaining;
-            float step=Mathf.Min(android?48:compact?40:34,available/Mathf.Max(1,total));
+            float step=Mathf.Min(cornerSlots?48:compact?40:34,available/Mathf.Max(1,total));
             for(int i=0;i<total;i++)
             {
                 float iconWidth=Mathf.Max(1,step-(android&&step<20?.5f:2));
@@ -318,11 +343,11 @@ namespace BattleCities
                 Icon(slot,enemy,i<deadCount);
             }
             Minimap(state);
-            if(psg1&&special.HasValue)Psg1Special(state,special.Value);
+            if((psg1||web)&&special.HasValue)SpecialIndicator(state,special.Value,web);
             if(showPowerups&&!state.IsMultiplayer)
             {
                 if(psg1)Psg1Powerups(economy,powerupAtlas,consumePending,narrow,selectedSlot,specialWidth);
-                else if(powerupUi==PowerupUiMode.WebTopLeft)PowerupBar(economy,powerupAtlas,consumePending,true);
+                else if(web)WebPowerups(economy,powerupAtlas,consumePending);
                 else if(powerupUi==PowerupUiMode.GameOverlay)PowerupBar(economy,powerupAtlas,consumePending,false);
             }
             while(cursor<elements.Count)elements[cursor++].gameObject.SetActive(false);

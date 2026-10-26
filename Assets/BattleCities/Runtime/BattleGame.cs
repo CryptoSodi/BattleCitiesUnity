@@ -493,7 +493,7 @@ namespace BattleCities
             if(Simulation==null||tvReplay)return;
             if(!ReplayReady||HasMatchResult||ResultsVisible){hud.SetVisible(false);return;}
             hud.SetVisible(true);
-            hud.Draw(Simulation,IsOnline||IsReplaying?null:economy,PowerupAtlas,consumePending,selectedPowerup,!IsReplaying,Psg1&&!IsReplaying?(SecondaryAttack?)SelectedSpecial:null);
+            hud.Draw(Simulation,IsOnline||IsReplaying?null:economy,PowerupAtlas,consumePending,selectedPowerup,!IsReplaying,(Psg1||RuntimePlatformInfo.PowerupUi==PowerupUiMode.WebTopLeft)&&!IsReplaying?(SecondaryAttack?)SelectedSpecial:null);
             if(IsReplaying)return;
             if(Multiplayer.BattleSession.Instance&&Multiplayer.BattleSession.Instance.Lobby.Visible)return;
             if(ChaseCamera&&!IsOnline&&Simulation.Player!=null&&!paused&&!showDebug)
