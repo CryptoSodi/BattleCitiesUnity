@@ -1,5 +1,17 @@
 # Publishing the game
 
+## Interactive build launcher
+
+Double-click `Build-Launcher.bat` at the project root for the terminal menu in
+`Tools/BuildLauncher/`. It offers Web/Android, editable game version and Android
+version code, localhost, individual/all web fronts, phone installation, GitHub APK
+publication and PSG1 draft upload. Web publication is web-only; Android hosts and
+verifies OTA artwork before installing or publishing its APK. See
+[the launcher guide](../Tools/BuildLauncher/README.md) for setup, outputs and tests.
+
+The older launchers below remain available; `Deploy-Web.bat` retains its older APK
+carry-forward workflow. Use the new launcher for web-only releases.
+
 The Unity repository owns the public game releases and web deployment:
 
 - Game: https://play.battlecities.com/

@@ -1,0 +1,10 @@
+{
+  "sshHost": "ubuntu@129.153.16.84",
+  "sshKey": "",
+  "localhostPort": 8080,
+  "remoteArtBaseUrl": "https://assets.battlecities.com/android/art",
+  "assetBucket": "battlecities-game-assets",
+  "psg1SubmissionId": "cmvqat4lu0005jn07zf975jzr",
+  "psg1McpUrl": "https://mcp.playsolana.com/mcp",
+  "androidSerial": ""
+}

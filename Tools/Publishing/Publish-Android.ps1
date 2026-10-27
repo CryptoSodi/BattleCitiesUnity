@@ -39,8 +39,8 @@ Battle Cities Android $($receipt.versionName) (code $($receipt.versionCode))
 - Production ARM64 release APK, signed with the existing Battle Cities certificate.
 - Firebase project: battle-cities-84acd.
 - Existing web game and API deployments are unchanged.
-- Adds independent turret aiming through the Android touch FIRE control, alongside the current gameplay and results improvements.
-- Device installation, wallet handoff and Firebase push delivery have not been tested on hardware.
+- Includes the current game and Android controls from the source commit below.
+- Build verification covers the signed package; device testing results are recorded separately.
 - Download: https://github.com/$Repository/releases/latest/download/battlecities.apk
 
 Certificate SHA-256: $($receipt.certificateSha256)

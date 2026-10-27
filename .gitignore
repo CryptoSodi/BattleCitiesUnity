@@ -122,3 +122,8 @@ InitTestScene*.unity*
 
 # Local Cloudflare CLI account cache
 /.cloudflare/
+
+# Build launcher machine-specific preferences (never store credentials here)
+/Tools/BuildLauncher/settings.local.json
+/Tools/BuildLauncher/**/__pycache__/
+/Tools/BuildLauncher/**/*.pyc
