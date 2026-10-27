@@ -23,7 +23,8 @@ verification, and `RemoteArt/content-manifest.json` plus a SHA256-named `.bundle
 Only the SHA256-named bundle needs hosting. The manifest is embedded in the APK.
 Keep the bundle and manifest together with that APK's release records.
 
-Omit `-RemoteArtBaseUrl` to build the ordinary self-contained APK. Web and Editor
+Signed release builds default to the production OTA URL above. Use `-SelfContained`
+only when explicitly requesting an APK with bundled artwork. Web and Editor
 workflows retain their current local artwork. No new package or Unity runtime is
 required. Remote artwork builds currently require the closed-editor batch path.
 

@@ -29,10 +29,18 @@ namespace BattleCities.Editor
             var shortIcon=new Texture2D(303,283,TextureFormat.RGBA32,false);
             shortIcon.SetPixels(atlas.GetPixels(978,971-621,303,283));shortIcon.Apply();
             File.WriteAllBytes(Folder+"rapid-shooter.png",shortIcon.EncodeToPNG());Object.DestroyImmediate(shortIcon);art.rapidShooter=Import("rapid-shooter");
+            art.rapidShooterShop=Import("rapid-shooter-illustration");
             EditorUtility.SetDirty(art);AssetDatabase.SaveAssets();Object.DestroyImmediate(atlas);
             Debug.Log("EXTENDED POWERUP ART READY: supplied healer/ammo art, existing short-shooter tile, framed HUD/drop textures; legacy atlas unchanged.");
         }
         public static void ValidateUi(){Run();ExtendedPowerupUiChecks.Run();}
+        public static void PreviewRapidShooterShop()
+        {
+            var art=AssetDatabase.LoadAssetAtPath<ExtendedPowerupArt>("Assets/BattleCities/Resources/ExtendedPowerupArt.asset");
+            art.rapidShooterShop=Import("rapid-shooter-illustration");
+            EditorUtility.SetDirty(art);AssetDatabase.SaveAssets();
+            ShopCurrencyChecks.CaptureSeasonPass();
+        }
         static Texture2D Frame(string name,Texture2D atlas)
         {
             var icon=Png(Folder+name+".png");const int w=295,h=289;var result=new Texture2D(w,h,TextureFormat.RGBA32,false);

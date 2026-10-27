@@ -141,4 +141,5 @@ Hardware installation, wallet handoff, gameplay and push delivery require device
 The closed-editor signed build supports `-RemoteArtBaseUrl` to move selected UI
 artwork into a separately hosted, verified AssetBundle. See [Remote artwork](RemoteArtwork.md)
 for build instructions, cache behavior, recovery, and the required R2 rollout checks.
-This option remains off by default. Do not publish its APK before hosting its exact bundle.
+Signed Android releases use the production OTA artwork URL by default; `-SelfContained`
+explicitly opts into bundled artwork. Do not publish an OTA APK before hosting its exact bundle.

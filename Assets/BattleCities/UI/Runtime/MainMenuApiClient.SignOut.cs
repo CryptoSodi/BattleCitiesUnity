@@ -31,6 +31,9 @@ namespace BattleCities.UI
                 completed?.Invoke(false,"Could not log out. Check your connection and retry.");yield break;
             }
             yield return ForgetSavedSession();
+#if UNITY_ANDROID && !UNITY_EDITOR
+            if(!RuntimePlatformInfo.IsPsg1){var walletDisconnect=SeekerGameWallet.DisconnectQuietly();while(!walletDisconnect.IsCompleted)yield return null;}
+#endif
             CurrentGuestId=null;currentGuestName=null;
             IsAuthenticated=false;IsWalletAuthenticated=false;IsLocalGuest=false;LastPlayer=null;LastRankings=null;LastRound=null;
             foreach(var key in new[]{"battlecities.guestId","battlecities.guestName","battlecities.playerName"})PlayerPrefs.DeleteKey(key);

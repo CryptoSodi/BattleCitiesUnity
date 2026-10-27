@@ -16,6 +16,7 @@ MonoBehaviour:
   healthHealer: {fileID: 7661465024636924040, guid: 120762b7532d88b47832dfb7be4c6eb4, type: 3}
   rapidShooter: {fileID: -2017313998911649225, guid: bbb7bc9eb8a7cd74c8e3bf2985c3f3c7, type: 3}
   rapidShooterLong: {fileID: -465039035211518245, guid: d6e175a8e902b1a439c86aa7cae5484e, type: 3}
+  rapidShooterShop: {fileID: 272540706416820201, guid: 1b1911936c2398f4d916554f825cdf6c, type: 3}
   maxHealerFrame: {fileID: 2800000, guid: ff81d1c2da967344dbc3b5d300ae6570, type: 3}
   healthHealerFrame: {fileID: 2800000, guid: e9a98d9e290f56949994b45846b435fe, type: 3}
   rapidShooterLongFrame: {fileID: 2800000, guid: 13ee3c8de61622241a520dc5a0fbdca3, type: 3}

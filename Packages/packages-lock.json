@@ -1,5 +1,15 @@
 {
   "dependencies": {
+    "com.community.seekerconnect.unity": {
+      "version": "https://github.com/CryptoSodi/solana-seeker-connect-unity.git?path=Packages/com.community.seekerconnect.unity#2af326d4855407537b95f217aa0a4c1bfc89176b",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.modules.androidjni": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0"
+      },
+      "hash": "2af326d4855407537b95f217aa0a4c1bfc89176b"
+    },
     "com.playsolana.psdk": {
       "version": "https://github.com/playsolana/PlaySolana.Unity-SDK.git",
       "depth": 0,

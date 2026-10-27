@@ -12,7 +12,7 @@ namespace BattleCities.UI
         public string origin, cookie, wallet;
         public long expiresAt;
         internal bool IsValid(string expectedOrigin) => origin == expectedOrigin
-            && origin == MainMenuApiClient.LiveApiBaseUrl
+            && origin == MainMenuApiClient.DefaultApiBaseUrl
             && expiresAt > DateTimeOffset.UtcNow.ToUnixTimeSeconds()
             && Regex.IsMatch(cookie ?? "", @"\Abattlecity_session=sess-[a-zA-Z0-9-]{1,200}\z")
             && Regex.IsMatch(wallet ?? "", @"\A[1-9A-HJ-NP-Za-km-z]{32,44}\z");

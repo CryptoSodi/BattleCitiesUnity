@@ -32,6 +32,11 @@ namespace BattleCities.Editor
             Check(RankingPageData.Parse(response,period).CurrentPlayer==null,"unranked current player is not assigned a position");
             var season=JObject.Parse("{\"rows\":[],\"me\":{\"rank\":7,\"totalPoints\":3000,\"matches\":2},\"currentPlayer\":{\"rank\":24}}");
             Check(RankingPageData.Parse(season,new RankingPeriod{Id="s1",Label="SEASON"}).CurrentPlayer.rank==7,"season card uses me, not cycle rank");
+            var mismatch=JObject.Parse("{\"rows\":[{\"rank\":3,\"playerId\":\"ply-current\",\"displayName\":\"CURRENT\",\"totalPoints\":100,\"matches\":2}],\"currentPlayer\":{\"rank\":2,\"playerId\":\"ply-current\",\"totalPoints\":90}}");
+            var consistent=RankingPageData.Parse(mismatch,period);
+            Check(consistent.MyRank==3&&consistent.CurrentPlayer.rank==3&&consistent.CurrentPlayer.totalPoints==100,"listed player row is authoritative for personal rank and score");
+            mismatch["currentPlayer"]["playerId"]="ply-someone-else";
+            Check(RankingPageData.Parse(mismatch,period).MyRank==2,"never identify the current player by display name or score");
             RankingPreviewCapture.Run();
             var menu=UnityEngine.Object.FindFirstObjectByType<MainMenuScene>();
             var events=UnityEngine.Object.FindAnyObjectByType<EventSystem>();
@@ -63,6 +68,16 @@ namespace BattleCities.Editor
             page.Present(new RankingPageData{Cycle=true,PeriodId="cycle",PeriodLabel="CURRENT CYCLE"});
             Check(page.Root.Find("Standings/Empty standings").gameObject.activeSelf&&!page.Root.Find("Standings/Your rank card").gameObject.activeSelf,"valid empty response clears rows and personal card");
             page.Present(board);scroll.verticalNormalizedPosition=1;Canvas.ForceUpdateCanvases();
+            var third=board.Rows[2];
+            var stale=new MainMenuApiClient.RankingRow{playerId=third.playerId,rank=2,totalPoints=1};
+            var fixedBoard=new RankingPageData{Cycle=true,PeriodId="cycle",PeriodLabel="CURRENT CYCLE",MyRank=2,CurrentPlayer=stale,EndsAt=board.EndsAt,PayoutsEnabled=true};fixedBoard.Rows.AddRange(board.Rows);
+            page.Present(fixedBoard);
+            var pinned=page.Root.Find("Standings/Your rank card").GetComponent<RankingRowCard>();
+            Check(pinned.Data.rank==3&&page.Root.Find("Status/Rank value").GetComponent<TMP_Text>().text=="YOUR RANK #3","page footer and pinned card use the listed third position");
+            Check(pinned.GetComponent<Image>().sprite==art.bronzeRow&&pinned.transform.Find("Rank badge").GetComponent<Image>().sprite==art.bronzeLaurel,"your rank three uses the same bronze row and medal as the list");
+            Check(page.Root.Find("Status/Rank value").GetComponent<TMP_Text>().textWrappingMode==TextWrappingModes.NoWrap,"your rank footer stays on one line");
+            typeof(MainMenuScene).GetMethod("OnApiRoundLoaded",Private).Invoke(menu,new object[]{new MainMenuApiClient.RoundSnapshot{rows=board.Rows.ToArray(),currentPlayer=stale,intervalMinutes=30,endsAt=board.EndsAt?.ToString("o")}});
+            Check(yours.Data.rank==3&&yours.GetComponent<Image>().sprite==art.bronzeRow&&yours.transform.Find("Rank badge").GetComponent<Image>().sprite==art.bronzeLaurel,"home live panel reconciles the same rank and bronze styling");
             Capture(menu,MainMenuPlatform.AndroidLandscape,1688,780,"ranking-page-seeker.png");
             Capture(menu,MainMenuPlatform.Psg1,1240,1080,"ranking-page-psg1.png");
             Debug.Log("RANKING CARD CHECKS PASSED: "+checks+". Sample previews: Builds/RankingPreviews");

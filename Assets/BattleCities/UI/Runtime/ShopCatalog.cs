@@ -1,6 +1,6 @@
 namespace BattleCities.UI
 {
-    public enum ShopCurrency { Skr,Solana,Swap }
+    public enum ShopCurrency { Skr,Solana,Swap,Play }
     public enum ShopCategory { All,Fuel,Power,Packs,SeasonPass }
 
     public sealed class ShopProduct
@@ -33,8 +33,8 @@ namespace BattleCities.UI
             new ShopProduct("season-pass","SEASON PASS",0,0m,ShopCategory.SeasonPass,"CURRENT SEASON"),
             new ShopProduct("max-healer","MAX HEALER",450,.02m,ShopCategory.Power,"FULL HEALTH",inventory:"max-healer"),
             new ShopProduct("health-healer","+2 HEALTH HEALER",450,.01m,ShopCategory.Power,"+2 HEALTH",inventory:"health-healer"),
-            new ShopProduct("rapid-shooter","RAPID SHOOTER",450,.01m,ShopCategory.Power,"4X FIRE RATE - 10 SEC",inventory:"rapid-shooter"),
-            new ShopProduct("rapid-shooter-long","RAPID SHOOTER 60S",900,.02m,ShopCategory.Power,"4X FIRE RATE - 60 SEC",inventory:"rapid-shooter-long")
+            new ShopProduct("rapid-shooter","RAPID SHOOTER",450,.01m,ShopCategory.Power,"4X FIRE RATE • 10 SEC",inventory:"rapid-shooter"),
+            new ShopProduct("rapid-shooter-long","RAPID SHOOTER 60S",900,.02m,ShopCategory.Power,"4X FIRE RATE • 60 SEC",inventory:"rapid-shooter-long")
         };
         public static readonly string[] InventoryIds={"shield","base-defence","freeze","speed","upgrade","zoom-out","wipeout","extra-life","max-healer","health-healer","rapid-shooter","rapid-shooter-long"};
         public static string PowerupType(string id)=>id=="base-defence"?"defence":id=="zoom-out"?"zoomout":id=="extra-life"?"life":id=="max-healer"?"healmax":id=="health-healer"?"heal2":id=="rapid-shooter"?"rapid":id=="rapid-shooter-long"?"rapidlong":id;

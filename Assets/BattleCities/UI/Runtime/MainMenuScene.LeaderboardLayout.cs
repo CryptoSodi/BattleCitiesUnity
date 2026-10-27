@@ -5,12 +5,13 @@ namespace BattleCities.UI
 {
     public sealed partial class MainMenuScene
     {
-        Image roundProgressTrack, roundProgressFill;
+        Image roundProgressTrack, roundProgressFill, roundStatusPanel;
 
         void LayoutRoundProgress()
         {
             var panel = leaderboard.Find("Round status") as RectTransform;
             if (!panel) return;
+            roundStatusPanel = panel.GetComponent<Image>();
             var timer = panel.Find("Label") as RectTransform;
             if (timer) HudBounds(timer, .22f, .27f, .95f, .62f);
             roundProgressTrack = EnsurePanelImage(panel, "Cycle Progress");
@@ -35,6 +36,11 @@ namespace BattleCities.UI
 
         void UpdateRoundProgress()
         {
+            if (roundStatusPanel && roundStatusPanel.sprite)
+            {
+                roundStatusPanel.type = Image.Type.Sliced;
+                TvTitleHeaderLayout.FitSkin(roundStatusPanel, roundStatusPanel.rectTransform.rect.height);
+            }
             if (!roundProgressTrack || !roundProgressFill) return;
             FitProgressCorners(roundProgressTrack);
             roundProgressTrack.gameObject.SetActive(hasRoundEnd);

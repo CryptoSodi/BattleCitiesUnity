@@ -18,6 +18,7 @@ namespace BattleCities.UI
             string mode = PlayerPrefs.GetString("battlecities.loginMode");
             if (mode == "signedout" || mode == "guest") { completed?.Invoke(false); yield break; }
             IsRestoringSession = true;
+            purchaseWallet = null;
             try
             {
                 NotifyStatus("RESTORING SESSION", "Signing you back in...");
@@ -71,6 +72,14 @@ namespace BattleCities.UI
                     NotifyStatus("SESSION RESTORE UNAVAILABLE", "Could not load your player. Check your connection and try again.");
                     completed?.Invoke(false); yield break;
                 }
+#if UNITY_ANDROID && !UNITY_EDITOR
+                if (!RuntimePlatformInfo.IsPsg1) {
+                    var walletRestore = SeekerGameWallet.RestoreQuietly(player.walletAddress);
+                    while (!walletRestore.IsCompleted) yield return null;
+                    if (walletRestore.Result) purchaseWallet = player.walletAddress;
+                    Debug.Log("[BattleCitiesWallet] restored purchase authorization=" + walletRestore.Result);
+                }
+#endif
                 IsAuthenticated = true; IsWalletAuthenticated = true; IsLocalGuest = false;
                 PlayerPrefs.SetString("battlecities.loginMode", "wallet"); PlayerPrefs.Save();
                 NotifyStatus("SIGNED IN", ShortWallet(player.walletAddress));

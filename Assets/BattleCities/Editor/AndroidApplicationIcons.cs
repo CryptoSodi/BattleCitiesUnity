@@ -19,7 +19,8 @@ namespace BattleCities.Editor
         [MenuItem("Battle Cities/Android/Configure Official Application Icons")]
         public static void Configure()
         {
-            if (PlayerSettings.GetApplicationIdentifier(NamedBuildTarget.Android) != "sol.battle.cities")
+            bool devnet = AutomationBuild.IsAndroidDevnetProfile;
+            if (PlayerSettings.GetApplicationIdentifier(NamedBuildTarget.Android) != (devnet ? "sol.battle.cities.devnet" : "sol.battle.cities"))
                 throw new BuildFailedException("Expected sol.battle.cities; refusing to change the package ID.");
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
             foreach (string file in Directory.GetFiles(Root, "*.png"))
@@ -34,7 +35,7 @@ namespace BattleCities.Editor
                 importer.maxTextureSize = 2048;
                 importer.SaveAndReimport();
             }
-            PlayerSettings.productName = "Battle Cities";
+            PlayerSettings.productName = devnet ? "Battle Cities Devnet" : "Battle Cities";
 #pragma warning disable CS0618
             PlayerSettings.SetIconsForTargetGroup(BuildTargetGroup.Unknown, new[] { Load("default-1024.png") });
 #pragma warning restore CS0618
@@ -83,9 +84,10 @@ namespace BattleCities.Editor
                 if (icons.Length == 0 || icons.Any(icon => icon.GetTextures().Length != layers || icon.GetTextures().Any(texture => !IsOfficial(texture))))
                     throw new BuildFailedException("Incomplete official Android icons: " + kind + ". Run Configure Official Application Icons.");
             }
-            if (PlayerSettings.GetApplicationIdentifier(NamedBuildTarget.Android) != "sol.battle.cities")
+            bool devnet = AutomationBuild.IsAndroidDevnetProfile;
+            if (PlayerSettings.GetApplicationIdentifier(NamedBuildTarget.Android) != (devnet ? "sol.battle.cities.devnet" : "sol.battle.cities"))
                 throw new BuildFailedException("Android package ID must remain sol.battle.cities.");
-            if (PlayerSettings.productName != "Battle Cities")
+            if (PlayerSettings.productName != (devnet ? "Battle Cities Devnet" : "Battle Cities"))
                 throw new BuildFailedException("Android release display name must be Battle Cities.");
         }
 

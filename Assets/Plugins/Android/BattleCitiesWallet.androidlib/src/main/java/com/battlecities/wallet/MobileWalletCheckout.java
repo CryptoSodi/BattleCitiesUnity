@@ -19,15 +19,20 @@ import org.json.JSONObject;
 public final class MobileWalletCheckout {
     public interface Callback { void onComplete(String json); }
     public static Operation sign(Activity activity,String transaction,String wallet,String expiry,boolean psg1,String attempt,Callback callback) {
-        Operation value=new Operation(activity,transaction,wallet,expiry,psg1,attempt,callback);
+        return sign(activity,transaction,wallet,expiry,psg1,attempt,callback,"solana:mainnet");
+    }
+    public static Operation sign(Activity activity,String transaction,String wallet,String expiry,boolean psg1,String attempt,Callback callback,String chain) {
+        if(!"solana:mainnet".equals(chain)&&!"solana:devnet".equals(chain))throw new IllegalArgumentException("Unexpected wallet chain");
+        Operation value=new Operation(activity,transaction,wallet,expiry,psg1,attempt,callback,chain);
         new Thread(value::run,"BattleCities-CheckoutSigning").start();return value;
     }
     public static final class Operation {
-        final Activity activity; final String encoded,wallet,expiry,attempt; final boolean psg1; final Callback callback;
+        final Activity activity; final String encoded,wallet,expiry,attempt,chain; final boolean psg1; final Callback callback;
         final AtomicBoolean done=new AtomicBoolean(); final long deadline=SystemClock.elapsedRealtime()+145000;
         volatile LocalAssociationScenario scenario;
-        Operation(Activity activity,String encoded,String wallet,String expiry,boolean psg1,String attempt,Callback callback) {
+        Operation(Activity activity,String encoded,String wallet,String expiry,boolean psg1,String attempt,Callback callback,String chain) {
             this.activity=activity;this.encoded=encoded;this.wallet=wallet;this.expiry=expiry;this.psg1=psg1;this.attempt=attempt;this.callback=callback;
+            this.chain=chain;
         }
         long remaining() throws Exception {
             long value=deadline-SystemClock.elapsedRealtime();
@@ -45,7 +50,7 @@ public final class MobileWalletCheckout {
                 FutureTask<Void> launch=new FutureTask<>(()->{if(!done.get())activity.startActivityForResult(intent,WalletIdentity.ASSOCIATION_REQUEST);return null;});
                 activity.runOnUiThread(launch);launch.get(Math.min(remaining(),10000),TimeUnit.MILLISECONDS);
                 var client=future.get(Math.min(remaining(),35000),TimeUnit.MILLISECONDS);
-                var auth=client.authorize(WalletIdentity.URI,WalletIdentity.ICON,WalletIdentity.NAME,"solana:mainnet",null,null,null,null)
+                var auth=client.authorize(WalletIdentity.URI,WalletIdentity.ICON,WalletIdentity.NAME,chain,null,null,null,null)
                     .get(Math.min(remaining(),120000),TimeUnit.MILLISECONDS);
                 boolean matched=false;
                 for(var account:auth.accounts)if(account.publicKey.length==32&&MobileWalletLogin.encodeBase58(account.publicKey).equals(wallet))matched=true;

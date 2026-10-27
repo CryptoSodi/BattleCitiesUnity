@@ -81,7 +81,7 @@ namespace BattleCities.UI
             {if(owner==Owner&&code>=200&&code<300&&(bool?)body?["ok"]==true&&(string)body["walletAddress"]==Wallet)walletBalances=body;});
             if(owner==Owner)
             {
-                if(!currencyChosen&&currency==ShopCurrency.Skr&&!HasAvailablePurchases(ShopCurrency.Skr)&&HasAvailablePurchases(ShopCurrency.Solana))
+                if(!currencyChosen&&currency!=ShopCurrency.Solana&&!HasAvailablePurchases(currency)&&HasAvailablePurchases(ShopCurrency.Solana))
                     SetCurrency(ShopCurrency.Solana,false);
                 RefreshAccount();
             }
@@ -107,9 +107,9 @@ namespace BattleCities.UI
             if(liveCatalog==null)return catalogError==null?"LOADING":"UNAVAILABLE";
             if(id=="season-pass"&&liveCatalog.Owned)return "OWNED";
             if(!liveCatalog.Available(id,currency))return "UNAVAILABLE";
-            return liveCatalog.Price(id,currency)+(currency==ShopCurrency.Solana?" SOL":" SKR");
+            return DisplayPrice(liveCatalog.Price(id,currency),currency)+" "+PaymentTicker;
         }
-        string SeasonCaption()=>liveCatalog==null?"CURRENT SEASON":(liveCatalog.SeasonName??"CURRENT SEASON").ToUpperInvariant()+
+        string SeasonCaption()=>liveCatalog==null?"CURRENT SEASON":(liveCatalog.SeasonName??"CURRENT SEASON").Trim().ToUpperInvariant()+
             (liveCatalog.Owned?" • OWNED":" • FULL SEASON");
         void InspectCheckout(int index)
         {
@@ -125,8 +125,8 @@ namespace BattleCities.UI
             if(product.Category==ShopCategory.SeasonPass&&liveCatalog.Owned){ShowNotice("SEASON PASS OWNED",description);return;}
             if(!liveCatalog.Available(product.Id,currency))
             {
-                string reason=currency==ShopCurrency.Skr&&liveCatalog.Available(product.Id,ShopCurrency.Solana)
-                    ?"SKR purchases are unavailable for this item. Choose SOLANA to buy it.":"This purchase is currently unavailable.";
+                string reason=currency!=ShopCurrency.Solana&&liveCatalog.Available(product.Id,ShopCurrency.Solana)
+                    ?PaymentTicker+" purchases are unavailable for this item. Choose SOLANA to buy it.":"This purchase is currently unavailable.";
                 ShowNotice(product.Title,description+"\n\n"+reason);return;
             }
             ShowNotice(product.Title,description+"\n\n"+LivePrice(product.Id));
@@ -161,7 +161,7 @@ namespace BattleCities.UI
             string owner=Owner;int revision=checkoutRevision;
             JObject result=null;string error=null;
             var product=ShopCatalog.Products[checkoutIndex];
-            var payload=new JObject{{"itemId",product.Id},{"currency",currency==ShopCurrency.Solana?"sol":"skr"},{"walletAddress",Wallet}};
+            var payload=new JObject{{"itemId",product.Id},{"currency",PaymentCode},{"walletAddress",Wallet}};
             if(product.Category==ShopCategory.SeasonPass)payload["seasonId"]=liveCatalog.SeasonId;
             noticeBody.text="Preparing the live price and wallet transaction...";
             yield return api.Request("POST","/api/economy/purchase/quote",payload,(code,body,problem)=>
@@ -171,19 +171,20 @@ namespace BattleCities.UI
             string price=null;
             try
             {
-                string expected=currency==ShopCurrency.Solana?"sol":"skr";
-                price=ShopLiveCatalog.FormatAtomic((string)result?["amountAtomic"],currency==ShopCurrency.Solana?9:liveCatalog.SkrDecimals);
+                string expected=PaymentCode;
+                price=ShopLiveCatalog.FormatAtomic((string)result?["amountAtomic"],currency==ShopCurrency.Solana?9:currency==ShopCurrency.Play?liveCatalog.PlayDecimals:liveCatalog.SkrDecimals);
                 var bytes=Convert.FromBase64String((string)result?["transaction"]??"");
                 valid=bytes.Length>65&&bytes.Length<=1232&&bytes[0]==1&&(string)result?["currency"]==expected
                     &&(string)result?["network"]==MainMenuApiClient.WalletNetwork&&!string.IsNullOrEmpty((string)result?["quoteToken"])
                     &&QuoteIsCurrent(result)&&(product.Category!=ShopCategory.SeasonPass||(string)result["seasonId"]==liveCatalog.SeasonId);
+                if(currency==ShopCurrency.Play)valid&=(string)result?["tokenMint"]=="PLAYs3GSSadH2q2JLS7djp7yzeT75NK78XgrE5YLrfq";
             }
             catch { }
             if(!valid){noticeBody.text=error??"The payment quote is unavailable or expired. Refresh the Shop and try again.";FinishCheckout();noticeConfirm.gameObject.SetActive(false);LinkNoticeButtons();yield break;}
             checkoutQuote=result;FinishCheckout();
-            noticeBody.text=(product.Category==ShopCategory.SeasonPass?PassDescription():product.Reward)+"\n\n"+price+" "+(currency==ShopCurrency.Solana?"SOL":"SKR")+
+            noticeBody.text=(product.Category==ShopCategory.SeasonPass?PassDescription():product.Reward)+"\n\n"+price+" "+PaymentTicker+
                 " + network fees\nApprove this exact price in your wallet.";
-            ConfigureNoticeAction("APPROVE "+price+" "+(currency==ShopCurrency.Solana?"SOL":"SKR"));
+            ConfigureNoticeAction("APPROVE "+price+" "+PaymentTicker);
         }
         static bool QuoteIsCurrent(JObject quote)=>DateTimeOffset.TryParse(ShopLiveCatalog.Text(quote?["expiresAt"]),CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal,out var expires)
             &&expires> DateTimeOffset.UtcNow;

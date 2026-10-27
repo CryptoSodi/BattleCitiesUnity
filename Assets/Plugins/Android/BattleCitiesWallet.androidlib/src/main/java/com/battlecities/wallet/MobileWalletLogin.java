@@ -119,7 +119,7 @@ public final class MobileWalletLogin {
                 MobileWalletAdapterClient client = connected.get(Math.min(remaining(), 35000), TimeUnit.MILLISECONDS);
                 stage("authorize");
                 var authorization = client.authorize(WalletIdentity.URI, WalletIdentity.ICON,
-                    WalletIdentity.NAME, "solana:mainnet", null, null, null, null)
+                    WalletIdentity.NAME, WalletIdentity.chainForApi(apiBaseUrl), null, null, null, null)
                     .get(Math.min(remaining(), 120000), TimeUnit.MILLISECONDS);
                 if (authorization.accounts.length == 0 || authorization.accounts[0].publicKey.length != 32)
                     throw new LoginException("The wallet did not return a Solana account.");

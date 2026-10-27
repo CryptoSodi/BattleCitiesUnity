@@ -22,10 +22,11 @@ namespace BattleCities.UI
             data=row;yours=current;theme=skin;
             if(!initialized)Build();
             artwork=Resources.Load<RankingCardArt>("RankingCardArt");
-            var sprite=artwork?artwork.Row(row.rank,index,current):null;
+            int visualIndex=row.rank>0?row.rank-1:index;
+            var sprite=artwork?artwork.Row(row.rank,visualIndex,false):null;
             background.sprite=sprite?sprite:theme.Rounded;background.type=Image.Type.Sliced;background.raycastTarget=GetComponent<Button>();
-            background.color=sprite?Color.white:current?new Color32(4,72,164,255):row.rank==1?new Color32(255,221,99,255):row.rank==2?new Color32(226,233,240,255):row.rank==3?new Color32(255,179,112,255):index%2==0?new Color32(203,233,255,255):new Color32(255,246,224,255);
-            badge.sprite=!current&&artwork?artwork.Medal(row.rank):null;
+            background.color=sprite?Color.white:row.rank==1?new Color32(255,221,99,255):row.rank==2?new Color32(226,233,240,255):row.rank==3?new Color32(255,179,112,255):visualIndex%2==0?new Color32(203,233,255,255):new Color32(255,246,224,255);
+            badge.sprite=artwork?artwork.Medal(row.rank):null;
             bool medal=badge.sprite;badge.sprite=medal?badge.sprite:theme.Rounded;
             badge.type=medal?Image.Type.Simple:Image.Type.Sliced;badge.preserveAspect=medal;
             badge.color=medal?Color.white:new Color32(185,220,243,255);
@@ -34,8 +35,8 @@ namespace BattleCities.UI
             nameLabel.text=current?"YOU":string.IsNullOrWhiteSpace(row.displayName)?"PLAYER":row.displayName;
             score.text=row.pointsKnown?row.totalPoints.ToString("N0",CultureInfo.InvariantCulture):"—";
             matches.text=row.matchesKnown?row.matches.ToString("N0",CultureInfo.InvariantCulture):"—";
-            foreach(var text in new[]{nameLabel,score,matches}){styles.Apply(text,ArcadeTextTreatment.PrizeAmount);if(current)text.color=Color.white;}
-            detail.text="YOUR RANK";styles.Apply(detail,ArcadeTextTreatment.PrizeAmount);detail.color=new Color32(0,222,255,255);detail.gameObject.SetActive(current);
+            foreach(var text in new[]{nameLabel,score,matches})styles.Apply(text,ArcadeTextTreatment.PrizeAmount);
+            detail.text="YOUR RANK";styles.Apply(detail,ArcadeTextTreatment.PrizeAmount);detail.gameObject.SetActive(current);
             var results=RemoteGameArt.Load<BattleResultsArt>("BattleResultsArt");
             int hash=0;string key=row.playerId??row.displayName??"player";foreach(char ch in key)hash=unchecked(hash*31+ch);
             var portraits=results?results.portraits:null;

@@ -45,7 +45,7 @@ namespace BattleCities.UI
         public bool IsLoading=>loading;
         public string LoadError=>error;
         public RankingPageData Data=>snapshot;
-        public void Present(RankingPageData value){snapshot=value;loading=false;Render();}
+        public void Present(RankingPageData value){if(value?.CurrentPlayer!=null){value.CurrentPlayer=RankingPageData.ResolveCurrentPlayer(value.Rows,value.CurrentPlayer);value.MyRank=value.CurrentPlayer?.rank;}snapshot=value;loading=false;Render();}
 
         public void Configure(MainMenuScene owner,MenuTheme skin,MainMenuApiClient client,RectTransform frame)
         {
@@ -163,7 +163,7 @@ namespace BattleCities.UI
         void RefreshFooter()
         {
             if(!rankValue)return;
-            rankValue.text=snapshot==null?"—":snapshot.MyRank is int rank?"#"+rank.ToString(CultureInfo.InvariantCulture):"UNRANKED";
+            rankValue.text="YOUR RANK "+(snapshot==null?"—":snapshot.MyRank is int rank?"#"+rank.ToString(CultureInfo.InvariantCulture):"UNRANKED");
             if(selectedPeriod.IsAllTime){countdown.text="ALL TIME • ALL RECORDED MATCHES";return;}
             string rule=selectedPeriod.IsCycle?"TOP 10 EVERY "+(snapshot?.IntervalMinutes??30)+" MINUTES":"MONTHLY SEASON PAYOUT";
             string status;

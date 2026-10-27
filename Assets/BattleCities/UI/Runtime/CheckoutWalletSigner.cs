@@ -2,6 +2,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Scripting;
@@ -16,6 +18,7 @@ namespace BattleCities.UI
         byte[] message;
         Action<JObject> completed;
         double deadline;
+        CancellationTokenSource cancellation;
         public bool IsPending=>attempt!=null;
 #if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")] static extern void BattleCitiesSignCheckout(string target,string callback,string attempt,string transaction,string wallet,string expiry,string scriptUrl);
@@ -45,17 +48,42 @@ namespace BattleCities.UI
                 BattleCitiesSignCheckout(gameObject.name,nameof(OnWalletSigned),attempt,transaction,wallet,expiry,
                     Application.streamingAssetsPath.TrimEnd('/')+"/BattleCitiesCheckout/wallet.js");
 #elif UNITY_ANDROID && !UNITY_EDITOR
-                callback=new Callback(responses);
-                using(var player=new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
-                using(var activity=player.GetStatic<AndroidJavaObject>("currentActivity"))
-                using(var bridge=new AndroidJavaClass("com.battlecities.wallet.MobileWalletCheckout"))
-                    operation=bridge.CallStatic<AndroidJavaObject>("sign",activity,transaction,wallet,expiry,RuntimePlatformInfo.IsPsg1,attempt,callback);
+                cancellation=new CancellationTokenSource();
+                _=SignAndroid(transaction,bytes,wallet,expiry,attempt,cancellation.Token);
 #else
                 Finish(new JObject{{"ok",false},{"error","Wallet checkout runs in the web build or on an Android device."}});
 #endif
             }
             catch {Finish(new JObject{{"ok",false},{"error","Could not open wallet checkout. Refresh the price and try again."}});}
         }
+#if UNITY_ANDROID && !UNITY_EDITOR
+        async Task SignAndroid(string transaction,byte[] bytes,string wallet,string expiry,string attemptId,CancellationToken token)
+        {
+            try
+            {
+                if(!RuntimePlatformInfo.IsPsg1 && await SeekerGameWallet.Client.IsAvailable(token))
+                {
+                    var signed=await SeekerGameWallet.SignQuotedTransaction(bytes,wallet,token,
+                        DateTimeOffset.Parse(expiry,CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal));
+                    if(!token.IsCancellationRequested) responses.Enqueue(new JObject{{"ok",true},{"attemptId",attemptId},
+                        {"signedTransaction",Convert.ToBase64String(signed)}}.ToString());
+                    return;
+                }
+                token.ThrowIfCancellationRequested();
+                callback=new Callback(responses);
+                using(var player=new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+                using(var activity=player.GetStatic<AndroidJavaObject>("currentActivity"))
+                using(var bridge=new AndroidJavaClass("com.battlecities.wallet.MobileWalletCheckout"))
+                    operation=bridge.CallStatic<AndroidJavaObject>("sign",activity,transaction,wallet,expiry,RuntimePlatformInfo.IsPsg1,attemptId,callback,MainMenuApiClient.WalletChain);
+            }
+            catch(OperationCanceledException) { }
+            catch(Exception)
+            {
+                if(!token.IsCancellationRequested) responses.Enqueue(new JObject{{"ok",false},{"attemptId",attemptId},
+                    {"error","Wallet signing did not complete. Check the selected wallet and request a fresh price before retrying."}}.ToString());
+            }
+        }
+#endif
         [Preserve] public void OnWalletSigned(string json){responses.Enqueue(json);}
         void Update()
         {
@@ -84,6 +112,7 @@ namespace BattleCities.UI
         void Finish(JObject value){var callbackAction=completed;Cancel();callbackAction?.Invoke(value);}
         public void Cancel()
         {
+            cancellation?.Cancel();cancellation?.Dispose();cancellation=null;
 #if UNITY_WEBGL && !UNITY_EDITOR
             if(attempt!=null)BattleCitiesCancelCheckout(attempt);
 #elif UNITY_ANDROID && !UNITY_EDITOR

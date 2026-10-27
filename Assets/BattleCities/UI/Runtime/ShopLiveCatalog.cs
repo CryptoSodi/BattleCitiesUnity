@@ -18,6 +18,8 @@ namespace BattleCities.UI
         public bool PassAvailable=>(bool?)Pass?["enabled"]==true&&(bool?)Pass?["purchaseAvailable"]==true&&!Owned;
         public int SkrDecimals {get;private set;}
         public bool SkrConfigured {get;private set;}
+        public int PlayDecimals {get;private set;}
+        public bool PlayConfigured {get;private set;}
         public static ShopLiveCatalog Parse(JObject body)
         {
             if(!(body?["items"] is JArray rows)||!(body["seasonPass"] is JObject pass)
@@ -27,17 +29,22 @@ namespace BattleCities.UI
             var result=new ShopLiveCatalog{Pass=pass,SkrDecimals=(int?)token?["decimals"]??0,
                 SkrConfigured=token!=null};
             if(result.SkrDecimals<0||result.SkrDecimals>9)throw new FormatException("Invalid token precision.");
+            var play=(body["currency"] as JObject)?["play"] as JObject;
+            result.PlayConfigured=play!=null;result.PlayDecimals=(int?)play?["decimals"]??0;
+            if(result.PlayConfigured&&((string)play["mint"]!="PLAYs3GSSadH2q2JLS7djp7yzeT75NK78XgrE5YLrfq"||result.PlayDecimals!=6))
+                throw new FormatException("Invalid PLAY configuration.");
             foreach(var row in rows)if(row is JObject item&&!string.IsNullOrEmpty(Text(item["id"])))result.items[Text(item["id"])]=item;
             return result;
         }
         public string Price(string id,ShopCurrency currency)
         {
-            if(currency==ShopCurrency.Swap||currency==ShopCurrency.Skr&&!SkrConfigured)return null;
+            if(currency==ShopCurrency.Swap||currency==ShopCurrency.Skr&&!SkrConfigured||currency==ShopCurrency.Play&&!PlayConfigured)return null;
             JToken amount;
-            if(id=="season-pass")amount=Pass?["prices"]?[currency==ShopCurrency.Solana?"sol":"skr"];
-            else amount=items.TryGetValue(id,out var item)?item[currency==ShopCurrency.Solana?"solPrice":"skrPrice"]:null;
+            string code=currency==ShopCurrency.Solana?"sol":currency==ShopCurrency.Play?"play":"skr";
+            if(id=="season-pass")amount=Pass?["prices"]?[code];
+            else amount=items.TryGetValue(id,out var item)?item[code+"Price"]:null;
             string text=Text(amount);
-            return ValidPrice(text,currency==ShopCurrency.Solana?9:SkrDecimals)?text:null;
+            return ValidPrice(text,currency==ShopCurrency.Solana?9:currency==ShopCurrency.Play?PlayDecimals:SkrDecimals)?text:null;
         }
         public bool Available(string id,ShopCurrency currency)=>Price(id,currency)!=null&&(id!="season-pass"||PassAvailable);
         public static bool ValidPrice(string value,int decimals)

@@ -20,6 +20,12 @@ namespace BattleCities.UI.Editor
         [MenuItem("Battle Cities/Notifications/Validate Android Firebase configuration")]
         public static void Generate()
         {
+            if (BattleCities.Editor.AutomationBuild.IsAndroidDevnetProfile) {
+                string devnetOutput = "Assets/Plugins/Android/BattleCitiesNotifications.androidlib/src/main/res/values/firebase-config.xml";
+                File.WriteAllText(devnetOutput, "<resources><bool name=\"firebase_messaging_auto_init_enabled\">false</bool><bool name=\"firebase_analytics_collection_enabled\">false</bool></resources>");
+                AssetDatabase.ImportAsset(devnetOutput);
+                return;
+            }
             string path = "Assets/BattleCities/Notifications/google-services.json";
             if (!File.Exists(path)) throw new BuildFailedException("Register this Unity Android package in Firebase and place its google-services.json at " + path);
             var config = JObject.Parse(File.ReadAllText(path));

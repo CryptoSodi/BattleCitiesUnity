@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.community.seekerconnect.unity": "https://github.com/CryptoSodi/solana-seeker-connect-unity.git?path=Packages/com.community.seekerconnect.unity#2af326d4855407537b95f217aa0a4c1bfc89176b",
     "com.playsolana.psdk": "https://github.com/playsolana/PlaySolana.Unity-SDK.git",
     "com.unity.ai.assistant": "2.19.0-pre.2",
     "com.unity.ai.navigation": "2.0.14",

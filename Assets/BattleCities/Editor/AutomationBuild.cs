@@ -13,12 +13,14 @@ namespace BattleCities.Editor
     /// <summary>Shared configuration for the live Editor and command-line release builds.</summary>
     public static class AutomationBuild
     {
+        public static bool IsAndroidDevnetProfile => PlayerSettings.GetApplicationIdentifier(NamedBuildTarget.Android) == "sol.battle.cities.devnet"
+            && PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Android).Split(';').Contains("BATTLECITIES_ANDROID_DEVNET");
         [Serializable]
         public sealed class Request
         {
             public string version, target, outputPath, reportPath;
             public int androidVersionCode;
-            public bool buildAppBundle, testNetwork, exportAndroidProject;
+            public bool buildAppBundle, testNetwork, exportAndroidProject, useDebugSigning;
             public string androidApplicationId;
             public string remoteArtBaseUrl;
         }
@@ -67,11 +69,23 @@ namespace BattleCities.Editor
             if (!BuildPipeline.IsBuildTargetSupported(BuildPipeline.GetBuildTargetGroup(target), target))
                 throw new BuildFailedException("Install " + request.target + " build support for this project's Unity version in Unity Hub.");
             PlayerSettings.bundleVersion = request.version;
+            if(request.useDebugSigning && (request.target != "Android" || !request.testNetwork || request.androidApplicationId != "sol.battle.cities.devnet"))
+                throw new BuildFailedException("Debug signing is restricted to the isolated devnet test application.");
             EditorUserBuildSettings.development = false;
             EditorUserBuildSettings.allowDebugging = false;
             EditorUserBuildSettings.connectProfiler = false;
             if (request.target == "Android")
             {
+                const string devnetDefine = "BATTLECITIES_ANDROID_DEVNET";
+                var androidDefines = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Android)
+                    .Split(';').Where(value => !string.IsNullOrWhiteSpace(value) && value != devnetDefine).ToList();
+                if(request.testNetwork) {
+                    if(request.androidApplicationId != "sol.battle.cities.devnet") throw new BuildFailedException("Android devnet builds require the isolated test application ID.");
+                    androidDefines.Add(devnetDefine);
+                    PlayerSettings.productName = "Battle Cities Devnet";
+                }
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Android,string.Join(";",androidDefines));
+                if(request.useDebugSigning) PlayerSettings.Android.useCustomKeystore = false;
                 if (request.androidVersionCode < 1)
                     throw new BuildFailedException("Android version code must be positive.");
                 if (!string.IsNullOrEmpty(request.androidApplicationId))
@@ -127,7 +141,6 @@ namespace BattleCities.Editor
                 // Network selection is runtime hostname-based; remove the obsolete build override.
                 PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.WebGL, string.Join(";", defines));
             }
-            else if (request.testNetwork) throw new BuildFailedException("The test deployment currently supports WebGL only.");
             AssetDatabase.SaveAssets();
         }
 

@@ -38,7 +38,9 @@ namespace BattleCities.UI
             var lineTop=Panel("Divider",eligibility,null);lineTop.GetComponent<UnityEngine.UI.Image>().color=new Color32(6,29,54,65);Fit(lineTop,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-0-0-1-d0ce80",new Rect(0,0,1,.015f)));
             eligibilityText=Label("Label",eligibility,"",ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-02f-1-d9ecfd",new Rect(.02f,.10f,.96f,.80f)),22,ArcadeTextTreatment.PrizeAmount);
 
-            table=Panel("Standings",root,theme.Rounded);table.GetComponent<UnityEngine.UI.Image>().color=new Color32(3,40,79,255);
+            table=Panel("Standings",root,theme.Rounded);
+            var standingsSurface=table.GetComponent<UnityEngine.UI.Image>();standingsSurface.color=new Color32(3,40,79,255);
+            if(standingsSurface.sprite)TvTitleHeaderLayout.FitSkin(standingsSurface,6f,1f);
             tableHeading=Panel("Heading",table,null);
             tableTitle=Label("Period title",tableHeading,ScreenContent.Text("ranking","live-player-rankings-40fcc9","LIVE PLAYER RANKINGS"),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-02f-0-cb9adc",new Rect(.02f,.05f,.96f,.45f)),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
             tableTitle.color=Color.white;
@@ -61,10 +63,11 @@ namespace BattleCities.UI
             emptyDetail.textWrappingMode=TextWrappingModes.Normal;
 
             footer=Panel("Status",root,art.statusPanel);TvStatusFooterLayout.ApplySkin(footer.GetComponent<UnityEngine.UI.Image>(),art.statusPanel);
-            Label("Rank label",footer,ScreenContent.Text("ranking","your-rank-ce6722","YOUR RANK"),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-025f--f725e4",new Rect(.025f,.08f,.15f,.36f)),20,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
-            rankValue=Label("Rank value",footer,"—",ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-025f--616da8",new Rect(.025f,.43f,.15f,.49f)),29,ArcadeTextTreatment.Gold,TextAlignmentOptions.MidlineLeft);
+            var oldRankLabel=footer.Find("Rank label");if(oldRankLabel)oldRankLabel.gameObject.SetActive(false);
+            rankValue=Label("Rank value",footer,"YOUR RANK —",ScreenContent.Rect("ranking","personal-rank-single-line-v2",new Rect(.025f,.10f,.27f,.80f)),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
+            rankValue.textWrappingMode=TextWrappingModes.NoWrap;
             var oldRule=footer.Find("Reward rule");if(oldRule)oldRule.gameObject.SetActive(false);
-            countdown=Label("Countdown",footer,ScreenContent.Text("ranking","top-10-every-30-minutes-892795","TOP 10 EVERY 30 MINUTES • —"),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-18f-1-d5bd13",new Rect(.18f,.10f,.56f,.80f)),25,ArcadeTextTreatment.PrizeAmount);
+            countdown=Label("Countdown",footer,ScreenContent.Text("ranking","top-10-every-30-minutes-892795","TOP 10 EVERY 30 MINUTES • —"),ScreenContent.Rect("ranking","rank-countdown-single-line-v2",new Rect(.30f,.10f,.43f,.80f)),25,ArcadeTextTreatment.PrizeAmount);
             picker=Action("Period picker",footer,TogglePicker);TvStatusFooterLayout.PlaceAction(picker.transform as RectTransform);
             periodCaption=Label("Label",picker.transform,ScreenContent.Text("ranking","current-cycle-965a70","CURRENT CYCLE"),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-05f-0-7f3367",new Rect(.05f,.06f,.78f,.88f)),26,ArcadeTextTreatment.PrizeAmount);periodCaption.color=Color.white;
             Arrow("Up arrow",picker.transform,ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-86f-2-dbd800",new Rect(.86f,.25f,.08f,.50f)),-90);

@@ -22,7 +22,7 @@ namespace BattleCities.UI
         int sessionRevision;
         bool syncBusy, holdSync;
         float nextRefresh, nextSync, nextNavigation;
-        public static bool IsNativeAndroid => Application.platform == RuntimePlatform.Android;
+        public static bool IsNativeAndroid => Application.platform == RuntimePlatform.Android && !MainMenuApiClient.IsTestNetwork;
         public bool Supported { get; private set; }
         public bool Enabled { get; private set; }
         public bool Receiving => Supported && Enabled && permission == "granted" && !string.IsNullOrEmpty(token);

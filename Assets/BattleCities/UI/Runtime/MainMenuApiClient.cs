@@ -18,6 +18,7 @@ namespace BattleCities.UI
         public const string TestApiBaseUrl = "https://test.battlecities.com";
         public static string DefaultApiBaseUrl => IsTestNetwork ? TestApiBaseUrl : LiveApiBaseUrl;
         public static string WalletNetwork => IsTestNetwork ? "devnet" : "mainnet-beta";
+        public static string WalletChain => IsTestNetwork ? "solana:devnet" : "solana:mainnet";
 
         public static bool IsTestNetwork
         {
@@ -25,11 +26,17 @@ namespace BattleCities.UI
             {
 #if UNITY_WEBGL && !UNITY_EDITOR
                 return IsTestWebUrl(Application.absoluteURL);
+#elif UNITY_ANDROID && BATTLECITIES_ANDROID_DEVNET && !UNITY_EDITOR
+                return true;
 #else
                 return false;
 #endif
             }
         }
+#if UNITY_ANDROID && !UNITY_EDITOR
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        static void LogNativeProfile() => Debug.Log("[BattleCitiesNetwork] api=" + DefaultApiBaseUrl + " chain=" + WalletChain + " mockWalletMode=" + SeekerGameWallet.AllowMockWalletCompatibility);
+#endif
 
         // Parse the actual launch URL: query strings, lookalike domains and
         // subdomains must never opt a live deployment into Devnet.
@@ -131,7 +138,7 @@ namespace BattleCities.UI
         {
 #if !UNITY_EDITOR
             // The launch host is authoritative, including after scene changes.
-            // Native players always use the live API.
+            // Native players use the API compiled into their mainnet/devnet profile.
             baseUrl = DefaultApiBaseUrl;
 #endif
         }
@@ -211,7 +218,7 @@ namespace BattleCities.UI
 #elif UNITY_ANDROID && !UNITY_EDITOR
             NotifyStatus("CONNECTING WALLET", RuntimePlatformInfo.IsPsg1
                 ? "Approve sign-in in Jupiter Wallet, then return to Battle Cities."
-                : "Choose your Seeker wallet and approve the sign-in message.");
+                : "Approve the sign-in message in your wallet, then return to Battle Cities.");
             if (!mobileWallet) mobileWallet = gameObject.AddComponent<MobileWalletLogin>();
             mobileWallet.Connect(baseUrl.TrimEnd('/'), RuntimePlatformInfo.IsPsg1, walletAttemptId, OnWalletLoginResult);
 #else
@@ -445,7 +452,7 @@ namespace BattleCities.UI
                 endsAt = endsAt,
                 intervalMinutes = Math.Max(1, (int?)body["rewardIntervalMinutes"] ?? 30),
                 rows = roundRows,
-                currentPlayer = ParseRankingRow(body["currentPlayer"] as JObject)
+                currentPlayer = RankingPageData.ResolveCurrentPlayer(roundRows,ParseRankingRow(body["currentPlayer"] as JObject))
             };
             RoundLoaded?.Invoke(LastRound);
         }
@@ -482,7 +489,7 @@ namespace BattleCities.UI
             {
                 seasonName = (string)season?["name"] ?? "CURRENT SEASON",
                 rows = rows,
-                me = ParseRankingRow(body["me"] as JObject)
+                me = RankingPageData.ResolveCurrentPlayer(rows,ParseRankingRow(body["me"] as JObject))
             };
             RankingsLoaded?.Invoke(LastRankings);
             LeaderboardLoaded?.Invoke(formatted);

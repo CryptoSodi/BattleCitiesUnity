@@ -39,9 +39,10 @@ namespace BattleCities.UI
                 homeRankCards[i].gameObject.SetActive(i<count);
                 if(i<count)homeRankCards[i].Configure(value.rows[i],i,false,theme);
             }
-            bool personal=HasPersonalRank(value.currentPlayer);
+            var current=RankingPageData.ResolveCurrentPlayer(value.rows,value.currentPlayer);
+            bool personal=HasPersonalRank(current);
             homeYourRank.gameObject.SetActive(personal);homeRankSeparator.gameObject.SetActive(personal);
-            if(personal)homeYourRank.Configure(value.currentPlayer,0,true,theme);
+            if(personal)homeYourRank.Configure(current,Mathf.Max(0,current.rank-1),true,theme);
             LayoutHomeRankCards();
         }
         void LayoutHomeRankCards()

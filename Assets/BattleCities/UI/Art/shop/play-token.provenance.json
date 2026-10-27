@@ -1,0 +1,8 @@
+{
+  "source": "User-supplied PLAY coin artwork",
+  "sourceFile": "codex-clipboard-0e69ddf3-be9f-4744-877b-3ba2060f239c.png",
+  "approvedDate": "2026-10-27",
+  "mint": "PLAYs3GSSadH2q2JLS7djp7yzeT75NK78XgrE5YLrfq",
+  "sha256": "b3c852260a92c081d5f491044326053ada7497a402d272e0b0789e901b7945df",
+  "notes": "Replaced artwork in place; Unity sprite GUID and ShopArt references preserved."
+}

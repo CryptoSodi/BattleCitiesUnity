@@ -1,6 +1,8 @@
 [CmdletBinding()]
-param([string]$Version='1.0.0',[ValidateRange(1,2100000000)][int]$VersionCode=1,[string]$ExistingBuildDirectory,[string]$RemoteArtBaseUrl)
+param([string]$Version='1.0.0',[ValidateRange(1,2100000000)][int]$VersionCode=1,[string]$ExistingBuildDirectory,[string]$RemoteArtBaseUrl,[switch]$SelfContained)
 $ErrorActionPreference='Stop'
+if($SelfContained -and $RemoteArtBaseUrl){throw 'Choose either OTA artwork or an explicit self-contained APK.'}
+if(-not $SelfContained -and -not $ExistingBuildDirectory -and -not $RemoteArtBaseUrl){$RemoteArtBaseUrl='https://assets.battlecities.com/android/art'}
 . (Join-Path $PSScriptRoot 'Automation-Functions.ps1')
 $lock=Enter-GameAutomation
 $editor=$null

@@ -56,14 +56,23 @@ namespace BattleCities.UI
             }
             var me=response[period.IsCycle?"currentPlayer":"me"] as JObject;
             int rank=Integer(me?["rank"]);
-            if(rank>0&&(bool?)me?["restricted"]!=true&&(bool?)me?["guest"]!=true){
-                data.MyRank=rank;
+            if(me!=null&&(bool?)me?["restricted"]!=true&&(bool?)me?["guest"]!=true){
                 data.CurrentPlayer=new MainMenuApiClient.RankingRow{rank=rank,playerId=(string)me["playerId"],displayName=(string)me["displayName"],
                     totalPoints=Integer(me["totalPoints"]),matches=Integer(me["matches"]),
                     pointsKnown=me["totalPoints"]!=null&&me["totalPoints"].Type!=JTokenType.Null,
                     matchesKnown=me["matches"]!=null&&me["matches"].Type!=JTokenType.Null};
             }
+            data.CurrentPlayer=ResolveCurrentPlayer(data.Rows,data.CurrentPlayer);
+            data.MyRank=data.CurrentPlayer?.rank;
             return data;
+        }
+
+        public static MainMenuApiClient.RankingRow ResolveCurrentPlayer(IEnumerable<MainMenuApiClient.RankingRow> rows,MainMenuApiClient.RankingRow personal)
+        {
+            if(personal==null||personal.restricted||personal.guest)return null;
+            if(!string.IsNullOrEmpty(personal.playerId)&&rows!=null)
+                foreach(var row in rows)if(row!=null&&row.rank>0&&row.playerId==personal.playerId)return row;
+            return personal.rank>0?personal:null;
         }
 
         public static DateTimeOffset? Date(JToken token)
