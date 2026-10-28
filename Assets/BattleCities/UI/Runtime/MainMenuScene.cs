@@ -870,7 +870,7 @@ namespace BattleCities.UI
                 var count = snapshot?.rows?.Length ?? 0;
                 rankingFooterSubtitle.text = snapshot == null ? "Round status unavailable" :
                     string.Format(CultureInfo.InvariantCulture, "{0}  •  PAYOUTS {1}",
-                        count==10?"TOP 10":count.ToString(CultureInfo.InvariantCulture)+" SCORES", snapshot.payoutsEnabled ? "ACTIVE" : "PAUSED");
+                        count==10?"TOP 10":count.ToString(CultureInfo.InvariantCulture)+(count==1?" SCORE":" SCORES"), snapshot.payoutsEnabled ? "ACTIVE" : "PAUSED");
             }
             UpdateRoundCountdown();
         }

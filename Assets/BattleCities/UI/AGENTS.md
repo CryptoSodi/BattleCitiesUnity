@@ -1,5 +1,7 @@
 # Approved game UI rules
 
+- Sparse home leaderboards use the same row heights as a complete top-ten board. Keep available rows top-aligned, leave unused list space navy, and retain the pinned personal-rank card at the bottom. Never stretch one/few rows to fill the list height; preserve the existing small podium height emphasis.
+
 - The home Player Rankings title plaque sits slightly below the top frame opening (six logical units minimum extra drop). Cycle Standings stays centered and narrower than that opening, with extra horizontal insets of 2% of panel width (at least eight units) on each side, retaining its raised bottom clearance.
 
 - The home navy standings backing spans the full column/list region width while its headings and rows retain their narrower insets. Leave a visible gap below the yellow timer (at least eight logical units, scaling with panel height); adjust only background bounds when changing this padding, not content positions or sizes.

@@ -40,6 +40,15 @@ namespace BattleCities.Editor
             Canvas.ForceUpdateCanvases();
             Capture(camera,target,"home-with-sample-rankings.png",null);
             Capture(camera,target,"player-rankings-populated.png",menu.Content.Find("Leaderboard") as RectTransform);
+            var firstCard=menu.Content.Find("Leaderboard/Scores/Ranking cards/Rank card 1") as RectTransform;
+            float fullBoardRowHeight=firstCard.rect.height;
+            typeof(MainMenuScene).GetMethod("OnApiRoundLoaded",Private).Invoke(menu,new object[]{new MainMenuApiClient.RoundSnapshot{
+                rows=new[]{rows[0]},currentPlayer=rows[0],intervalMinutes=30,payoutsEnabled=false,startsAt=end.AddMinutes(-30).ToString("o"),endsAt=end.ToString("o")}});
+            Canvas.ForceUpdateCanvases();
+            if(Mathf.Abs(firstCard.rect.height-fullBoardRowHeight)>.1f)throw new Exception("A sparse leaderboard must keep its full-board row height.");
+            Capture(camera,target,"player-rankings-single-player.png",menu.Content.Find("Leaderboard") as RectTransform);
+            typeof(MainMenuScene).GetMethod("OnApiRoundLoaded",Private).Invoke(menu,new object[]{new MainMenuApiClient.RoundSnapshot{
+                rows=rows,currentPlayer=current,intervalMinutes=30,payoutsEnabled=true,startsAt=end.AddMinutes(-30).ToString("o"),endsAt=end.ToString("o")}});
             var theme=(MenuTheme)typeof(MainMenuScene).GetField("theme",Private).GetValue(menu);
             var ranking=menu.GetComponent<RankingScreen>()??menu.gameObject.AddComponent<RankingScreen>();
             ranking.Configure(menu,theme,null,menu.Content.Find("Main Display") as RectTransform);

@@ -56,8 +56,10 @@ namespace BattleCities.UI
             float w=homeCardsRoot.rect.width,h=homeCardsRoot.rect.height,pad=4,gap=Mathf.Clamp(h*.0065f,3,6);
             bool personal=homeYourRank.gameObject.activeSelf;
             float youHeight=personal?Mathf.Clamp(h*.10f,40,58):0,reserve=personal?youHeight+14:0;
-            float weights=count;for(int i=0;i<count;i++)if(homeCardData.rows[i].rank<=3)weights+=.12f;
-            float normal=Mathf.Max(20,(h-pad*2-reserve-gap*(count-1))/weights),top=pad;
+            // Size against a complete top ten, even when only a few rows exist.
+            // Otherwise a single podium card stretches over the whole list.
+            const float weights=10+3*.12f;
+            float normal=Mathf.Max(20,(h-pad*2-reserve-gap*9)/weights),top=pad;
             for(int i=0;i<count;i++){
                 float size=normal*(homeCardData.rows[i].rank<=3?1.12f:1);
                 Place((RectTransform)homeRankCards[i].transform,pad,top,w-pad*2,size);homeRankCards[i].Layout();top+=size+gap;
