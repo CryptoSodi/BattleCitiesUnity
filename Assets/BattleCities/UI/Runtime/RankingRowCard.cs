@@ -17,6 +17,7 @@ namespace BattleCities.UI
         bool yours,initialized,hovered,selected;
         public MainMenuApiClient.RankingRow Data=>data;
         public bool IsCurrentPlayer=>yours;
+        public bool WideMatchesColumn {get;set;}
         public void Configure(MainMenuApiClient.RankingRow row,int index,bool current,MenuTheme skin)
         {
             data=row;yours=current;theme=skin;
@@ -71,14 +72,16 @@ namespace BattleCities.UI
             if(!initialized)return;
             var rect=(RectTransform)transform;float w=rect.rect.width,h=rect.rect.height;if(w<=0||h<=0)return;
             float pad=Mathf.Clamp(h*.09f,3,7),rankWidth=w*.12f,face=Mathf.Min(h-pad*2,w*.15f),nameX=NameStart(w);
+            float scoreStart=WideMatchesColumn?.60f:.63f,scoreWidth=WideMatchesColumn?.18f:.22f;
+            float matchesStart=WideMatchesColumn?.79f:.86f,matchesWidth=WideMatchesColumn?.20f:.13f;
             float badgeSize=Mathf.Min(rankWidth,h-pad*2);
             MainMenuScene.Place(badge.rectTransform,pad+(rankWidth-badgeSize)*.5f,(h-badgeSize)*.5f,badgeSize,badgeSize);
             MainMenuScene.Place(rank.rectTransform,pad,pad,rankWidth,h-pad*2);
             MainMenuScene.Place(portrait.rectTransform,w*.145f+(w*.15f-face)*.5f,(h-face)*.5f,face,face);
-            MainMenuScene.Place(nameLabel.rectTransform,nameX,yours?h*.10f:pad,Mathf.Max(12,w*.63f-nameX-7),yours?h*.52f:h-pad*2);
-            MainMenuScene.Place(score.rectTransform,w*.63f,pad,w*.22f,h-pad*2);
-            MainMenuScene.Place(matches.rectTransform,w*.86f,pad,w*.13f,h-pad*2);
-            MainMenuScene.Place(detail.rectTransform,nameX,h*.58f,Mathf.Max(12,w*.63f-nameX-7),h*.30f);
+            MainMenuScene.Place(nameLabel.rectTransform,nameX,yours?h*.10f:pad,Mathf.Max(12,w*scoreStart-nameX-7),yours?h*.52f:h-pad*2);
+            MainMenuScene.Place(score.rectTransform,w*scoreStart,pad,w*scoreWidth,h-pad*2);
+            MainMenuScene.Place(matches.rectTransform,w*matchesStart,pad,w*matchesWidth,h-pad*2);
+            MainMenuScene.Place(detail.rectTransform,nameX,h*.58f,Mathf.Max(12,w*scoreStart-nameX-7),h*.30f);
             float size=Mathf.Clamp(h*.51f,18,30);
             foreach(var text in new[]{nameLabel,score,matches}){text.fontSize=text.fontSizeMax=size;text.fontSizeMin=Mathf.Min(14,size);}
             nameLabel.alignment=detail.alignment=TextAlignmentOptions.MidlineLeft;

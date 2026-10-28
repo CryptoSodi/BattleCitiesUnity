@@ -7,6 +7,12 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 import artifacts,network,playsolana,serve
 
 class Tests(unittest.TestCase):
+    def test_https_uses_launcher_identifier(self):
+        opener=MagicMock()
+        with patch.object(network.urllib.request,'build_opener',return_value=opener):
+            network.urlopen('https://assets.battlecities.com/file')
+        request=opener.open.call_args.args[0]
+        self.assertEqual(request.get_header('User-agent'),'BattleCities-BuildLauncher/1.0')
     def test_portable_web_archive(self):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d)/'site';(root/'Build').mkdir(parents=True)

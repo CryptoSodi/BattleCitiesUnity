@@ -1,7 +1,6 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
-$script:LauncherHome=$PSScriptRoot
-. (Join-Path $PSScriptRoot '../Publishing/Automation-Functions.ps1')
+. (Join-Path $PSScriptRoot 'Project.ps1')
 
 function Get-LauncherSettings {
     $settings=Get-Content (Join-Path $script:LauncherHome 'settings.example.json') -Raw|ConvertFrom-Json
@@ -71,11 +70,13 @@ function Publish-LauncherSource {
 }
 
 function Invoke-LauncherChild([string]$Script,[string[]]$Parameters=@()) {
-    $null=Invoke-GameTool powershell.exe (@('-NoLogo','-NoProfile','-ExecutionPolicy','Bypass','-File',(Join-Path $script:GameRoot $Script))+$Parameters) -Echo
+    $path=if([IO.Path]::IsPathRooted($Script)){$Script}else{Join-Path $script:GameRoot $Script}
+    $null=Invoke-GameTool powershell.exe (@('-NoLogo','-NoProfile','-ExecutionPolicy','Bypass','-File',$path)+$Parameters) -Echo
 }
 
 function Assert-LauncherPrerequisites($Plan,$Settings) {
     Assert-LauncherPlan $Plan
+    Assert-GameBuildDiskSpace $(if($Plan.kind -eq 'android'){'Android'}else{'WebGL'})
     foreach($name in @('unity','git','python')){$null=Get-GameProgram $name}
     $publish=@($Plan.targets|Where-Object {$_ -in @('play','test','magic','github')}).Count -gt 0
     if($publish){$null=Assert-GameGitReady}
@@ -192,7 +193,7 @@ function Invoke-LauncherPlan($Plan,$Settings,[string]$Job,[switch]$DryRun) {
             $manifestPath=Join-Path $build 'RemoteArt/content-manifest.json';$manifest=Get-Content -LiteralPath $manifestPath -Raw|ConvertFrom-Json
             $bundle=Join-Path $build ("RemoteArt/$($manifest.sha256).bundle")
             if((Get-ReleaseSha256 $bundle) -ne $manifest.sha256 -or (Get-Item $bundle).Length -ne $manifest.bytes){throw 'Local OTA bundle checksum/size mismatch.'}
-            Invoke-LauncherChild 'Tools/BuildLauncher/Upload-AndroidArt.ps1' @('-ManifestPath',$manifestPath,'-BucketName',$Settings.assetBucket)
+            Invoke-LauncherChild (Join-Path $script:LauncherHome 'Upload-AndroidArt.ps1') @('-ManifestPath',$manifestPath,'-BucketName',$Settings.assetBucket)
             $null=Invoke-GameTool python @((Join-Path $script:LauncherHome 'artifacts.py'),'verify-ota','--manifest',$manifestPath) -Echo
             $result.completed+=@('ota');Save-LauncherResult $result $Job
             if('github' -in $Plan.targets){

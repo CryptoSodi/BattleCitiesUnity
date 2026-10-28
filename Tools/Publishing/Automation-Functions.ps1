@@ -28,20 +28,43 @@ function Invoke-GameTool([string]$Name, [string[]]$Arguments, [switch]$AllowFail
     $process.StartInfo = $start
     try {
         if (-not $process.Start()) { throw "Could not start $Name." }
-        $stdout = $process.StandardOutput.ReadToEndAsync()
-        $stderr = $process.StandardError.ReadToEndAsync()
+        $outputBuffer = [Text.StringBuilder]::new()
+        $errorBuffer = [Text.StringBuilder]::new()
+        $stdout = $process.StandardOutput.ReadLineAsync()
+        $stderr = $process.StandardError.ReadLineAsync()
+        $stdoutDone = $false
+        $stderrDone = $false
         $timer = [Diagnostics.Stopwatch]::StartNew()
         $nextHeartbeat = 60
-        while (-not $process.WaitForExit(1000)) {
+        while (-not ($stdoutDone -and $stderrDone -and $process.HasExited)) {
+            while (-not $stdoutDone -and $stdout.IsCompleted) {
+                $line = $stdout.GetAwaiter().GetResult()
+                if ($null -eq $line) { $stdoutDone = $true }
+                else {
+                    $null = $outputBuffer.AppendLine($line)
+                    if ($Echo) { Write-Host $line }
+                    $stdout = $process.StandardOutput.ReadLineAsync()
+                }
+            }
+            while (-not $stderrDone -and $stderr.IsCompleted) {
+                $line = $stderr.GetAwaiter().GetResult()
+                if ($null -eq $line) { $stderrDone = $true }
+                else {
+                    $null = $errorBuffer.AppendLine($line)
+                    if ($Echo) { Write-Host $line }
+                    $stderr = $process.StandardError.ReadLineAsync()
+                }
+            }
+            if (-not $process.HasExited) { $null = $process.WaitForExit(50) }
+            elseif (-not ($stdoutDone -and $stderrDone)) { Start-Sleep -Milliseconds 1 }
             if ($timer.Elapsed.TotalSeconds -ge $nextHeartbeat) {
                 Write-Host ("{0} is still running ({1:0} minutes)..." -f $Name, $timer.Elapsed.TotalMinutes)
                 $nextHeartbeat += 60
             }
         }
-        $output = $stdout.GetAwaiter().GetResult()
-        $errors = $stderr.GetAwaiter().GetResult()
+        $output = $outputBuffer.ToString()
+        $errors = $errorBuffer.ToString()
         $code = $process.ExitCode
-        if ($Echo) { if ($output.Trim()) { Write-Host $output.TrimEnd() }; if ($errors.Trim()) { Write-Host $errors.TrimEnd() } }
         if ($code -ne 0 -and -not $AllowFailure) { throw "$Name failed (exit $code).`n$output`n$errors" }
         return [pscustomobject]@{ ExitCode = $code; Output = $output; Errors = $errors }
     } finally { $process.Dispose() }
@@ -131,7 +154,22 @@ function Get-GameEditor {
     return $instances[0]
 }
 
+function Get-GameBuildFreeBytes {
+    $root=[IO.Path]::GetPathRoot($script:GameRoot)
+    return ([IO.DriveInfo]::new($root)).AvailableFreeSpace
+}
+
+function Assert-GameBuildDiskSpace([string]$Target) {
+    $required=if($Target -eq 'Android'){15GB}else{8GB}
+    $available=Get-GameBuildFreeBytes
+    if($available -lt $required){
+        $root=[IO.Path]::GetPathRoot($script:GameRoot)
+        throw ('Not enough disk space on {0}: {1:N2} GiB free; {2:N0} GiB required before a {3} build. Free space from old generated build exports/caches, preserving signed APKs and release records, then retry. Increasing the version code will not fix this.' -f $root,($available/1GB),($required/1GB),$Target)
+    }
+}
+
 function Assert-GameBuildReady([string]$Target) {
+    Assert-GameBuildDiskSpace $Target
     $editor = Get-GameEditor
     if ($editor) {
         $state = Invoke-UnityEditorCommand editor_status

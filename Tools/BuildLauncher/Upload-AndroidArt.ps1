@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param([Parameter(Mandatory=$true)][string]$ManifestPath,[Parameter(Mandatory=$true)][string]$BucketName)
 $ErrorActionPreference='Stop'
-. (Join-Path $PSScriptRoot '../Publishing/Automation-Functions.ps1')
+. (Join-Path $PSScriptRoot 'Project.ps1')
 if($BucketName -ne 'battlecities-game-assets'){throw 'Unexpected artwork bucket'}
 $manifest=Get-Content -LiteralPath $ManifestPath -Raw|ConvertFrom-Json
 if($manifest.sha256 -notmatch '^[a-f0-9]{64}$' -or $manifest.url -ne "https://assets.battlecities.com/android/art/$($manifest.sha256).bundle"){throw 'Unexpected artwork manifest'}

@@ -4,6 +4,7 @@ $ErrorActionPreference='Stop'
 if($SelfContained -and $RemoteArtBaseUrl){throw 'Choose either OTA artwork or an explicit self-contained APK.'}
 if(-not $SelfContained -and -not $ExistingBuildDirectory -and -not $RemoteArtBaseUrl){$RemoteArtBaseUrl='https://assets.battlecities.com/android/art'}
 . (Join-Path $PSScriptRoot 'Automation-Functions.ps1')
+Assert-GameBuildDiskSpace Android
 $lock=Enter-GameAutomation
 $editor=$null
 try {

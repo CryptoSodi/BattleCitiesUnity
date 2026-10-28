@@ -3,6 +3,8 @@
 Double-click **Build-Launcher.bat** in the Unity project root, or **Start.bat** in this folder.
 This is a Windows terminal application. It reuses the project's existing Unity, signing, SSH and GitHub publishing tools.
 
+The launcher folder can also run from another location. Set `projectRoot` in that folder's `settings.local.json` to the Unity repository. Its build outputs and publishing scripts remain in the project; the game is not moved with the launcher. Source files remain version controlled under the project's `Tools/BuildLauncher` folder.
+
 ## Web
 
 1. Choose Web.
@@ -47,6 +49,8 @@ The Python HTTPS helpers try normal DNS first and use Cloudflare DNS-over-HTTPS 
 ## Logs and failures
 
 Runs live in ignored `Builds/Launcher/<timestamp-id>/`: `plan.json`, `launcher.log`, and `result.json` record the artifact, completed steps and URLs. A failure stops subsequent destinations and preserves the completed steps and build. No force-pushes or automatic release overwrites occur. Inspect the receipt before retrying a partially published job. Automatic resume is intentionally not implemented: a new run is a new build; use the recorded publishing scripts/artifact paths for a targeted retry.
+
+Disk preflight requires at least 15 GiB free for Android and 8 GiB for WebGL on the project drive. These are conservative startup minimums, not guaranteed maximum build sizes. The launcher stops before Unity and version changes if space is too low. It does not automatically delete previous builds or user files.
 
 Publishing commits and pushes **all non-ignored project changes**, just like the existing release scripts. Build-only and localhost do not commit or push. One launcher run is allowed at a time, and existing build locks prevent competing Unity builds.
 

@@ -40,4 +40,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self,*args,**kwargs): return None
 
 def urlopen(request,timeout=180):
+    if isinstance(request,str): request=urllib.request.Request(request)
+    if not request.has_header('User-agent'):
+        request.add_header('User-Agent','BattleCities-BuildLauncher/1.0')
     return urllib.request.build_opener(Handler(),NoRedirect()).open(request,timeout=timeout)

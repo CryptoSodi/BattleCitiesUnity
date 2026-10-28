@@ -1,5 +1,17 @@
 # Approved game UI rules
 
+- The home Player Rankings title plaque sits slightly below the top frame opening (six logical units minimum extra drop). Cycle Standings stays centered and narrower than that opening, with extra horizontal insets of 2% of panel width (at least eight units) on each side, retaining its raised bottom clearance.
+
+- The home navy standings backing spans the full column/list region width while its headings and rows retain their narrower insets. Leave a visible gap below the yellow timer (at least eight logical units, scaling with panel height); adjust only background bounds when changing this padding, not content positions or sizes.
+
+- Home Player Rankings uses one shared dark navy (`#03284F`) standings container behind both the column headings and ranking rows, matching the full Ranking page detail table and its compact six-unit corners. Remove the separate heading plate and row-root backgrounds while preserving their bindings, row insets and column alignment.
+
+- Home ranking column headings (#, Player, Score, Matches) share one font size and shrink together only if required. Give Matches 20% of the row width and align its header and values; never independently shrink that caption because its column is too narrow.
+
+- Populated home ranking lists keep their navy surface and inset rows without exposing the legacy cream Scores panel behind them. Restore that panel only for the existing loading/empty state.
+
+- The home Player Rankings panel uses a smaller aspect-fitted header trophy (up to 54 units high), a raised Cycle Standings footer with clear space above the bottom frame, and an inset ranking-list surface with matching column alignment. Keep top-ten and personal rows inside the metal frame without clipping their artwork; retain actual ranks, readable typography and existing row skins.
+
 - The yellow current-cycle countdown container uses the shared sliced skin with corners fitted to 22% of its rendered height, like the other title/tab containers. Refit on layout and countdown refresh so resizing cannot turn it into a pill. Preserve timer, watch artwork and progress-bar geometry.
 
 - The short Rapid Shooter Shop card uses the isolated three-shell illustration, without the blue/gold HUD container, matching the other freestanding Shop item artwork. Keep its existing framed gameplay HUD/drop icon separate and deliver the Shop illustration in ExtendedPowerupArt through the OTA art pack.

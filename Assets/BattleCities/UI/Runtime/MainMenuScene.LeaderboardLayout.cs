@@ -75,6 +75,8 @@ namespace BattleCities.UI
         void LayoutLeaderboardEdges()
         {
             if(!leaderboard)return;
+            LayoutHomeStandingsSurface();
+            LayoutHomeRankHeadings();
             LayoutRoundProgress();
             var roundTitle=leaderboard.Find("Round status/Heading")?.GetComponent<Text>();
             if(roundTitle)
@@ -98,11 +100,26 @@ namespace BattleCities.UI
             var art=RemoteGameArt.Load<PreBattleArt>("PreBattleArt");
             FitLeaderboardContainer(heading,side,edge,true,art?art.tankTitlePanel:null,4f);
             FitLeaderboardContainer(footer,side,edge,false,art?art.statusPanel:null,3f);
+            if(heading)
+            {
+                float drop=Mathf.Max(6f,leaderboard.rect.height*.006f);
+                heading.offsetMin=heading.offsetMax=new Vector2(0,-drop);
+            }
+            if(footer)
+            {
+                float clearance=Mathf.Max(8f,leaderboard.rect.height*.012f);
+                float horizontalInset=Mathf.Max(8f,leaderboard.rect.width*.02f);
+                footer.offsetMin=new Vector2(horizontalInset,clearance);
+                footer.offsetMax=new Vector2(-horizontalInset,clearance);
+            }
             var trophy=heading?heading.Find("Trophy")?.GetComponent<Image>():null;
             if(trophy)
             {
                 var position=trophy.rectTransform.anchoredPosition;position.x=18f;
                 trophy.rectTransform.anchoredPosition=position;
+                float height=Mathf.Min(54f,heading.rect.height*.62f);
+                trophy.rectTransform.sizeDelta=new Vector2(height*52f/54f,height);
+                trophy.preserveAspect=true;
             }
             ApplyTrophyGroundShadow(trophy);
             ApplyTrophyGroundShadow(leaderboard.Find("Scores/Empty state trophy")?.GetComponent<Image>());
