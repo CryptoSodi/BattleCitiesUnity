@@ -15,7 +15,7 @@ The launcher folder can also run from another location. Set `projectRoot` in tha
 One WebGL build serves all destinations. Play selects mainnet and the production API. Test and Magic select devnet and the test API. Localhost also selects the test API.
 Production publication creates a **web-only** GitHub release and waits for Pages and the live version check. It never uploads/carries an APK or changes the latest Android download. Existing release tags are not overwritten.
 
-Localhost binds only to this computer, opens the browser, and serves the exact new output. It refuses an occupied port instead of showing an older build. The server continues after the menu closes; its PID, port, output root and identity are in that run's `localhost-process.json`. Stop that PID when finished, or change `localhostPort` for another server. It cannot be accessed from your phone over Wi-Fi.
+Localhost binds only to this computer, opens the browser, and serves the exact new output. Relaunching automatically stops the previous launcher server after verifying its saved identity, listening PID and server command, then starts the new build on the same port. Unrelated or unverified processes are left running with an explanatory error. The server continues after the menu closes; its PID, port, output root and identity are in that run's `localhost-process.json`. It cannot be accessed from your phone over Wi-Fi.
 
 ## Android
 

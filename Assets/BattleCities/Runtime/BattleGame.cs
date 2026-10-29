@@ -59,6 +59,8 @@ namespace BattleCities
         private readonly long[] moveOrder=new long[4],aimOrder=new long[4];
         private long order;
         private float accumulator,trauma,dayTime;
+        private double lastSimulationFrameTime;
+        private bool gameplayFocused=true;
         private bool paused,showDebug,terrainDirty;
         private Vector2 debugScroll;
         private string debugPowerupStatus="Free test use - inventory is unchanged.";
@@ -73,7 +75,6 @@ namespace BattleCities
         private BattleAnimations effects;
         private BattleDebris debris;
         private BattleWeather weather;
-        private PickupSparkles pickupSparkles;
         private readonly BattleHud hud=new BattleHud();
         private bool consumePending;
         private InputAction[] slots;
@@ -84,6 +85,8 @@ namespace BattleCities
 
         private void Awake()
         {
+            Application.runInBackground=true;
+            lastSimulationFrameTime=Time.realtimeSinceStartupAsDouble;
             if (RemoteGameArt.Required && !tvReplay)
             {
                 var models = RemoteGameArt.Load<RemoteBattleModels>("RemoteBattleModels");
@@ -91,7 +94,6 @@ namespace BattleCities
                 models.Apply(this);
             }
             Debug.Log("[BattleCities] Runtime: "+RuntimePlatformInfo.Current+" ("+RuntimePlatformInfo.DeviceIdentity+")");
-            pickupSparkles=new PickupSparkles();
             ConfigureGameplayInput();
             economy=tvReplay||LevelEditor.LevelEditorPlaytest.IsActive?null:GetComponent<EconomyClient>();
             if(!tvReplay)input.Enable();
@@ -173,7 +175,9 @@ namespace BattleCities
             var asset=Resources.Load<TextAsset>("Maps/"+stage.ToString("00"));if(asset==null&&mapOverride==null)throw new InvalidOperationException("Missing stage "+stage);
             var shootingSettings=SelectedTankShootingSettings;
             var map=mapOverride??JsonConvert.DeserializeObject<MapData>(asset.text);
+            var previousCampaign=Simulation!=null&&Simulation.Won&&!Simulation.Lost&&!Simulation.IsMultiplayer&&!IsReplaying&&replayLoadingData==null&&stage==Stage+1?Simulation:null;
             ResetPrimaryFire();chaseAim=null;chaseAimTankId=0;Stage=requestedStage=stage;Simulation=replayLoadingData!=null?ReplayPlayer.CreateSimulation(replayLoadingData):new BattleSimulation(map,stage,shootingSettings?shootingSettings.NormalReloadSeconds:.12f,shootingSettings?shootingSettings.UpgradedNormalReloadSeconds:.08f,BattlePreparation.TankTier);accumulator=0;paused=false;
+            if(previousCampaign!=null)Simulation.ContinueCampaignFrom(previousCampaign);
             if(!GroundTurretPrefab)throw new InvalidOperationException("GroundTurret prefab is not assigned");
             var turretSettings=GroundTurretPrefab.GetComponent<GroundTurret>();
             if(!turretSettings)throw new InvalidOperationException("GroundTurret prefab is missing its runtime component");
@@ -211,6 +215,7 @@ namespace BattleCities
                 Simulation.RivalBaseDestroyed+=()=>{effects.Burst(World(Simulation.RivalBaseBounds.X+32,Simulation.RivalBaseBounds.Y+32,.35f),1.7f);Destroy(rivalEagle);rivalEagle=Instantiate(RuinedEagleModel,World(Simulation.RivalBaseBounds.X+32,Simulation.RivalBaseBounds.Y+32,.1f),Quaternion.identity,stageRoot);rivalEagleTint=rivalEagle.AddComponent<EagleNightTint>();Shadows(rivalEagle);};
             }
             Shadows(eagle);cameraTarget=World(Simulation.Width/2,Simulation.Height/2);SyncActors(0);UpdateCamera(1);weather.Tick(0,Simulation.Width/64f,Simulation.Height/64f,sun,reflections);if(tvReplay)IsolateTvReplayVisuals();reflections.RenderProbe();
+            lastSimulationFrameTime=Time.realtimeSinceStartupAsDouble;
             BeginRecording(map);
         }
         public static Vector3 World(float x,float y,float height=0)=>new Vector3(x/64,height,-y/64);
@@ -266,10 +271,11 @@ namespace BattleCities
         }
         private void Update()
         {
+            float simulationDt=BattleBackgroundTiming.Elapsed(ref lastSimulationFrameTime,Time.realtimeSinceStartupAsDouble);
             if(Simulation==null)return;PrepareMagicBeforeStart();bool ending=UpdateResults();if(ResultsVisible)return;float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);fps=Mathf.Lerp(fps,1/Mathf.Max(.0001f,Time.unscaledDeltaTime),.05f);
             if(!ending)
             {
-            if(!tvReplay){UpdateGamepadControls();
+            if(!tvReplay&&gameplayFocused){UpdateGamepadControls();
             if(DevelopmentOverlays.Visible&&debug.WasPressedThisFrame()&&!IsReplaying)showDebug=!showDebug;
             if(Multiplayer.BattleSession.Instance&&Multiplayer.BattleSession.Instance.Lobby.Visible)paused=true;
             UpdateDayNightShortcuts(dt);
@@ -278,12 +284,14 @@ namespace BattleCities
             if(IsReplaying)TickReplay(dt);
             else if(!paused&&!consumePending&&!BlockCombat&&ReplayReady)
             {
-                secondaryQueued|=secondaryFire.WasPressedThisFrame();
-                if(secondarySelect.WasPressedThisFrame())CycleSecondary();
-                accumulator+=dt;var cmd=new Command{Move=PlayerMove(),Aim=PlayerAim()};
+                if(gameplayFocused){secondaryQueued|=secondaryFire.WasPressedThisFrame();
+                if(secondarySelect.WasPressedThisFrame())CycleSecondary();}
+                accumulator+=simulationDt;var cmd=gameplayFocused&&simulationDt<.25f?new Command{Move=PlayerMove(),Aim=PlayerAim()}:default;
                 Simulation.DisableEnemyFire=!EnemyFire;
                 if(IsOnline)accumulator=0;
-                while(accumulator>=BattleSimulation.StepSeconds){QueuePrimaryCommand(ref cmd);cmd.SecondaryFire=secondaryQueued;secondaryQueued=false;StepRecorded(cmd);accumulator-=BattleSimulation.StepSeconds;}
+                int steps=0;
+                while(accumulator>=BattleSimulation.StepSeconds&&steps++<BattleBackgroundTiming.MaxStepsPerFrame&&!Simulation.Won&&!Simulation.Lost){if(gameplayFocused&&simulationDt<.25f)QueuePrimaryCommand(ref cmd);cmd.SecondaryFire=secondaryQueued;secondaryQueued=false;StepRecorded(cmd);accumulator-=BattleSimulation.StepSeconds;}
+                if(Simulation.Won||Simulation.Lost)accumulator=0;
             }
             else secondaryQueued=false;
             }
@@ -297,7 +305,7 @@ namespace BattleCities
             if(terrainDirty)RebuildTerrain();
             foreach(var batch in batches)Graphics.DrawMeshInstanced(batch.Part.Mesh,batch.Part.Submesh,batch.Part.Material,batch.Matrices,batch.Matrices.Length,null,ShadowCastingMode.On,true,tvReplay?TvReplayLayer:0,tvReplay?gameCamera:null);
             foreach(var surface in terrainSurfaces)surface.Tick(presentationDt);
-            SyncActors(presentationDt);SyncFlags();effects.Tick(presentationDt,gameCamera);debris.Tick(presentationDt,tvReplay?gameCamera:null,tvReplay?TvReplayLayer:0);UpdateLighting(IsReplaying?presentationDt:dt);UpdateCamera(IsReplaying?presentationDt:dt);if(tvReplay){DrawTvReplayPickup();IsolateTvReplayVisuals();}
+            SyncActors(presentationDt);SyncFlags();effects.Tick(presentationDt,gameCamera);debris.Tick(presentationDt,tvReplay?gameCamera:null,tvReplay?TvReplayLayer:0);UpdateLighting(IsReplaying?presentationDt:dt);UpdateCamera(IsReplaying?presentationDt:dt);SyncPickupCube();if(tvReplay)IsolateTvReplayVisuals();
         }
         private void UpdateLighting(float dt)
         {
@@ -311,7 +319,8 @@ namespace BattleCities
             float gameplayHeight=Mathf.Max(1,screenHeight-BattleHud.TopHeightPixels);
             gameCamera.rect=tvReplay?new Rect(0,0,1,1):new Rect(0,0,1,gameplayHeight/screenHeight);
             var player=Simulation.Player;
-            if(ChaseCamera&&!IsOnline&&player!=null)
+            bool gameOver=Simulation.Lost||(!Simulation.IsMultiplayer&&Simulation.Lives<=0);
+            if(ChaseCamera&&!IsOnline&&player!=null&&!gameOver)
             {
                 var forward=Quaternion.Euler(0,(int)player.Aim*90,0)*Vector3.forward;
                 var position=World(player.X,player.Y,ChaseCameraHeight)-forward*ChaseCameraDistance;
@@ -324,22 +333,25 @@ namespace BattleCities
             }
             gameCamera.orthographic=true;
             gameCamera.nearClipPlane=.1f;
-            if(AutomaticCamera)
+            if(AutomaticCamera||gameOver)
             {
                 float w=Simulation.Width/64f,h=Simulation.Height/64f;
                 float span=Mathf.Min(w+.9f,(h+.9f)*gameCamera.aspect*Mathf.Sin(CameraElevation*Mathf.Deg2Rad));
                 gameCamera.orthographicSize=span/gameCamera.aspect/2/(Simulation.ZoomOut>0?.75f:Zoom);
+                if(gameOver)gameCamera.orthographicSize=Mathf.Min(gameCamera.orthographicSize,w/gameCamera.aspect/2,h*Mathf.Sin(CameraElevation*Mathf.Deg2Rad)/2);
                 float halfX=gameCamera.orthographicSize*gameCamera.aspect,halfZ=gameCamera.orthographicSize/Mathf.Sin(CameraElevation*Mathf.Deg2Rad);
-                var p=Simulation.Player;Vector3 desired=p!=null?World(p.X,p.Y):World(Simulation.Width/2,Simulation.Height/2);
-                desired.x=halfX*2>=w?w/2:Mathf.Clamp(desired.x,halfX-.3f,w-halfX+.3f);desired.z=halfZ*2>=h?-h/2:Mathf.Clamp(desired.z,-h+halfZ-.3f,-halfZ+.3f);
+                Vector3 desired=CameraFocus(Simulation);
+                if(gameOver)desired=ClampCameraToStage(desired,w,h,halfX,halfZ);
+                else{desired.x=halfX*2>=w?w/2:Mathf.Clamp(desired.x,halfX-.3f,w-halfX+.3f);desired.z=halfZ*2>=h?-h/2:Mathf.Clamp(desired.z,-h+halfZ-.3f,-halfZ+.3f);}
                 cameraTarget=Vector3.Lerp(cameraTarget,desired,1-Mathf.Exp(-dt*5));
+                if(gameOver)cameraTarget=ClampCameraToStage(cameraTarget,w,h,halfX,halfZ);
             }
             else if(Mouse.current!=null)
             {
                 if(Mouse.current.middleButton.isPressed){var d=Mouse.current.delta.ReadValue();cameraTarget+=new Vector3(-d.x,0,-d.y)*.012f;}
                 Zoom=Mathf.Clamp(Zoom+Mouse.current.scroll.ReadValue().y*.001f,.7f,2);gameCamera.orthographicSize=7/Zoom;
             }
-            trauma=Mathf.Max(0,trauma-dt);Vector3 shake=CameraShake?new Vector3(Mathf.Sin(Time.unscaledTime*71),0,Mathf.Sin(Time.unscaledTime*83))*trauma*.2f:Vector3.zero;
+            trauma=Mathf.Max(0,trauma-dt);Vector3 shake=CameraShake&&!gameOver?new Vector3(Mathf.Sin(Time.unscaledTime*71),0,Mathf.Sin(Time.unscaledTime*83))*trauma*.2f:Vector3.zero;
             var angle=CameraElevation*Mathf.Deg2Rad;var target=cameraTarget+shake;
             gameCamera.transform.position=target+new Vector3(0,Mathf.Sin(angle)*22,-Mathf.Cos(angle)*22);gameCamera.transform.LookAt(target,Vector3.up);
         }
@@ -515,7 +527,6 @@ namespace BattleCities
             if(!string.IsNullOrEmpty(Simulation.SecondaryStatus))GUI.Label(new Rect(180,Screen.height-secondaryBottom+2,Screen.width-200,44),Simulation.SecondaryStatus);
             }
             if(DevelopmentOverlays.Visible&&economy&&showDebug)GUI.Label(new Rect(12,Screen.height-84,650,24),consumePending?"Confirming power-upÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦":economy.Status);
-            DrawLivePickup();
             if(DevelopmentOverlays.Visible&&!HasTouchControls&&!Psg1)GUI.Label(new Rect(12,Screen.height-28,Screen.width-24,24),"WASD drive | Arrows aim | Space: tap / hold + release | E / RMB deploy"+(CanSwapSpecials?" | Q swap":""));
             DrawPsg1Controls();
             if(!DevelopmentOverlays.Visible||IsOnline||!showDebug||RuntimePlatformInfo.IsPsg1)return;
@@ -570,7 +581,7 @@ namespace BattleCities
             QueueReplayEvent(new ReplayEvent{kind="powerup",value=type});
             debugPowerupStatus="Applied: "+debugPowerupNames[index]+(paused?" (paused)":"");
         }
-        private void OnApplicationFocus(bool focus){if(!focus)CancelTouchGameplay();}
+        private void OnApplicationFocus(bool focus){gameplayFocused=focus;if(!focus)CancelTouchGameplay();}
         private async void RollDrop(BattleSimulation current)
         {
             if(IsReplaying)return;
@@ -599,6 +610,6 @@ namespace BattleCities
 #if UNITY_EDITOR
             if(authoringPreview)return;
 #endif
-            if(resultsScreen)Destroy(resultsScreen.gameObject);RestoreTvReplayMasks();FinishRecording();hud.Dispose();pickupSparkles?.Dispose();input?.Dispose();if(particleMaterial&&particleMaterial.mainTexture)Destroy(particleMaterial.mainTexture);foreach(var m in ownedMaterials)if(m)Destroy(m);foreach(var m in ownedMeshes)if(m)Destroy(m);}
+            if(resultsScreen)Destroy(resultsScreen.gameObject);RestoreTvReplayMasks();FinishRecording();hud.Dispose();input?.Dispose();if(particleMaterial&&particleMaterial.mainTexture)Destroy(particleMaterial.mainTexture);foreach(var m in ownedMaterials)if(m)Destroy(m);foreach(var m in ownedMeshes)if(m)Destroy(m);}
     }
 }

@@ -1,0 +1,33 @@
+{
+  "Powerup_Gold_Frame": {
+    "baseColorSRGB": [
+      1,
+      0.71,
+      0.055
+    ],
+    "metallic": 0.62,
+    "roughness": 0.27
+  },
+  "Powerup_Cobalt_Panels": {
+    "baseColorSRGB": [
+      0.018,
+      0.3,
+      0.84
+    ],
+    "metallic": 0.12,
+    "roughness": 0.32
+  },
+  "Powerup_Icon_Transparent": {
+    "baseColorFactor": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "metallic": 0,
+    "roughness": 0.6,
+    "alphaMode": "BLEND",
+    "texture": "textures/transparent-icon-placeholder.png",
+    "castShadows": false
+  }
+}

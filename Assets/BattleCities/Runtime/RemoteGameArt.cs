@@ -139,7 +139,7 @@ namespace BattleCities
                     await Task.Yield();
                 }
                 cancellation.ThrowIfCancellationRequested();
-                if (!loaded.LoadAsset<GameObject>("TvReplayRig.prefab") || !loaded.LoadAsset<GameObject>("LandAttackDrone.prefab"))
+                if (!loaded.LoadAsset<GameObject>("TvReplayRig.prefab") || !loaded.LoadAsset<GameObject>("LandAttackDrone.prefab") || !loaded.LoadAsset<GameObject>("PowerupCube.prefab"))
                     throw new InvalidDataException("Game models are incomplete.");
                 foreach (var key in new[] { "SettingsArt", "PlayerProfileArt", "OperationsArt", "LoadoutArt", "ShopArt", "ExtendedPowerupArt", "PreBattleArt", "BattleResultsArt", "EnvironmentPalette", "RemoteBattleModels" })
                     if (!loaded.LoadAsset<ScriptableObject>(key + ".asset"))

@@ -6,7 +6,8 @@ namespace BattleCities
     public static class BattlePickupSizing
     {
         public const float TileFraction=.9f;
-        public static float WorldSize=>Vector3.Distance(BattleGame.World(0,0),BattleGame.World(64,0))*TileFraction;
+        public static float TileWorldSize=>Vector3.Distance(BattleGame.World(0,0),BattleGame.World(64,0));
+        public static float WorldSize=>TileWorldSize*TileFraction;
         public static float ScreenSize(Camera camera,Vector3 position)
         {
             var half=camera.transform.right*(WorldSize*.5f);

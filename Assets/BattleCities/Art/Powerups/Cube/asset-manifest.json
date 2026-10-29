@@ -1,0 +1,183 @@
+{
+  "id": "powerup-cube",
+  "status": "GLB validated; Unity integration review pending",
+  "unitsPerTile": 64,
+  "nominalSize": 1,
+  "runtimeScale": 0.9,
+  "visualFootprintSimulationUnits": 57.6,
+  "pivot": "ground-center",
+  "axis": "Y up; north +Z",
+  "model": "powerup-cube.glb",
+  "source": "powerup-cube.blend",
+  "componentSource": "powerup-cube-components.blend",
+  "bodyTriangles": 732,
+  "decalTriangles": 10,
+  "bodyMaterialSlots": 2,
+  "totalMaterialSlots": 3,
+  "decals": [
+    {
+      "name": "Decal_Top",
+      "position": [
+        0,
+        1.001,
+        0
+      ],
+      "right": [
+        -1,
+        0,
+        0
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "size": [
+        0.64,
+        0.64
+      ]
+    },
+    {
+      "name": "Decal_South",
+      "position": [
+        0,
+        0.5,
+        -0.501
+      ],
+      "right": [
+        -1,
+        0,
+        0
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "size": [
+        0.64,
+        0.64
+      ]
+    },
+    {
+      "name": "Decal_North",
+      "position": [
+        0,
+        0.5,
+        0.501
+      ],
+      "right": [
+        1,
+        0,
+        0
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "size": [
+        0.64,
+        0.64
+      ]
+    },
+    {
+      "name": "Decal_East",
+      "position": [
+        0.501,
+        0.5,
+        0
+      ],
+      "right": [
+        0,
+        0,
+        -1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "size": [
+        0.64,
+        0.64
+      ]
+    },
+    {
+      "name": "Decal_West",
+      "position": [
+        -0.501,
+        0.5,
+        0
+      ],
+      "right": [
+        0,
+        0,
+        1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "size": [
+        0.64,
+        0.64
+      ]
+    }
+  ],
+  "colliderSuggestion": {
+    "type": "Box",
+    "center": [
+      0,
+      0.5,
+      0
+    ],
+    "size": [
+      1,
+      1,
+      1
+    ],
+    "note": "Integration owns pickup trigger sizing; render shell must not block tanks."
+  },
+  "iconInstructions": "Replace DecalSurfaces shared material with existing transparent shop illustration material, or disable DecalSurfaces and use the five anchors. Do not use both. UV is full 0..1 on every face. No powerup icons or halo are baked into the model.",
+  "provenance": {
+    "authoring": "Procedural Blender mesh, authored specifically for Battle Cities from user-supplied visual references; no external mesh or texture downloads.",
+    "tool": "5.2.1 LTS",
+    "references": [
+      {
+        "originalPath": "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-f530beb4-83a7-4bd1-933a-ca8f79b61231.png",
+        "localPath": "references/codex-clipboard-f530beb4-83a7-4bd1-933a-ca8f79b61231.png",
+        "sha256": "c0b46935641aeb13bdd752e0967e8579c17180e5f5e8add4a164acddb763861e",
+        "rights": "User-supplied reference; source rights not independently verified."
+      },
+      {
+        "originalPath": "C:/Users/tassa/AppData/Local/Temp/codex-clipboard-3bc97f20-58c9-4ebf-8510-cf1ba381477a.jpg",
+        "localPath": "references/codex-clipboard-3bc97f20-58c9-4ebf-8510-cf1ba381477a.jpg",
+        "sha256": "0f62bfa63c03a26e21bc884c4489627bbd667e66353a7500ee6d461bdcb7fe5a",
+        "rights": "User-supplied reference; source rights not independently verified."
+      }
+    ]
+  },
+  "previews": [
+    "previews/cube-three-quarter.png",
+    "previews/cube-top.png",
+    "previews/cube-front.png"
+  ],
+  "sha256": "17563575dc4f6d18e4437a5c39413e347ec76ab150f52ac9f59812444ae04172",
+  "validation": "validation.json",
+  "meshCount": 2,
+  "totalTriangles": 742,
+  "measuredShellBounds": {
+    "min": [
+      -0.5,
+      0,
+      -0.5
+    ],
+    "max": [
+      0.5,
+      1,
+      0.5
+    ]
+  }
+}

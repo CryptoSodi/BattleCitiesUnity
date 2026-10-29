@@ -1,0 +1,193 @@
+{
+  "file": "C:\\repos\\Battle Cities Game\\blender assets\\powerup-cube\\powerup-cube.glb",
+  "bytes": 79572,
+  "sha256": "17563575dc4f6d18e4437a5c39413e347ec76ab150f52ac9f59812444ae04172",
+  "meshes": [
+    {
+      "name": "Cube_Body",
+      "triangles": 732,
+      "vertices": 1440,
+      "materialSlots": 2,
+      "bounds": {
+        "min": [
+          -0.5,
+          0,
+          -0.5
+        ],
+        "max": [
+          0.5,
+          1,
+          0.5
+        ]
+      }
+    },
+    {
+      "name": "DecalSurfaces",
+      "triangles": 10,
+      "vertices": 20,
+      "materialSlots": 1,
+      "bounds": {
+        "min": [
+          -0.5009999871253967,
+          0.18000000715255737,
+          -0.5009999871253967
+        ],
+        "max": [
+          0.5009999871253967,
+          1.0010000467300415,
+          0.5009999871253967
+        ]
+      }
+    }
+  ],
+  "totalTriangles": 742,
+  "materials": [
+    {
+      "name": "Powerup_Cobalt_Panels",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.0013931888388469815,
+          0.07323895394802094,
+          0.6738595366477966,
+          1
+        ],
+        "metallicFactor": 0.11999999731779099,
+        "roughnessFactor": 0.3199999928474426
+      }
+    },
+    {
+      "name": "Powerup_Gold_Frame",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          1,
+          0.4623613655567169,
+          0.004400849808007479,
+          1
+        ],
+        "metallicFactor": 0.6200000047683716,
+        "roughnessFactor": 0.27000001072883606
+      }
+    },
+    {
+      "alphaMode": "BLEND",
+      "name": "Powerup_Icon_Transparent",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0,
+        "roughnessFactor": 0.6000000238418579
+      }
+    }
+  ],
+  "anchors": [
+    {
+      "extras": {
+        "right_glTF": [
+          0,
+          0,
+          -1
+        ],
+        "up_glTF": [
+          0,
+          1,
+          0
+        ],
+        "decalWidth": 0.64
+      },
+      "name": "Decal_East",
+      "translation": [
+        0.5009999871253967,
+        0.5,
+        0
+      ]
+    },
+    {
+      "extras": {
+        "right_glTF": [
+          1,
+          0,
+          0
+        ],
+        "up_glTF": [
+          0,
+          1,
+          0
+        ],
+        "decalWidth": 0.64
+      },
+      "name": "Decal_North",
+      "translation": [
+        0,
+        0.5,
+        0.5009999871253967
+      ]
+    },
+    {
+      "extras": {
+        "right_glTF": [
+          -1,
+          0,
+          0
+        ],
+        "up_glTF": [
+          0,
+          1,
+          0
+        ],
+        "decalWidth": 0.64
+      },
+      "name": "Decal_South",
+      "translation": [
+        0,
+        0.5,
+        -0.5009999871253967
+      ]
+    },
+    {
+      "extras": {
+        "right_glTF": [
+          -1,
+          0,
+          0
+        ],
+        "up_glTF": [
+          0,
+          0,
+          1
+        ],
+        "decalWidth": 0.64
+      },
+      "name": "Decal_Top",
+      "translation": [
+        0,
+        1.0010000467300415,
+        0
+      ]
+    },
+    {
+      "extras": {
+        "right_glTF": [
+          0,
+          0,
+          1
+        ],
+        "up_glTF": [
+          0,
+          1,
+          0
+        ],
+        "decalWidth": 0.64
+      },
+      "name": "Decal_West",
+      "translation": [
+        -0.5009999871253967,
+        0.5,
+        0
+      ]
+    }
+  ],
+  "errors": 0,
+  "warnings": 0,
+  "issues": []
+}

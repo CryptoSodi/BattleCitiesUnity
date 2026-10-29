@@ -73,16 +73,11 @@ namespace BattleCities.Editor
                         float cx=(column+.5f)*64,cy=(row+.5f)*64;
                         if(px==0&&sim.Terrain.All(w=>!w.Alive||(!w.Brick&&w.Type!="steel")||cx<w.Bounds.X||cx>w.Bounds.Right||cy<w.Bounds.Y||cy>w.Bounds.Bottom)){px=cx;py=cy;}
                     }
-                    var position=BattleGame.World(px,py,.7f);var screen=camera.WorldToScreenPoint(position);
-                    var previewDrop=new GameObject("Tile-sized shield drop preview",typeof(RectTransform),typeof(RawImage));
-                    var previewRect=(RectTransform)previewDrop.transform;previewRect.SetParent(touchCanvas.transform,false);
-                    previewRect.anchorMin=previewRect.anchorMax=new Vector2(.5f,.5f);
-                    RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)touchCanvas.transform,screen,camera,out var local);
-                    previewRect.anchoredPosition=local;previewRect.sizeDelta=Vector2.one*BattlePickupSizing.ScreenSize(camera,position)/touchCanvas.scaleFactor;
-                    var picture=previewDrop.GetComponent<RawImage>();picture.texture=prefab.PowerupAtlas;picture.raycastTarget=false;
-                    BattleHud.TryPowerupUv("shield",out var uv);picture.uvRect=uv;
+                    var previewDrop=UnityEngine.Object.Instantiate(Resources.Load<GameObject>("PowerupCube"));
+                    previewDrop.GetComponent<BattlePickupCube>().Present("shield",BattleGame.World(px,py),.25f);
                     Capture(camera,target,"mobile-hud-tile-drop.png");
                     Debug.Log("MOBILE HUD/DROP PREVIEW: Builds/AndroidControlPreviews/mobile-hud-tile-drop.png; shield drop is 90% of one world tile; sample equipped stock only.");
+                    UnityEngine.Object.DestroyImmediate(previewDrop);
                     return;
                 }
                 var all=carrier.GetComponentsInChildren<BattleTouchControl>(true);var move=all.Single(c=>c.name=="Movement");var fire=all.Single(c=>c.name=="Fire");
@@ -99,15 +94,9 @@ namespace BattleCities.Editor
                     Check(position.y>=720-48&&position.y<=720,"power-up is positioned inside top HUD");
                 }
                 Capture(camera,target,"android-floating-idle.png");
-                // Preview the live drop's exact atlas art at 90% of a world tile.
-                // Keep it separate from sample inventory and simulation/account state.
-                var drop=new GameObject("Android battlefield drop preview",typeof(RectTransform),typeof(RawImage));
-                var dropRect=drop.GetComponent<RectTransform>();dropRect.SetParent(touchCanvas.transform,false);
-                dropRect.anchorMin=dropRect.anchorMax=new Vector2(.5f,.5f);
-                dropRect.anchoredPosition=new Vector2(220,-80);
-                dropRect.sizeDelta=Vector2.one*BattlePickupSizing.ScreenSize(camera,Vector3.zero)/touchCanvas.scaleFactor;
-                var dropImage=drop.GetComponent<RawImage>();dropImage.texture=prefab.PowerupAtlas;
-                BattleHud.TryPowerupUv("shield",out var dropUv);dropImage.uvRect=dropUv;dropImage.raycastTarget=false;
+                // Use the same grounded 3D presentation as live gameplay and TV replays.
+                var drop=UnityEngine.Object.Instantiate(Resources.Load<GameObject>("PowerupCube"));
+                drop.GetComponent<BattlePickupCube>().Present("shield",BattleGame.World(416,640),.25f);
                 Capture(camera,target,"android-larger-powerup-drop.png");
                 UnityEngine.Object.DestroyImmediate(drop);
                 var special=carrier.GetComponentsInChildren<Button>().Single(b=>b.name=="Special Mine");

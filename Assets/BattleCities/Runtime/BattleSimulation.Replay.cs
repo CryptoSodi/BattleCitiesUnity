@@ -16,7 +16,7 @@ namespace BattleCities.Core
             mineLimitVersion=MineLimitVersion,powerupRosterVersion=PowerupRosterVersion,wipeoutDamageVersion=WipeoutDamageVersion,
             turretRange=turretAttackRange,turretDamage=turretDamage,turretCooldown=turretFireCooldown,turretReload=turretReloadDuration,
             turretTurn=turretTurnDuration,turretMuzzle=turretMuzzleDistance,turretHealth=turretHealth,turretDeploy=turretDeployDuration,
-            landDrone=ReplayJson.Copy(LandDroneSettings)
+            landDrone=ReplayJson.Copy(LandDroneSettings),campaignStart=ReplayJson.Copy(campaignStart)
         };
         public void ApplyReplayConfiguration(ReplayConfig c)
         {
@@ -30,6 +30,7 @@ namespace BattleCities.Core
             WipeoutDamageVersion=c.wipeoutDamageVersion;
             PlayerNormalReloadSeconds=ValidReloadSeconds(c.normalReload,.12f);PlayerUpgradedNormalReloadSeconds=ValidReloadSeconds(c.upgradedReload,.08f);
             ConfigureTurrets(c.turretRange,c.turretDamage,c.turretCooldown,c.turretReload,c.turretTurn,c.turretMuzzle,c.turretHealth,c.turretDeploy);LandDroneSettings=ReplayJson.Copy(c.landDrone);
+            SetCampaignStart(c.campaignStart);
         }
         // Include hidden timers, RNG, entity order, pathfinding history, terrain damage and
         // participant state. Local camera slot, UI text and visual event buffers are excluded.

@@ -16,7 +16,7 @@ namespace BattleCities.Core
     /// <summary>The roster and simulation share these fixed, deterministic profiles.</summary>
     public static class TankProfiles
     {
-        public const int Version=1;
+        public const int Version=2;
         static readonly TankStats[] Players={
             new TankStats(1,1,1,1), // Vanguard
             new TankStats(2,1,1,1), // Striker

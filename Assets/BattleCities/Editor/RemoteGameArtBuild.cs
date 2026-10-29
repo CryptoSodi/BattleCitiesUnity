@@ -41,7 +41,7 @@ namespace BattleCities.Editor
                     .Where(p => p.EndsWith("/" + name + ".asset", StringComparison.Ordinal) && p.Contains("/Resources/")).ToArray();
                 if (candidates.Length != 1) throw new BuildFailedException("Expected one Resources asset: " + name);
                 return new Move { source = candidates[0], destination = Staging + "/" + name + ".asset" };
-            }).Concat(new[] { "Assets/BattleCities/Resources/TvReplayRig.prefab", "Assets/BattleCities/Resources/Deployables/LandAttackDrone.prefab" }
+            }).Concat(new[] { "Assets/BattleCities/Resources/TvReplayRig.prefab", "Assets/BattleCities/Resources/Deployables/LandAttackDrone.prefab", "Assets/BattleCities/Resources/PowerupCube.prefab" }
                 .Concat(Directory.GetFiles("Assets/BattleCities/Resources/RuntimeShaders/Terrain", "*.mat"))
                 .Select(path => new Move { source = path.Replace('\\', '/'), destination = Staging + "/" + Path.GetFileName(path) })).ToArray();
             Directory.CreateDirectory("Builds");

@@ -186,6 +186,12 @@ namespace BattleCities.Core
         private EnemySpec[] wave;
         private Point[] enemySpawns;
         private Point playerSpawn;
+        public Point PlayerRespawnPoint {
+            get {
+                var origin=IsMultiplayer&&LocalPlayerSlot>=0&&LocalPlayerSlot<MaxPlayers?onlineSpawns[LocalPlayerSlot]:null;
+                return origin!=null?new Point{x=origin.x,y=origin.y}:new Point{x=playerSpawn.x+32,y=playerSpawn.y+32};
+            }
+        }
         private int spawned, nextId, spawnIndex;
         private float spawnTimer = .16f, respawnTimer, intro = 2;
         private uint random = 12345;
@@ -852,7 +858,13 @@ namespace BattleCities.Core
                 case "rapid":if(p!=null)p.RapidFire=Math.Max(p.RapidFire,10);break;
                 case "rapidlong":if(p!=null)p.RapidFire=Math.Max(p.RapidFire,60);break;
                 case "shield":if(p!=null)p.Shield=10;break;
-                case "upgrade":if(p!=null){if(p.StatsVersion==0)p.Tier=Math.Min(3,p.Tier+1);else p.UpgradeLevel=Math.Min(3,p.UpgradeLevel+1);}break;
+                case "upgrade":if(p!=null){
+                    if(p.StatsVersion==0)p.Tier=Math.Min(3,p.Tier+1);
+                    else{
+                        p.UpgradeLevel=Math.Min(3,p.UpgradeLevel+1);
+                        if(p.StatsVersion>=2){p.Tier=Math.Min(3,p.Tier+1);p.Health=Math.Min(p.Health,p.MaxHealth);}
+                    }
+                }break;
                 case "speed":if(p!=null)p.SpeedBoost=10;break;
                 case "life":Lives++;break;
                 case "freeze":Freeze=10;break;

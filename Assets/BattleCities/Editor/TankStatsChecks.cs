@@ -89,8 +89,16 @@ namespace BattleCities.Tests
             normal.Fire(normal.Player,true);twin.Fire(twin.Player,true);
             Near(twin.Player.Cooldown,normal.Player.Cooldown/2,"two rounds halves charged recovery");
             twin.Shots.Clear();twin.ApplyPowerup("upgrade");twin.ApplyPowerup("upgrade");
-            Near(twin.NormalReloadSeconds(twin.Player),twin.PlayerUpgradedNormalReloadSeconds/2,"upgrade keeps round multiplier");
-            Check(twin.Player.Tier==2&&twin.Player.MaxHealth==1,"STAR preserves chosen chassis");
+            Near(twin.NormalReloadSeconds(twin.Player),twin.PlayerUpgradedNormalReloadSeconds,"promoted bunker uses its own round count");
+            Check(twin.Player.Tier==3&&twin.Player.MaxHealth==5,"STAR promotes chosen chassis up to bunker");
+            var promotion=Ready(0);
+            for(int tier=1;tier<=3;tier++){
+                promotion.ApplyPowerup("upgrade");Check(promotion.Player.Tier==tier,"each star promotes to next chassis");
+                Check(promotion.Player.Health>0&&promotion.Player.Health<=promotion.Player.MaxHealth,"promotion keeps valid current health");
+            }
+            promotion.ApplyPowerup("upgrade");Check(promotion.Player.Tier==3,"promotion caps at bunker");
+            var archived= new BattleSimulation(Map(),playerTier:2,tankStatsVersion:1);
+            archived.ApplyPowerup("upgrade");Check(archived.Player.Tier==2&&archived.Player.UpgradeLevel==1,"version-one recordings keep weapon-only upgrades");
             var battle=Ready(3);var target=new TankState{Id=9999,Tier=3,StatsVersion=1,Health=5,X=400,Y=680};battle.Tanks.Add(target);
             battle.Fire(battle.Player);for(int i=0;i<15;i++)battle.Step(default);
             Check(target.Alive&&target.Health==3,"Siegebreaker shell deals two damage on impact");

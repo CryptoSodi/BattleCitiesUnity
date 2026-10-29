@@ -22,6 +22,7 @@ namespace BattleCities.Core
         [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public int powerupRosterVersion;
         [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public int wipeoutDamageVersion;
         public LandDroneConfig landDrone;
+        [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public CampaignTankState[] campaignStart;
     }
     [Serializable] public sealed class ReplayInputRun
     {

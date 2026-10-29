@@ -86,7 +86,7 @@ namespace BattleCities.Core
                 Mines.RemoveAll(m=>m.OwnerSlot==slot);Drones.RemoveAll(d=>d.OwnerSlot==slot);
                 Turrets.RemoveAll(t=>t.OwnerSlot==slot);LandDrones.RemoveAll(d=>d.OwnerSlot==slot);
             }
-            else {p.Lives=3;p.Respawn=0;TrySpawnParticipant(slot);}
+            else {p.Lives=3;p.Respawn=0;RestoreCampaignLives(slot);if(p.Lives>0)TrySpawnParticipant(slot);}
         }
 
         public void BeginMatch()
@@ -114,7 +114,7 @@ namespace BattleCities.Core
                 if(Math.Max(Math.Abs(x),Math.Abs(y))!=radius)continue;
                 float px=origin.x+x,py=origin.y+y;
                 if(!Free(TankState.MovementBox(px,py),tank))continue;
-                tank.X=px;tank.Y=py;nextId++;Tanks.Add(tank);return true;
+                tank.X=px;tank.Y=py;nextId++;RestoreCampaignTank(tank);Tanks.Add(tank);return true;
             }
             return false;
         }

@@ -47,12 +47,6 @@ namespace BattleCities
             }
             catch {game.ReleaseTvReplay();throw;}
         }
-        void DrawTvReplayPickup()
-        {
-            if(Simulation.PickupType==null||!ExtendedPowerupArt.TryImage(PowerupAtlas,Simulation.PickupType,out var texture,out var uv))return;
-            effects.Pickup(World(Simulation.PickupX,Simulation.PickupY,.7f),texture,uv,
-                pickupSparkles.Texture,Simulation.Tick*BattleSimulation.StepSeconds,gameCamera);
-        }
         void IsolateTvReplayVisuals()
         {
             GetComponentsInChildren(true,tvTransforms);foreach(var child in tvTransforms)child.gameObject.layer=TvReplayLayer;

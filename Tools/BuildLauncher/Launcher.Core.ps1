@@ -133,12 +133,41 @@ function Publish-LauncherWeb([string]$Web,$Plan,[string]$Commit,[string]$Job) {
     return 'https://play.battlecities.com/'
 }
 
+function Stop-LauncherPreviousLocalhost([int]$Port) {
+    try{$info=Invoke-RestMethod "http://127.0.0.1:$Port/__battlecities_build__" -TimeoutSec 2}catch{throw "Port $Port belongs to an unrecognized server; it has been left running."}
+    $identity=[string]$info.identity
+    if($identity -notmatch '^[a-zA-Z0-9-]+$'){throw "Port $Port has no valid launcher identity; it has been left running."}
+    $receiptPath=Join-Path $script:GameRoot "Builds/Launcher/$identity/localhost-process.json"
+    if(-not(Test-Path -LiteralPath $receiptPath)){throw "Port $Port has no saved launcher receipt; it has been left running."}
+    $receipt=Get-Content -LiteralPath $receiptPath -Raw|ConvertFrom-Json
+    if($receipt.identity -ne $identity -or [int]$receipt.port -ne $Port){throw 'Previous localhost receipt does not match the running server.'}
+    $serverPid=[int]$receipt.pid
+    # Some Windows CIM providers return no listener even while this loopback server responds.
+    # Verify the HTTP identity, saved PID and exact server command before using that fallback.
+    $listeners=@(Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue)
+    if($listeners.Count -gt 0 -and -not($listeners|Where-Object {$_.OwningProcess -eq $serverPid})){throw 'Previous localhost PID does not own this port; it has been left running.'}
+    $running=Get-CimInstance Win32_Process -Filter "ProcessId = $serverPid"
+    $command=([string]$running.CommandLine).Replace('\','/').ToLowerInvariant()
+    $servers=@((Join-Path $script:LauncherHome 'serve.py'),(Join-Path $script:GameRoot 'Tools/BuildLauncher/serve.py'),(Join-Path $env:USERPROFILE 'Desktop/utils/BattleCities Builder/serve.py'))
+    $recognized=@($servers|Where-Object {$command.Contains($_.Replace('\','/').ToLowerInvariant())}).Count -gt 0
+    $portPattern='(?:^|\s)"?--port"?\s+"?'+$Port+'"?(?=\s|$)'
+    if(-not $recognized -or -not $command.Contains($identity.ToLowerInvariant()) -or -not $command.Contains(([string]$receipt.root).Replace('\','/').ToLowerInvariant()) -or $command -notmatch $portPattern){throw 'Previous localhost process does not match the launcher server; it has been left running.'}
+    $process=Get-Process -Id $serverPid -ErrorAction Stop
+    Write-Host "Stopping previous Battle Cities localhost server ($identity)."
+    Stop-Process -Id $serverPid -ErrorAction Stop
+    if(-not $process.WaitForExit(5000)){throw 'Previous localhost server did not stop in time.'}
+}
+
 function Start-LauncherLocalhost([string]$Web,$Settings,[string]$Job) {
     $port=[int]$Settings.localhostPort
     if($port -lt 1024 -or $port -gt 65535){throw 'localhostPort must be 1024 to 65535.'}
-    # Do not kill or silently reuse an older server.
     $probe=[Net.Sockets.TcpListener]::new([Net.IPAddress]::Loopback,$port)
-    try{$probe.Start()}catch{throw "Port $port is in use. Change localhostPort or stop that server first."}finally{$probe.Stop()}
+    $occupied=$false
+    try{$probe.Start()}catch{$occupied=$true}finally{$probe.Stop()}
+    if($occupied){
+        Stop-LauncherPreviousLocalhost $port
+        try{$probe.Start()}catch{throw "Port $port is still occupied after stopping the previous launcher server."}finally{$probe.Stop()}
+    }
     $server=Join-Path $script:LauncherHome 'serve.py'
     $args=@($server,'--root',$Web,'--port',[string]$port,'--identity',([IO.Path]::GetFileName($Job)))
     $start=@{FilePath=(Get-GameProgram python);ArgumentList=(($args|ForEach-Object {ConvertTo-WindowsArgument $_}) -join ' ');WorkingDirectory=$script:GameRoot;WindowStyle='Hidden';PassThru=$true;RedirectStandardOutput=(Join-Path $Job 'localhost.log');RedirectStandardError=(Join-Path $Job 'localhost-errors.log')}
