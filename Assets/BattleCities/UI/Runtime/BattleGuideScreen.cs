@@ -93,7 +93,7 @@ namespace BattleCities.UI
             for(int i=0;i<tanks.Count;i++)tanks[i].Configure(tier,i==1);
             foreach(var preview in tanks)preview.RenderPreview();
             Layout();content.anchoredPosition=Vector2.zero;
-            if(psg1Guide)ConfigurePsg1Navigation();
+            if(psg1Guide||RuntimePlatformInfo.UsesControllerNavigation)ConfigurePsg1Navigation();
             if(psg1Guide&&EventSystem.current)EventSystem.current.SetSelectedGameObject(null);
             if(EventSystem.current)EventSystem.current.SetSelectedGameObject(proceed.gameObject);
         }
@@ -104,7 +104,7 @@ namespace BattleCities.UI
         }
         public void Cancel(){confirmed=null;gameObject.SetActive(false);}
         void OnDisable(){confirmed=null;}
-        void LateUpdate(){if(built&&(needsLayout||lastSize!=bounds.rect.size))Layout();if(psg1Guide&&IsOpen)KeepControllerFocus();}
+        void LateUpdate(){if(built&&(needsLayout||lastSize!=bounds.rect.size))Layout();if((psg1Guide||RuntimePlatformInfo.UsesControllerNavigation)&&IsOpen)KeepControllerFocus();}
         void OnRectTransformDimensionsChange(){needsLayout=true;}
         void Layout()
         {

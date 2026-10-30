@@ -118,8 +118,7 @@ namespace BattleCities
             aimKeys=Keys("Turret",new[]{"upArrow","rightArrow","downArrow","leftArrow"},aimOrder);
             fire=input.AddAction("Fire",InputActionType.Button,"<Keyboard>/space");
             chaseFire=input.AddAction("ChaseFire",InputActionType.Button,"<Mouse>/leftButton");
-            secondaryFire=input.AddAction("SecondaryFire",InputActionType.Button,"<Keyboard>/e");
-            secondaryFire.AddBinding("<Mouse>/rightButton");
+            secondaryFire=input.AddAction("SecondaryFire",InputActionType.Button,"<Mouse>/rightButton");
             secondarySelect=input.AddAction("SelectSecondary",InputActionType.Button,"<Keyboard>/q");
             debug=input.AddAction("Debug",InputActionType.Button,"<Keyboard>/f1");
             ConfigureDayNightShortcuts();

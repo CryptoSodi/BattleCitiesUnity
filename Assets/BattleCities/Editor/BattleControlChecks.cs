@@ -51,6 +51,26 @@ namespace BattleCities.Editor
                     InputSystem.QueueStateEvent(keyboard, new KeyboardState());
                     InputSystem.Update();
                 }
+                Check(RuntimePlatformInfo.UsesControllerNavigation,"desktop keyboard menu navigation is enabled without a test flag");
+                void KeyboardStateFor(params Key[] keys){InputSystem.QueueStateEvent(keyboard,new KeyboardState(keys));InputSystem.Update();}
+                string[] drive={"Drive0","Drive1","Drive2","Drive3","Turret0","Turret1","Turret2","Turret3"};
+                Key[] directions={Key.W,Key.D,Key.S,Key.A,Key.UpArrow,Key.RightArrow,Key.DownArrow,Key.LeftArrow};
+                for(int i=0;i<directions.Length;i++){
+                    KeyboardStateFor(directions[i]);Check(actions[drive[i]].IsPressed(),"PSG1 keyboard direction "+drive[i]);KeyboardStateFor();
+                }
+                KeyboardStateFor(Key.Space);Check(actions["Fire"].WasPressedThisFrame(),"Space presses the same Fire action as R1");
+                KeyboardStateFor();Check(actions["Fire"].WasReleasedThisFrame(),"Space releases R1 fire/charge");
+                var keyboardGesture=new GamepadSpecialGesture();
+                KeyboardStateFor(Key.E);
+                Check(actions["GamepadSpecial"].WasPressedThisFrame()&&!actions["SecondaryFire"].WasPressedThisFrame(),"E enters L1 gesture without immediate deployment");
+                keyboardGesture.Sample(true,true,false,.1f,true);
+                KeyboardStateFor();
+                Check(actions["GamepadSpecial"].WasReleasedThisFrame()&&keyboardGesture.Sample(false,false,true,0,true)==1,"E tap releases one special");
+                KeyboardStateFor(Key.E);keyboardGesture.Sample(true,true,false,.1f,true);
+                Check(keyboardGesture.Sample(false,actions["GamepadSpecial"].IsPressed(),false,.9f,true)==2,"E hold switches at one second");
+                KeyboardStateFor();Check(keyboardGesture.Sample(false,false,actions["GamepadSpecial"].WasReleasedThisFrame(),0,true)==0,"E hold release never also deploys");
+                KeyboardStateFor(Key.E);Check(actions["GamepadSpecial"].WasPressedThisFrame()&&!actions["SecondaryFire"].IsPressed(),"main keyboard E uses the L1 gesture by default");
+                KeyboardStateFor();
                 actions.Disable();
                 Check(!BattleGamepadBindings.HelpFor(false).Contains("SWITCH") && !BattleGamepadBindings.Help.Contains("PAUSE"), "single-special help omits unavailable controls");
                 Check(BattleGamepadBindings.HelpFor(true).Contains("HOLD L1: SWITCH SPECIAL"), "future multi-special help advertises switching");

@@ -93,7 +93,7 @@ namespace BattleCities.Multiplayer
             if(replayGame&&(replayGame.IsReplaying||replayGame.HasMatchResult||replayGame.ResultsVisible))
             {open.gameObject.SetActive(false);if(Visible){panel.SetActive(false);ReleaseController();}return;}
             bool available=SceneManager.GetActiveScene().name!="Login";
-            bool psgMenu=RuntimePlatformInfo.IsPsg1&&SceneManager.GetActiveScene().name=="MainMenu";
+            bool psgMenu=(RuntimePlatformInfo.UsesControllerNavigation)&&SceneManager.GetActiveScene().name=="MainMenu";
             if(psgMenu&&!mainMenuView)mainMenuView=UnityEngine.Object.FindFirstObjectByType<UI.MainMenuScene>();
             var homeHud=psgMenu&&mainMenuView?mainMenuView.Content.Find("Status Bar"):null;
             open.gameObject.SetActive(DevelopmentOverlays.Visible&&available&&!Visible&&(!homeHud||homeHud.gameObject.activeInHierarchy));
@@ -129,8 +129,8 @@ namespace BattleCities.Multiplayer
             bool quick=Session.QuickMatching;
             mode.gameObject.SetActive(!quick);region.gameObject.SetActive(!quick);
             mapLabel.gameObject.SetActive(!quick);previousMap.gameObject.SetActive(!quick);nextMap.gameObject.SetActive(!quick);
-            code.gameObject.SetActive(!quick&&!RuntimePlatformInfo.IsPsg1);
-            codeButton.gameObject.SetActive(!quick&&RuntimePlatformInfo.IsPsg1);
+            code.gameObject.SetActive(!quick&&!(RuntimePlatformInfo.UsesControllerNavigation));
+            codeButton.gameObject.SetActive(!quick&&(RuntimePlatformInfo.UsesControllerNavigation));
             create.gameObject.SetActive(!quick);join.gameObject.SetActive(!quick);
             roomLabel.gameObject.SetActive(!quick);quickControls.gameObject.SetActive(quick&&!ended);
             close.gameObject.SetActive(!quick);
@@ -163,16 +163,16 @@ namespace BattleCities.Multiplayer
             close.GetComponentInChildren<UnityEngine.UI.Text>().text=SceneManager.GetActiveScene().name=="MainMenu"?"BACK TO MENU":"BACK TO GAME";
             var activeGame=UnityEngine.Object.FindFirstObjectByType<BattleGame>();
             bool canSwap=activeGame&&activeGame.CanSwapSpecials;
-            quickControls.text=RuntimePlatformInfo.IsPsg1 ? BattleGamepadBindings.HelpFor(canSwap)
+            quickControls.text=(RuntimePlatformInfo.UsesControllerNavigation) ? BattleGamepadBindings.HelpFor(canSwap)
                 : "DRIVE  WASD     AIM  ARROW KEYS\nFIRE / CHARGE  SPACE\nDEPLOY  E / RIGHT CLICK"+(canSwap?"     SWITCH SPECIAL  Q":"");
-            if(RuntimePlatformInfo.IsPsg1)
+            if((RuntimePlatformInfo.UsesControllerNavigation))
             {
                 ConfigureLobbyNavigation();
             }
         }
         private void ConfigureController()
         {
-            if(!RuntimePlatformInfo.IsPsg1||!EventSystem.current)return;
+            if(!(RuntimePlatformInfo.UsesControllerNavigation)||!EventSystem.current)return;
             if(controllerInput!=null&&controllerInput.MatchesCurrent)return;
             ReleaseController();controllerInput=new Psg1UiInput();
         }

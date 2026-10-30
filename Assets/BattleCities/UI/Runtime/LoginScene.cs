@@ -278,14 +278,15 @@ namespace BattleCities.UI
         {
             RefreshGuestAccess();
             if (restoringSession || loading) return;
-            if (!layout || !layout.UsesPsg1) { controllerInput?.Dispose(); controllerInput = null; return; }
+            if (!layout || (!layout.UsesPsg1&&!RuntimePlatformInfo.UsesControllerNavigation)) { controllerInput?.Dispose(); controllerInput = null; return; }
             if (controllerInput == null || !controllerInput.MatchesCurrent)
             { controllerInput?.Dispose(); controllerInput = new Psg1UiInput(); }
             if (controllerInput.CancelPressed && pendingWallet && apiClient) apiClient.CancelWalletLogin();
-            Psg1UiNavigation.Rows(new Selectable[] { psgPhantomButton });
-            if (controllerInput.CancelPressed && Psg1UiNavigation.Available(psgPhantomButton))
-                EventSystem.current.SetSelectedGameObject(psgPhantomButton.gameObject);
-            if (psgPhantomButton) Psg1UiNavigation.KeepFocus(psgPhantomButton.transform.parent, psgPhantomButton);
+            var primary=layout.UsesPsg1?psgPhantomButton:phantomButton;
+            Psg1UiNavigation.Rows(layout.UsesPsg1?new Selectable[]{primary}:new Selectable[]{primary,guestButton,storeButton});
+            if (controllerInput.CancelPressed && Psg1UiNavigation.Available(primary))
+                EventSystem.current.SetSelectedGameObject(primary.gameObject);
+            if (primary) Psg1UiNavigation.KeepFocus(primary.transform.parent, primary);
         }
         // Keep the old entry point for any serialized UnityEvent references.
         public void ConnectPhantom() => ConnectWallet();

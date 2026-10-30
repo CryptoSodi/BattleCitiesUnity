@@ -20,6 +20,7 @@ namespace BattleCities
             // PSG1 uses Nintendo face labels: A=east, B=south, X=north, Y=west.
             map.FindAction("Fire", true).AddBinding("<Gamepad>/rightShoulder");
             map.AddAction("GamepadSpecial", InputActionType.Button, "<Gamepad>/leftShoulder");
+            map.FindAction("GamepadSpecial").AddBinding("<Keyboard>/e");
             string[] buttons = { "buttonEast", "buttonSouth", "buttonNorth", "buttonWest" };
             for (int i = 0; i < buttons.Length; i++)
                 map.FindAction("Powerup" + (i + 1), true).AddBinding("<Gamepad>/" + buttons[i]);

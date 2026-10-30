@@ -52,7 +52,7 @@ namespace BattleCities.UI
                 events.transform.SetParent(transform, false);
                 events.GetComponent<InputSystemUIInputModule>().AssignDefaultActions();
             }
-            if (RuntimePlatformInfo.IsPsg1) controller = new Psg1UiInput();
+            if (RuntimePlatformInfo.UsesControllerNavigation) controller = new Psg1UiInput();
             if(EventSystem.current)EventSystem.current.SetSelectedGameObject(next.gameObject);
         }
 
@@ -227,13 +227,15 @@ namespace BattleCities.UI
         void Update()
         {
             if(!canvas)return;
+            if(RuntimePlatformInfo.UsesControllerNavigation){if(controller==null||!controller.MatchesCurrent){controller?.Dispose();controller=new Psg1UiInput();}}
+            else if(controller!=null){controller.Dispose();controller=null;}
             RefreshButtonCaption(share,ref shareCaptionNavy);RefreshButtonCaption(next,ref nextCaptionNavy);
             if(lastSize!=new Vector2(Screen.width,Screen.height)||lastSafe!=Screen.safeArea)Layout();
             gate.interactable=Time.unscaledTime-openedAt>.25f;
             if(messageUntil>0&&Time.unscaledTime>messageUntil){messageUntil=0;if(!busy)status.text="MATCH COMPLETE";}
             if(!gate.interactable)return;
             if(!inputReady){inputReady=true;Psg1UiNavigation.Rows(new Selectable[] { share },new Selectable[] { next });}
-            if(RuntimePlatformInfo.IsPsg1){Psg1UiNavigation.KeepFocus(root,next);if(controller!=null&&controller.CancelPressed)backAction?.Invoke();}
+            if(RuntimePlatformInfo.UsesControllerNavigation){Psg1UiNavigation.KeepFocus(root,next);if(controller!=null&&controller.CancelPressed)backAction?.Invoke();}
             else if(Keyboard.current!=null&&Keyboard.current.escapeKey.wasPressedThisFrame)backAction?.Invoke();
         }
         public void SetStatus(string message,bool blockContinue=false){status.text=message;busy=blockContinue;next.interactable=!busy;messageUntil=0;}

@@ -23,6 +23,14 @@ namespace BattleCities.Editor
             menu.ApplyLayout(MainMenuPlatform.Web,new Vector2(1920,1080));Canvas.ForceUpdateCanvases();
             var button=menu.GetComponentInChildren<WebFullscreenButton>();
             if(!button)throw new Exception("Web fullscreen button missing");
+            var settings=menu.Content.Find("Web settings");
+            var socket=menu.Content.Find("Status Bar/Player/Icon tile");
+            var portrait=socket?socket.Find("Icon")?.GetComponent<Image>():null;
+            var profile=RemoteGameArt.Load<PlayerProfileArt>("PlayerProfileArt");
+            if(!settings||!settings.GetComponent<Button>()||!socket||!socket.GetComponent<Button>()||!portrait||!profile||portrait.sprite!=profile.commander)throw new Exception("Player portrait or separate settings action missing");
+            if(portrait.rectTransform.anchorMin!=Vector2.zero||portrait.rectTransform.anchorMax!=Vector2.one||portrait.rectTransform.localScale.x<1.07f)throw new Exception("Player portrait must fill the white icon socket");
+            if(!socket.GetComponent<Image>().raycastTarget||!socket.GetComponent<Button>().enabled)throw new Exception("Player portrait must receive profile clicks");
+            if(!button.transform.Find("Framed fullscreen artwork")||button.GetComponent<Image>().sprite!=socket.GetComponent<Image>().sprite)throw new Exception("Fullscreen and Settings must share the player icon frame");
             var rect=(RectTransform)button.transform;
             if(rect.rect.width!=48||rect.rect.height!=48)throw new Exception("Fullscreen target must be compact 48x48");
             foreach(float ratio in new[]{1f,2f,3f})foreach(float menuScale in new[]{.5f,1f,1.5f}){
@@ -36,6 +44,8 @@ namespace BattleCities.Editor
                 var board=menu.Content.Find("Leaderboard") as RectTransform;
                 var a=new Vector3[4];var b=new Vector3[4];rect.GetWorldCorners(a);board.GetWorldCorners(b);
                 if(Mathf.Abs(a[2].x-b[2].x)>.1f||a[0].y<=b[2].y)throw new Exception("Fullscreen must align above rankings' right edge");
+                var s=new Vector3[4];((RectTransform)settings).GetWorldCorners(s);
+                if(s[2].x>=a[0].x||Mathf.Abs(s[0].y-a[0].y)>.1f||Mathf.Abs((s[2].x-s[0].x)-(a[2].x-a[0].x))>.1f)throw new Exception("Settings must be the same size and sit immediately left of Fullscreen");
                 Capture(camera,target,"fullscreen-home.png",new Rect(0,0,1920,1080));
                 Capture(camera,target,"fullscreen-detail.png",new Rect(1320,780,480,290));
                 button.OnPointerEnter(new PointerEventData(EventSystem.current));
@@ -44,6 +54,7 @@ namespace BattleCities.Editor
                 foreach(var platform in new[]{MainMenuPlatform.AndroidLandscape,MainMenuPlatform.Psg1}){
                     menu.ApplyLayout(platform,new Vector2(1920,1080));
                     if(button.gameObject.activeSelf)throw new Exception("Fullscreen visible on native profile");
+                    if(settings.gameObject.activeSelf||socket.GetComponent<Button>().enabled)throw new Exception("Web header actions leaked to a native layout");
                 }
                 menu.ApplyLayout(MainMenuPlatform.Web,new Vector2(1920,1080));
                 if(menu.GetComponentsInChildren<WebFullscreenButton>(true).Length!=1||!button.gameObject.activeSelf)throw new Exception("Fullscreen duplicate or lost on profile change");

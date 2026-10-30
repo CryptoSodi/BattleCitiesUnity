@@ -170,6 +170,7 @@ namespace BattleCities.UI
         private Vector2 lastSize;
         private Rect lastSafeArea;
         private MainMenuPlatform lastPlatform = (MainMenuPlatform)(-1);
+        private bool lastControllerNavigation;
         private InputActionAsset liveInput;
         private InputAction cancel;
         private readonly List<InputActionReference> inputReferences = new List<InputActionReference>();
@@ -354,7 +355,7 @@ namespace BattleCities.UI
                     RefreshLayout();
                 }
             }
-            if(size!=lastSize || Screen.safeArea!=lastSafeArea || resolved!=lastPlatform) RefreshLayout();
+            if(size!=lastSize || Screen.safeArea!=lastSafeArea || resolved!=lastPlatform || lastControllerNavigation!=RuntimePlatformInfo.UsesControllerNavigation) RefreshLayout();
         }
         public MainMenuPlatform Resolve(Vector2 size)
         {
@@ -386,6 +387,7 @@ namespace BattleCities.UI
         {
             if(target==MainMenuPlatform.Android && available.x>available.y)
                 target=MainMenuPlatform.AndroidLandscape;
+            ConfigureWebHeaderActions(target==MainMenuPlatform.Web);
             if(editLayoutInScene && !generatingLayout)
             {
                 ApplyAuthoredLayout(target,available);
@@ -517,7 +519,7 @@ namespace BattleCities.UI
             float mw=Mathf.Min(w-70,720),mh=portrait?520:440;
             Place(modalPanel,(w-mw)/2,(h-mh)/2,mw,mh);
             ConfigureNavigation(compact);
-            if(Application.isPlaying && (target!=lastPlatform || inputModule.actionsAsset!=liveInput))ConfigureInput(psg);
+            if(Application.isPlaying && (target!=lastPlatform || inputModule.actionsAsset!=liveInput || lastControllerNavigation!=RuntimePlatformInfo.UsesControllerNavigation))ConfigureInput(psg);
             lastPlatform=target;
             ApplyArenaBackdrop(target,available);
             ApplyMenuPresentation();
@@ -584,10 +586,13 @@ namespace BattleCities.UI
         private void ConfigureInput(bool psg)
         {
             if(!liveInput || !inputModule)return;
+            lastControllerNavigation=RuntimePlatformInfo.UsesControllerNavigation;
+            psg|=lastControllerNavigation;
             if(cancel!=null)cancel.performed-=OnCancel;
             liveInput.Disable();
             inputModule.actionsAsset=liveInput;
             var map=liveInput.FindActionMap(psg?"PSG1":"UI",true);
+            if(psg)Psg1UiInput.BindKeyboard(map.FindAction("Navigate",true),map.FindAction("Submit",true),map.FindAction("Cancel",true));
             ClearInputReferences();
             inputModule.point=Reference(map.FindAction("Point"));
             inputModule.leftClick=Reference(map.FindAction("Click"));
@@ -628,7 +633,7 @@ namespace BattleCities.UI
         }
         private void LateUpdate()
         {
-            if (!Application.isPlaying || lastPlatform != MainMenuPlatform.Psg1 || !EventSystem.current) return;
+            if (!Application.isPlaying || (lastPlatform != MainMenuPlatform.Psg1&&!RuntimePlatformInfo.UsesControllerNavigation) || !EventSystem.current) return;
             var lobby = BattleCities.Multiplayer.BattleSession.Instance ? BattleCities.Multiplayer.BattleSession.Instance.Lobby : null;
             if (lobby && lobby.Visible) return;
             if (IsModalOpen) { Psg1UiNavigation.KeepFocus(modal, closeButton); return; }
@@ -639,7 +644,7 @@ namespace BattleCities.UI
             if (IsShopOpen) { EnsureShop();shop.KeepControllerFocus();return; }
             if (preBattle && preBattle.IsOpen) { preBattle.KeepControllerFocus(); return; }
             var online = lobby ? lobby.OpenButton : null;
-            Psg1UiNavigation.Rows(new Selectable[] { walletLoginButton, settingsButton, online },
+            Psg1UiNavigation.Rows(new Selectable[] { webAvatarButton, walletLoginButton, settingsButton, fullscreenButton, online },
                 new Selectable[] { startButton }, tabs);
             var selected = EventSystem.current.currentSelectedGameObject;
             // ONLINE belongs to the persistent multiplayer canvas, outside this menu's hierarchy.

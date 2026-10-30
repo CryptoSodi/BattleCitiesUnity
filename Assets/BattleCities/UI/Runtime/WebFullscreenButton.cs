@@ -10,6 +10,8 @@ namespace BattleCities.UI
     {
         readonly List<Image> glyph=new List<Image>();
         Sprite blue,gold;
+        Sprite frame;
+        Image framedArtwork;
         WebFullscreenArt art;
         bool hovered,focused,pressed,lastFullscreen;
         public static float TargetSize(bool mobile,float pixelScale,float canvasScale)=>mobile?64*Mathf.Max(1,pixelScale)/Mathf.Max(.001f,canvasScale):48;
@@ -52,6 +54,18 @@ namespace BattleCities.UI
         {
             Refresh();
         }
+        public void SetFrame(Sprite sprite)
+        {
+            frame=sprite;
+            if(frame&&!framedArtwork){
+                var child=new GameObject("Framed fullscreen artwork",typeof(RectTransform),typeof(Image));
+                child.transform.SetParent(transform,false);
+                var rect=(RectTransform)child.transform;rect.anchorMin=new Vector2(.12f,.12f);rect.anchorMax=new Vector2(.88f,.88f);rect.offsetMin=rect.offsetMax=Vector2.zero;
+                framedArtwork=child.GetComponent<Image>();framedArtwork.raycastTarget=false;framedArtwork.preserveAspect=true;
+            }
+            if(framedArtwork)framedArtwork.enabled=frame;
+            Refresh();
+        }
         void FitFallbackSkin()
         {
             var surface=(Image)targetGraphic;if(!surface||!blue)return;
@@ -67,10 +81,17 @@ namespace BattleCities.UI
             lastFullscreen=Screen.fullScreen;
             var artwork=art?art.ForState(lastFullscreen,active):null;
             var surface=(Image)targetGraphic;
-            surface.sprite=artwork?artwork:active?gold:blue;
-            surface.type=artwork?Image.Type.Simple:Image.Type.Sliced;surface.preserveAspect=artwork;
+            if(frame){
+                surface.sprite=frame;surface.type=Image.Type.Simple;surface.preserveAspect=true;
+                framedArtwork.sprite=artwork?artwork:active?gold:blue;
+                framedArtwork.type=artwork?Image.Type.Simple:Image.Type.Sliced;
+                framedArtwork.preserveAspect=artwork;
+            }else{
+                surface.sprite=artwork?artwork:active?gold:blue;
+                surface.type=artwork?Image.Type.Simple:Image.Type.Sliced;surface.preserveAspect=artwork;
+            }
             foreach(var stroke in glyph){stroke.enabled=!artwork;stroke.color=active?ArcadeTextStyles.PrizeAmountFace:Color.white;}
-            if(!artwork)FitFallbackSkin();
+            if(!artwork&&!frame)FitFallbackSkin();
         }
         void Update(){if(lastFullscreen!=Screen.fullScreen)Refresh();}
         void ToggleFullscreen()

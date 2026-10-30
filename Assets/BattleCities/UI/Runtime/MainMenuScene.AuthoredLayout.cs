@@ -164,7 +164,7 @@ namespace BattleCities.UI
                 controls.gameObject.SetActive(!controllerLegendHidden);
             }
             ConfigureNavigation(target!=MainMenuPlatform.Web && target!=MainMenuPlatform.AndroidLandscape);
-            if(Application.isPlaying && inputModule && (target!=lastPlatform || inputModule.actionsAsset!=liveInput))
+            if(Application.isPlaying && inputModule && (target!=lastPlatform || inputModule.actionsAsset!=liveInput || lastControllerNavigation!=RuntimePlatformInfo.UsesControllerNavigation))
                 ConfigureInput(target==MainMenuPlatform.Psg1);
             // A platform profile may restore the home artwork while the tank selector is open.
             bool showHome= !IsModalOpen && !IsTvScreenOpen;

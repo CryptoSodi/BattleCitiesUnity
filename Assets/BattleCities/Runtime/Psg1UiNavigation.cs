@@ -25,17 +25,25 @@ namespace BattleCities
             actions = ScriptableObject.CreateInstance<InputActionAsset>();
             var map = actions.AddActionMap("PSG1 screen");
             var a = map.AddAction("Submit", InputActionType.Button, "<Gamepad>/buttonEast");
-            a.AddBinding("<Keyboard>/enter");
             var b = map.AddAction("Cancel", InputActionType.Button, "<Gamepad>/buttonSouth");
-            b.AddBinding("<Keyboard>/escape");
             var navigation = map.AddAction("Move", InputActionType.Value);
             navigation.expectedControlType = "Vector2";
             navigation.AddBinding("<Gamepad>/dpad"); navigation.AddBinding("<Gamepad>/leftStick");
-            navigation.AddCompositeBinding("2DVector").With("Up", "<Keyboard>/upArrow").With("Down", "<Keyboard>/downArrow")
-                .With("Left", "<Keyboard>/leftArrow").With("Right", "<Keyboard>/rightArrow");
+            BindKeyboard(navigation,a,b);
             submit = InputActionReference.Create(a); cancel = InputActionReference.Create(b); move = InputActionReference.Create(navigation);
             module.submit = submit; module.cancel = null; module.move = move;
             map.Enable();
+        }
+
+        public static void BindKeyboard(InputAction navigation,InputAction submit,InputAction cancel)
+        {
+            if(!submit.bindings.Any(b=>b.path=="<Keyboard>/enter"))submit.AddBinding("<Keyboard>/enter");
+            if(!cancel.bindings.Any(b=>b.path=="<Keyboard>/escape"))cancel.AddBinding("<Keyboard>/escape");
+            string[][] keys={new[]{"upArrow","downArrow","leftArrow","rightArrow"},new[]{"w","s","a","d"}};
+            foreach(var group in keys)
+                if(!navigation.bindings.Any(b=>b.path=="<Keyboard>/"+group[0]))
+                    navigation.AddCompositeBinding("2DVector").With("Up","<Keyboard>/"+group[0]).With("Down","<Keyboard>/"+group[1])
+                        .With("Left","<Keyboard>/"+group[2]).With("Right","<Keyboard>/"+group[3]);
         }
 
         public void Dispose()
@@ -46,11 +54,17 @@ namespace BattleCities
                 if (module.submit == submit) { module.submit = oldSubmit; module.cancel = oldCancel; }
                 if (module.move == move) module.move = oldMove;
             }
-            if (actions) { actions.Disable(); UnityEngine.Object.Destroy(actions); }
-            if (submit) UnityEngine.Object.Destroy(submit);
-            if (cancel) UnityEngine.Object.Destroy(cancel);
-            if (move) UnityEngine.Object.Destroy(move);
+            if (actions) { actions.Disable(); Release(actions); }
+            if (submit) Release(submit);
+            if (cancel) Release(cancel);
+            if (move) Release(move);
             module = null; actions = null;
+        }
+
+        static void Release(UnityEngine.Object value)
+        {
+            if(Application.isPlaying)UnityEngine.Object.Destroy(value);
+            else UnityEngine.Object.DestroyImmediate(value);
         }
     }
 

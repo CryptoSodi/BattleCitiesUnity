@@ -54,6 +54,7 @@ namespace BattleCities
         public static bool IsWeb => Current == GameRuntimePlatform.WebGl;
         public static bool IsAndroid => Current == GameRuntimePlatform.Android || IsPsg1;
         public static bool IsPsg1 => Current == GameRuntimePlatform.Psg1;
+        public static bool UsesControllerNavigation => IsPsg1||!UsesTouchGameplay||UnityEngine.InputSystem.Keyboard.current!=null||UnityEngine.InputSystem.Gamepad.current!=null;
         public static bool IsMobileBrowser => IsWeb && detectedMobileBrowser;
         public static bool UsesTouchGameplay => UsesTouchGameplayFor(Current, IsMobileBrowser);
         public static bool UsesTouchGameplayFor(GameRuntimePlatform platform,bool mobileBrowser) =>
