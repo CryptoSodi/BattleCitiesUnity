@@ -159,11 +159,13 @@ namespace BattleCities.UI
             var controls=new System.Collections.Generic.List<Button>();
             if(page==Page.Treasury&&history)controls.AddRange(ledgerRows);else for(int i=0;i<items.Count&&i<cards.Count;i++)controls.Add(cards[i].Button);
             Button action=footerAction.gameObject.activeSelf?footerAction:tabs[tabs.Count-1];
-            for(int i=0;i<tabs.Count;i++)Link(tabs[i],tabs[(i+tabs.Count-1)%tabs.Count],tabs[(i+1)%tabs.Count],action,controls.Count>0?controls[Math.Min(i,controls.Count-1)]:action);
+            Button tab=tabs.Contains(lastTabFocus)&&Psg1UiNavigation.Available(lastTabFocus)?lastTabFocus:tabs[0];
+            Button card=controls.Contains(lastCardFocus)&&Psg1UiNavigation.Available(lastCardFocus)?lastCardFocus:controls.Count>0?controls[0]:action;
+            for(int i=0;i<tabs.Count;i++)Link(tabs[i],tabs[(i+tabs.Count-1)%tabs.Count],tabs[(i+1)%tabs.Count],action,card);
             int rowWidth=page==Page.Treasury&&history?1:columns;
             for(int i=0;i<controls.Count;i++)Link(controls[i],i%rowWidth>0?controls[i-1]:tabs[0],i%rowWidth<rowWidth-1&&i+1<controls.Count?controls[i+1]:tabs[tabs.Count-1],
-                i>=rowWidth?controls[i-rowWidth]:tabs[Math.Min(i,tabs.Count-1)],i+rowWidth<controls.Count?controls[i+rowWidth]:i/rowWidth<(controls.Count-1)/rowWidth?controls[controls.Count-1]:action);
-            if(footerAction.gameObject.activeSelf)Link(footerAction,tabs[0],tabs[tabs.Count-1],controls.Count>0?controls[controls.Count-1]:tabs[0],tabs[0]);
+                i>=rowWidth?controls[i-rowWidth]:tab,i+rowWidth<controls.Count?controls[i+rowWidth]:i/rowWidth<(controls.Count-1)/rowWidth?controls[controls.Count-1]:action);
+            if(footerAction.gameObject.activeSelf)Link(footerAction,tabs[0],tabs[tabs.Count-1],card,tab);
         }
         static void Link(Selectable b,Selectable left,Selectable right,Selectable up,Selectable down){b.navigation=new Navigation{mode=Navigation.Mode.Explicit,selectOnLeft=left,selectOnRight=right,selectOnUp=up,selectOnDown=down};}
         TankRosterScroll BuildScroll(Transform parent)

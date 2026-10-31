@@ -15,6 +15,33 @@ namespace BattleCities.Editor
     public static class RankingCardsChecks
     {
         const BindingFlags Private=BindingFlags.Instance|BindingFlags.NonPublic;
+        public static void CheckHomeEmptyTransition()
+        {
+            var menu=UnityEngine.Object.FindFirstObjectByType<MainMenuScene>();
+            if(!menu||!Application.isPlaying)throw new Exception("Open the main menu in Play mode.");
+            var type=typeof(MainMenuScene);var old=(MainMenuApiClient.RoundSnapshot)type.GetField("roundSnapshot",Private).GetValue(menu);
+            var load=type.GetMethod("OnApiRoundLoaded",Private);var board=menu.Content.Find("Leaderboard");
+            var columns=board.Find("Columns");var scores=(RectTransform)board.Find("Scores");
+            try
+            {
+                var row=new MainMenuApiClient.RankingRow{rank=1,displayName="TEST",totalPoints=100,matches=1};
+                var populated=new MainMenuApiClient.RoundSnapshot{rows=new[]{row},intervalMinutes=30};
+                load.Invoke(menu,new object[]{populated});Canvas.ForceUpdateCanvases();float top=scores.anchorMax.y;
+                if(!columns.gameObject.activeSelf)throw new Exception("Populated home headings are missing.");
+                load.Invoke(menu,new object[]{new MainMenuApiClient.RoundSnapshot{rows=Array.Empty<MainMenuApiClient.RankingRow>(),intervalMinutes=30}});
+                Canvas.ForceUpdateCanvases();if(columns.gameObject.activeSelf||scores.anchorMax.y<=top)throw new Exception("Empty home rankings did not expand.");
+                menu.RefreshLayout();Canvas.ForceUpdateCanvases();
+                if(columns.gameObject.activeSelf||scores.anchorMax.y<=top)throw new Exception("Empty home layout did not survive refresh.");
+                var timer=(RectTransform)board.Find("Round status");var timerCorners=new Vector3[4];var scoreCorners=new Vector3[4];
+                timer.GetWorldCorners(timerCorners);scores.GetWorldCorners(scoreCorners);
+                float timerBottom=board.InverseTransformPoint(timerCorners[0]).y;
+                float scoresTop=board.InverseTransformPoint(scoreCorners[1]).y;
+                if(timerBottom-scoresTop<9.9f)throw new Exception("Empty home ranking must stay at least 10 units below the timer.");
+                load.Invoke(menu,new object[]{populated});Canvas.ForceUpdateCanvases();
+                if(!columns.gameObject.activeSelf||!Mathf.Approximately(scores.anchorMax.y,top))throw new Exception("Populated home layout was not restored.");
+            }
+            finally {load.Invoke(menu,new object[]{old});}
+        }
         public static void Run()
         {
             ImportArt();RankingPageChecks.CheckParsing();
@@ -53,6 +80,13 @@ namespace BattleCities.Editor
                 Check(card.transform.Find("Rank badge").GetComponent<Image>().sprite==art.Medal(card.Data.rank),"podium uses blank laurel plus native rank text");
             }
             var page=menu.GetComponent<RankingScreen>();var board=page.Data;
+            var homeColumns=menu.Content.Find("Leaderboard/Columns");
+            var homeScores=(RectTransform)menu.Content.Find("Leaderboard/Scores");
+            float populatedTop=homeScores.anchorMax.y;
+            typeof(MainMenuScene).GetMethod("OnApiRoundLoaded",Private).Invoke(menu,new object[]{new MainMenuApiClient.RoundSnapshot{rows=Array.Empty<MainMenuApiClient.RankingRow>(),intervalMinutes=30}});
+            Check(!homeColumns.gameObject.activeSelf&&homeScores.anchorMax.y>populatedTop,"empty home ranking hides headings and expands its empty surface");
+            typeof(MainMenuScene).GetMethod("OnApiRoundLoaded",Private).Invoke(menu,new object[]{new MainMenuApiClient.RoundSnapshot{rows=board.Rows.ToArray(),intervalMinutes=30}});
+            Check(homeColumns.gameObject.activeSelf&&Mathf.Approximately(homeScores.anchorMax.y,populatedTop),"populated home ranking restores headings and list geometry");
             Check(page.Root.Find("Standings/Your rank card").GetComponent<RankingRowCard>().Data.rank==24,"full page pins the same API current player outside scrolling rows");
             var scroll=page.TableScroll;Canvas.ForceUpdateCanvases();
             var rowButtons=scroll.content.GetComponentsInChildren<Button>().Where(b=>b.gameObject.activeSelf).ToArray();
@@ -67,7 +101,11 @@ namespace BattleCities.Editor
             Check(scroll.verticalNormalizedPosition<.99f,"mouse-wheel still scrolls cards");
             page.Present(new RankingPageData{Cycle=true,PeriodId="cycle",PeriodLabel="CURRENT CYCLE"});
             Check(page.Root.Find("Standings/Empty standings").gameObject.activeSelf&&!page.Root.Find("Standings/Your rank card").gameObject.activeSelf,"valid empty response clears rows and personal card");
+            Check(!page.Root.Find("Standings/Heading").gameObject.activeSelf&&!scroll.gameObject.activeSelf,"empty ranking hides headings and scrollbar");
+            var empty=(RectTransform)page.Root.Find("Standings/Empty standings");var table=(RectTransform)page.Root.Find("Standings");
+            Check(empty.rect.height>=table.rect.height-20,"empty ranking surface fills the available table height");
             page.Present(board);scroll.verticalNormalizedPosition=1;Canvas.ForceUpdateCanvases();
+            Check(page.Root.Find("Standings/Heading").gameObject.activeSelf&&scroll.gameObject.activeSelf&&!page.Root.Find("Standings/Heading/Period title").gameObject.activeSelf,"populated rankings restore columns and scrolling without the redundant title");
             var third=board.Rows[2];
             var stale=new MainMenuApiClient.RankingRow{playerId=third.playerId,rank=2,totalPoints=1};
             var fixedBoard=new RankingPageData{Cycle=true,PeriodId="cycle",PeriodLabel="CURRENT CYCLE",MyRank=2,CurrentPlayer=stale,EndsAt=board.EndsAt,PayoutsEnabled=true};fixedBoard.Rows.AddRange(board.Rows);

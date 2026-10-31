@@ -112,15 +112,16 @@ namespace BattleCities.UI
         void LoadoutNavigation()
         {
             if(!loadoutWorkspace)return;
-            back.navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.Explicit,selectOnDown=slotButtons[1],selectOnUp=proceed,selectOnLeft=clearSlot.interactable?clearSlot:loadoutRows[0],selectOnRight=back};
+            var slot=Psg1UiNavigation.Available(lastSlotFocus)?lastSlotFocus:slotButtons[activeSlot];
+            back.navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.Explicit,selectOnDown=slot,selectOnUp=proceed,selectOnLeft=clearSlot.interactable?clearSlot:loadoutRows[0],selectOnRight=back};
             for(int i=0;i<4;i++)slotButtons[i].navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.Explicit,
                 selectOnUp=i<2?back:slotButtons[i-2],selectOnDown=i<2?slotButtons[i+2]:i==2&&clearSlot.interactable?clearSlot:proceed,
                 selectOnLeft=i%2==0?loadoutRows[Math.Min(i*2,Items.Length-1)]:slotButtons[i-1],selectOnRight=i%2==0?slotButtons[i+1]:slotButtons[i]};
             for(int i=0;i<Items.Length;i++)loadoutRows[i].navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.Explicit,
                 selectOnUp=i>0?loadoutRows[i-1]:back,selectOnDown=i<Items.Length-1?loadoutRows[i+1]:clearSlot.interactable?clearSlot:proceed,
-                selectOnLeft=back,selectOnRight=slotButtons[activeSlot]};
-            clearSlot.navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.Explicit,selectOnUp=slotButtons[2],selectOnDown=back,selectOnLeft=loadoutRows[Items.Length-1],selectOnRight=proceed};
-            proceed.navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.Explicit,selectOnUp=slotButtons[2],selectOnDown=back,selectOnLeft=clearSlot.interactable?clearSlot:loadoutRows[Items.Length-1],selectOnRight=slotButtons[3]};
+                selectOnLeft=back,selectOnRight=slot};
+            clearSlot.navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.Explicit,selectOnUp=slot,selectOnDown=back,selectOnLeft=loadoutRows[Items.Length-1],selectOnRight=proceed};
+            proceed.navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.Explicit,selectOnUp=slot,selectOnDown=back,selectOnLeft=clearSlot.interactable?clearSlot:loadoutRows[Items.Length-1],selectOnRight=slotButtons[3]};
         }
     }
 }

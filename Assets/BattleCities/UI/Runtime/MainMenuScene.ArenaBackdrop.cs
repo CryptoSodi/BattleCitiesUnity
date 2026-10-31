@@ -215,6 +215,7 @@ namespace BattleCities.UI
                 for (int i = 0; i < statusBar.childCount; i++)
                     FitStatusCardFrame((RectTransform)statusBar.GetChild(i), false);
             }
+            if(ResponsiveWebLayout.IsBrowserSurface&&target!=MainMenuPlatform.Web&&leaderboard)leaderboard.gameObject.SetActive(false);
             var canvasRect = transform as RectTransform;
             var backdrop = canvasRect ? canvasRect.Find("World backdrop") as RectTransform : null;
             var image = backdrop ? backdrop.GetComponent<UnityEngine.UI.Image>() : null;
@@ -286,10 +287,18 @@ namespace BattleCities.UI
                     blurred.anchorMin = blurred.anchorMax = blurred.pivot = new Vector2(.5f, .5f);
                     blurred.localRotation = Quaternion.identity;
                     blurred.localScale = Vector3.one;
-                    blurred.sizeDelta = new Vector2(topRight.x - bottomLeft.x, topRight.y - bottomLeft.y);
-                    blurred.anchoredPosition = new Vector2(
-                        (bottomLeft.x + topRight.x) * .5f - viewport.rect.center.x,
-                        (bottomLeft.y + topRight.y) * .5f - viewport.rect.center.y);
+                    float bgWidth=topRight.x-bottomLeft.x, bgHeight=topRight.y-bottomLeft.y;
+                    var bgCenter=(bottomLeft+topRight)*.5f;
+                    if(target==MainMenuPlatform.Psg1 && ResponsiveWebLayout.IsBrowserSurface){
+                        // Tall browser windows can extend beyond the authored arena
+                        // backdrop. Keep the same glass surface across the entire TV.
+                        float cover=Mathf.Max(1f,viewport.rect.width/Mathf.Max(.01f,bgWidth),viewport.rect.height/Mathf.Max(.01f,bgHeight));
+                        bgWidth*=cover;bgHeight*=cover;
+                        bgCenter.x=Mathf.Clamp(bgCenter.x,viewport.rect.xMax-bgWidth*.5f,viewport.rect.xMin+bgWidth*.5f);
+                        bgCenter.y=Mathf.Clamp(bgCenter.y,viewport.rect.yMax-bgHeight*.5f,viewport.rect.yMin+bgHeight*.5f);
+                    }
+                    blurred.sizeDelta = new Vector2(bgWidth,bgHeight);
+                    blurred.anchoredPosition = new Vector2(bgCenter.x-viewport.rect.center.x,bgCenter.y-viewport.rect.center.y);
                     blurredImage.sprite = sprite;
                     blurredImage.type = UnityEngine.UI.Image.Type.Simple;
                     blurredImage.preserveAspect = false;

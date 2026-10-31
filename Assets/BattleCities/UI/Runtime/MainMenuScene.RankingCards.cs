@@ -10,6 +10,8 @@ namespace BattleCities.UI
         RectTransform homeCardsRoot,homeRankSeparator,homeStandingsSurface;
         RankingRowCard homeYourRank;
         MainMenuApiClient.RoundSnapshot homeCardData;
+        bool homeScoresExpanded;
+        float homeScoresOriginalTopAnchor,homeScoresOriginalTopOffset,homeScoresExpandedTopAnchor,homeScoresExpandedTopOffset;
         static bool HasPersonalRank(MainMenuApiClient.RankingRow row)=>row!=null&&row.rank>0&&!row.restricted&&!row.guest;
         RankingRowCard CreateHomeCard(string title)
         {
@@ -21,6 +23,7 @@ namespace BattleCities.UI
         {
             homeCardData=value;if(!scoresPanel)return;
             int count=Mathf.Min(10,value?.rows?.Length??0);
+            LayoutHomeEmptyStandings(count==0);
             SetHomeRankBackdrop(count>0);
             if(count==0){if(homeCardsRoot)homeCardsRoot.gameObject.SetActive(false);return;}
             if(!homeCardsRoot){
@@ -45,6 +48,39 @@ namespace BattleCities.UI
             homeYourRank.gameObject.SetActive(personal);homeRankSeparator.gameObject.SetActive(personal);
             if(personal)homeYourRank.Configure(current,Mathf.Max(0,current.rank-1),true,theme);
             LayoutHomeRankCards();
+        }
+        void LayoutHomeEmptyStandings(bool empty)
+        {
+            var columns=leaderboard?leaderboard.Find("Columns") as RectTransform:null;
+            if(!scoresPanel||!columns)return;
+            columns.gameObject.SetActive(!empty);
+            var anchor=scoresPanel.anchorMax;var offset=scoresPanel.offsetMax;
+            if(empty)
+            {
+                // Layout profiles can reset the original geometry while the empty state is visible.
+                if(!homeScoresExpanded||!Mathf.Approximately(anchor.y,homeScoresExpandedTopAnchor)||!Mathf.Approximately(offset.y,homeScoresExpandedTopOffset))
+                {homeScoresOriginalTopAnchor=anchor.y;homeScoresOriginalTopOffset=offset.y;}
+                anchor.y=columns.anchorMax.y;offset.y=columns.offsetMax.y;
+                var timer=leaderboard.Find("Round status") as RectTransform;
+                var parent=scoresPanel.parent as RectTransform;
+                if(timer&&parent)
+                {
+                    var corners=new Vector3[4];timer.GetWorldCorners(corners);
+                    float timerBottom=parent.InverseTransformPoint(corners[0]).y;
+                    float gap=Mathf.Max(10f,leaderboard.rect.height*.01f);
+                    float anchorY=parent.rect.yMin+parent.rect.height*anchor.y;
+                    offset.y=Mathf.Min(offset.y,timerBottom-gap-anchorY);
+                }
+                scoresPanel.anchorMax=anchor;scoresPanel.offsetMax=offset;
+                homeScoresExpandedTopAnchor=anchor.y;homeScoresExpandedTopOffset=offset.y;homeScoresExpanded=true;
+            }
+            else if(homeScoresExpanded)
+            {
+                // Only undo our own expansion; preserve a newer platform layout if one was applied.
+                if(Mathf.Approximately(anchor.y,homeScoresExpandedTopAnchor)&&Mathf.Approximately(offset.y,homeScoresExpandedTopOffset))
+                {anchor.y=homeScoresOriginalTopAnchor;offset.y=homeScoresOriginalTopOffset;scoresPanel.anchorMax=anchor;scoresPanel.offsetMax=offset;}
+                homeScoresExpanded=false;
+            }
         }
         void LayoutHomeRankCards()
         {

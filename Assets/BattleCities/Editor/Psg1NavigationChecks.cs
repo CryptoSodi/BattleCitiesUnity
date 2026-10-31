@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using BattleCities.Core;
 using BattleCities.Multiplayer;
 using BattleCities.UI;
@@ -10,6 +11,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.Android.LowLevel;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -21,6 +23,7 @@ namespace BattleCities.Editor
     {
         public static string Result { get; private set; } = "Not run";
         static PSG1 pad;
+        static Keyboard keyboard;
         static readonly Stack<IEnumerator> routines = new Stack<IEnumerator>();
         static double nextTick;
         static int checks;
@@ -34,6 +37,10 @@ namespace BattleCities.Editor
 
         public static void RunResults()
             => Begin(ResultScreens(), "full-screen results, next stage, game over, final stage and return to menu");
+
+        [MenuItem("Battle Cities/Validate PSG1 Main Menu Shortcuts")]
+        public static void RunMenuShortcuts()
+            => Begin(MenuShortcuts(), "Start, Select, L1, R1, page focus and return focus");
 
         static void Begin(IEnumerator routine, string description)
         {
@@ -66,12 +73,112 @@ namespace BattleCities.Editor
         {
             EditorApplication.update -= Tick; routines.Clear();
             if (pad != null && pad.added) InputSystem.RemoveDevice(pad);
-            pad = null; Result = message; Debug.Log(message);
+            if (keyboard != null && keyboard.added) InputSystem.RemoveDevice(keyboard);
+            pad = null;keyboard=null; Result = message; Debug.Log(message);
         }
         static void Check(bool condition, string message)
         { if (!condition) throw new InvalidOperationException(message); checks++; }
         static IEnumerator Tap(AndroidKeyCode key)
         { yield return new PSG1StateController().WithButton(key); yield return new PSG1StateController(); }
+        static IEnumerator TapRightTrigger()
+        { yield return new PSG1StateController().WithAxis(AndroidAxis.Gas,1); yield return new PSG1StateController(); }
+        static IEnumerator TapRightShoulder()
+        { yield return Tap(AndroidKeyCode.ButtonR1); }
+        static IEnumerator TapKey(Key key)
+        { InputSystem.QueueStateEvent(keyboard,new KeyboardState(key));yield return null;InputSystem.QueueStateEvent(keyboard,new KeyboardState());yield return null; }
+
+        static IEnumerator MenuShortcuts()
+        {
+            yield return Scene("MainMenu");
+            var menu=UnityEngine.Object.FindAnyObjectByType<MainMenuScene>();
+            Check(menu&&Selected==menu.StartButton,"home starts on Start");
+            var legend=menu.Content.Find("PSG1 Controls/Extended PSG1 hints");
+            Check(legend&&legend.Find("Guide artwork/Dpad icon")&&legend.Find("Guide artwork/L1 icon")&&legend.Find("Guide artwork/R1 icon")&&legend.Find("Guide artwork/X icon")&&legend.GetComponentsInChildren<Text>().Any(t=>t.text.Contains("SETTINGS"))&&legend.GetComponentsInChildren<Text>().Any(t=>t.text.Contains("SELECT TANK")),"home legend includes controller artwork and menu shortcuts");
+            yield return Tap(AndroidKeyCode.ButtonStart);
+            var preBattle=menu.GetComponent<PreBattleScreen>();
+            Check(preBattle&&preBattle.IsOpen,"Start opens tank selection");
+            var tank=Selected.navigation.selectOnRight;
+            yield return Direction(3);Check(Selected==tank,"D-pad focuses another tank without activating it");
+            yield return Direction(0);Check(Selected&&Selected.name=="Back","D-pad up reaches tank selection header");
+            yield return Direction(1);Check(Selected==tank,"D-pad down restores the last focused tank");
+            yield return Tap(AndroidKeyCode.ButtonA);
+            Check(!preBattle.IsOpen&&Selected==menu.StartButton,"Back restores Start");
+            yield return TapRightTrigger();Check(!menu.IsShopOpen,"R2 does not change the main menu page");
+            yield return TapRightShoulder();
+            Check(menu.IsShopOpen&&Selected&&Selected.transform.IsChildOf(menu.Content.Find("Main Display/Shop screen")),"R1 opens Shop and focuses its contents");
+            var shopRoot=menu.Content.Find("Main Display/Shop screen");
+            var filter=shopRoot.GetComponentsInChildren<Button>().First(b=>b.name=="FUEL"&&b.interactable);
+            EventSystem.current.SetSelectedGameObject(filter.gameObject);yield return null;
+            var rightOfFilter=filter.navigation.selectOnRight;
+            yield return Direction(3);Check(Selected==rightOfFilter,"D-pad right moves through Shop filters");
+            yield return Direction(2);Check(Selected==filter,"D-pad left returns to the same filter");
+            var header=filter.navigation.selectOnUp;
+            yield return Direction(0);Check(Selected==header,"D-pad up enters the Shop header");
+            var nextHeader=header.navigation.selectOnRight;
+            yield return Direction(3);Check(Selected==nextHeader,"D-pad moves to another header option");
+            yield return Direction(1);Check(Selected==filter,"D-pad down restores the last focused filter, not the active filter or matching column");
+            var belowFilter=filter.navigation.selectOnDown;
+            Check(Psg1UiNavigation.Available(belowFilter),"Shop filter has a reachable control below");
+            yield return Direction(1);Check(Selected==belowFilter,"D-pad down enters the Shop content");
+            yield return Direction(0);Check(Selected==filter,"D-pad up returns to the same Shop filter");
+            var shop=menu.GetComponent<ShopScreen>();
+            typeof(ShopScreen).GetMethod("ShowNotice",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(shop,new object[]{"TEST","Return-focus check"});
+            yield return null;yield return Tap(AndroidKeyCode.ButtonA);
+            Check(Selected==filter,"Back from a Shop notice restores its originating control");
+            yield return Tap(AndroidKeyCode.ButtonSelect);
+            Check(menu.IsSettingsOpen,"Select opens Settings from Shop");
+            var settingOrigin=Selected;var settingNext=settingOrigin.navigation.selectOnDown;
+            if(Psg1UiNavigation.Available(settingNext)&&settingNext!=settingOrigin){
+                yield return Direction(1);Check(Selected==settingNext,"D-pad down moves within Settings");
+                yield return Direction(0);Check(Selected==settingOrigin,"D-pad up returns within Settings");
+            }
+            yield return Tap(AndroidKeyCode.ButtonA);
+            Check(menu.IsShopOpen&&Selected==filter,"Back from Settings restores the exact Shop control");
+            yield return Tap(AndroidKeyCode.ButtonSelect);Check(menu.IsSettingsOpen,"Settings reopens from Shop");
+            yield return TapRightShoulder();
+            Check(menu.IsRankingOpen&&Selected&&Selected.transform.IsChildOf(menu.Content.Find("Main Display/Ranking screen")),"R1 moves from Settings to Rankings and focuses it");
+            var ranking=menu.GetComponent<RankingScreen>();ranking.TogglePicker();yield return null;
+            Check(ranking.IsPickerOpen,"Ranking period picker opens");yield return Tap(AndroidKeyCode.ButtonA);
+            Check(!ranking.IsPickerOpen&&Selected&&Selected.name=="Period picker","Back from the period picker returns to its opening control");
+            yield return TapRightShoulder();Check(menu.IsOperationsOpen&&!menu.IsSocialsOpen,"R1 opens Quarters");
+            var nextQuarterCard=Selected.navigation.selectOnRight;
+            if(Psg1UiNavigation.Available(nextQuarterCard)&&nextQuarterCard.GetComponent("OperationsCardFocus"))
+            {
+                yield return Direction(3);Check(Selected==nextQuarterCard,"Quarters focuses another card");
+                yield return Direction(0);Check(Selected==nextQuarterCard.navigation.selectOnUp,"Quarters enters its header");
+                yield return Direction(1);Check(Selected==nextQuarterCard,"Quarters restores the last focused card");
+            }
+            yield return TapRightShoulder();Check(menu.IsSocialsOpen,"R1 opens Socials");
+            yield return TapRightShoulder();Check(!menu.IsOperationsOpen&&Selected==menu.StartButton,"R1 wraps to Play");
+            yield return Tap(AndroidKeyCode.ButtonL1);Check(menu.IsSocialsOpen,"L1 moves to previous page");
+            yield return TapRightShoulder();yield return TapRightShoulder();
+            Check(menu.IsShopOpen&&Selected==filter,"returning to Shop restores the selected filter");
+            yield return Tap(AndroidKeyCode.ButtonA);Check(!menu.IsShopOpen&&Selected==menu.Tabs[1],"Back restores the Shop menu option");
+            yield return Tap(AndroidKeyCode.ButtonSelect);Check(menu.IsSettingsOpen,"Select opens Settings from home");
+            yield return Tap(AndroidKeyCode.ButtonStart);Check(preBattle.IsOpen,"Start opens tank selection from Settings");
+            yield return Tap(AndroidKeyCode.ButtonA);Check(!preBattle.IsOpen,"Back leaves tank selection");
+            // PSG1 face labels are Nintendo-style: its X is the north face button.
+            yield return Tap(AndroidKeyCode.ButtonY);var profileOrigin=Selected;
+            Check(menu.IsPlayerProfileOpen&&profileOrigin,"PSG1 X opens Profile with a selected control");
+            yield return Tap(AndroidKeyCode.ButtonSelect);Check(menu.IsSettingsOpen,"Select opens Settings from Profile");
+            yield return Tap(AndroidKeyCode.ButtonA);
+            Check(menu.IsPlayerProfileOpen&&Selected==profileOrigin,"Back restores the Profile control that had focus");
+            yield return Tap(AndroidKeyCode.ButtonA);Check(!menu.IsPlayerProfileOpen,"Back leaves Profile");
+            if(pad!=null&&pad.added)InputSystem.RemoveDevice(pad);pad=null;
+            keyboard=InputSystem.AddDevice<Keyboard>();yield return null;
+            yield return TapKey(Key.Space);
+            Check(menu.IsShopOpen&&!preBattle.IsOpen,"keyboard Space mirrors R1 without submitting Start");
+            yield return TapKey(Key.E);
+            Check(!menu.IsShopOpen&&Selected==menu.StartButton,"keyboard E mirrors L1 without a connected gamepad");
+            yield return TapKey(Key.Minus);Check(menu.IsSettingsOpen,"keyboard minus mirrors Select and opens Settings");
+            yield return TapKey(Key.Escape);Check(!menu.IsSettingsOpen&&Selected==menu.StartButton,"keyboard Escape closes Settings");
+            yield return TapKey(Key.Equals);Check(preBattle.IsOpen,"keyboard equals mirrors Start and opens tank selection");
+            yield return TapKey(Key.Escape);Check(!preBattle.IsOpen&&Selected==menu.StartButton,"keyboard Escape returns after equals");
+            yield return TapKey(Key.X);Check(menu.IsPlayerProfileOpen,"keyboard X opens Profile");
+            yield return TapKey(Key.Escape);Check(!menu.IsPlayerProfileOpen&&Selected==menu.StartButton,"keyboard Escape returns from Profile");
+            yield return TapKey(Key.Enter);Check(preBattle.IsOpen,"keyboard Enter still selects Start");
+            yield return TapKey(Key.Escape);Check(!preBattle.IsOpen&&Selected==menu.StartButton,"keyboard Escape returns from tank selection");
+        }
         static IEnumerator Direction(int direction)
         {
             yield return new PSG1StateController().WithAxis(direction < 2 ? AndroidAxis.HatY : AndroidAxis.HatX,

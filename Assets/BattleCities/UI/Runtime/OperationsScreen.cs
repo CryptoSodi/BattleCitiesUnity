@@ -23,6 +23,7 @@ namespace BattleCities.UI
         Image titleIcon,emptyIcon,detailIcon;
         TMP_Text title,introTitle,introDescription,status,emptyTitle,emptyDescription,detailTitle,detailRole,detailLore,detailEffect,detailSource,footerCaption;
         Button footerAction;
+        Button lastTabFocus,lastCardFocus;
         TankRosterScroll scroll;GridLayoutGroup grid;
         readonly List<Button> tabs=new List<Button>();
         readonly List<Image> tabSelections=new List<Image>();
@@ -67,7 +68,7 @@ namespace BattleCities.UI
         {
             if(!IsConfigured)return;
             HideLinkInstructions(false);
-            page=socials?Page.Socials:Page.Quarters;history=false;category=0;activeCard=null;
+            page=socials?Page.Socials:Page.Quarters;history=false;category=0;activeCard=null;lastTabFocus=lastCardFocus=null;
             if(socials){BindSocialProgress();socialResultMessage=null;}
             statusMessage=socials?"CHECKING SOCIAL TASKS...":"SELECT A SECTION TO CONTINUE";
             root.gameObject.SetActive(true);root.SetAsLastSibling();menu.SetHeroVisible(false);menu.SetTankSelectorBackdrop(true);
@@ -102,7 +103,7 @@ namespace BattleCities.UI
         {
             if(target==Page.Quarters)activeCard=page==Page.Treasury?"quarter-0":"quarter-1";
             else if(target==Page.Manual&&page==Page.ManualDetail)activeCard=entryId;
-            CancelRequest();page=target;focused=hovered=-1;
+            CancelRequest();page=target;focused=hovered=-1;lastTabFocus=lastCardFocus=null;
             statusMessage=page==Page.Quarters?"SELECT A SECTION TO CONTINUE":page==Page.Manual?"SELECT AN ENTRY TO VIEW FIELD INTELLIGENCE":page==Page.ManualDetail?"FIELD MANUAL • B / BACK TO RETURN":"BALANCES, ITEMS & TRANSACTION HISTORY";
             Render();menu.RefreshLayout();ResetScroll();FocusFirst();
         }
@@ -110,7 +111,18 @@ namespace BattleCities.UI
         void ResetScroll(){Canvas.ForceUpdateCanvases();scroll.StopMovement();scroll.verticalNormalizedPosition=1;}
         void FocusFirst(){int selected=items.FindIndex(item=>item.Key==activeCard);Focus(cards.Count>0&&items.Count>0?cards[Mathf.Max(0,selected)].Button:tabs.Count>0?tabs[0]:footerAction);}
         static void Focus(Selectable button){if(button&&EventSystem.current)EventSystem.current.SetSelectedGameObject(button.gameObject);}
-        public void KeepControllerFocus()=>Psg1UiNavigation.KeepFocus(IsLinkNoticeOpen?linkNotice:root,IsLinkNoticeOpen?linkOpen:items.Count>0?cards[0].Button:tabs.Count>0?tabs[0]:footerAction);
+        public void KeepControllerFocus()
+        {
+            Psg1UiNavigation.KeepFocus(IsLinkNoticeOpen?linkNotice:root,IsLinkNoticeOpen?linkOpen:items.Count>0?cards[0].Button:tabs.Count>0?tabs[0]:footerAction);
+            if(IsLinkNoticeOpen||!EventSystem.current)return;
+            var current=EventSystem.current.currentSelectedGameObject;
+            var button=current?current.GetComponent<Button>():null;
+            if(!button)return;
+            bool changed=false;
+            if(tabs.Contains(button)){changed=lastTabFocus!=button;lastTabFocus=button;}
+            else if(ledgerRows.Contains(button)||cards.Exists(card=>card.Button==button)){changed=lastCardFocus!=button;lastCardFocus=button;}
+            if(changed)ConfigureNavigation();
+        }
         public void FocusCard(int index,bool value,bool pointer)
         {
             if(index<0||index>=items.Count)return;

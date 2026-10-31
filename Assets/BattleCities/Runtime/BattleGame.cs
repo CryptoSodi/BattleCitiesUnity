@@ -271,7 +271,7 @@ namespace BattleCities
         private void Update()
         {
             float simulationDt=BattleBackgroundTiming.Elapsed(ref lastSimulationFrameTime,Time.realtimeSinceStartupAsDouble);
-            if(Simulation==null)return;PrepareMagicBeforeStart();bool ending=UpdateResults();if(ResultsVisible)return;float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);fps=Mathf.Lerp(fps,1/Mathf.Max(.0001f,Time.unscaledDeltaTime),.05f);
+            if(Simulation==null)return;PrepareMagicBeforeStart();UpdatePsg1Hint(Time.unscaledDeltaTime);bool ending=UpdateResults();if(ResultsVisible)return;float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);fps=Mathf.Lerp(fps,1/Mathf.Max(.0001f,Time.unscaledDeltaTime),.05f);
             if(!ending)
             {
             if(!tvReplay&&gameplayFocused){UpdateGamepadControls();

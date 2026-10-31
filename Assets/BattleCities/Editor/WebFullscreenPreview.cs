@@ -52,10 +52,13 @@ namespace BattleCities.Editor
                 Capture(camera,target,"fullscreen-focused-detail.png",new Rect(1320,780,480,290));
                 button.OnPointerExit(new PointerEventData(EventSystem.current));
                 foreach(var platform in new[]{MainMenuPlatform.AndroidLandscape,MainMenuPlatform.Psg1}){
+                    ScreenContent.EditorPlatform=platform==MainMenuPlatform.Psg1?"psg1":"seeker";
                     menu.ApplyLayout(platform,new Vector2(1920,1080));
                     if(button.gameObject.activeSelf)throw new Exception("Fullscreen visible on native profile");
-                    if(settings.gameObject.activeSelf||socket.GetComponent<Button>().enabled)throw new Exception("Web header actions leaked to a native layout");
+                    bool psg=platform==MainMenuPlatform.Psg1;
+                    if(settings.gameObject.activeSelf!=psg||socket.GetComponent<Button>().enabled!=psg)throw new Exception("Native Settings or player portrait actions do not match the platform");
                 }
+                ScreenContent.EditorPlatform="web";
                 menu.ApplyLayout(MainMenuPlatform.Web,new Vector2(1920,1080));
                 if(menu.GetComponentsInChildren<WebFullscreenButton>(true).Length!=1||!button.gameObject.activeSelf)throw new Exception("Fullscreen duplicate or lost on profile change");
                 Debug.Log("WEB FULLSCREEN: compact size, aspect fit, icon-only, alignment, native exclusions and profile restoration verified. Previews: Builds/RankingPreviews/fullscreen-*.png");

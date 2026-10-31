@@ -23,6 +23,14 @@
       "source": "Assets/BattleCities/Art/controls-guide/psg1/device.png"
     },
     {
+      "id": "psg-guide-select",
+      "source": "Assets/BattleCities/Art/controls-guide/psg1/select.png"
+    },
+    {
+      "id": "psg-guide-start",
+      "source": "Assets/BattleCities/Art/controls-guide/psg1/start.png"
+    },
+    {
       "id": "psg-guide-tap",
       "source": "Assets/BattleCities/Art/controls-guide/hand-tap-release.png"
     },
@@ -3355,6 +3363,8 @@
         "shoulder": "psg-guide-shoulder",
         "face": "psg-guide-face",
         "device": "psg-guide-device",
+        "select": "psg-guide-select",
+        "start": "psg-guide-start",
         "tap": "psg-guide-tap",
         "charge": "psg-guide-charge",
         "normal-shell": "psg-guide-normal-shell",

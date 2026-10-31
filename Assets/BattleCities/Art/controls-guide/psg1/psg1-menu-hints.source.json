@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-31",
+  "tool": "built-in image_gen",
+  "purpose": "PSG1 SELECT/View and START/Menu control-hint artwork. Labels are intentionally baked as explicitly requested.",
+  "seed": {
+    "file": "exec-8421741d-db5c-4a52-b8b9-83916102fc18.png",
+    "prompt": "Use case: precise-object-edit.\nProduction Battle Cities PSG1 controller-hint asset: ONE small physical SELECT button icon.\nInput image 1 (round face button) and input image 2 (shoulder button) are MATERIAL/STYLE REFERENCES: match their polished translucent dark indigo-blue/purple console plastic, subtle internal purple depth, bright lavender upper-left bevel highlight, dark lower rim and restrained glossy finish. Do not copy their round or wide shoulder silhouette.\nShape: compact horizontal rounded oval/soft capsule button, approximately 2.3 times as wide as tall, matching the small PSG1 SELECT/START physical menu buttons. Straight-on orthographic view, symmetric silhouette, shallow tactile thickness. Soft low-profile bevel, no large surrounding frame or console body.\nExact centered lettering: SELECT. S E L E C T, uppercase, ONE word only. Clean pale white/lavender Barlow Condensed Bold-style lettering, flat face, no outline or drop shadow, no grunge or texture inside letters. Large readable type occupying about 68% of button width and 40% of height; high contrast on a quiet dark purple center, clear of reflective rim. Must remain legible at roughly 56x26 logical pixels.\nTechnical: ONE complete isolated button, square or wide canvas is acceptable but fill most of the width, a small transparent safe margin and no clipped edges. Genuinely transparent RGBA background. No ground shadow, glow aura, illustration, controller shell, labels above/below, decorative marks, symbols, tiny writing, text other than SELECT, second button, comparison sheet or backdrop. Only one SELECT button icon.",
+    "references": [
+      "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/Art/controls-guide/psg1/face.png",
+      "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/Art/controls-guide/psg1/shoulder.png"
+    ]
+  },
+  "normalization": "Alpha below 8 cleared, alpha >=248 made opaque; retain center-connected physical button; trim; aspect-preserving Lanczos fit within 496x208 on a 512x224 transparent canvas. No letter painting or recoloring in export.",
+  "usage": {
+    "rendering": "Simple image with preserveAspect=true; never stretch or nine-slice baked lettering.",
+    "labelMapping": {
+      "SELECT": "Select / View",
+      "START": "Menu / Start"
+    },
+    "previewWidths": [
+      56,
+      64,
+      80,
+      128
+    ],
+    "recommendedWidth": "64 logical pixels or larger where space permits"
+  },
+  "checks": {
+    "alpha": true,
+    "safeMargins": true,
+    "exactLabels": "Visually checked SELECT and START.",
+    "nativePreview": "native-size-preview.png",
+    "unityProjectEdited": false,
+    "buildOrPublish": false,
+    "runtimeVerified": false
+  },
+  "assets": [
+    {
+      "file": "select.png",
+      "label": "SELECT",
+      "size": [
+        512,
+        224
+      ],
+      "bytes": 108608,
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBounds": [
+        8,
+        23,
+        504,
+        201
+      ],
+      "source": "C:\\Users\\tassa\\.codex\\generated_images\\01a094c4-7348-79f3-9b5b-13a6013430db\\exec-fa5779ba-0fc8-4354-ae45-fb876a0ea292.png",
+      "sourceSize": [
+        1881,
+        836
+      ],
+      "sourceCrop": [
+        115,
+        121,
+        1767,
+        713
+      ],
+      "sourceSHA256": "a23309ab5d47b8a428eef38443db30f3d38b34f9f98e87ad6ff2240f0d78dc3f",
+      "sha256": "67fd18599495315c0ca98217dfaf566fd9bd88b4ca825e63c1a7ca6d72685d6d",
+      "prompt": "Edit the supplied PSG1 SELECT button. Preserve the entire button body EXACTLY: horizontal capsule silhouette, dimensions, depth, blue-purple transparent plastic, bevel highlights, reflections, dark base, position and transparent outer background. Change ONLY its white lettering. Keep the same clean condensed bold uppercase font, pale-white/lavender color, flat letter face, zero outline/shadow and centered baseline. Enlarge lettering by about 30% compared with reference: glyph HEIGHT should be roughly 50% of the button's full visible height, leaving ample clear margin before upper/lower rim. Lettering must read clearly when the entire button is only 56x26 logical pixels. No changes outside lettering, no extra symbols, text, labels, objects, glow or backdrop; complete one isolated button on true transparent RGBA. Exact final text: SELECT (S E L E C T). Keep all six letters and scale the word to approximately 66\u201370% of the visible button width, horizontally centered.",
+      "references": [
+        "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-8421741d-db5c-4a52-b8b9-83916102fc18.png"
+      ]
+    },
+    {
+      "file": "start.png",
+      "label": "START",
+      "size": [
+        512,
+        224
+      ],
+      "bytes": 106982,
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBounds": [
+        8,
+        23,
+        504,
+        200
+      ],
+      "source": "C:\\Users\\tassa\\.codex\\generated_images\\01a094c4-7348-79f3-9b5b-13a6013430db\\exec-faaa7ff2-9905-461d-b2ad-a086cb015959.png",
+      "sourceSize": [
+        1882,
+        836
+      ],
+      "sourceCrop": [
+        114,
+        121,
+        1769,
+        713
+      ],
+      "sourceSHA256": "3673cb5ab8c2462bea10dd89726624a1b94f44e3a3cd089e5f307521032990dd",
+      "sha256": "40b2b88c2f69f7347a522204247f5d727075640a61f970256c0e9a89d2c8f411",
+      "prompt": "Edit the supplied PSG1 SELECT button. Preserve the entire button body EXACTLY: horizontal capsule silhouette, dimensions, depth, blue-purple transparent plastic, bevel highlights, reflections, dark base, position and transparent outer background. Change ONLY its white lettering. Keep the same clean condensed bold uppercase font, pale-white/lavender color, flat letter face, zero outline/shadow and centered baseline. Enlarge lettering by about 30% compared with reference: glyph HEIGHT should be roughly 50% of the button's full visible height, leaving ample clear margin before upper/lower rim. Lettering must read clearly when the entire button is only 56x26 logical pixels. No changes outside lettering, no extra symbols, text, labels, objects, glow or backdrop; complete one isolated button on true transparent RGBA. REPLACE SELECT with exact text: START (S T A R T). Exactly five letters. Use the same enlarged letter height (50% of visible button height) and same font metrics; START naturally occupies less width than SELECT. Center START horizontally. No SELECT or other lettering remains.",
+      "references": [
+        "C:/Users/tassa/.codex/generated_images/01a094c4-7348-79f3-9b5b-13a6013430db/exec-8421741d-db5c-4a52-b8b9-83916102fc18.png"
+      ]
+    }
+  ]
+}

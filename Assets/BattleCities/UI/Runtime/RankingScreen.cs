@@ -19,6 +19,7 @@ namespace BattleCities.UI
         RankingRowCard personalCard;
         TMP_Text rankValue,countdown,periodCaption,tableTitle,emptyTitle,emptyDetail,historyPeriod,eligibilityText;
         UnityEngine.UI.Button picker,back;
+        UnityEngine.UI.Button lastHeaderFocus,lastRowFocus;
         readonly UnityEngine.UI.Button[] tabs=new UnityEngine.UI.Button[3];
         readonly UnityEngine.UI.Image[] selectedTabs=new UnityEngine.UI.Image[3];
         readonly TMP_Text[] tabLabels=new TMP_Text[3];
@@ -190,8 +191,18 @@ namespace BattleCities.UI
         }
         void ClosePicker(bool restoreFocus=true)
         {if(pickerOverlay)pickerOverlay.gameObject.SetActive(false);ConfigureNavigation();if(restoreFocus)Focus(picker);}
-        public void KeepControllerFocus()=>Psg1UiNavigation.KeepFocus(IsPickerOpen?pickerPanel:root,
-            IsPickerOpen&&periodButtons.Count>0?periodButtons[0]:tabs[trading?1:0]);
+        public void KeepControllerFocus()
+        {
+            Psg1UiNavigation.KeepFocus(IsPickerOpen?pickerPanel:root,IsPickerOpen&&periodButtons.Count>0?periodButtons[0]:tabs[trading?1:0]);
+            if(IsPickerOpen||!EventSystem.current)return;
+            var current=EventSystem.current.currentSelectedGameObject;
+            var button=current?current.GetComponent<Button>():null;
+            if(!button)return;
+            bool changed=false;
+            if(button==back||button==tabs[0]){changed=lastHeaderFocus!=button;lastHeaderFocus=button;}
+            else if(rowButtons.Contains(button)){changed=lastRowFocus!=button;lastRowFocus=button;}
+            if(changed)ConfigureNavigation();
+        }
         void ConfigureNavigation()
         {
             if(!back||!picker)return;
@@ -201,12 +212,14 @@ namespace BattleCities.UI
                     periodButtons[Math.Max(0,i-1)],periodButtons[Math.Min(periodButtons.Count-1,i+1)]);
                 return;
             }
-            Link(tabs[0],back,back,picker,rowButtons.Count>0?rowButtons[0]:picker);
-            Link(back,tabs[0],tabs[0],picker,rowButtons.Count>0?rowButtons[0]:picker);
+            var header=Psg1UiNavigation.Available(lastHeaderFocus)?lastHeaderFocus:tabs[0];
+            var row=rowButtons.Contains(lastRowFocus)&&Psg1UiNavigation.Available(lastRowFocus)?lastRowFocus:rowButtons.Count>0?rowButtons[0]:picker;
+            Link(tabs[0],back,back,picker,row);
+            Link(back,tabs[0],tabs[0],picker,row);
             tabs[1].navigation=new Navigation{mode=Navigation.Mode.None};
             for(int i=0;i<rowButtons.Count;i++)Link(rowButtons[i],tabs[trading?1:0],picker,
-                i>0?rowButtons[i-1]:tabs[trading?1:0],i+1<rowButtons.Count?rowButtons[i+1]:picker);
-            Link(picker,tabs[0],back,rowButtons.Count>0?rowButtons[rowButtons.Count-1]:tabs[trading?1:0],tabs[trading?1:0]);
+                i>0?rowButtons[i-1]:header,i+1<rowButtons.Count?rowButtons[i+1]:picker);
+            Link(picker,tabs[0],back,row,header);
         }
         static void Link(Selectable target,Selectable left,Selectable right,Selectable up,Selectable down)
         {target.navigation=new Navigation{mode=Navigation.Mode.Explicit,selectOnLeft=left,selectOnRight=right,selectOnUp=up,selectOnDown=down};}

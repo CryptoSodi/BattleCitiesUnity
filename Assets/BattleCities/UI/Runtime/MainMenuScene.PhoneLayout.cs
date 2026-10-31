@@ -19,9 +19,10 @@ namespace BattleCities.UI
             float buttonHeight = (bodyHeight - navInset * 2f - buttonGap * (tabs.Length - 1)) / tabs.Length;
             float buttonWidth = buttonHeight * NavigationAspect;
             float navWidth = buttonWidth + navInset * 2f;
-            float boardWidth = Mathf.Clamp(width * .255f, 360f, 520f);
+            bool compactWeb=ResponsiveWebLayout.IsBrowserSurface;
+            float boardWidth = compactWeb?0:Mathf.Clamp(width * .255f, 360f, 520f);
             float tvLeft = pad + navWidth + gap;
-            float tvWidth = width - pad * 2f - navWidth - boardWidth - gap * 2f;
+            float tvWidth = width - pad * 2f - navWidth - boardWidth - (compactWeb?gap:gap * 2f);
 
             navigation.localScale = leaderboard.localScale = mainFrame.localScale = Vector3.one;
             Place(navigation, pad, pad, navWidth, bodyHeight);
@@ -33,7 +34,7 @@ namespace BattleCities.UI
             }
             Place(mainFrame, tvLeft, pad, tvWidth, bodyHeight);
             Place(leaderboard, width - pad - boardWidth, pad, boardWidth, bodyHeight);
-            leaderboard.gameObject.SetActive(true);
+            leaderboard.gameObject.SetActive(!compactWeb);
             controls.gameObject.SetActive(false);
             var tv = mainFrame.Find("TV Frame") as RectTransform;
             var viewport = mainFrame.Find("TV Background Viewport") as RectTransform;
@@ -232,7 +233,7 @@ namespace BattleCities.UI
         {
             if (target != MainMenuPlatform.Psg1 && target != MainMenuPlatform.AndroidLandscape) return;
             float top = target == MainMenuPlatform.Psg1 ? PsgHudBandHeight - 16f : statusBar.rect.height + 32f;
-            float bottom = target == MainMenuPlatform.AndroidLandscape || controllerLegendHidden
+            float bottom = target == MainMenuPlatform.AndroidLandscape || controllerLegendHidden || ResponsiveWebLayout.IsBrowserSurface
                 ? howItWorks.rect.height + 24f : GetLayout(MainMenuPlatform.Psg1).controllerLegendHeight + PsgLegendBottomInset;
             hero.anchoredPosition -= new Vector2(0f, top);
             hero.sizeDelta -= new Vector2(0f, top + bottom);

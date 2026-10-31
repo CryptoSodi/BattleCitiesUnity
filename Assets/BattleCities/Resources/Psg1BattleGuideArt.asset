@@ -17,3 +17,5 @@ MonoBehaviour:
   shoulder: {fileID: 21300000, guid: a034474d862a44b9a97138c6824f7a0b, type: 3}
   face: {fileID: 21300000, guid: 3974ac5adde141bfa86406980ef51b93, type: 3}
   device: {fileID: 21300000, guid: c0f99ea66ffb4191b5ef81f5374e85bd, type: 3}
+  select: {fileID: 21300000, guid: 834844a1400197848a639da750c0235b, type: 3}
+  start: {fileID: 21300000, guid: fcac6fb43f5a3c54da2658aa25d86e6c, type: 3}

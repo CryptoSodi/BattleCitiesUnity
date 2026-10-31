@@ -161,10 +161,12 @@ namespace BattleCities.UI
             float sw=Mathf.Max(1,Screen.width),sh=Mathf.Max(1,Screen.height);var safe=Screen.safeArea;
             root.anchorMin=new Vector2(safe.xMin/sw,safe.yMin/sh);root.anchorMax=new Vector2(safe.xMax/sw,safe.yMax/sh);root.offsetMin=root.offsetMax=Vector2.zero;
             Canvas.ForceUpdateCanvases();float w=root.rect.width,h=root.rect.height;
+            bool narrowWeb=ResponsiveWebLayout.IsBrowserSurface&&w<h*.8f;
             var top=new TvTitleHeaderLayout(root);top.PlaceTitle(header,(RectTransform)header.Find("Medal"),title.rectTransform,true);
-            Place(title.rectTransform,90,4,w*.62f-90,top.Height-8);
-            float shareWidth=Mathf.Min(200,header.rect.width*.24f);
+            float shareWidth=Mathf.Min(200,header.rect.width*(narrowWeb?.32f:.24f));
+            Place(title.rectTransform,narrowWeb?52:90,4,narrowWeb?w-shareWidth-65:w*.62f-90,top.Height-8);
             Place((RectTransform)share.transform,header.rect.width*.99f-shareWidth,6,shareWidth,top.Height-12);
+            var shareText=share.transform.Find("Caption").GetComponent<TMP_Text>();shareText.fontSizeMin=narrowWeb?9:shareText.fontSizeMax*.66f;
             FitButtonSkin(share);
             Fit((RectTransform)share.transform.Find("Icon"),.045f,.18f,.15f,.64f);Fit((RectTransform)share.transform.Find("Caption"),.22f,.06f,.73f,.88f);
             var bottom=new TvStatusFooterLayout(root);bottom.Place(footer);TvStatusFooterLayout.PlaceAction((RectTransform)next.transform);
@@ -174,8 +176,14 @@ namespace BattleCities.UI
                 footer.rect.height*actionArea.y,continueWidth,footer.rect.height*actionArea.height);
             FitButtonSkin(next);
             float bodyTop=top.Height+14,bodyHeight=h-bodyTop-bottom.Height-14,leftWidth=w*ScreenContent.Number("battle-results","report-ratio",0.255f);
-            Place(sidebar,10,bodyTop,leftWidth-15,bodyHeight);Place(paper,7,7,sidebar.rect.width-14,bodyHeight-14);
-            Place(table,leftWidth+4,bodyTop,w-leftWidth-14,bodyHeight);
+            float reportHeight=narrowWeb?Mathf.Clamp(bodyHeight*.25f,190,230):bodyHeight;
+            if(narrowWeb){
+                Place(sidebar,8,bodyTop,w-16,reportHeight);Place(paper,7,7,sidebar.rect.width-14,reportHeight-14);
+                Place(table,8,bodyTop+reportHeight+8,w-16,bodyHeight-reportHeight-8);
+            }else{
+                Place(sidebar,10,bodyTop,leftWidth-15,bodyHeight);Place(paper,7,7,sidebar.rect.width-14,bodyHeight-14);
+                Place(table,leftWidth+4,bodyTop,w-leftWidth-14,bodyHeight);
+            }
             float pw=paper.rect.width,ph=paper.rect.height,headingHeight=54,mvpHeight=Mathf.Clamp(ph*.135f,68,95);
             Place(summaryHeading,0,0,pw,headingHeight);Place((RectTransform)summaryHeading.Find("Clipboard"),12,7,34,40);Place((RectTransform)summaryHeading.Find("Label"),54,4,pw-64,46);
             float area=ph-headingHeight-mvpHeight,unit=area/5.25f;
@@ -194,13 +202,28 @@ namespace BattleCities.UI
             Place(summaryCount.rectTransform,pw*.37f,8,pw*.60f,unit-16);
             Place(mvp,0,ph-mvpHeight,pw,mvpHeight);Place((RectTransform)mvp.Find("Medal"),10,10,pw*.16f,mvpHeight-20);
             Place(mvpPortrait.rectTransform,pw*.22f,9,mvpHeight-18,mvpHeight-18);Place(mvpName.rectTransform,pw*.22f+mvpHeight-10,8,pw*.78f-mvpHeight,mvpHeight-16);
+            if(narrowWeb){
+                const float head=40f,row=52f;float rowY=head+4,metricY=rowY+row+4,metricHeight=Mathf.Max(40,ph-metricY-4);
+                Place(summaryHeading,0,0,pw,head);Place((RectTransform)summaryHeading.Find("Clipboard"),8,4,28,32);Place((RectTransform)summaryHeading.Find("Label"),40,2,pw-48,head-4);
+                Place(outcomeRoot,4,rowY,pw*.43f,row);Place(outcomeIcon.rectTransform,2,4,40,row-8);Place(outcome.rectTransform,46,2,pw*.43f-50,row-4);
+                Place(mvp,pw*.45f,rowY,pw*.54f,row);Place((RectTransform)mvp.Find("Medal"),4,4,30,row-8);
+                Place(mvpPortrait.rectTransform,36,4,row-8,row-8);Place(mvpName.rectTransform,36+row-4,2,pw*.54f-row-36,row-4);
+                float metricWidth=pw/4;
+                for(int i=0;i<metrics.Length;i++){
+                    var p=(RectTransform)metrics[i].transform.parent;Place(p,i*metricWidth,metricY,metricWidth,metricHeight);
+                    Place((RectTransform)p.Find("Icon"),2,4,24,24);
+                    Place((RectTransform)p.Find("Caption"),27,2,metricWidth-29,20);
+                    Place(metrics[i].rectTransform,2,28,metricWidth-4,metricHeight-30);
+                    Place((RectTransform)p.Find("Rule"),0,0,metricWidth,1);
+                }
+            }
             float tw=table.rect.width,th=table.rect.height,inner=tw-16;
-            Place(tableHeading,8,8,inner,50);Place((RectTransform)tableHeading.Find("Title"),18,0,inner*.66f,50);Place(playerCount.rectTransform,inner*.69f,0,inner*.29f,50);
+            Place(tableHeading,8,8,inner,50);Place((RectTransform)tableHeading.Find("Title"),narrowWeb?4:18,0,inner*(narrowWeb?.57f:.66f),50);Place(playerCount.rectTransform,inner*(narrowWeb?.60f:.69f),0,inner*(narrowWeb?.38f:.29f),50);
             Place(columns,8,58,inner,84);Place((RectTransform)columns.Find("Top"),0,0,inner,1);Place((RectTransform)columns.Find("Bottom"),0,83,inner,1.5f);
             for(int i=0;i<8;i++)
             {
                 var cell=(RectTransform)columns.Find("Column "+i);Place(cell,inner*Edges[i],0,inner*(Edges[i+1]-Edges[i]),84);
-                var caption=(RectTransform)cell.Find("Caption");if(i>=2&&i<=5){Place((RectTransform)cell.Find("Tank"),cell.rect.width*.2f,5,cell.rect.width*.6f,49);Place(caption,0,53,cell.rect.width,28);}else Place(caption,3,5,cell.rect.width-6,74);
+                var caption=(RectTransform)cell.Find("Caption");var captionText=caption.GetComponent<TMP_Text>();if(captionText)captionText.fontSizeMin=narrowWeb?8:captionText.fontSizeMax*.66f;if(i>=2&&i<=5){Place((RectTransform)cell.Find("Tank"),cell.rect.width*.2f,5,cell.rect.width*.6f,49);Place(caption,0,53,cell.rect.width,28);}else Place(caption,3,5,cell.rect.width-6,74);
             }
             Place((RectTransform)viewport.parent,8,142,inner,th-150);Canvas.ForceUpdateCanvases();
             float rh=Mathf.Max(ScreenContent.Number("battle-results","row-min-height",108f),(th-150)/4);
@@ -221,6 +244,16 @@ namespace BattleCities.UI
             Place((RectTransform)footer.Find("Shells"),fw*.035f,5,fh*.9f,fh-10);Place((RectTransform)footer.Find("Team label"),fw*.125f,4,fw*.14f,fh-8);
             Place(teamTotal.rectTransform,fw*.265f,0,fw*.08f,fh);Place(status.rectTransform,fw*.39f,5,fw*.34f,fh-10);
             Place((RectTransform)footer.Find("Divider left"),fw*.365f,fh*.18f,1,fh*.64f);Place((RectTransform)footer.Find("Divider right"),fw*.735f,fh*.18f,1,fh*.64f);
+            if(narrowWeb){
+                float actionLeft=fw*(actionArea.x+actionArea.width)-continueWidth,available=Mathf.Max(1,actionLeft-8);
+                Place((RectTransform)footer.Find("Shells"),6,(fh-26)*.5f,26,26);
+                var teamLabel=footer.Find("Team label").GetComponent<TMP_Text>();teamLabel.fontSizeMin=8;
+                Place(teamLabel.rectTransform,34,4,available*.38f-34,fh-8);
+                Place(teamTotal.rectTransform,available*.38f,0,available*.14f,fh);
+                Place(status.rectTransform,available*.55f,5,available*.43f,fh-10);
+                Place((RectTransform)footer.Find("Divider left"),available*.53f,fh*.18f,1,fh*.64f);
+                Place((RectTransform)footer.Find("Divider right"),actionLeft-3,fh*.18f,1,fh*.64f);
+            }
             Canvas.ForceUpdateCanvases();FitButtonSkin(share);FitButtonSkin(next);lastSize=new Vector2(Screen.width,Screen.height);lastSafe=safe;
         }
 

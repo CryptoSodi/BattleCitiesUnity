@@ -59,6 +59,8 @@ namespace BattleCities
     {
         private InputAction stickMove, stickAim, gamepadSpecial;
         private GamepadSpecialGesture specialGesture;
+        private const float Psg1HintHoldSeconds = 5f, Psg1HintExitSeconds = .45f;
+        private float psg1HintElapsed;
         private int selectedPowerup, gamepadBlockedThroughFrame = -1;
         public int SelectedPowerupSlot => selectedPowerup;
         private bool Psg1 => RuntimePlatformInfo.IsPsg1;
@@ -111,16 +113,29 @@ namespace BattleCities
         {
             if (!Psg1 || TouchLobbyVisible || showDebug) return;
             if (paused || Simulation.Lost || Simulation.Won) return;
+            float exit = Mathf.Clamp01((psg1HintElapsed - Psg1HintHoldSeconds) / Psg1HintExitSeconds);
+            if(exit >= 1f)return;
+            float eased = exit * exit * (3f - 2f * exit);
+            var previousColor=GUI.color;
+            GUI.color=new Color(previousColor.r,previousColor.g,previousColor.b,previousColor.a*(1f-eased));
+            float offset=66f*eased;
             var centered = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontSize = Mathf.Max(18, Mathf.RoundToInt(Screen.width / 60f)), wordWrap = true };
-            DrawControllerPanel(new Rect(8, Screen.height - 66, Screen.width - 16, 58));
-            GUI.Label(new Rect(16, Screen.height - 64, Screen.width - 32, 54),
+            DrawControllerPanel(new Rect(8, Screen.height - 66 + offset, Screen.width - 16, 58));
+            GUI.Label(new Rect(16, Screen.height - 64 + offset, Screen.width - 32, 54),
                 "R1 FIRE / CHARGE    L1 TAP DEPLOY" + (CanSwapSpecials ? " / HOLD SWITCH" : "") + "\nA / B / X / Y USE POWER-UP 1 / 2 / 3 / 4", centered);
+            GUI.color=previousColor;
+        }
+
+        private void UpdatePsg1Hint(float dt)
+        {
+            if(!Psg1 || IsReplaying || !ReplayReady || TouchLobbyVisible || showDebug || paused || Simulation.Lost || Simulation.Won || (Simulation.IsMultiplayer && !Simulation.MatchStarted))return;
+            psg1HintElapsed=Mathf.Min(Psg1HintHoldSeconds+Psg1HintExitSeconds,psg1HintElapsed+Mathf.Max(0f,dt));
         }
 
         private static void DrawControllerPanel(Rect rect)
         {
             var prior = GUI.color;
-            GUI.color = new Color(.02f, .06f, .1f, .97f);
+            GUI.color = new Color(.02f, .06f, .1f, .97f * prior.a);
             GUI.DrawTexture(rect, Texture2D.whiteTexture);
             GUI.color = prior;
         }

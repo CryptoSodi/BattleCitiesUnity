@@ -35,7 +35,7 @@ namespace BattleCities.Editor
             foreach(var key in BattleGuideScreen.Psg1ArtKeys)
             {
                 string source;
-                if(new[]{"stick","dpad","shoulder","face","device"}.Contains(key))source=ArtDirectory+key+".png";
+                if(new[]{"stick","dpad","shoulder","face","device","select","start"}.Contains(key))source=ArtDirectory+key+".png";
                 else source="Assets/BattleCities/Art/controls-guide/"+(key=="tap"?"hand-tap-release":key=="charge"?"hand-charge-release":key=="normal-shell"?"shell-normal":"shell-power")+".png";
                 string id="psg-guide-"+key;images.Add(new JObject{{"id",id},{"source",source}});bindings[key]=id;
             }

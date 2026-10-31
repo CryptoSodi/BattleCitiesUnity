@@ -75,6 +75,7 @@ namespace BattleCities.UI
         void LayoutLeaderboardEdges()
         {
             if(!leaderboard)return;
+            LayoutHomeEmptyStandings(homeCardData?.rows==null||homeCardData.rows.Length==0);
             LayoutHomeStandingsSurface();
             LayoutHomeRankHeadings();
             LayoutRoundProgress();

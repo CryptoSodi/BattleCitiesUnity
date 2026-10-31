@@ -147,7 +147,7 @@ namespace BattleCities.UI
             content.anchorMin=content.anchorMax=content.pivot=new Vector2(.5f,.5f);
             content.anchoredPosition=Vector2.zero;
             float scale=Mathf.Min(available.x/design.x,available.y/design.y);
-            float extraPortraitHeight=target==MainMenuPlatform.Android && available.y>available.x
+            float extraPortraitHeight=(target==MainMenuPlatform.Android || (target==MainMenuPlatform.Psg1 && ResponsiveWebLayout.IsBrowserSurface)) && available.y>available.x
                 ?Mathf.Max(0f,available.y/scale-design.y):0f;
             content.sizeDelta=new Vector2(design.x,design.y+extraPortraitHeight);
             content.localScale=Vector3.one*scale;
@@ -161,11 +161,12 @@ namespace BattleCities.UI
 
             if(Application.isPlaying && target==MainMenuPlatform.Psg1 && controls && navigation)
             {
+                if(!ResponsiveWebLayout.IsBrowserSurface){controls.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,Mathf.Max(PsgLegendHeight,controls.rect.height));controls.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,Mathf.Min(PsgLegendWidth,content.rect.width-32f));ConfigurePsg1MenuLegend();}
                 controls.gameObject.SetActive(!controllerLegendHidden);
             }
             ConfigureNavigation(target!=MainMenuPlatform.Web && target!=MainMenuPlatform.AndroidLandscape);
             if(Application.isPlaying && inputModule && (target!=lastPlatform || inputModule.actionsAsset!=liveInput || lastControllerNavigation!=RuntimePlatformInfo.UsesControllerNavigation))
-                ConfigureInput(target==MainMenuPlatform.Psg1);
+                ConfigureInput(target==MainMenuPlatform.Psg1&&!ResponsiveWebLayout.IsBrowserSurface);
             // A platform profile may restore the home artwork while the tank selector is open.
             bool showHome= !IsModalOpen && !IsTvScreenOpen;
             lastPlatform=target;

@@ -40,6 +40,7 @@ namespace BattleCities.UI
         readonly TMP_Text[] slotNames=new TMP_Text[4],slotEmpty=new TMP_Text[4],inventoryLabels=new TMP_Text[Items.Length];
         readonly RawImage[] slotIcons=new RawImage[4];
         Button back,proceed;
+        Button lastRosterFocus,lastSlotFocus;
         PreBattleArt art;
         JObject account,pendingFuel,loadout=new JObject();
         int selected,paidTier=-1;
@@ -70,6 +71,7 @@ namespace BattleCities.UI
             }
         }
         public bool IsOpen=>root&&root.gameObject.activeSelf;
+        public bool BlocksMenuShortcuts=>busy||(battleGuide&&battleGuide.IsOpen);
         public bool IsConfigured=>root&&tankButtons[0]&&launch!=null;
         public void Configure(RectTransform frame,MenuTheme skin,MainMenuApiClient client,Action onLaunch,Button returnTo)
         {
@@ -225,6 +227,7 @@ namespace BattleCities.UI
             androidSpacing=platform==MainMenuPlatform.Android||platform==MainMenuPlatform.AndroidLandscape;
             androidLandscapeSpacing=platform==MainMenuPlatform.AndroidLandscape;
             rosterColumns=psg1||platform==MainMenuPlatform.Android||platform==MainMenuPlatform.AndroidLandscape?3:4;
+            if(ResponsiveWebLayout.IsBrowserSurface&&platform==MainMenuPlatform.Psg1)rosterColumns=2;
             if(!root)
             {
                 var frame=GetComponent<MainMenuScene>()?.Content?.Find("Main Display");
@@ -1108,13 +1111,13 @@ namespace BattleCities.UI
             if(!inLoadout)
             {
                 bool available=!busy&&paidTier<0&&pendingFuel==null;
+                var roster=Psg1UiNavigation.Available(lastRosterFocus)?lastRosterFocus:tankButtons[selected];
                 back.navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.Explicit,
-                    selectOnDown=available?tankButtons[selected]:proceed,selectOnUp=proceed,
+                    selectOnDown=available?roster:proceed,selectOnUp=proceed,
                     selectOnLeft=proceed,selectOnRight=available?tankButtons[selected]:proceed};
                 int count=tankButtons.Length+classifiedButtons.Length;
-                int lastRow=(count-1)/rosterColumns*rosterColumns;
                 proceed.navigation=new UnityEngine.UI.Navigation{mode=UnityEngine.UI.Navigation.Mode.Explicit,
-                    selectOnUp=available?RosterCard(Mathf.Min(lastRow+selected%rosterColumns,count-1)):back,selectOnDown=back,
+                    selectOnUp=available?roster:back,selectOnDown=back,
                     selectOnLeft=available?RosterCard(count-1):back,selectOnRight=back};
                 for(int i=0;i<count;i++)
                 {
@@ -1148,6 +1151,12 @@ namespace BattleCities.UI
         {
             if(battleGuide&&battleGuide.IsOpen){battleGuide.KeepControllerFocus();return;}
             Psg1UiNavigation.KeepFocus(root, inLoadout ? slotButtons[0] : tankButtons[selected]);
+            if(!EventSystem.current)return;
+            var current=EventSystem.current.currentSelectedGameObject;
+            var button=current?current.GetComponent<Button>():null;
+            if(!button)return;
+            if(inLoadout&&Array.IndexOf(slotButtons,button)>=0&&lastSlotFocus!=button){lastSlotFocus=button;Navigation();}
+            else if(!inLoadout&&(Array.IndexOf(tankButtons,button)>=0||Array.IndexOf(classifiedButtons,button)>=0)&&lastRosterFocus!=button){lastRosterFocus=button;Navigation();}
         }
         static void Focus(Button button){if(EventSystem.current&&button)EventSystem.current.SetSelectedGameObject(button.gameObject);}
         RectTransform Panel(string name,Transform parent,Sprite sprite,Rect area)

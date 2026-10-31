@@ -44,6 +44,7 @@ namespace BattleCities.UI
             tableHeading=Panel("Heading",table,null);
             tableTitle=Label("Period title",tableHeading,ScreenContent.Text("ranking","live-player-rankings-40fcc9","LIVE PLAYER RANKINGS"),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-02f-0-cb9adc",new Rect(.02f,.05f,.96f,.45f)),26,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
             tableTitle.color=Color.white;
+            tableTitle.gameObject.SetActive(false);
             string[] columns={"#","PLAYER","SCORE","MATCHES"};
             var positions=new[]{ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-025f--3558fc",new Rect(.025f,.51f,.07f,.40f)),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-12f-5-e9624c",new Rect(.12f,.51f,.43f,.40f)),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-56f-5-ce3c0c",new Rect(.56f,.51f,.21f,.40f)),ScreenContent.Rect("ranking","rankingscreen-view-buildview-new-rect-79f-5-e063dd",new Rect(.79f,.51f,.18f,.40f))};
             positions=new[]{new Rect(.025f,.51f,.10f,.40f),new Rect(.24f,.51f,.38f,.40f),new Rect(.63f,.51f,.22f,.40f),new Rect(.86f,.51f,.13f,.40f)};
@@ -100,26 +101,50 @@ namespace BattleCities.UI
             statusLayout.Place(footer);TvStatusFooterLayout.PlaceAction(picker.transform as RectTransform);
             TvTitleHeaderLayout.FitSkin(picker.image,((RectTransform)picker.transform).rect.height);
             float side=Mathf.Clamp(root.rect.width*ScreenContent.Number("ranking","payouts-ratio",0.38f),320,460),top=titleLayout.Height+12,height=root.rect.height-top-statusLayout.Height-16;
-            MainMenuScene.Place(history,4,top,side,height);MainMenuScene.Place(table,side+12,top,root.rect.width-side-16,height);
+            bool narrowWeb=ResponsiveWebLayout.IsBrowserSurface&&platform==MainMenuPlatform.Psg1;
+            if(narrowWeb){
+                float historyHeight=Mathf.Clamp(height*.22f,170,260);
+                MainMenuScene.Place(history,4,top,root.rect.width-8,historyHeight);
+                height=Mathf.Max(120,height-historyHeight-10);
+                MainMenuScene.Place(table,4,top+historyHeight+10,root.rect.width-8,height);
+            }else{MainMenuScene.Place(history,4,top,side,height);MainMenuScene.Place(table,side+12,top,root.rect.width-side-16,height);}
             menu.ApplyDetailSurface(history,historyPaper,ref historyMaterial);
+            if(narrowWeb){var fog=historyPaper.Find("TV White Fog")?.GetComponent<UnityEngine.UI.Image>();if(fog)fog.color=new Color(1f,.97f,.9f,.92f);}
             float w=historyPaper.rect.width,h=historyPaper.rect.height;
-            MainMenuScene.Place(historyHeading,3,3,w-6,TvSidebarStyle.HeaderHeight);MainMenuScene.Place(historyPeriod.rectTransform,10,52,w-20,32);
-            MainMenuScene.Place(historyEmpty,8,Mathf.Max(96,h*.23f),w-16,Mathf.Min(260,h*.49f));
-            MainMenuScene.Place(eligibility,10,h-86,w-20,76);
+            MainMenuScene.Place(historyHeading,3,3,w-6,TvSidebarStyle.HeaderHeight);
+            if(narrowWeb){
+                MainMenuScene.Place(historyPeriod.rectTransform,10,54,w*.28f,38);
+                MainMenuScene.Place(historyEmpty,w*.30f,50,w*.38f,Mathf.Max(50,h-55));
+                MainMenuScene.Place(eligibility,w*.70f,50,w*.28f,Mathf.Max(50,h-55));
+            }else{
+                MainMenuScene.Place(historyPeriod.rectTransform,10,52,w-20,32);
+                MainMenuScene.Place(historyEmpty,8,Mathf.Max(96,h*.23f),w-16,Mathf.Min(260,h*.49f));
+                MainMenuScene.Place(eligibility,10,h-86,w-20,76);
+            }
             bool largerSidebarText=TvSidebarStyle.LargerText(platform);
             TvSidebarStyle.Apply(historyHeading.Find("Heading").GetComponent<TMP_Text>(),TvSidebarStyle.HeadingSize(largerSidebarText),textStyles);
             foreach(var label in new[]{historyPeriod,historyEmpty.Find("Title").GetComponent<TMP_Text>(),historyEmpty.Find("Description").GetComponent<TMP_Text>(),eligibilityText})
                 TvSidebarStyle.Apply(label,TvSidebarStyle.BodySize(largerSidebarText),textStyles);
             TvSidebarStyle.PlaceHeaderIcon(historyHeading.Find("Chest").GetComponent<UnityEngine.UI.Image>(),new Rect(0,0,1,1));
-            float tableHeaderHeight=Mathf.Clamp(height*.105f,44,62),tableRowsTop=tableHeaderHeight+15;
+            float tableHeaderHeight=42f,tableRowsTop=tableHeaderHeight+15;
             MainMenuScene.Place(tableHeading,6,7,table.rect.width-12,tableHeaderHeight);
+            foreach(string column in new[]{"#","PLAYER","SCORE","MATCHES"}){
+                var label=tableHeading.Find(column)?.GetComponent<TMP_Text>();
+                if(label){label.fontSize=label.fontSizeMax=narrowWeb?28:19;label.fontSizeMin=narrowWeb?18:12;}
+            }
             bool personalVisible=personalCard&&personalCard.gameObject.activeSelf;float personalHeight=personalVisible?64:0;
             MainMenuScene.Place(tableScroll.transform as RectTransform,6,tableRowsTop,table.rect.width-12,height-tableRowsTop-8-(personalVisible?personalHeight+12:0));
-            MainMenuScene.Place(empty,14,tableRowsTop,table.rect.width-40,height-tableRowsTop-10-(personalVisible?personalHeight+12:0));
+            MainMenuScene.Place(empty,14,8,table.rect.width-28,height-16-(personalVisible?personalHeight+12:0));
+            var emptySkin=empty.GetComponent<UnityEngine.UI.Image>();
+            if(emptySkin&&emptySkin.sprite)TvTitleHeaderLayout.FitSkin(emptySkin,12f,1f);
             if(personalVisible){MainMenuScene.Place(personalCard.transform as RectTransform,12,height-personalHeight-8,table.rect.width-24,personalHeight);personalCard.Layout();}
             float rowHeight=Mathf.Max(60,ScreenContent.Number("ranking","row-height",64f));
             foreach(var button in rowButtons){button.GetComponent<LayoutElement>().preferredHeight=rowHeight;button.GetComponent<RankingRowCard>().Layout();}
-            var playerHeader=tableHeading.Find("PLAYER") as RectTransform;if(playerHeader)Fit(playerHeader,new Rect(.31f,.51f,.31f,.40f));
+            foreach(string column in new[]{"#","PLAYER","SCORE","MATCHES"}){
+                var item=tableHeading.Find(column) as RectTransform;if(!item)continue;
+                var lo=item.anchorMin;var hi=item.anchorMax;lo.y=.08f;hi.y=.95f;item.anchorMin=lo;item.anchorMax=hi;item.offsetMin=item.offsetMax=Vector2.zero;
+            }
+            var playerHeader=tableHeading.Find("PLAYER") as RectTransform;if(playerHeader)Fit(playerHeader,new Rect(.31f,.05f,.31f,.87f));
             LayoutPicker();
         }
         void LayoutPicker()
@@ -151,6 +176,9 @@ namespace BattleCities.UI
             }
             bool hasPersonal=snapshot?.CurrentPlayer!=null;
             personalCard.gameObject.SetActive(hasPersonal);if(hasPersonal)personalCard.Configure(snapshot.CurrentPlayer,0,true,theme);
+            bool hasRows=rowButtons.Count>0;
+            tableHeading.gameObject.SetActive(hasRows);
+            tableScroll.gameObject.SetActive(hasRows);
             ApplyLayout(menu.Resolve(new Vector2(UnityEngine.Device.Screen.width,UnityEngine.Device.Screen.height)));
             LayoutRebuilder.MarkLayoutForRebuild(tableScroll.content);
         }

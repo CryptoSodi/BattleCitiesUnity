@@ -24,6 +24,8 @@ namespace BattleCities.UI
         TMP_Text itemCount,connection,skrBalance,solBalance,fuelBalance,noticeTitle,noticeBody,swapFrom,swapTo,swapBalance;
         TMP_InputField swapAmount;
         Button back,connect,swapDirection,swapAction,noticeClose;
+        Button lastHeaderFocus,lastFilterFocus,lastProductFocus;
+        GameObject noticeReturnFocus;
         readonly Button[] currencyTabs=new Button[3],filters=new Button[5];
         readonly Button[] hudTabs=new Button[4];
         readonly Image[] hudSelections=new Image[4];
@@ -48,6 +50,7 @@ namespace BattleCities.UI
         JObject account;Coroutine accountRequest;
         [NonSerialized] bool configured;
         public bool IsOpen=>root&&root.gameObject.activeSelf;
+        public bool HasBlockingNotice=>checkoutBusy||(notice&&notice.gameObject.activeSelf);
         public bool IsConfigured=>configured&&root&&back&&menu;
         public RectTransform Root=>root;
         public ShopCurrency Currency=>currency;
@@ -63,7 +66,7 @@ namespace BattleCities.UI
             // Unity restores object references on script reload, but runtime arrays need rebinding.
             configured=false;
             if(api)api.PlayerLoaded-=OnPlayerLoaded;
-            menu=owner;theme=skin;api=client;usePlay=RuntimePlatformInfo.IsPsg1||menu.Platform==MainMenuPlatform.Psg1;art=RemoteGameArt.Load<PreBattleArt>("PreBattleArt");shopArt=RemoteGameArt.Load<ShopArt>("ShopArt");
+            menu=owner;theme=skin;api=client;usePlay=ScreenContent.Platform=="psg1";art=RemoteGameArt.Load<PreBattleArt>("PreBattleArt");shopArt=RemoteGameArt.Load<ShopArt>("ShopArt");
             if(api)api.PlayerLoaded+=OnPlayerLoaded;
             var existing=frame.Find("Shop screen");bool open=existing&&existing.gameObject.activeSelf;
             root=Panel("Shop screen",frame,null);root.GetComponent<Image>().raycastTarget=true;
@@ -329,15 +332,17 @@ namespace BattleCities.UI
         public void ApplyLayout(MainMenuPlatform platform)
         {
             if(!IsConfigured)return;float w=root.rect.width,h=root.rect.height;
-            bool nextPlay=platform==MainMenuPlatform.Psg1;
+            bool nextPlay=ScreenContent.Platform=="psg1";
             if(usePlay!=nextPlay){usePlay=nextPlay;if(currency==ShopCurrency.Skr||currency==ShopCurrency.Play)currency=TokenCurrency;RefreshArt();RefreshAccount();SetCurrency(currency,false);}
             bool compact=platform==MainMenuPlatform.Android||platform==MainMenuPlatform.AndroidLandscape||platform==MainMenuPlatform.Psg1;
             columns=compact?3:4;
+            if(ResponsiveWebLayout.IsBrowserSurface&&platform==MainMenuPlatform.Psg1)columns=2;
             if(w<620f)columns=2;
             var headerLayout=new TvTitleHeaderLayout(root);
             var footerLayout=new TvStatusFooterLayout(root);
             float header=headerLayout.Height,footerHeight=footerLayout.Height;
             float sidebar=Mathf.Clamp(w*ScreenContent.Number("shop","sidebar-ratio",0.25f),208f,300f);
+            if(ResponsiveWebLayout.IsBrowserSurface&&platform==MainMenuPlatform.Psg1)sidebar=Mathf.Clamp(w*.31f,208f,300f);
             headerLayout.PlaceTitle(heading,heading.Find("Shop icon") as RectTransform,heading.Find("Title") as RectTransform,iconHeightFraction:.64f);
             headerLayout.PlaceNavigation(heading,currencyBar);
             LayoutJoinedBar(currencyBar,hudTabs,hudSelections,headerLayout.NavigationHeight,.22f);
@@ -419,8 +424,8 @@ namespace BattleCities.UI
         }
         void InspectProduct(int index)
         {if(checkoutBusy||!ProductAvailable(index))return;SelectProduct(index,true);InspectCheckout(index);}
-        void ShowNotice(string title,string body){noticeTitle.text=title;noticeBody.text=body;notice.gameObject.SetActive(true);notice.SetAsLastSibling();Focus(noticeClose);}
-        void DismissNotice(){CancelCheckout();notice.gameObject.SetActive(false);Focus(currency==ShopCurrency.Swap?swapAction:PreferredProductButton());}
+        void ShowNotice(string title,string body){if(!notice.gameObject.activeSelf)noticeReturnFocus=EventSystem.current?EventSystem.current.currentSelectedGameObject:null;noticeTitle.text=title;noticeBody.text=body;notice.gameObject.SetActive(true);notice.SetAsLastSibling();Focus(noticeClose);}
+        void DismissNotice(){CancelCheckout();notice.gameObject.SetActive(false);var previous=noticeReturnFocus?noticeReturnFocus.GetComponent<Selectable>():null;noticeReturnFocus=null;Focus(Psg1UiNavigation.Available(previous)?previous:currency==ShopCurrency.Swap?swapAction:PreferredProductButton());}
         public void RefreshArt()
         {
             shopArt=RemoteGameArt.Load<ShopArt>("ShopArt");SetSprite(heading.Find("Shop icon").GetComponent<Image>(),theme.NavigationIcons[2]);
@@ -545,17 +550,32 @@ namespace BattleCities.UI
             decimal rounded=decimal.Round(amount,0,MidpointRounding.AwayFromZero);
             return amount>0&&rounded==0?"<1":rounded.ToString("N0",CultureInfo.InvariantCulture);
         }
-        public void KeepControllerFocus(){Psg1UiNavigation.KeepFocus(root,notice.gameObject.activeSelf?noticeClose:currency==ShopCurrency.Swap?swapDirection:PreferredProductButton());}
+        public void KeepControllerFocus()
+        {
+            Psg1UiNavigation.KeepFocus(root,notice.gameObject.activeSelf?noticeClose:currency==ShopCurrency.Swap?swapDirection:PreferredProductButton());
+            if(notice.gameObject.activeSelf||!EventSystem.current)return;
+            var current=EventSystem.current.currentSelectedGameObject;
+            var button=current?current.GetComponent<Button>():null;
+            if(!button)return;
+            bool changed=false;
+            if(button==back||Array.IndexOf(currencyTabs,button)>=0){changed=lastHeaderFocus!=button;lastHeaderFocus=button;}
+            else if(Array.IndexOf(filters,button)>=0){changed=lastFilterFocus!=button;lastFilterFocus=button;}
+            else for(int i=0;i<cards.Length;i++)if(cards[i]!=null&&cards[i].Price==button){changed=lastProductFocus!=button;lastProductFocus=button;break;}
+            if(changed)ConfigureNavigation();
+        }
         void ConfigureNavigation()
         {
             if(!back)return;
-            Link(back,currencyTabs[1],currencyTabs[0],connect,filters[3]);
-            for(int i=0;i<2;i++)Link(currencyTabs[i],i==0?back:currencyTabs[0],i==1?back:currencyTabs[1],connect,filters[i]);
+            var header=Psg1UiNavigation.Available(lastHeaderFocus)?lastHeaderFocus:currencyTabs[currency==ShopCurrency.Solana?1:0];
+            var filter=Psg1UiNavigation.Available(lastFilterFocus)?lastFilterFocus:filters[(int)category];
+            var product=Psg1UiNavigation.Available(lastProductFocus)&&purchasable.Exists(i=>cards[i].Price==lastProductFocus)?lastProductFocus:PreferredProductButton();
+            Link(back,currencyTabs[1],currencyTabs[0],connect,filter);
+            for(int i=0;i<2;i++)Link(currencyTabs[i],i==0?back:currencyTabs[0],i==1?back:currencyTabs[1],connect,filter);
             currencyTabs[2].navigation=new Navigation{mode=Navigation.Mode.None};
-            for(int i=0;i<filters.Length;i++)Link(filters[i],filters[(i+filters.Length-1)%filters.Length],filters[(i+1)%filters.Length],i==filters.Length-1?back:currencyTabs[Math.Min(i,1)],purchasable.Count>0?cards[purchasable[Math.Min(i,Math.Min(columns,purchasable.Count)-1)]].Price:back);
-            for(int at=0;at<purchasable.Count;at++){int row=at/columns*columns,last=Math.Min(row+columns,purchasable.Count)-1;var button=cards[purchasable[at]].Price;Link(button,cards[purchasable[at>row?at-1:last]].Price,cards[purchasable[at<last?at+1:row]].Price,at>=columns?cards[purchasable[at-columns]].Price:filters[Math.Min(at,3)],row+columns<purchasable.Count?cards[purchasable[Math.Min(at+columns,purchasable.Count-1)]].Price:connect);}
+            for(int i=0;i<filters.Length;i++)Link(filters[i],filters[(i+filters.Length-1)%filters.Length],filters[(i+1)%filters.Length],header,product);
+            for(int at=0;at<purchasable.Count;at++){int row=at/columns*columns,last=Math.Min(row+columns,purchasable.Count)-1;var button=cards[purchasable[at]].Price;Link(button,cards[purchasable[at>row?at-1:last]].Price,cards[purchasable[at<last?at+1:row]].Price,at>=columns?cards[purchasable[at-columns]].Price:filter,row+columns<purchasable.Count?cards[purchasable[Math.Min(at+columns,purchasable.Count-1)]].Price:connect);}
             for(int i=0;i<cards.Length;i++)if(!ProductAvailable(i))cards[i].Price.navigation=new Navigation{mode=Navigation.Mode.None};
-            Link(connect,back,back,currency==ShopCurrency.Swap?swapAction:purchasable.Count>0?cards[purchasable[purchasable.Count-1]].Price:back,back);
+            Link(connect,back,back,currency==ShopCurrency.Swap?swapAction:product,header);
             Link(swapDirection,currencyTabs[2],swapAmount,swapAmount,swapAction);Link(swapAction,swapDirection,connect,swapDirection,connect);Link(swapAmount,swapDirection,swapDirection,currencyTabs[2],swapDirection);LinkNoticeButtons();
         }
         static void Link(Selectable target,Selectable left,Selectable right,Selectable up,Selectable down){target.navigation=new Navigation{mode=Navigation.Mode.Explicit,selectOnLeft=left,selectOnRight=right,selectOnUp=up,selectOnDown=down};}

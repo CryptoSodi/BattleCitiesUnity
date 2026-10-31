@@ -25,7 +25,7 @@ namespace BattleCities.UI
             ["deploy-title"]="DEPLOY SPECIAL",["single-special"]="Current tanks each have one special.",
             ["menu-hint"]="D-PAD: SELECT    A: CONFIRM    B: BACK"
         };
-        public static readonly string[] Psg1ArtKeys={"stick","dpad","shoulder","face","device","tap","charge","normal-shell","power-shell"};
+        public static readonly string[] Psg1ArtKeys={"stick","dpad","shoulder","face","device","select","start","tap","charge","normal-shell","power-shell"};
         Psg1BattleGuideArt psgArt;
         TMP_Text psgMenuHint;
         Sprite PsgArt(string key,Sprite fallback)=>ScreenContent.Sprite(Psg1ScreenId,key,fallback);

@@ -8,6 +8,7 @@ namespace BattleCities.UI
         SettingsScreen settingsScreen;
         [SerializeField] string settingsReturnScreen;
         [SerializeField] int settingsNavigationIndex;
+        GameObject settingsReturnFocus;
         public bool IsSettingsOpen {get{var s=mainFrame?mainFrame.Find("Settings screen"):null;return s&&s.gameObject.activeSelf;}}
         void EnsureSettings()
         {
@@ -17,11 +18,12 @@ namespace BattleCities.UI
         }
         public void OpenSettings()
         {
-            if(IsPlayerProfileOpen)ClosePlayerProfile();
+            if(IsPlayerProfileOpen&&profileReturnScreen=="Settings screen"){ClosePlayerProfile();return;}
             if(IsSettingsOpen)return;
+            settingsReturnFocus=EventSystem.current?EventSystem.current.currentSelectedGameObject:null;
             EnsureApiClient();settingsReturnScreen=null;
-            settingsNavigationIndex=IsOperationsOpen?(IsSocialsOpen?4:3):IsRankingOpen?2:IsShopOpen?1:0;
-            foreach(var name in new[]{"Shop screen","Ranking screen","Operations screen","Pre-battle screens"})
+            settingsNavigationIndex=IsPlayerProfileOpen?profileNavigationIndex:IsOperationsOpen?(IsSocialsOpen?4:3):IsRankingOpen?2:IsShopOpen?1:0;
+            foreach(var name in new[]{"Player profile screen","Shop screen","Ranking screen","Operations screen","Pre-battle screens"})
             {
                 var other=mainFrame.Find(name);if(other&&other.gameObject.activeSelf){settingsReturnScreen=name;other.gameObject.SetActive(false);}
             }
@@ -36,7 +38,12 @@ namespace BattleCities.UI
                 var other=mainFrame.Find(settingsReturnScreen);if(other)other.gameObject.SetActive(true);
             }
             settingsReturnScreen=null;SetTankSelectorBackdrop(IsTvScreenOpen);RefreshLayout();
-            if(restore&&EventSystem.current)EventSystem.current.SetSelectedGameObject(settingsButton.gameObject);
+            if(restore&&EventSystem.current){
+                var control=settingsReturnFocus?settingsReturnFocus.GetComponent<UnityEngine.UI.Selectable>():null;
+                if(Psg1UiNavigation.Available(control))EventSystem.current.SetSelectedGameObject(settingsReturnFocus);
+                else if(Psg1UiNavigation.Available(ActiveSettingsButton))EventSystem.current.SetSelectedGameObject(ActiveSettingsButton.gameObject);
+            }
+            settingsReturnFocus=null;
         }
         void CloseSettingsForNavigation(){if(IsPlayerProfileOpen)ClosePlayerProfile(false);if(IsSettingsOpen)CloseSettings(false);}
         void LayoutSettingsScreen()

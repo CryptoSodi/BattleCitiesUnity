@@ -168,9 +168,13 @@ namespace BattleCities.UI
         [SerializeField] private MainMenuApiClient apiClient;
         private Canvas canvas;
         private Vector2 lastSize;
+        private float lastWebPixelRatio=1;
         private Rect lastSafeArea;
         private MainMenuPlatform lastPlatform = (MainMenuPlatform)(-1);
         private bool lastControllerNavigation;
+        private Selectable[] psg1MenuWithSettings;
+        private readonly GameObject[] psg1PageFocus = new GameObject[5];
+        private GameObject psg1PreviousSelection;
         private InputActionAsset liveInput;
         private InputAction cancel;
         private readonly List<InputActionReference> inputReferences = new List<InputActionReference>();
@@ -200,9 +204,9 @@ namespace BattleCities.UI
             if(statusBar && (lastPlatform==MainMenuPlatform.Psg1 || lastPlatform==MainMenuPlatform.AndroidLandscape))
                 statusBar.gameObject.SetActive(visible);
             if(controls && lastPlatform==MainMenuPlatform.Psg1)
-                controls.gameObject.SetActive(visible && !controllerLegendHidden);
+                controls.gameObject.SetActive(visible && !controllerLegendHidden && !ResponsiveWebLayout.IsBrowserSurface);
             if(howItWorks && (lastPlatform==MainMenuPlatform.Psg1 || lastPlatform==MainMenuPlatform.AndroidLandscape))
-                howItWorks.gameObject.SetActive(visible && (lastPlatform==MainMenuPlatform.AndroidLandscape || controllerLegendHidden));
+                howItWorks.gameObject.SetActive(visible && (lastPlatform==MainMenuPlatform.AndroidLandscape || controllerLegendHidden || ResponsiveWebLayout.IsBrowserSurface));
             SetAndroidTvVisible(!visible,animateTv);
         }
 
@@ -230,6 +234,16 @@ namespace BattleCities.UI
             profileReturnScreen=settingsReturnScreen=null;
             SetHeroVisible(true,false);
         }
+#if UNITY_EDITOR
+        // With both domain and scene reload disabled, Unity retains the active
+        // preview objects and may not run Awake again on the next Play session.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void ResetRetainedEditorStartupView()
+        {
+            foreach(var menu in FindObjectsByType<MainMenuScene>(FindObjectsInactive.Include,FindObjectsSortMode.None))
+                menu.ResetStartupView();
+        }
+#endif
         private void Awake()
         {
             canvas=GetComponent<Canvas>();
@@ -336,6 +350,7 @@ namespace BattleCities.UI
         }
         private void Update()
         {
+            if(Application.isPlaying)UpdatePsg1MenuShortcuts();
             if (Application.isPlaying) UpdateInstructionsPage(Time.unscaledDeltaTime);
             if (Application.isPlaying && Time.unscaledTime >= nextRoundUpdate)
             {
@@ -344,8 +359,9 @@ namespace BattleCities.UI
             }
             if (!content || !safeArea) return;
             var size=new Vector2(Screen.width,Screen.height);
-            var resolved=Resolve(size);
-            if(Application.isPlaying && resolved==MainMenuPlatform.Psg1 && !controllerLegendHidden && controllerLegendHideAt>=0)
+            var resolved=Resolve(new Vector2(Screen.safeArea.width,Screen.safeArea.height));
+            if(Application.isPlaying&&resolved==MainMenuPlatform.Psg1&&!ResponsiveWebLayout.IsBrowserSurface&&psgLegendArtRevision!=ScreenUpdates.Revision)ConfigurePsg1MenuLegend();
+            if(Application.isPlaying && resolved==MainMenuPlatform.Psg1 && !ResponsiveWebLayout.IsBrowserSurface && !controllerLegendHidden && controllerLegendHideAt>=0)
             {
                 if(controls && controls.TryGetComponent<CanvasGroup>(out var legendGroup))
                     legendGroup.alpha=Mathf.Clamp01((controllerLegendHideAt-Time.unscaledTime)/.4f);
@@ -355,7 +371,8 @@ namespace BattleCities.UI
                     RefreshLayout();
                 }
             }
-            if(size!=lastSize || Screen.safeArea!=lastSafeArea || resolved!=lastPlatform || lastControllerNavigation!=RuntimePlatformInfo.UsesControllerNavigation) RefreshLayout();
+            float webPixelRatio=RuntimePlatformInfo.IsWeb?BattleHudLayout.BrowserPixelRatio:1;
+            if(size!=lastSize || Screen.safeArea!=lastSafeArea || resolved!=lastPlatform || lastControllerNavigation!=RuntimePlatformInfo.UsesControllerNavigation || !Mathf.Approximately(webPixelRatio,lastWebPixelRatio)) RefreshLayout();
         }
         public MainMenuPlatform Resolve(Vector2 size)
         {
@@ -366,6 +383,7 @@ namespace BattleCities.UI
             if(RuntimePlatformInfo.IsPsg1)return MainMenuPlatform.Psg1;
             if(RuntimePlatformInfo.Current==GameRuntimePlatform.Android)
                 return size.x>size.y ? MainMenuPlatform.AndroidLandscape : MainMenuPlatform.Android;
+            if(RuntimePlatformInfo.IsWeb){float ratio=Mathf.Max(1,BattleHudLayout.BrowserPixelRatio);return ResponsiveWebLayout.ForViewport(size.x/ratio,size.y/ratio);}
             if(size.x/Mathf.Max(1,size.y)<.8f)return MainMenuPlatform.Android;
             return MainMenuPlatform.Web;
         }
@@ -375,19 +393,20 @@ namespace BattleCities.UI
             RemoteScreenView.Bind("home",content);
             if(!canvas)canvas=GetComponent<Canvas>();
             lastSize=new Vector2(Screen.width,Screen.height);lastSafeArea=Screen.safeArea;
+            lastWebPixelRatio=RuntimePlatformInfo.IsWeb?BattleHudLayout.BrowserPixelRatio:1;
             var safe=lastSafeArea;
             safeArea.anchorMin=new Vector2(safe.xMin/Mathf.Max(1,Screen.width),safe.yMin/Mathf.Max(1,Screen.height));
             safeArea.anchorMax=new Vector2(safe.xMax/Mathf.Max(1,Screen.width),safe.yMax/Mathf.Max(1,Screen.height));
             safeArea.offsetMin=safeArea.offsetMax=Vector2.zero;
             Canvas.ForceUpdateCanvases();
-            ApplyLayout(Resolve(lastSize),safeArea.rect.size);
+            ApplyLayout(Resolve(new Vector2(safe.width,safe.height)),safeArea.rect.size);
         }
         /// <summary>Also used by the editor preview and layout checks at exact platform resolutions.</summary>
         public void ApplyLayout(MainMenuPlatform target, Vector2 available)
         {
             if(target==MainMenuPlatform.Android && available.x>available.y)
                 target=MainMenuPlatform.AndroidLandscape;
-            ConfigureWebHeaderActions(target==MainMenuPlatform.Web);
+            ConfigureWebHeaderActions(target==MainMenuPlatform.Web||target==MainMenuPlatform.Psg1||ResponsiveWebLayout.IsBrowserSurface);
             if(editLayoutInScene && !generatingLayout)
             {
                 ApplyAuthoredLayout(target,available);
@@ -399,7 +418,7 @@ namespace BattleCities.UI
             bool portrait=target==MainMenuPlatform.Android && available.y>available.x;
             bool compact=psg || target==MainMenuPlatform.Android || target==MainMenuPlatform.AndroidLandscape;
             var layout=GetLayout(target);
-            bool hideControllerLegend=psg && controllerLegendHidden;
+            bool hideControllerLegend=psg && (controllerLegendHidden || ResponsiveWebLayout.IsBrowserSurface);
             Vector2 reference=layout.referenceResolution;
             float scale=Mathf.Min(available.x/reference.x,available.y/reference.y);
             if(scale<=0)return;
@@ -519,7 +538,7 @@ namespace BattleCities.UI
             float mw=Mathf.Min(w-70,720),mh=portrait?520:440;
             Place(modalPanel,(w-mw)/2,(h-mh)/2,mw,mh);
             ConfigureNavigation(compact);
-            if(Application.isPlaying && (target!=lastPlatform || inputModule.actionsAsset!=liveInput || lastControllerNavigation!=RuntimePlatformInfo.UsesControllerNavigation))ConfigureInput(psg);
+            if(Application.isPlaying && (target!=lastPlatform || inputModule.actionsAsset!=liveInput || lastControllerNavigation!=RuntimePlatformInfo.UsesControllerNavigation))ConfigureInput(psg && !ResponsiveWebLayout.IsBrowserSurface);
             lastPlatform=target;
             ApplyArenaBackdrop(target,available);
             ApplyMenuPresentation();
@@ -575,12 +594,13 @@ namespace BattleCities.UI
             }
         }
         private static void Link(Button b,Selectable up,Selectable down,Selectable left,Selectable right)
-        { b.navigation=new Navigation{mode=Navigation.Mode.Explicit,selectOnUp=up,selectOnDown=down,selectOnLeft=left,selectOnRight=right}; }
+        { if(b)b.navigation=new Navigation{mode=Navigation.Mode.Explicit,selectOnUp=up,selectOnDown=down,selectOnLeft=left,selectOnRight=right}; }
         private void ConfigureNavigation(bool compact)
         {
-            Link(startButton,settingsButton,tabs[0],tabs[0],tabs[4]);
-            Link(settingsButton,compact?tabs[0]:null,startButton,tabs[0],startButton);
-            for(int i=0;i<tabs.Length;i++)Link(tabs[i],compact?startButton:(i==0?settingsButton:tabs[i-1]),compact?startButton:tabs[(i+1)%tabs.Length],compact?tabs[(i+tabs.Length-1)%tabs.Length]:startButton,compact?tabs[(i+1)%tabs.Length]:startButton);
+            var settings=ActiveSettingsButton;
+            Link(startButton,settings,tabs[0],tabs[0],tabs[4]);
+            Link(settings,compact?tabs[0]:null,startButton,tabs[0],startButton);
+            for(int i=0;i<tabs.Length;i++)Link(tabs[i],compact?startButton:(i==0?settings:tabs[i-1]),compact?startButton:tabs[(i+1)%tabs.Length],compact?tabs[(i+tabs.Length-1)%tabs.Length]:startButton,compact?tabs[(i+1)%tabs.Length]:startButton);
             Link(closeButton,closeButton,closeButton,closeButton,closeButton);
         }
         private void ConfigureInput(bool psg)
@@ -589,15 +609,24 @@ namespace BattleCities.UI
             lastControllerNavigation=RuntimePlatformInfo.UsesControllerNavigation;
             psg|=lastControllerNavigation;
             if(cancel!=null)cancel.performed-=OnCancel;
+            // The UI module can enable its asset as soon as it is assigned.
+            // Detach it while adding the keyboard and scroll bindings, especially
+            // when scripts reload during Play mode.
+            inputModule.actionsAsset=null;
             liveInput.Disable();
-            inputModule.actionsAsset=liveInput;
             var map=liveInput.FindActionMap(psg?"PSG1":"UI",true);
             if(psg)Psg1UiInput.BindKeyboard(map.FindAction("Navigate",true),map.FindAction("Submit",true),map.FindAction("Cancel",true));
+            if(RuntimePlatformInfo.IsPsg1){
+                // Space mirrors R1 in the PSG1 menu; Enter remains the submit key.
+                var submit=map.FindAction("Submit",true);
+                for(int i=0;i<submit.bindings.Count;i++)if(submit.bindings[i].path=="<Keyboard>/space")submit.ApplyBindingOverride(i,new InputBinding{overridePath=""});
+            }
+            var wheel=map.FindAction("ScrollWheel");
+            if(wheel==null){wheel=map.AddAction("ScrollWheel",InputActionType.PassThrough,"<Mouse>/scroll");wheel.expectedControlType="Vector2";}
+            inputModule.actionsAsset=liveInput;
             ClearInputReferences();
             inputModule.point=Reference(map.FindAction("Point"));
             inputModule.leftClick=Reference(map.FindAction("Click"));
-            var wheel=map.FindAction("ScrollWheel");
-            if(wheel==null){wheel=map.AddAction("ScrollWheel",InputActionType.PassThrough,"<Mouse>/scroll");wheel.expectedControlType="Vector2";}
             inputModule.scrollWheel=Reference(wheel);
             inputModule.move=Reference(map.FindAction("Navigate"));
             inputModule.submit=Reference(map.FindAction("Submit"));
@@ -611,6 +640,37 @@ namespace BattleCities.UI
         private void ClearInputReferences()
         { foreach(var reference in inputReferences)if(reference)Destroy(reference);inputReferences.Clear(); }
         private void OnCancel(InputAction.CallbackContext ctx) { Back(); }
+        private void UpdatePsg1MenuShortcuts()
+        {
+            if(!RuntimePlatformInfo.IsPsg1||loading||!EventSystem.current||tabs==null||tabs.Length<5)return;
+            var pad=Gamepad.current;var keyboard=Keyboard.current;
+            var lobby=BattleCities.Multiplayer.BattleSession.Instance?.Lobby;
+            if((lobby&&lobby.Visible)||IsModalOpen||(IsPlayerProfileOpen&&profileScreen&&profileScreen.ReplayViewerOpen)||
+               (IsShopOpen&&shop&&shop.HasBlockingNotice)||(IsRankingOpen&&rankingScreen&&rankingScreen.IsPickerOpen)||
+               (IsOperationsOpen&&operations&&operations.IsLinkNoticeOpen)||(preBattle&&preBattle.IsOpen&&preBattle.BlocksMenuShortcuts))return;
+            var selectedObject=EventSystem.current.currentSelectedGameObject;
+            var textInput=selectedObject?selectedObject.GetComponent<TMPro.TMP_InputField>():null;
+            var legacyInput=selectedObject?selectedObject.GetComponent<InputField>():null;
+            bool typing=(textInput&&textInput.isFocused)||(legacyInput&&legacyInput.isFocused);
+            if((pad!=null&&pad.selectButton.wasPressedThisFrame)||(!typing&&keyboard!=null&&keyboard.minusKey.wasPressedThisFrame)){if(!IsSettingsOpen)OpenSettings();return;}
+            if((pad!=null&&pad.startButton.wasPressedThisFrame)||(!typing&&keyboard!=null&&keyboard.equalsKey.wasPressedThisFrame)){if(IsSettingsOpen)CloseSettings(true);if(!(preBattle&&preBattle.IsOpen))StartBattle();return;}
+            if((pad!=null&&pad.buttonNorth.wasPressedThisFrame)||(!typing&&keyboard!=null&&keyboard.xKey.wasPressedThisFrame)){if(!IsPlayerProfileOpen)OpenOwnProfile();return;}
+            bool left=(pad!=null&&pad.leftShoulder.wasPressedThisFrame)||(!typing&&keyboard!=null&&keyboard.eKey.wasPressedThisFrame);
+            bool right=(pad!=null&&pad.rightShoulder.wasPressedThisFrame)||(!typing&&keyboard!=null&&keyboard.spaceKey.wasPressedThisFrame);
+            if(left==right)return;
+            if(IsSettingsOpen)CloseSettings(true);
+            int current=IsPlayerProfileOpen?profileNavigationIndex:IsOperationsOpen?(IsSocialsOpen?4:3):IsRankingOpen?2:IsShopOpen?1:0;
+            var selected=EventSystem.current.currentSelectedGameObject;
+            if(selected&&selected.transform.IsChildOf(mainFrame))psg1PageFocus[current]=selected;
+            int next=(current+(left?-1:1)+tabs.Length)%tabs.Length;
+            if(!tabs[next]||!tabs[next].interactable)return;
+            tabs[next].onClick.Invoke();
+            var prior=psg1PageFocus[next];
+            var selectable=prior?prior.GetComponent<Selectable>():null;
+            if(Psg1UiNavigation.Available(selectable)&&prior.transform.IsChildOf(mainFrame)){
+                EventSystem.current.SetSelectedGameObject(prior);Psg1UiNavigation.Reveal(selectable);
+            }
+        }
         public void Back()
         {
             // The lobby owns B while it is open, including its room-code keypad.
@@ -633,9 +693,10 @@ namespace BattleCities.UI
         }
         private void LateUpdate()
         {
-            if (!Application.isPlaying || (lastPlatform != MainMenuPlatform.Psg1&&!RuntimePlatformInfo.UsesControllerNavigation) || !EventSystem.current) return;
+            if (!Application.isPlaying || ((lastPlatform != MainMenuPlatform.Psg1||ResponsiveWebLayout.IsBrowserSurface)&&!RuntimePlatformInfo.UsesControllerNavigation) || !EventSystem.current) return;
             var lobby = BattleCities.Multiplayer.BattleSession.Instance ? BattleCities.Multiplayer.BattleSession.Instance.Lobby : null;
-            if (lobby && lobby.Visible) return;
+            if (lobby && lobby.Visible) {psg1PreviousSelection=null;return;}
+            RememberPsg1ReturnDirection();
             if (IsModalOpen) { Psg1UiNavigation.KeepFocus(modal, closeButton); return; }
             if (IsPlayerProfileOpen) { EnsurePlayerProfile();profileScreen.KeepControllerFocus();return; }
             if (IsSettingsOpen) { EnsureSettings();settingsScreen.KeepControllerFocus();return; }
@@ -644,13 +705,37 @@ namespace BattleCities.UI
             if (IsShopOpen) { EnsureShop();shop.KeepControllerFocus();return; }
             if (preBattle && preBattle.IsOpen) { preBattle.KeepControllerFocus(); return; }
             var online = lobby ? lobby.OpenButton : null;
-            Psg1UiNavigation.Rows(new Selectable[] { webAvatarButton, walletLoginButton, settingsButton, fullscreenButton, online },
+            if(lastPlatform==MainMenuPlatform.Psg1&&!ResponsiveWebLayout.IsBrowserSurface){
+                if(psg1MenuWithSettings==null||psg1MenuWithSettings.Length!=tabs.Length+1)psg1MenuWithSettings=new Selectable[tabs.Length+1];
+                Array.Copy(tabs,psg1MenuWithSettings,tabs.Length);psg1MenuWithSettings[tabs.Length]=ActiveSettingsButton;
+                Psg1UiNavigation.Rows(new Selectable[] { webAvatarButton, walletLoginButton, online },new Selectable[] { startButton },psg1MenuWithSettings);
+            }else Psg1UiNavigation.Rows(new Selectable[] { webAvatarButton, walletLoginButton, ActiveSettingsButton, fullscreenButton, online },
                 new Selectable[] { startButton }, tabs);
             var selected = EventSystem.current.currentSelectedGameObject;
             // ONLINE belongs to the persistent multiplayer canvas, outside this menu's hierarchy.
             if (online && selected == online.gameObject && Psg1UiNavigation.Available(online))
                 Psg1UiNavigation.KeepFocus(online.transform.parent, online);
             else Psg1UiNavigation.KeepFocus(content, startButton);
+        }
+        private void RememberPsg1ReturnDirection()
+        {
+            var current=EventSystem.current.currentSelectedGameObject;
+            var previous=psg1PreviousSelection;psg1PreviousSelection=current;
+            if(!RuntimePlatformInfo.IsPsg1||!IsTvScreenOpen||!current||!previous||current==previous||!inputModule||!inputModule.move||inputModule.move.action==null)return;
+            var from=previous.GetComponent<Selectable>();var to=current.GetComponent<Selectable>();
+            if(!Psg1UiNavigation.Available(from)||!Psg1UiNavigation.Available(to)||!from.transform.IsChildOf(mainFrame)||!to.transform.IsChildOf(mainFrame))return;
+            var direction=inputModule.move.action.ReadValue<Vector2>();if(direction.sqrMagnitude<.25f)return;
+            var source=from.navigation;var destination=to.navigation;
+            if(Mathf.Abs(direction.x)>Mathf.Abs(direction.y)){
+                if(direction.x>0&&source.selectOnRight==to)destination.selectOnLeft=from;
+                else if(direction.x<0&&source.selectOnLeft==to)destination.selectOnRight=from;
+                else return;
+            }else{
+                if(direction.y>0&&source.selectOnUp==to)destination.selectOnDown=from;
+                else if(direction.y<0&&source.selectOnDown==to)destination.selectOnUp=from;
+                else return;
+            }
+            to.navigation=destination;
         }
         private PreBattleScreen preBattle;
         private void EnsurePreBattle()
@@ -696,6 +781,7 @@ namespace BattleCities.UI
             CloseOperationsForNavigation();
             CloseRankingForNavigation();
             if(IsShopOpen){EnsureShop();shop.Close(false);}
+            if(preBattle&&preBattle.IsOpen)preBattle.Close(false);
             if(EventSystem.current)EventSystem.current.SetSelectedGameObject(startButton.gameObject);
         }
         public void OpenQuarters() { OpenOperations(false); }
