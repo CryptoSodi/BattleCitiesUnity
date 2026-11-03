@@ -36,6 +36,15 @@ test('immutable legacy wallet response preserves the server message and valid si
   assert.deepEqual(signed.subarray(65),Buffer.from(original,'base64').subarray(65));
   assert.ok(Transaction.from(signed).verifySignatures());
 });
+test('SDK-connected wallet signs the exact quoted transaction',async()=>{
+  const provider={isPhantom:true,publicKey:key.publicKey,signTransaction:async tx=>signImmutable(tx)};
+  const context=vm.createContext({window:{BattleCitiesPhantom:{current:address=>address===wallet?provider:null}},atob,btoa,Uint8Array,
+    TextEncoder,TextDecoder,console,setTimeout,clearTimeout});
+  vm.runInContext(bundle,context);
+  const signed=Buffer.from(await context.window.BattleCitiesCheckoutWallet.sign(original,wallet),'base64');
+  assert.deepEqual(signed.subarray(65),Buffer.from(original,'base64').subarray(65));
+  assert.ok(Transaction.from(signed).verifySignatures());
+});
 test('legacy wallet response is verified from its signed wire bytes',async()=>{
   const h=helper(async tx=>{const result=legacy(tx);result.sign(key);return result;});
   assert.ok(Transaction.from(Buffer.from(await h.sign(original,wallet),'base64')).verifySignatures());

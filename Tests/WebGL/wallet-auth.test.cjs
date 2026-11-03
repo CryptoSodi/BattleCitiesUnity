@@ -47,6 +47,7 @@ function setup(options = {}) {
       return { ok: options.httpError ? false : true, json: async () => body };
     }
   };
+  if(options.sdk)context.window.BattleCitiesPhantom={connect:async network=>{options.sdk.network=network;return provider;},cancelChoice:()=>{},...options.sdk};
   vm.runInNewContext(source, context);
   const bridge = context.LibraryManager.library;
   const connect = id => bridge.BattleCitiesConnectWallet('Login Flow', 'OnWalletLoginResult', 'https://api.battlecities.com', id || 'attempt-1');
@@ -59,6 +60,12 @@ test('Phantom signs the exact server challenge and only accepts a verified match
   assert.equal(s.replies.length, 1); assert.equal(s.replies[0].ok, true);
   assert.equal(s.replies[0].attemptId, 'attempt-1');
   assert.equal(s.listeners.size, 0); assert.ok(s.timers.every(x => !x.active));
+});
+test('SDK wallet signs the same verified challenge and uses devnet with the test API', async () => {
+  const sdk={};const s=setup({sdk,missing:true});
+  s.bridge.BattleCitiesConnectWallet('Login Flow','OnWalletLoginResult','https://test.battlecities.com','sdk-attempt');await tick();
+  assert.equal(sdk.network,'devnet');assert.equal(s.replies[0].ok,true);
+  assert.deepEqual(s.calls.map(x=>x.method),['PUT','POST','GET']);
 });
 test('missing Phantom fails without an API request', async () => {
   const s = setup({ missing: true }); s.connect(); await tick();

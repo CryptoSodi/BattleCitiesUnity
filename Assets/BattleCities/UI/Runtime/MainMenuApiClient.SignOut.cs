@@ -31,6 +31,9 @@ namespace BattleCities.UI
                 completed?.Invoke(false,"Could not log out. Check your connection and retry.");yield break;
             }
             yield return ForgetSavedSession();
+#if UNITY_WEBGL && !UNITY_EDITOR
+            BattleCitiesWalletBridge.DisconnectPhantom();
+#endif
 #if UNITY_ANDROID && !UNITY_EDITOR
             if(!RuntimePlatformInfo.IsPsg1){var walletDisconnect=SeekerGameWallet.DisconnectQuietly();while(!walletDisconnect.IsCompleted)yield return null;}
 #endif

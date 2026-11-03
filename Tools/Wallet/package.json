@@ -4,12 +4,16 @@
   "version": "1.0.0",
   "scripts": {
     "build": "node build.mjs",
-    "test": "node --test wallet-bundle.test.mjs"
+    "test": "node --test wallet-bundle.test.mjs phantom-bridge.test.mjs"
   },
   "dependencies": {
+    "@phantom/browser-sdk": "2.0.4",
     "@solana/web3.js": "1.98.4"
   },
   "devDependencies": {
     "esbuild": "0.28.1"
+  },
+  "overrides": {
+    "axios": "1.21.0"
   }
 }

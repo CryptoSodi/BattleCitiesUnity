@@ -8,6 +8,12 @@
     <link rel="icon" type="image/png" href="TemplateData/battle-cities-logo.png">
     <link rel="stylesheet" href="TemplateData/style.css">
     <script id="battle-cities-loading" src="TemplateData/battle-cities-loading.js" defer></script>
+    <script>
+      // DOMContentLoaded waits for deferred scripts, even if Unity's loader finishes first.
+      window.battleCitiesWalletScriptsReady = new Promise((resolve) =>
+        document.addEventListener("DOMContentLoaded", resolve, { once: true }));
+    </script>
+    <script src="StreamingAssets/BattleCitiesCheckout/phantom.js" defer></script>
     <link id="battle-cities-viewport" rel="stylesheet" href="TemplateData/battle-cities-viewport.css">
 #if SHOW_DIAGNOSTICS
     <link rel="stylesheet" href="<<<TemplateData/diagnostics.css>>>">
@@ -131,6 +137,10 @@
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
+        // Deferred wallet scripts must finish before Unity checks for an OAuth return.
+        window.battleCitiesWalletScriptsReady.then(startUnity);
+      };
+      function startUnity() {
         const loadingContainer = document.querySelector("#unity-loading-container");
         const progressBarFull = document.querySelector("#unity-progress-bar-full");
 
@@ -188,7 +198,7 @@
               }).catch((message) => {
                 alert(message);
               });
-            };
+            }
 
       document.body.appendChild(script);
 

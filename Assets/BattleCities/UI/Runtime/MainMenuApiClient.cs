@@ -10,7 +10,7 @@ namespace BattleCities.UI
 {
     /// <summary>
     /// Main-menu adapter for the Battle Cities HTTP API.
-    /// Supports wallet sessions and guest play. Google authentication is intentionally excluded.
+    /// Supports verified wallet sessions and guest play, including Phantom-managed sign-in.
     /// </summary>
     public sealed partial class MainMenuApiClient : MonoBehaviour
     {
@@ -162,6 +162,10 @@ namespace BattleCities.UI
             browserResponses.Clear();
             IsSigningOut = false;
             IsRestoringSession = false;
+#if UNITY_WEBGL && !UNITY_EDITOR
+            browserWalletRestoreId = null;
+            browserWalletRestoreResult = null;
+#endif
         }
 
         public void ConfigureAutomaticRefresh(bool value) { automaticRefresh = value; }
@@ -641,6 +645,12 @@ namespace BattleCities.UI
         [System.Runtime.InteropServices.DllImport("__Internal")]
         private static extern void BattleCitiesCancelWallet(string attemptId);
         [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern int BattleCitiesHasPhantomCallback();
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern void BattleCitiesDisconnectPhantom();
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern void BattleCitiesRestorePhantom(string target, string callback, string attemptId, string wallet, string network);
+        [System.Runtime.InteropServices.DllImport("__Internal")]
         private static extern void BattleCitiesApiRequest(string target, string callback, string id, string url, string method, string payload, int timeout);
 #endif
         public static void Connect(string gameObjectName, string callbackMethod, string baseUrl, string attemptId)
@@ -653,6 +663,26 @@ namespace BattleCities.UI
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
             BattleCitiesCancelWallet(attemptId);
+#endif
+        }
+        public static bool HasPhantomCallback()
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            return BattleCitiesHasPhantomCallback()!=0;
+#else
+            return false;
+#endif
+        }
+        public static void DisconnectPhantom()
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            BattleCitiesDisconnectPhantom();
+#endif
+        }
+        public static void RestorePhantom(string target,string callback,string attemptId,string wallet,string network)
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            BattleCitiesRestorePhantom(target,callback,attemptId,wallet,network);
 #endif
         }
         public static void Request(string target, string callback, string id, string url, string method, string payload, int timeout)

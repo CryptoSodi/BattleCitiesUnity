@@ -4,7 +4,7 @@ The existing Login and main-menu wallet buttons select their provider at runtime
 
 | Build/device | Provider |
 | --- | --- |
-| WebGL | Phantom browser extension (`window.phantom.solana`) |
+| WebGL | Phantom Browser SDK: Phantom extension, or Phantom embedded wallet via Google or Apple |
 | Seeker / other Android devices | Solana Mobile Wallet Adapter wallet chooser |
 | PSG1 | Jupiter Wallet (`ag.jup.jupiter.android`) over Mobile Wallet Adapter |
 | Unity Editor / desktop standalone | Clear unavailable message; guest play remains available |
@@ -30,6 +30,37 @@ returning to the game.
 The existing API performs signature verification and challenge expiry/reuse
 checks. No backend changes are required. The default API is
 `https://api.battlecities.com`; native wallet login requires HTTPS.
+
+## Phantom Browser SDK
+
+The WebGL template loads the locally bundled Phantom Browser SDK before Unity
+starts. The Portal app ID is `4d0d9b85-042f-477b-93d4-2176fd01d740`.
+Phantom, Google and Apple connect options all complete the same API challenge
+above. Google and Apple can produce a different wallet address from the player's
+existing Phantom wallet, so they may lead to a different game account. The
+game only restores a purchase wallet if it matches the authenticated account.
+
+The SDK returns to the current page's origin and path. Configure the exact return
+URLs for every deployed web front in the Phantom Portal, including trailing
+slashes where applicable, and verify each domain as required by Phantom. The
+local test origin also needs to be allowed if embedded sign-in is tested there.
+Merely configuring an app ID or integrating the SDK does not guarantee an app
+directory listing; check Phantom's current listing requirements and availability.
+When the SDK bundle is unavailable, the existing injected-Phantom connection
+remains as a fallback.
+
+To regenerate just the committed JavaScript bundles after changing wallet code:
+
+```shell
+cd Tools/Wallet
+npm ci
+npm run build
+npm test
+```
+
+This does not build or publish a Unity player. Before release, test each enabled
+provider on the actual allowed origin, including redirect recovery and a shop
+transaction. These checks require a configured Portal app and a real wallet.
 
 Web requests include cookies, and the web hosting origin must be allowed by the
 API's existing credentialed CORS policy. The wallet result carries an attempt ID;
@@ -81,6 +112,8 @@ Before shipping, test rebuilt WebGL and Android players with real wallets:
 ## References
 
 - [Phantom direct integration](https://docs.phantom.com/solana/integrating-phantom)
+- [Phantom Browser SDK](https://docs.phantom.com/sdks/browser-sdk)
+- [Phantom domain verification](https://docs.phantom.com/phantom-portal/verify-domain)
 - [Solana Mobile Android integration](https://github.com/solana-mobile/mobile-wallet-adapter/blob/main/android/docs/integration_guide.md)
 - [Mobile Wallet Adapter protocol](https://github.com/solana-mobile/mobile-wallet-adapter/blob/main/spec/spec.md)
 - [Unity Android library plugins](https://docs.unity3d.com/Manual/android-library-plugin-create.html)

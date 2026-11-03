@@ -8,6 +8,16 @@ namespace BattleCities.UI
     public sealed partial class MainMenuApiClient
     {
         private static string purchaseWallet;
+#if UNITY_WEBGL && !UNITY_EDITOR
+        private string browserWalletRestoreId;
+        private JObject browserWalletRestoreResult;
+        [UnityEngine.Scripting.Preserve]
+        public void OnBrowserWalletRestored(string json)
+        {
+            try { var value=JObject.Parse(json);if((string)value["attemptId"]==browserWalletRestoreId)browserWalletRestoreResult=value; }
+            catch { }
+        }
+#endif
         public bool IsRestoringSession { get; private set; }
         public bool IsWalletReadyForPurchases => IsWalletAuthenticated && LastPlayer != null
             && purchaseWallet == LastPlayer.walletAddress;
@@ -79,6 +89,15 @@ namespace BattleCities.UI
                     if (walletRestore.Result) purchaseWallet = player.walletAddress;
                     Debug.Log("[BattleCitiesWallet] restored purchase authorization=" + walletRestore.Result);
                 }
+#endif
+#if UNITY_WEBGL && !UNITY_EDITOR
+                browserWalletRestoreId=Guid.NewGuid().ToString("N");browserWalletRestoreResult=null;
+                BattleCitiesWalletBridge.RestorePhantom(gameObject.name,nameof(OnBrowserWalletRestored),browserWalletRestoreId,player.walletAddress,IsTestNetwork?"devnet":"mainnet");
+                double restoreDeadline=Time.realtimeSinceStartupAsDouble+12;
+                while(browserWalletRestoreResult==null&&Time.realtimeSinceStartupAsDouble<restoreDeadline)yield return null;
+                if((bool?)browserWalletRestoreResult?["ok"]==true&&(string)browserWalletRestoreResult?["wallet"]==player.walletAddress)
+                    purchaseWallet=player.walletAddress;
+                browserWalletRestoreId=null;browserWalletRestoreResult=null;
 #endif
                 IsAuthenticated = true; IsWalletAuthenticated = true; IsLocalGuest = false;
                 PlayerPrefs.SetString("battlecities.loginMode", "wallet"); PlayerPrefs.Save();

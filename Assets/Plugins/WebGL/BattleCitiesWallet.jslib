@@ -27,6 +27,21 @@ mergeInto(LibraryManager.library, {
     const attempt = window.__battleCitiesWalletAttempt;
     if (attempt && attempt.id === UTF8ToString(attemptIdPtr)) attempt.cancel();
   },
+  BattleCitiesHasPhantomCallback: function () {
+    return window.BattleCitiesPhantom && window.BattleCitiesPhantom.hasCallback() ? 1 : 0;
+  },
+  BattleCitiesDisconnectPhantom: function () {
+    if (window.BattleCitiesPhantom) void window.BattleCitiesPhantom.disconnect().catch(() => {});
+  },
+  BattleCitiesRestorePhantom: function (targetPtr, callbackPtr, attemptPtr, walletPtr, networkPtr) {
+    const target=UTF8ToString(targetPtr), callback=UTF8ToString(callbackPtr), attemptId=UTF8ToString(attemptPtr);
+    const wallet=UTF8ToString(walletPtr), network=UTF8ToString(networkPtr);
+    (async () => {
+      let ok=false;
+      try { ok=!!(window.BattleCitiesPhantom && await window.BattleCitiesPhantom.restore(wallet, network)); } catch { }
+      SendMessage(target,callback,JSON.stringify({attemptId,ok,wallet}));
+    })();
+  },
   BattleCitiesConnectWallet: function (gameObjectNamePtr, callbackMethodPtr, baseUrlPtr, attemptIdPtr) {
     const gameObjectName = UTF8ToString(gameObjectNamePtr);
     const callbackMethod = UTF8ToString(callbackMethodPtr);
@@ -45,6 +60,7 @@ mergeInto(LibraryManager.library, {
     const disconnected = () => finish({ ok: false, error: 'The wallet disconnected. Please try again.' });
     const cleanup = () => {
       finished = true;
+      if (window.BattleCitiesPhantom) window.BattleCitiesPhantom.cancelChoice();
       clearTimeout(overallTimer);
       controllers.forEach(controller => controller.abort());
       if (provider && provider.removeListener) {
@@ -79,9 +95,16 @@ mergeInto(LibraryManager.library, {
 
     (async () => {
       try {
-        provider = (window.phantom && window.phantom.solana) || window.solana;
-        if (!provider || !provider.isPhantom) throw new Error('Install Phantom wallet to connect.');
-        const connected = await provider.connect();
+        let connected;
+        if (window.BattleCitiesPhantom) {
+          const network=apiUrl.hostname === 'test.battlecities.com' ? 'devnet' : 'mainnet';
+          provider=await window.BattleCitiesPhantom.connect(network);
+          connected={publicKey:provider.publicKey};
+        } else {
+          provider = (window.phantom && window.phantom.solana) || window.solana;
+          if (!provider || !provider.isPhantom) throw new Error('Install Phantom wallet to connect.');
+          connected = await provider.connect();
+        }
         ensureActive();
         walletAddress = connected.publicKey.toString();
         if (provider.on) {

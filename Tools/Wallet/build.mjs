@@ -7,3 +7,9 @@ await build({
   nodePaths:[fileURLToPath(new URL('node_modules',import.meta.url))],
   bundle:true,minify:true,platform:'browser',format:'iife',target:'es2020',legalComments:'eof',
 });
+await build({
+  entryPoints:[fileURLToPath(new URL('Assets/StreamingAssets/BattleCitiesCheckout/phantom-entry.js',root))],
+  outfile:fileURLToPath(new URL('Assets/StreamingAssets/BattleCitiesCheckout/phantom.js',root)),
+  nodePaths:[fileURLToPath(new URL('node_modules',import.meta.url))],
+  bundle:true,minify:true,platform:'browser',format:'iife',target:'es2020',legalComments:'eof',
+});

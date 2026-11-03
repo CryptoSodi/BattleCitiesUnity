@@ -6,7 +6,7 @@ function sameBytes(left, right) {
 
 window.BattleCitiesCheckoutWallet = {
   async sign(encoded, wallet) {
-    const provider = window.phantom?.solana || window.solana;
+    const provider = window.BattleCitiesPhantom?.current(wallet) || window.phantom?.solana || window.solana;
     if (!provider?.isPhantom || typeof provider.signTransaction !== 'function') throw new Error('Install or open Phantom to approve checkout.');
     if (provider.publicKey?.toString() !== wallet) throw new Error('Select the wallet used to sign in to Battle Cities.');
     const bytes = Uint8Array.from(atob(encoded), c => c.charCodeAt(0));
