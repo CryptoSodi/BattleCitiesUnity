@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Battle Cities</title>
+    <link rel="icon" type="image/png" href="TemplateData/battle-cities-logo.6b77cc90493c.png">
+    <link rel="stylesheet" href="TemplateData/battle-cities-style.c87239ec172c.css">
+    <script>
+      // DOMContentLoaded waits for deferred scripts, even if Unity's loader finishes first.
+      window.battleCitiesWalletScriptsReady = new Promise((resolve) =>
+        document.addEventListener("DOMContentLoaded", resolve, { once: true }));
+    </script>
+    <script src="StreamingAssets/BattleCitiesCheckout/phantom.js" defer></script>
+    <script src="seeker-connect.js"></script>
+    <link id="battle-cities-viewport" rel="stylesheet" href="TemplateData/battle-cities-viewport.eff3bd7de97c.css">
+      <link rel="preload" as="image" href="TemplateData/battle-cities-logo.6b77cc90493c.png">
+      <script id="battle-cities-loading" src="TemplateData/battle-cities-loading.d53497fc0290.js" defer></script>
+  </head>
+  <body>
+    <div id="unity-container">
+      <div id="unity-fullscreen-container">
+        <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
+        <div id="unity-loading-container">
+          <div id="unity-loading-bar">
+            <img id="unity-logo" src="TemplateData/battle-cities-logo.6b77cc90493c.png" alt="Battle Cities" width="1254" height="1254" fetchpriority="high">
+            <div id="unity-progress-bar-empty" role="progressbar" aria-label="Loading Battle Cities" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div id="unity-progress-bar-full"></div>
+            </div>
+            <output id="unity-progress-percentage" aria-hidden="true">0%</output>
+          </div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+    </div>
+    <script>
+      let canvas = document.querySelector("#unity-canvas");
+      let fullscreenContainer = document.querySelector("#unity-fullscreen-container");
+
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        var warningBanner = document.querySelector("#unity-warning");
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/95bf588e9482ccdb0f60d6a4b6fdc8e2.loader.js";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/5eacd32bf60b4b86a3ce3bdf657d77e8.data.unityweb",
+        frameworkUrl: buildUrl + "/211bbfb276ee11eee25730e310b2fe70.framework.js.unityweb",
+        codeUrl: buildUrl + "/eece4883551dc9c2564405e67e8678ca.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+
+        // If you have a custom web site structure, or want to place multiple Unity build instances on the same page,
+        // you can pass fullscreenElementID: "my-unity-fullscreen-container-id", in this configuration field to
+        // explicitly point to the element tree root that is displayed in fullscreen mode.
+        fullscreenElementID: "unity-fullscreen-container",
+
+        companyName: "DefaultCompany",
+        productName: "Battle Cities",
+        productVersion: "1.0.31",
+        showBanner: unityShowBanner,
+        // errorHandler: function(err, url, line) {
+        //    alert("error " + err + " occurred at line " + line);
+        //    // Return 'true' if you handled this error and don't want Unity
+        //    // to process it further, 'false' otherwise.
+        //    return true;
+        // },
+      };
+
+      // By default, Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      // If you would like all file writes inside Unity Application.persistentDataPath
+      // directory to automatically persist so that the contents are remembered when
+      // the user revisits the site the next time, uncomment the following line:
+      // config.autoSyncPersistentDataPath = true;
+      // This autosyncing is currently not the default behavior to avoid regressing
+      // existing user projects that might rely on the earlier manual
+      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
+      // expected to change.
+
+      // CSS fills the browser viewport on every platform. Unity resizes its
+      // render target to the canvas, preserving the game's responsive layout.
+      config.matchWebGLToCanvasSize = true;
+
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        // Deferred wallet scripts must finish before Unity checks for an OAuth return.
+        window.battleCitiesWalletScriptsReady.then(startUnity);
+      };
+      function startUnity() {
+        const loadingContainer = document.querySelector("#unity-loading-container");
+        const progressBarFull = document.querySelector("#unity-progress-bar-full");
+
+        createUnityInstance(canvas, config, (progress) => {
+          document.querySelector("#unity-progress-bar-empty").setAttribute("aria-valuenow", Math.round(100 * progress));
+          if (progress < 1) {
+            loadingContainer.style.display = "block";
+            progressBarFull.style.width = 100 * progress + "%";
+          } else {
+            loadingContainer.style.display = "none";
+          }
+        }).then((unityInstance) => {
+              }).catch((message) => {
+                alert(message);
+              });
+            }
+
+      document.body.appendChild(script);
+
+    </script>
+  </body>
+</html>

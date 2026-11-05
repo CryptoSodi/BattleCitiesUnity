@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#06316a">
+<title>Battle Cities · Phone Controller</title>
+<style>
+@font-face{font-family:Barlow;src:url('BarlowCondensed-Bold.ttf') format('truetype');font-weight:400;font-display:swap}
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;touch-action:none}
+body{background:radial-gradient(ellipse at top,#116fd6,#032256 70%);color:#fff;font-family:Barlow,sans-serif;padding:env(safe-area-inset-top) max(14px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(14px,env(safe-area-inset-left));display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 8px;gap:12px;border-bottom:2px solid #399ee3}
+h1{font-size:clamp(17px,3vw,27px);margin:0;color:#ffda37;letter-spacing:1px}
+#status{font-size:14px;text-align:right;color:#f7ebd0;max-width:48%}#status.connected{color:#8effce}
+#controls{display:grid;grid-template-columns:1fr 1fr;gap:8vw;align-items:center;justify-items:center;flex:1;min-height:0}
+#stick{width:min(34vw,64vh,280px);height:min(34vw,64vh,280px);border-radius:50%;background:linear-gradient(#071b38,#0b427a);border:7px solid #39a8f0;box-shadow:0 0 0 4px #082348,inset 0 4px 14px #020b20;position:relative;touch-action:none}
+#stick::before,#stick::after{content:"";position:absolute;background:#154d78;border-radius:6px;left:45%;top:10%;width:10%;height:80%}#stick::after{transform:rotate(90deg)}
+#knob{position:absolute;width:40%;height:40%;top:30%;left:30%;z-index:1;border-radius:50%;background:radial-gradient(circle at 35% 25%,#c9f6ff,#1886d8 50%,#024985);border:3px solid #b6eaff;box-shadow:0 5px 8px #02172c;pointer-events:none}
+.buttons{display:grid;grid-template-columns:repeat(3,min(12vw,22vh,92px));grid-template-rows:repeat(3,min(12vw,22vh,92px));gap:3px}
+button{font:400 clamp(18px,4vw,30px) Barlow,sans-serif;touch-action:none;color:#052a57;cursor:pointer;border:3px solid #ffef97;background:linear-gradient(#ffe66b,#ffb900);box-shadow:0 4px 0 #945500,0 0 0 3px #071d3d}
+.face{border-radius:50%}.face.pressed,button:active{background:#bfefff;transform:translateY(3px);box-shadow:0 1px 0 #0b5280}
+[data-button="0"]{grid-column:2;grid-row:3}[data-button="1"]{grid-column:3;grid-row:2}[data-button="2"]{grid-column:1;grid-row:2}[data-button="3"]{grid-column:2;grid-row:1}
+footer{display:flex;justify-content:center;gap:28px;padding:8px 0 18px}footer button{font-size:15px;min-width:104px;padding:8px 20px;border-radius:9px}
+#retry{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:5;font-size:17px;padding:12px 20px;border-radius:10px}
+#hint{margin:0;text-align:center;color:#d9e7f8;font-size:12px;padding-bottom:8px}
+@media(orientation:portrait){#controls{grid-template-columns:1fr;gap:12px;padding:14px 0}#stick{width:min(49vw,29vh);height:min(49vw,29vh)}.buttons{grid-template-columns:repeat(3,min(17vw,10vh));grid-template-rows:repeat(3,min(17vw,10vh));gap:2px}h1{font-size:18px}#status{font-size:12px}}
+</style>
+</head>
+<body>
+<header><h1>BATTLE CITIES</h1><span id="status" role="status">Connecting…</span></header>
+<main id="controls">
+  <div id="stick" role="application" aria-label="Movement joystick"><div id="knob"></div></div>
+  <div class="buttons" aria-label="Gamepad buttons">
+    <button class="face" data-button="0" aria-label="A — select or fire">A</button>
+    <button class="face" data-button="1" aria-label="B — back or secondary">B</button>
+    <button class="face" data-button="2" aria-label="X">X</button>
+    <button class="face" data-button="3" aria-label="Y">Y</button>
+  </div>
+</main>
+<footer><button data-button="8">SELECT</button><button data-button="9">START</button></footer>
+<p id="hint">Keep this screen open while playing.</p>
+<button id="retry" hidden>RECONNECT</button>
+<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+<script>
+(() => {
+  const code=new URLSearchParams(location.search).get('rc');
+  const status=document.getElementById('status'),retry=document.getElementById('retry');
+  const stick=document.getElementById('stick'),knob=document.getElementById('knob');
+  const buttons=Array.from({length:16},()=>({pressed:false,touched:false,value:0}));
+  const axes=[0,0];let peer,connection,sequence=0,heartbeat,pointer=null,attempt=0,timeout;
+  const label=(text,connected=false)=>{status.textContent=text;status.classList.toggle('connected',connected);};
+  function send(){
+    if(!connection?.open)return;
+    connection.send({type:'gamepads',seq:++sequence,timestamp:Date.now(),gamepads:[{axes:axes.slice(),buttons:buttons.map(b=>({...b})),connected:true,index:0,mapping:'standard'}]});
+  }
+  function release(){
+    axes[0]=axes[1]=0;pointer=null;knob.style.transform='';
+    buttons.forEach(b=>{b.pressed=b.touched=false;b.value=0;});
+    document.querySelectorAll('.pressed').forEach(b=>b.classList.remove('pressed'));send();
+  }
+  function disconnected(){release();clearInterval(heartbeat);clearTimeout(timeout);label('Not connected');retry.hidden=false;}
+  async function connect(){
+    if(!code||!/^[A-Z]{4}$/.test(code)){label('Open Settings and scan its pairing QR.');return;}
+    const current=++attempt;release();clearInterval(heartbeat);clearTimeout(timeout);
+    if(peer)peer.destroy();connection=null;sequence=0;retry.hidden=true;label('Connecting…');
+    if(!window.Peer||!window.isSecureContext){label('Use HTTPS and check your internet connection.');retry.hidden=false;return;}
+    try{
+      const digest=await crypto.subtle.digest('SHA-1',new TextEncoder().encode(code));
+      const id=Array.from(new Uint8Array(digest),n=>n.toString(16).padStart(2,'0')).join('');
+      if(current!==attempt)return;
+      peer=new Peer();timeout=setTimeout(()=>{if(current===attempt)disconnected();},15000);
+      peer.on('open',()=>{
+        if(current!==attempt)return;connection=peer.connect(id);
+        connection.on('open',()=>{
+          if(current!==attempt)return;clearTimeout(timeout);label('Connected · '+code,true);retry.hidden=true;
+          heartbeat=setInterval(send,1000/30);send();
+        });
+        connection.on('close',()=>{if(current===attempt)disconnected();});connection.on('error',()=>{if(current===attempt)disconnected();});
+      });
+      peer.on('error',()=>{if(current===attempt)disconnected();});peer.on('disconnected',()=>{if(current===attempt)disconnected();});
+    }catch{disconnected();}
+  }
+  function move(event){
+    if(event.pointerId!==pointer)return;
+    const r=stick.getBoundingClientRect(),radius=r.width*.40;
+    let x=(event.clientX-r.left-r.width/2)/radius,y=(event.clientY-r.top-r.height/2)/radius;
+    const magnitude=Math.max(1,Math.hypot(x,y));axes[0]=x/magnitude;axes[1]=y/magnitude;
+    knob.style.transform=`translate(${axes[0]*r.width*.28}px,${axes[1]*r.height*.28}px)`;send();
+  }
+  stick.addEventListener('pointerdown',event=>{if(pointer!==null)return;event.preventDefault();pointer=event.pointerId;stick.setPointerCapture(pointer);move(event);});
+  stick.addEventListener('pointermove',move);
+  const stopStick=event=>{if(event.pointerId!==pointer)return;axes[0]=axes[1]=0;pointer=null;knob.style.transform='';send();};
+  for(const type of ['pointerup','pointercancel','lostpointercapture'])stick.addEventListener(type,stopStick);
+  document.querySelectorAll('[data-button]').forEach(button=>{
+    const index=Number(button.dataset.button);
+    const set=value=>{buttons[index]={pressed:value,touched:value,value:value?1:0};button.classList.toggle('pressed',value);send();};
+    button.addEventListener('pointerdown',event=>{event.preventDefault();button.setPointerCapture(event.pointerId);set(true);});
+    for(const type of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(type,()=>set(false));
+  });
+  addEventListener('blur',release);document.addEventListener('visibilitychange',()=>{if(document.hidden)release();});
+  addEventListener('pagehide',()=>{release();clearInterval(heartbeat);if(peer)peer.destroy();});
+  document.addEventListener('contextmenu',event=>event.preventDefault());retry.addEventListener('click',connect);connect();
+})();
+</script>
+</body>
+</html>
