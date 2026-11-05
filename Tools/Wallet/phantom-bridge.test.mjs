@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createPhantomBridge } from '../../Assets/StreamingAssets/BattleCitiesCheckout/phantom-core.mjs';
 
 const WALLET = '11111111111111111111111111111111';
-function fixture({ autoType = 'injected', autoAddress = WALLET } = {}) {
+function fixture({ autoType = 'injected', autoAddress = WALLET, discovery, connectError } = {}) {
   let mock;
   class FakeSDK {
     constructor(config) {
@@ -13,7 +13,11 @@ function fixture({ autoType = 'injected', autoAddress = WALLET } = {}) {
         signTransaction: async tx => tx, on() {}, off() {} };
     }
     isConnected() { return this.connected; }
-    async connect({ provider }) { this.provider = provider; this.type = 'injected';
+    async discoverWallets() { this.discoveryStarted = true; await discovery; this.discovered = true; }
+    async connect({ provider, walletId }) { this.provider = provider; this.walletId = walletId;
+      if (!this.discovered) throw new Error('Unknown injected wallet id: phantom');
+      if (connectError) throw connectError;
+      this.type = 'injected';
       this.connected = true; this.solana.publicKey = WALLET; }
     async autoConnect() { this.type = autoType; this.connected = !!autoAddress; this.solana.publicKey = autoAddress; }
     getCurrentProviderInfo() { return this.type ? { type: this.type } : null; }
@@ -27,9 +31,26 @@ test('connects directly with the injected wallet on the requested network', asyn
   const f = fixture(); const provider = await f.bridge.connect('devnet');
   assert.equal(f.sdk.config.appId, '4d0d9b85-042f-477b-93d4-2176fd01d740');
   assert.deepEqual(f.sdk.config.providers, ['injected']);
-  assert.equal(f.sdk.provider, 'injected'); assert.equal(f.sdk.network, 'devnet');
+  assert.equal(f.sdk.provider, 'injected'); assert.equal(f.sdk.walletId, 'phantom');
+  assert.equal(f.sdk.network, 'devnet');
   assert.equal(provider.publicKey.toString(), WALLET);
   assert.equal(f.bridge.hasCallback(), false);
+});
+
+test('first click waits for wallet discovery before attempting to connect', async () => {
+  let finishDiscovery;
+  const discovery = new Promise(resolve => { finishDiscovery = resolve; });
+  const f = fixture({ discovery });
+  const pending = f.bridge.connect();
+  assert.equal(f.sdk.discoveryStarted, true);
+  assert.equal(f.sdk.provider, undefined);
+  finishDiscovery();
+  assert.equal((await pending).publicKey.toString(), WALLET);
+});
+
+test('a missing Phantom wallet produces a helpful error', async () => {
+  const f = fixture({ connectError: new Error('Unknown injected wallet id: phantom') });
+  await assert.rejects(f.bridge.connect(), /Install or enable Phantom/);
 });
 
 test('restored purchase wallet must match the authenticated account', async () => {

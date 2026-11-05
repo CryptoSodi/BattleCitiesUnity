@@ -34,7 +34,17 @@ export function createPhantomBridge({ BrowserSDK, AddressType }) {
     network = targetNetwork;
     const instance = getSdk();
     if (instance.isConnected() && !isInjected()) await instance.disconnect();
-    if (!instance.isConnected()) await instance.connect({ provider: 'injected' });
+    if (!instance.isConnected()) {
+      // The SDK starts discovery in the background during construction. Connecting
+      // before its registry is populated fails on the first click.
+      await instance.discoverWallets();
+      try { await instance.connect({ provider: 'injected', walletId: 'phantom' }); }
+      catch (error) {
+        if (error?.message === 'Unknown injected wallet id: phantom')
+          throw new Error('Phantom wallet was not found. Install or enable Phantom, reload this page, and try again.');
+        throw error;
+      }
+    }
     if (!isInjected() || !address()) throw new Error('Phantom did not return a Solana wallet address.');
     await instance.solana.switchNetwork(network);
     return adapter();
