@@ -4,6 +4,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location("pages", Path(__file__).with_name("publish_pages_branch.py"))
 pages = importlib.util.module_from_spec(spec)
@@ -65,6 +66,15 @@ class PagesBranchTests(unittest.TestCase):
         (self.site / ".gitattributes").write_text("*.unityweb filter=lfs", encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "Unsafe site entry"):
             pages.validate_site(self.site)
+
+    def test_switch_preserves_domain_without_touching_certificate_setting(self):
+        with patch.object(pages, "gh_json") as api:
+            pages.configure_pages("owner/repo", {"build_type": "workflow", "cname": pages.DOMAIN,
+                                               "https_enforced": False, "source": {"branch": "main"}})
+        payload = api.call_args.kwargs["payload"]
+        self.assertEqual(payload["cname"], pages.DOMAIN)
+        self.assertEqual(payload["source"], {"branch": pages.BRANCH, "path": "/"})
+        self.assertNotIn("https_enforced", payload)
 
 
 if __name__ == "__main__":

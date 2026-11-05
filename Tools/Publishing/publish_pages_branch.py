@@ -119,12 +119,13 @@ def push_branch(work, old, new):
 def configure_pages(repository, pages):
     source = pages.get("source") or {}
     if pages.get("build_type") == "legacy" and source.get("branch") == BRANCH and source.get("path") == "/":
-        return
+        return False
     payload = {"build_type": "legacy", "source": {"branch": BRANCH, "path": "/"},
                "cname": pages["cname"]}
-    if pages.get("https_enforced") is not None:
-        payload["https_enforced"] = pages["https_enforced"]
+    # Omitting https_enforced preserves the current setting. Sending even
+    # false can cause GitHub to look for a certificate that does not exist yet.
     gh_json("--method", "PUT", "repos/" + repository + "/pages", "--input", "-", payload=payload)
+    return True
 
 
 def wait_for_live(version, commit, archive_hash):
@@ -133,11 +134,14 @@ def wait_for_live(version, commit, archive_hash):
         try:
             nonce = str(time.time_ns())
             base = "https://" + DOMAIN + "/"
-            with urllib.request.urlopen(base + MARKER + "?check=" + nonce, timeout=20) as response:
+            def request(path):
+                return urllib.request.Request(base + path + "?check=" + nonce,
+                                              headers={"User-Agent": "Mozilla/5.0 BattleCities-Builder/1.0"})
+            with urllib.request.urlopen(request(MARKER), timeout=20) as response:
                 marker = json.load(response)
-            with urllib.request.urlopen(base + "release-info.json?check=" + nonce, timeout=20) as response:
+            with urllib.request.urlopen(request("release-info.json"), timeout=20) as response:
                 release = json.load(response)
-            with urllib.request.urlopen(base + "?check=" + nonce, timeout=20) as response:
+            with urllib.request.urlopen(request(""), timeout=20) as response:
                 page = response.read().decode("utf-8")
             if (marker.get("version") == version and marker.get("sourceCommit") == commit
                     and marker.get("archiveSha256") == archive_hash
@@ -154,7 +158,7 @@ def wait_for_live(version, commit, archive_hash):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", choices=("check", "publish"))
+    parser.add_argument("action", choices=("check", "publish", "resume"))
     parser.add_argument("--site", required=True)
     parser.add_argument("--repository", required=True)
     parser.add_argument("--version")
@@ -188,9 +192,21 @@ def main():
     archive_hash = digest.hexdigest()
     with tempfile.TemporaryDirectory(prefix="battlecities-pages-") as temp:
         work = Path(temp) / "site"
-        old, new = prepare_branch(site, remote, work, args.version, args.commit, archive_hash)
-        push_branch(work, old, new)
-    configure_pages(args.repository, pages)
+        if args.action == "resume":
+            initialize(work, remote)
+            old = inspect_branch(work)
+            if not old:
+                raise ValueError("The managed Pages branch does not exist; cannot resume.")
+            marker = json.loads(git("show", old + ":" + MARKER, cwd=work))
+            if (marker.get("version") != args.version or marker.get("sourceCommit") != args.commit
+                    or marker.get("archiveSha256") != archive_hash):
+                raise ValueError("The Pages branch does not match the requested release; cannot resume.")
+        else:
+            old, new = prepare_branch(site, remote, work, args.version, args.commit, archive_hash)
+            push_branch(work, old, new)
+    switched = configure_pages(args.repository, pages)
+    if switched or args.action == "resume":
+        gh_json("--method", "POST", "repos/" + args.repository + "/pages/builds")
     wait_for_live(args.version, args.commit, archive_hash)
 
 
