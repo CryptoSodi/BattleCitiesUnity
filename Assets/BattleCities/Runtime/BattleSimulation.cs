@@ -150,7 +150,7 @@ namespace BattleCities.Core
         public float SecondaryCooldown { get => IsMultiplayer ? Participants[actingSlot >= 0 ? actingSlot : LocalPlayerSlot].SecondaryCooldown : offlineSecondaryCooldown; private set { if(IsMultiplayer) Participants[actingSlot >= 0 ? actingSlot : LocalPlayerSlot].SecondaryCooldown=value; else offlineSecondaryCooldown=value; } }
         public string SecondaryStatus { get; private set; } = "";
         private Facing? playerMoveIntent;
-        public bool CanUseSecondary => !Lost && !Won && intro<=0 && Player!=null && EquippedSecondary!=SecondaryAttack.None && SecondaryCooldown<=0 && SecondaryCount<SecondaryLimit;
+        public bool CanUseSecondary => !Lost && !Won && (!IsMultiplayer||MatchStarted) && intro<=0 && Player!=null && EquippedSecondary!=SecondaryAttack.None && SecondaryCooldown<=0 && SecondaryCount<SecondaryLimit;
         public event Action<MineState> MineDetonated;
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -173,7 +173,7 @@ namespace BattleCities.Core
         public event Action TerrainChanged;
         public Box BaseBounds { get; private set; }
         public TankState Player => Tanks.Find(t => t.Player && t.Alive && (!IsMultiplayer || t.Slot == (actingSlot >= 0 ? actingSlot : LocalPlayerSlot)));
-        public bool CanAcceptPlayerFire => !Lost&&!Won&&intro<=0&&Player!=null;
+        public bool CanAcceptPlayerFire => !Lost&&!Won&&(!IsMultiplayer||MatchStarted)&&intro<=0&&Player!=null;
         public int Remaining => wave.Length - spawned + Tanks.Count(t => !t.Player && t.Alive);
         public int TotalEnemies => wave.Length;
         public event Action<Wall> WallDestroyed;
@@ -193,7 +193,8 @@ namespace BattleCities.Core
             }
         }
         private int spawned, nextId, spawnIndex;
-        private float spawnTimer = .16f, respawnTimer, intro = 2;
+        private float spawnTimer = .16f, respawnTimer, intro;
+        public int StartControlVersion { get; private set; } = 1;
         private uint random = 12345;
         public float PlayerNormalReloadSeconds { get; private set; }
         public float PlayerUpgradedNormalReloadSeconds { get; private set; }
@@ -289,6 +290,16 @@ namespace BattleCities.Core
             if(intro>0) {intro-=dt;return;}
             if(!IsMultiplayer)SecondaryCooldown=Math.Max(0,SecondaryCooldown-dt);
             Freeze=Math.Max(0,Freeze-dt);ZoomOut=Math.Max(0,ZoomOut-dt);
+            if(IsTeamBattle&&Participants[1].InventoryDefence>0)
+            {
+                var defence=Participants[1];defence.InventoryDefence=Math.Max(0,defence.InventoryDefence-dt);
+                if(defence.InventoryDefence<=0)
+                {
+                    foreach(var w in Terrain.Where(w=>defence.InventoryDefenceBricks!=null&&defence.InventoryDefenceBricks.Contains(w.Id)))w.Alive=true;
+                    Terrain.RemoveAll(w=>defence.InventoryDefenceWalls!=null&&defence.InventoryDefenceWalls.Contains(w.Id));
+                    defence.InventoryDefenceWalls=defence.InventoryDefenceBricks=null;TerrainChanged?.Invoke();
+                }
+            }
             if(defenceTimer>0)
             {
                 defenceTimer-=dt;
@@ -331,7 +342,7 @@ namespace BattleCities.Core
                     spawnIndex++;spawnTimer=3;if(spec.drop)PickupType=null;
                 }
             }
-            foreach(var t in Tanks) if(t.Alive&&!t.Player&&Freeze<=0) UpdateEnemy(t);
+            foreach(var t in Tanks) if(t.Alive&&!t.Player&&Freeze<=0&&(!IsTeamBattle||!Participants.Where((p,i)=>p.Connected&&!AreAllies(i,t.Slot)).Any(p=>p.InventoryFreeze>0))) UpdateEnemy(t);
             foreach(var t in Tanks)if(t.Alive)UpdateQuicksand(t,dt);
             UpdateMines(dt);
             UpdateTurrets(dt);
@@ -848,6 +859,14 @@ namespace BattleCities.Core
             if(positions.Count==0){ApplyPowerup(PickupType);if(claim!=null)CurrencyClaimed?.Invoke(claim);PickupType=null;return;}
             var point=positions[Next(0,positions.Count)];PickupX=point.x;PickupY=point.y;
         }
+        private bool applyingInventoryPowerup;
+        public void ApplyPowerupForSlot(string type,int slot)
+        {
+            if(!IsMultiplayer){ApplyPowerup(type);return;}
+            if(slot<0||slot>=MaxPlayers)throw new ArgumentOutOfRangeException(nameof(slot));
+            int previous=actingSlot;bool previousInventory=applyingInventoryPowerup;actingSlot=slot;applyingInventoryPowerup=true;
+            try{ApplyPowerup(type);}finally{actingSlot=previous;applyingInventoryPowerup=previousInventory;}
+        }
         public void ApplyPowerup(string type)
         {
             var p=Player;
@@ -867,7 +886,7 @@ namespace BattleCities.Core
                 }break;
                 case "speed":if(p!=null)p.SpeedBoost=10;break;
                 case "life":Lives++;break;
-                case "freeze":Freeze=10;break;
+                case "freeze":if(applyingInventoryPowerup&&IsTeamBattle)Participants[actingSlot].InventoryFreeze=10;else Freeze=10;break;
                 case "wipeout":
                     if(WipeoutDamageVersion==0)
                     {foreach(var t in Tanks.Where(t=>!t.Player&&t.Alive).ToArray())Kill(t,actingSlot);}
@@ -878,8 +897,20 @@ namespace BattleCities.Core
                             DamageTank(t,1,owner);
                     }
                     break;
-                case "zoomout":ZoomOut=10;break;
+                case "zoomout":if(applyingInventoryPowerup&&IsMultiplayer)Participants[actingSlot].InventoryZoom=10;else ZoomOut=10;break;
                 case "defence":
+                    if(applyingInventoryPowerup&&IsTeamBattle&&TeamForSlot(actingSlot)==1)
+                    {
+                        var defence=Participants[1];
+                        if(defence.InventoryDefence>0){foreach(var w in Terrain.Where(w=>defence.InventoryDefenceWalls.Contains(w.Id)))w.Alive=true;defence.InventoryDefence=17;TerrainChanged?.Invoke();break;}
+                        var home=RivalBaseBounds;var area=new Box(home.X-32,home.Y,128,96);
+                        defence.InventoryDefenceBricks=new List<int>();defence.InventoryDefenceWalls=new List<int>();
+                        foreach(var w in Terrain.Where(w=>w.Brick&&w.Bounds.Overlaps(area)&&!w.Bounds.Overlaps(home)).ToArray()){w.Alive=false;defence.InventoryDefenceBricks.Add(w.Id);}
+                        float x0=home.X-32,y0=home.Y;
+                        for(int x=0;x<4;x++){var wall=new Wall{Id=++nextId,Type="steel",Bounds=new Box(x0+x*32,y0+64,32,32)};Terrain.Add(wall);defence.InventoryDefenceWalls.Add(wall.Id);}
+                        for(int y=0;y<2;y++)foreach(int x in new[]{0,96}){var wall=new Wall{Id=++nextId,Type="steel",Bounds=new Box(x0+x,y0+y*32,32,32)};Terrain.Add(wall);defence.InventoryDefenceWalls.Add(wall.Id);}
+                        defence.InventoryDefence=17;TerrainChanged?.Invoke();break;
+                    }
                     if(defenceTimer>0)
                     {
                         foreach(var w in defenceWalls)w.Alive=true;

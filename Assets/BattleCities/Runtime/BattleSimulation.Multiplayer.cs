@@ -22,6 +22,9 @@ namespace BattleCities.Core
         public int Lives = 3;
         [Newtonsoft.Json.JsonProperty(DefaultValueHandling=Newtonsoft.Json.DefaultValueHandling.Ignore)] public int TankTier;
         public float Respawn, SecondaryCooldown;
+        [Newtonsoft.Json.JsonProperty(DefaultValueHandling=Newtonsoft.Json.DefaultValueHandling.Ignore)] public float InventoryFreeze, InventoryZoom;
+        [Newtonsoft.Json.JsonProperty(DefaultValueHandling=Newtonsoft.Json.DefaultValueHandling.Ignore)] public float InventoryDefence;
+        [Newtonsoft.Json.JsonProperty(NullValueHandling=Newtonsoft.Json.NullValueHandling.Ignore)] public List<int> InventoryDefenceWalls, InventoryDefenceBricks;
         public SecondaryAttack Secondary = SecondaryAttack.Mine;
     }
 
@@ -49,7 +52,7 @@ namespace BattleCities.Core
             Mode=mode;MatchStarted=false;WinnerSlot=-1;
             for(int i=0;i<MaxPlayers;i++)ResultStats[i]=new BattleResultStats();
             Tanks.Clear();Shots.Clear();Mines.Clear();Drones.Clear();Turrets.Clear();LandDrones.Clear();
-            foreach(var p in Participants){p.Connected=false;p.Lives=3;p.Respawn=0;p.SecondaryCooldown=0;p.TankTier=0;}
+            foreach(var p in Participants){p.Connected=false;p.Lives=3;p.Respawn=0;p.SecondaryCooldown=0;p.TankTier=0;p.InventoryFreeze=p.InventoryZoom=p.InventoryDefence=0;p.InventoryDefenceWalls=p.InventoryDefenceBricks=null;}
             if(mode==BattleMode.Versus){wave=Array.Empty<EnemySpec>();BaseAlive=false;BaseBounds=new Box(-1024,-1024,64,64);}
             // Search clear, non-overlapping spawns near opposite corners for PvP,
             // and near the original player spawn for co-op. Never remove cover.
@@ -93,7 +96,7 @@ namespace BattleCities.Core
         {
             if(Participants.Count(p=>p.Connected)<(Mode==BattleMode.Versus?2:BattleModeRules.PlayerLimit(Mode)))throw new InvalidOperationException("At least two players are required.");
             ReplayLifecycle?.Invoke(new ReplayEvent {kind="begin"});
-            MatchStarted=true;intro=2;
+            MatchStarted=true;intro=StartControlVersion==0?2:0;
         }
 
         public void StepMultiplayer(IReadOnlyDictionary<int,Command> commands)
@@ -125,6 +128,7 @@ namespace BattleCities.Core
             {
                 var participant=Participants[slot];if(!participant.Connected)continue;
                 actingSlot=slot;participant.SecondaryCooldown=Math.Max(0,participant.SecondaryCooldown-dt);
+                participant.InventoryFreeze=Math.Max(0,participant.InventoryFreeze-dt);participant.InventoryZoom=Math.Max(0,participant.InventoryZoom-dt);
                 var p=Player;
                 if(p==null)
                 {

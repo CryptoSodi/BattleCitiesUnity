@@ -80,6 +80,8 @@ namespace BattleCities
         { if(NetworkMatch&&NetworkMatch.Object.HasStateAuthority)StartReplayRecorder(); }
         private void QueueReplayEvent(ReplayEvent e)
         {if(!IsReplaying&&Simulation!=null&&!Simulation.Won&&!Simulation.Lost)replayPending.Enqueue(e);}
+        public void EnqueueOnlinePowerup(int slot,string type)
+        {if(IsOnline&&NetworkMatch.Object.HasStateAuthority)QueueReplayEvent(new ReplayEvent{kind="powerup",slot=slot,value=type});}
         private void ApplyPendingReplayEvents()
         {
             while(replayPending.Count>0)

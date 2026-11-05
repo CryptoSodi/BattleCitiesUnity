@@ -24,6 +24,7 @@ namespace BattleCities
         private readonly string[] slots={"active-one","active-two","active-three","active-four"};
         private static readonly Dictionary<string,string> Types=new Dictionary<string,string>{{"shield","shield"},{"base-defence","defence"},{"freeze","freeze"},{"speed","speed"},{"upgrade","upgrade"},{"zoom-out","zoomout"},{"wipeout","wipeout"},{"extra-life","life"},{"max-healer","healmax"},{"health-healer","heal2"},{"rapid-shooter","rapid"},{"rapid-shooter-long","rapidlong"}};
         public sealed class Drop { public string Type,ClaimId; }
+        [Serializable] public sealed class Consumption { public string Type,Item,PlayerId,RequestId,MatchId; }
         private sealed class Response { public long Code;public JObject Body; }
         private async void Start()
         {
@@ -71,17 +72,57 @@ namespace BattleCities
         public int SlotCount(int i){var item=Item(i);return item==null?0:Math.Max(0,(int?)account["inventory"]?[item]??0);}
         public string SlotLabel(int i)
         {var item=Item(i);return item!=null&&Types.ContainsKey(item)?item+" ×"+SlotCount(i):"Empty";}
-        public async Task<string> ConsumeSlot(int index)
+        private string PendingKey=>"battlecities.pending-online-powerup."+baseUrl+"."+(string)account["playerId"];
+        public Consumption PendingOnline
+        {get{if(!Authenticated)return null;try{return JsonUtility.FromJson<Consumption>(PlayerPrefs.GetString(PendingKey,""));}catch{return null;}}}
+        private void SaveOnlinePending(Consumption value){PlayerPrefs.SetString(PendingKey,JsonUtility.ToJson(value));PlayerPrefs.Save();}
+        public void ClearOnlinePending(string requestId)
+        {if(PendingOnline?.RequestId!=requestId)return;PlayerPrefs.DeleteKey(PendingKey);PlayerPrefs.Save();}
+        public async Task<Consumption> ConfirmOnlinePending()
         {
-            string item=Item(index);if(!Authenticated||item==null||!Types.TryGetValue(item,out string type))return null;
-            if(!uncertain.TryGetValue(item,out var id)){id=Guid.NewGuid().ToString();uncertain[item]=id;}
+            var pending=PendingOnline;if(pending==null)return null;
             try
             {
-                var r=await Api("/api/economy/powerups/consume",new JObject{{"itemId",item},{"powerupType",type},{"requestId",id}});
+                var result=await Api("/api/economy/powerups/consume",new JObject{{"itemId",pending.Item},{"powerupType",pending.Type},{"requestId",pending.RequestId},{"matchId",pending.MatchId}});
+                if(result.Body["account"] is JObject a)account=a;
+                if(result.Code>=200&&result.Code<300&&(bool?)result.Body["ok"]==true&&(string)result.Body["powerupType"]==pending.Type)return pending;
+                if(result.Code>=400&&result.Code<500)ClearOnlinePending(pending.RequestId);
+            }
+            catch{}
+            return null;
+        }
+        public async Task<bool> RefundOnlinePending(Consumption pending)
+        {
+            try
+            {
+                var result=await Api("/api/economy/powerups/refund",new JObject{{"itemId",pending.Item},{"requestId",pending.RequestId},{"matchId",pending.MatchId}});
+                if(result.Body["account"] is JObject a)account=a;
+                if((bool?)result.Body["ok"]==true||(string)result.Body["statusText"]=="ALREADY ACTIVATED")
+                {ClearOnlinePending(pending.RequestId);return true;}
+            }catch{}
+            return false;
+        }
+        public async Task<Consumption> ConsumeSlot(int index,string matchId=null)
+        {
+            string item=Item(index);if(!Authenticated||item==null||!Types.TryGetValue(item,out string type))return null;
+            string playerId=(string)account["playerId"];
+            if(matchId!=null)
+            {
+                if(PendingOnline!=null){Status="Resolving previous power-up";return null;}
+                try{var support=await Api("/api/economy/powerups/redeem");if(support.Code!=200||(bool?)support.Body["ok"]!=true||(int?)support.Body["version"]!=1){Status="Multiplayer power-ups unavailable";return null;}}
+                catch{Status="Multiplayer power-ups unavailable";return null;}
+            }
+            string requestKey=item+"|"+(matchId??"");
+            if(!uncertain.TryGetValue(requestKey,out var id)){id=Guid.NewGuid().ToString();uncertain[requestKey]=id;}
+            if(matchId!=null)SaveOnlinePending(new Consumption{Type=type,Item=item,PlayerId=playerId,RequestId=id,MatchId=matchId});
+            try
+            {
+                var payload=new JObject{{"itemId",item},{"powerupType",type},{"requestId",id}};if(matchId!=null)payload["matchId"]=matchId;
+                var r=await Api("/api/economy/powerups/consume",payload);
                 if(r.Body["account"] is JObject a)account=a;
                 if(r.Code>=500){Status="Consumption uncertain; retry the same slot";return null;}
-                if(r.Code>=200&&r.Code<300&&(bool?)r.Body["ok"]==true&&(string)r.Body["powerupType"]==type){uncertain.Remove(item);Status="Economy connected";return type;}
-                if(r.Code<200||r.Code>=300||(bool?)r.Body["ok"]==false)uncertain.Remove(item);
+                if(r.Code>=200&&r.Code<300&&(bool?)r.Body["ok"]==true&&(string)r.Body["powerupType"]==type){uncertain.Remove(requestKey);Status="Economy connected";return new Consumption{Type=type,Item=item,PlayerId=playerId,RequestId=id,MatchId=matchId};}
+                if(r.Code<200||r.Code>=300||(bool?)r.Body["ok"]==false){uncertain.Remove(requestKey);if(matchId!=null)ClearOnlinePending(id);}
                 Status="Power-up consumption was not approved";return null;
             }
             catch {Status="Consumption uncertain; retry the same slot";return null;}

@@ -75,7 +75,7 @@ namespace BattleCities.UI
             {
                 var token=source?[Slots[i]]??(i==3?source?["passive"]:null);
                 string item=token?.Type==JTokenType.String?token.Value<string>():null;
-                if(item!="extra-life"&&Array.IndexOf(Items,item)>=0&&OwnedPowerCount(item)>0&&used.Add(item))result[Slots[i]]=item;
+                if(Array.IndexOf(Items,item)>=0&&OwnedPowerCount(item)>0&&used.Add(item))result[Slots[i]]=item;
             }
             return result;
         }
@@ -83,14 +83,13 @@ namespace BattleCities.UI
         {
             if(busy||!inLoadout||index<0||index>3)return;
             activeSlot=index;status.text="SLOT 0"+(index+1)+" • SELECT AN OWNED POWER FROM INVENTORY";RefreshLoadoutView();LoadoutNavigation();
-            int first=Array.FindIndex(Items,item=>item!="extra-life"&&OwnedPowerCount(item)>0);
+            int first=Array.FindIndex(Items,item=>OwnedPowerCount(item)>0);
             if(first>=0)Focus(loadoutRows[first]);
         }
         public void EquipLoadoutPower(string item)
         {
             if(busy||accountLoading||!inLoadout)return;
             if(account==null||inventoryUnavailable){status.text=inventoryUnavailable?"INVENTORY UNAVAILABLE • REOPEN LOADOUT TO RETRY":"CONNECT YOUR ACCOUNT TO EQUIP OWNED POWERS";return;}
-            if(item=="extra-life"){status.text="EXTRA LIVES CANNOT BE EQUIPPED IN ACTIVE SLOTS";return;}
             if(Array.IndexOf(Items,item)<0||OwnedPowerCount(item)<=0){status.text="POWER NOT OWNED • VISIT SHOP TO RESTOCK";return;}
             for(int i=0;i<4;i++)if(i!=activeSlot&&EquippedPower(i)==item){status.text=PowerName(item)+" IS ALREADY IN SLOT 0"+(i+1);return;}
             loadout[Slots[activeSlot]]=item;loadoutDirty=true;status.text=PowerName(item)+" EQUIPPED IN SLOT 0"+(activeSlot+1);UpdateView();

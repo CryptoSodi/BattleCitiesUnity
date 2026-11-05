@@ -323,8 +323,8 @@ namespace BattleCities
             Text(new Rect(enemyX,enemyY,100,19),state.IsPvp?ScreenContent.Text("battle-hud","rivals","RIVALS"):ScreenContent.Text("battle-hud","enemies","ENEMIES"),cream);
             Text(new Rect(enemyX,enemyY+18,100,23),(state.IsPvp?opponents:state.Remaining).ToString()+" LEFT",new Color(1,.42f,.32f));
             float start=enemyX+(cornerSlots&&narrow?66:compact?76:100),reserved=psg1?Psg1PowerupWidth(narrow)+specialWidth:0;
-            if(web&&showPowerups&&!state.IsMultiplayer)reserved=layout.AndroidPowerupWidth;
-            if(android&&showPowerups&&!state.IsMultiplayer&&powerupAtlas){
+            if(web&&showPowerups)reserved=layout.AndroidPowerupWidth;
+            if(android&&showPowerups&&powerupAtlas){
                 // Touch slots have fixed positions. Reserve only the occupied span, as empty slots are hidden.
                 for(int i=0;i<4;i++)if(economy&&ExtendedPowerupArt.TryImage(powerupAtlas,economy.SlotType(i),out _,out _)){
                     reserved=(4-i)*(BattleHudLayout.AndroidPowerupSlotWidth+BattleHudLayout.AndroidPowerupGap)+8;break;
@@ -349,7 +349,7 @@ namespace BattleCities
             }
             Minimap(state);
             if((psg1||web)&&special.HasValue)SpecialIndicator(state,special.Value,web);
-            if(showPowerups&&!state.IsMultiplayer)
+            if(showPowerups)
             {
                 if(psg1)Psg1Powerups(economy,powerupAtlas,consumePending,narrow,selectedSlot,specialWidth);
                 else if(web)WebPowerups(economy,powerupAtlas,consumePending);

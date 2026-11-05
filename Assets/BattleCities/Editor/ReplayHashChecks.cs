@@ -122,6 +122,7 @@ namespace BattleCities.Tests
                     var tiles = (HashSet<int>)field.GetValue(target);
                     tiles.Clear(); tiles.Add(value + 3); tiles.Add(value); tiles.Add(value + 1);
                 }
+                else if(type==typeof(List<int>))field.SetValue(target,new List<int>{value,value+1});
                 else throw new Exception("Snapshot field guard needs explicit coverage for " + target.GetType().Name + "." + field.Name + " (" + type + ")");
             }
             if (target is TankState)

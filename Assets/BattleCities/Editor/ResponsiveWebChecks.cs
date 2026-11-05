@@ -20,8 +20,14 @@ namespace BattleCities.Editor
             foreach(var v in samples)Check(ResponsiveWebLayout.ForViewport(v.Item1,v.Item2)==v.Item3,"viewport selection "+v.Item4);
             Check(ResponsiveWebLayout.ForViewport(844,390)==ResponsiveWebLayout.ForViewport(1688/2f,780/2f),"CSS viewport selection is independent of pixel density");
             EditorSceneManager.OpenScene("Assets/BattleCities/Scenes/MainMenu.unity",OpenSceneMode.Single);
-            ScreenContent.EditorPlatform="web";
             var menu=UnityEngine.Object.FindFirstObjectByType<MainMenuScene>();Check(menu,"menu available");
+            ScreenContent.EditorPlatform="android";
+            var savedFullscreen=menu.Content.Find("Web fullscreen");
+            Check(savedFullscreen&&!savedFullscreen.gameObject.activeSelf,"saved fullscreen is hidden by default");
+            savedFullscreen.gameObject.SetActive(true);
+            menu.ApplyLayout(MainMenuPlatform.AndroidLandscape,new Vector2(1920,1080));
+            Check(!savedFullscreen.gameObject.activeSelf,"native layout hides an active saved fullscreen object before its button is initialized");
+            ScreenContent.EditorPlatform="web";
             var savedSettings=typeof(MainMenuScene).GetField("settingsButton",Private);
             var sceneSettings=menu.Content.Find("Status Bar/Player").GetComponent<Button>();
             savedSettings.SetValue(menu,null);

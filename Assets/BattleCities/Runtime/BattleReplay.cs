@@ -17,6 +17,7 @@ namespace BattleCities.Core
         public float normalReload, upgradedReload, turretRange, turretCooldown, turretReload, turretTurn, turretMuzzle, turretDeploy;
         public int playerTier, turretDamage, turretHealth;
         [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public int tankStatsVersion;
+        [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public int startControlVersion;
         [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public int powerShotDamageVersion;
         [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public int mineLimitVersion;
         [JsonProperty(DefaultValueHandling=DefaultValueHandling.Ignore)] public int powerupRosterVersion;
@@ -207,6 +208,7 @@ namespace BattleCities.Core
             Require(ValidHash(r.levelHash)&&r.levelHash==Hash(r.map)&&ValidHash(r.configHash)&&r.configHash==Hash(r.config),"Replay setup hash mismatch.");
             var c=r.config;
             Require(c.tankStatsVersion>=0&&c.tankStatsVersion<=TankProfiles.Version,"Unsupported tank stats version.");
+            Require(c.startControlVersion>=0&&c.startControlVersion<=1,"Unsupported battle start control version.");
             Require(c.powerShotDamageVersion>=0&&c.powerShotDamageVersion<=1,"Unsupported power shot damage version.");
             Require(c.powerupRosterVersion>=0&&c.powerupRosterVersion<=1,"Unsupported power-up roster version.");
             Require(c.wipeoutDamageVersion>=0&&c.wipeoutDamageVersion<=1,"Unsupported Wipeout damage version.");
@@ -312,7 +314,6 @@ namespace BattleCities.Core
             if(Finished)return;
             if(Data.events.Count>=4096){Finish("truncated");return;}
             e.tick=simulation.Tick+1;Data.events.Add(ReplayJson.Copy(e));
-            if(e.kind=="powerup")Data.debugUsed|=e.value=="life";
         }
         public void BeforeStep(Command command,IReadOnlyDictionary<int,Command> online=null)
         {
@@ -480,7 +481,7 @@ namespace BattleCities.Core
             {
                 case "magicpickup":MagicDropEvent.Apply(sim,e.value);break;
                 case "pickup":sim.SpawnPickup(e.value);break;
-                case "powerup":sim.ApplyPowerup(e.value);break;
+                case "powerup":sim.ApplyPowerupForSlot(e.value,e.slot);break;
                 case "participant":sim.SetParticipant(e.slot,e.connected);break;
                 case "tank":if(!sim.SetParticipantTankTier(e.slot,int.Parse(e.value,System.Globalization.CultureInfo.InvariantCulture)))throw new FormatException("Tank selection changed after the match started.");break;
                 case "flagdrop":sim.DropCarriedFlag(e.slot);break;

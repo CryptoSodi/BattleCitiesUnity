@@ -10,13 +10,13 @@ namespace BattleCities
         private BattleTouchControls touchControls;
         internal bool HasTouchControls => touchControls;
         internal bool TouchActionsAvailable => !BlockCombat && Simulation != null && Simulation.CanAcceptPlayerFire && !paused &&
-            !consumePending && !showDebug && !TouchLobbyVisible && (!IsOnline || Simulation.MatchStarted);
+            (!consumePending||IsOnline) && !showDebug && !TouchLobbyVisible && (!IsOnline || Simulation.MatchStarted);
         internal bool TouchLobbyVisible => Multiplayer.BattleSession.Instance && Multiplayer.BattleSession.Instance.Lobby.Visible;
         internal float TouchChargeProgress => primaryCharge.Progress;
         internal bool TouchConsumePending => consumePending;
         internal string TouchSlotType(int slot) => economy ? economy.SlotType(slot) : null;
         internal int TouchSlotCount(int slot) => economy ? economy.SlotCount(slot) : 0;
-        internal bool TouchSlotAvailable(int slot) => TouchActionsAvailable && !IsOnline && economy &&
+        internal bool TouchSlotAvailable(int slot) => TouchActionsAvailable && !consumePending && economy &&
             economy.Authenticated && economy.SlotCount(slot) > 0;
         internal bool TouchOwnsSpecial(Core.SecondaryAttack ability) => BattleSpecialAbilities.Valid(ability) &&
             System.Array.IndexOf(AvailableSpecials ?? System.Array.Empty<Core.SecondaryAttack>(),ability)>=0;

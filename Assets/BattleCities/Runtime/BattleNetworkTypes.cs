@@ -121,9 +121,10 @@ namespace BattleCities.Multiplayer
         public int Lives, TankTier;
         public float Respawn;
         public float SecondaryCooldown;
+        public float InventoryFreeze, InventoryZoom;
         public SecondaryAttack Secondary;
-        public static NetBattleParticipant From(BattleParticipant s) => new NetBattleParticipant { Connected=s.Connected, Lives=s.Lives, TankTier=s.TankTier, Respawn=s.Respawn, SecondaryCooldown=s.SecondaryCooldown, Secondary=s.Secondary };
-        public BattleParticipant ToState() => new BattleParticipant { Connected=Connected, Lives=Lives, TankTier=TankTier, Respawn=Respawn, SecondaryCooldown=SecondaryCooldown, Secondary=Secondary };
+        public static NetBattleParticipant From(BattleParticipant s) => new NetBattleParticipant { Connected=s.Connected, Lives=s.Lives, TankTier=s.TankTier, Respawn=s.Respawn, SecondaryCooldown=s.SecondaryCooldown, Secondary=s.Secondary,InventoryFreeze=s.InventoryFreeze,InventoryZoom=s.InventoryZoom };
+        public BattleParticipant ToState() => new BattleParticipant { Connected=Connected, Lives=Lives, TankTier=TankTier, Respawn=Respawn, SecondaryCooldown=SecondaryCooldown, Secondary=Secondary,InventoryFreeze=InventoryFreeze,InventoryZoom=InventoryZoom };
     }
     public struct NetBattleVisualEvent : INetworkStruct
     {

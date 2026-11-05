@@ -61,7 +61,7 @@ namespace BattleCities.Core
             if(f.Flags!=null)for(int i=0;i<2;i++)Flags[i]=f.Flags[i].Copy();
             if(f.FlagScores!=null)Array.Copy(f.FlagScores,FlagScores,2);
             Tick=f.Tick;Score=f.Score;WinnerSlot=f.WinnerSlot;MatchStarted=f.Started;Won=f.Won;Lost=f.Lost;spawned=f.SpawnedEnemies;
-            intro=f.Started?Math.Max(0,2-f.Tick*StepSeconds):2;
+            intro=StartControlVersion==0?(f.Started?Math.Max(0,2-f.Tick*StepSeconds):2):0;
             Freeze=f.Freeze;ZoomOut=f.ZoomOut;PickupType=f.PickupType;PickupX=f.PickupX;PickupY=f.PickupY;PickupTime=f.PickupTime;
             if(BaseAlive&&!f.BaseAlive&&Mode!=BattleMode.Versus)BaseDestroyed?.Invoke();
             if(RivalBaseAlive&&!f.RivalBaseAlive)RivalBaseDestroyed?.Invoke();

@@ -49,7 +49,7 @@ namespace BattleCities.Multiplayer
         [Networked,Capacity(TerrainWords)] public NetworkArray<uint> TerrainBits => default;
         // Snapshot partial damage as well as destroyed cells, including for late joiners.
         
-        [Networked,Capacity(8)] public NetworkArray<NetWall> ExtraWalls => default;
+        [Networked,Capacity(16)] public NetworkArray<NetWall> ExtraWalls => default;
         [Networked,Capacity(128)] public NetworkArray<NetBattleVisualEvent> Events => default;
         [Networked] public int EventSequence {get;set;}
 
@@ -116,6 +116,7 @@ namespace BattleCities.Multiplayer
             if(!Game.ReplayReady)return;
             UpdateMembership();
             if(Time.realtimeSinceStartup<recoveryReadyAt)return;
+            ApplyVerifiedPowerups();
             commands.Clear();
             for(int slot=0;slot<4;slot++)
             {

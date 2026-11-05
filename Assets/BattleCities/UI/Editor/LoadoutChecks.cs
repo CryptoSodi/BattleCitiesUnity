@@ -52,6 +52,10 @@ namespace BattleCities.Editor
             }
             var input=UnityEngine.Object.FindFirstObjectByType<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();bool enabled=input&&input.enabled;if(input)input.enabled=false;
             var fixture=new Fixture();api.EditorRequestOverride=fixture.Request;screen.EditorStartRoutineOverride=pump.Start;screen.EditorLaunchOverride=()=>launched++;
+            // The guide has its own checks; do not let a user's saved preference intercept this save-flow fixture.
+            string[] guideKeys={BattleGuideScreen.PreferenceKey,BattleGuideScreen.Psg1PreferenceKey};
+            var guidePreferences=guideKeys.Select(key=>(exists:PlayerPrefs.HasKey(key),value:PlayerPrefs.GetInt(key,0))).ToArray();
+            foreach(string key in guideKeys)PlayerPrefs.SetInt(key,1);
             try
             {
                 SetFixturePlayer(true);
@@ -67,9 +71,10 @@ namespace BattleCities.Editor
                 Check(screen.Root.Find("Loadout/Workspace/Slot 1/Item name").GetComponent<TMP_Text>().text=="SLOT 1","empty slot displays its numbered slot caption");
                 screen.ChooseLoadoutSlot(0);screen.EquipLoadoutPower("shield");Check(screen.EquippedPower(0)=="shield","owned Shield equips selected slot");
                 screen.ChooseLoadoutSlot(1);screen.EquipLoadoutPower("shield");Check(screen.EquippedPower(1)==null,"duplicate power rejected");screen.EquipLoadoutPower("freeze");
-                screen.ChooseLoadoutSlot(2);screen.EquipLoadoutPower("upgrade");Check(screen.EquippedPower(2)==null,"unowned power rejected");screen.EquipLoadoutPower("extra-life");Check(screen.EquippedPower(2)==null,"unsupported active Extra Life rejected");
+                screen.ChooseLoadoutSlot(2);screen.EquipLoadoutPower("upgrade");Check(screen.EquippedPower(2)==null,"unowned power rejected");screen.EquipLoadoutPower("extra-life");Check(screen.EquippedPower(2)=="extra-life","owned Extra Life equips selected slot");
+                screen.ChooseLoadoutSlot(3);screen.EquipLoadoutPower("extra-life");Check(screen.EquippedPower(3)==null,"duplicate Extra Life rejected");
                 screen.ChooseLoadoutSlot(0);screen.Root.Find("Fuel summary/Clear slot").GetComponent<Button>().onClick.Invoke();Check(screen.EquippedPower(0)==null,"footer Clear Slot removes selected power");screen.EquipLoadoutPower("shield");
-                screen.Back();Check(!screen.IsLoadout&&screen.SelectedTankTier==0,"Back returns to same selected tank");Check(!screen.Root.Find("Fuel summary/Clear slot").gameObject.activeSelf,"Clear Slot hidden on Select Tank");proceed.onClick.Invoke();Check(screen.IsLoadout&&screen.EquippedPower(0)=="shield"&&screen.EquippedPower(1)=="freeze","Continue preserves draft after Back");
+                screen.Back();Check(!screen.IsLoadout&&screen.SelectedTankTier==0,"Back returns to same selected tank");Check(!screen.Root.Find("Fuel summary/Clear slot").gameObject.activeSelf,"Clear Slot hidden on Select Tank");proceed.onClick.Invoke();Check(screen.IsLoadout&&screen.EquippedPower(0)=="shield"&&screen.EquippedPower(1)=="freeze"&&screen.EquippedPower(2)=="extra-life","Continue preserves draft including Extra Life after Back");
                 foreach(var v in new[]{(MainMenuPlatform.Web,1583,924,"web"),(MainMenuPlatform.AndroidLandscape,844,390,"seeker"),(MainMenuPlatform.Psg1,1240,1080,"psg1")})
                 {
                     menu.ApplyLayout(v.Item1,new Vector2(v.Item2,v.Item3));Canvas.ForceUpdateCanvases();screen.ChooseLoadoutSlot(3);
@@ -85,7 +90,34 @@ namespace BattleCities.Editor
                 fixture.FailSave=true;proceed.onClick.Invoke();proceed.onClick.Invoke();yield return Wait(screen);Check(launched==0&&fixture.Saves==1&&screen.LoadoutStatus.Contains("NOT SAVED"),"failed save retains screen and prevents duplicate writes");
                 Check(fixture.Fuel==7&&fixture.FuelRequests==0,"opening Loadout and failed save never consume Fuel");
                 fixture.FailSave=false;proceed.onClick.Invoke();yield return Wait(screen);Check(launched==1&&fixture.Saves==2&&BattlePreparation.TankTier==0,"successful save launches selected tank once");proceed.onClick.Invoke();Check(launched==1,"repeat Start cannot launch twice");
-                Check(fixture.OnlyLoadoutWritten&&fixture.Fuel==6&&fixture.FuelDebits==1,"loadout save writes only loadout; confirmed Start separately consumes exactly one Fuel");
+                Check(fixture.OnlyLoadoutWritten&&fixture.SavedPower("active-three")=="extra-life"&&fixture.Fuel==6&&fixture.FuelDebits==1,"loadout save preserves Extra Life; confirmed Start separately consumes exactly one Fuel");
+                var previousFixture=fixture;var restoredExtraLife=new Fixture();restoredExtraLife.SetSavedPower("active-two","extra-life");
+                yield return StartCase(restoredExtraLife);
+                Check(screen.EquippedPower(1)=="extra-life","server-saved Extra Life remains equipped after reopening loadout");
+                var noExtraLife=new Fixture{ExtraLives=0};noExtraLife.SetSavedPower("active-one","extra-life");yield return StartCase(noExtraLife);
+                Check(screen.EquippedPower(0)==null,"server-saved Extra Life is not restored when no stock remains");
+                screen.ChooseLoadoutSlot(2);screen.EquipLoadoutPower("extra-life");
+                Check(screen.EquippedPower(2)==null,"unowned Extra Life cannot be equipped");
+                int launchesBeforeRoster=launched;
+                string[] rosterSlots={"active-one","active-two","active-three","active-four"};
+                for(int start=0;start<ShopCatalog.InventoryIds.Length;start+=4)
+                {
+                    var rosterFixture=new Fixture{AllOwned=true};yield return StartCase(rosterFixture);
+                    int count=Math.Min(4,ShopCatalog.InventoryIds.Length-start);
+                    for(int i=0;i<count;i++)
+                    {
+                        string item=ShopCatalog.InventoryIds[start+i];screen.ChooseLoadoutSlot(i);
+                        screen.InventoryScroll.content.Find(item).GetComponent<Button>().onClick.Invoke();
+                        Check(screen.EquippedPower(i)==item,"owned "+item+" equips through inventory button");
+                    }
+                    int before=launched;proceed.onClick.Invoke();yield return Wait(screen);
+                    Check(launched==before+1&&rosterFixture.Saves==1,"roster batch saves and launches");
+                    for(int i=0;i<count;i++)Check(rosterFixture.SavedPower(rosterSlots[i])==ShopCatalog.InventoryIds[start+i],"saved "+ShopCatalog.InventoryIds[start+i]);
+                    yield return StartCase(rosterFixture);
+                    for(int i=0;i<count;i++)Check(screen.EquippedPower(i)==ShopCatalog.InventoryIds[start+i],"restored "+ShopCatalog.InventoryIds[start+i]);
+                }
+                launched=launchesBeforeRoster;
+                fixture=previousFixture;api.EditorRequestOverride=fixture.Request;
                 SetFixturePlayer(false);screen.EditorResetLoadoutFixture();fixture.Anonymous=true;screen.Open();yield return Wait(screen);proceed.onClick.Invoke();proceed.onClick.Invoke();Check(launched==2&&fixture.FuelRequests==1,"anonymous empty loadout remains playable without a server Fuel request");
                 SetFixturePlayer(true);screen.EditorResetLoadoutFixture();fixture.Anonymous=false;fixture.FailRead=true;screen.Open();yield return Wait(screen);proceed.onClick.Invoke();yield return Wait(screen);Check(screen.LoadoutStatus.Contains("UNAVAILABLE"),"failed inventory is distinct from valid empty");
                 fixture.FailRead=false;screen.Back();proceed.onClick.Invoke();yield return Wait(screen);screen.ChooseLoadoutSlot(0);screen.EquipLoadoutPower("shield");Check(screen.EquippedPower(0)=="shield","reopening Loadout recovers failed inventory without Refresh control");
@@ -148,6 +180,7 @@ namespace BattleCities.Editor
             }
             finally
             {
+                for(int i=0;i<guideKeys.Length;i++){if(guidePreferences[i].exists)PlayerPrefs.SetInt(guideKeys[i],guidePreferences[i].value);else PlayerPrefs.DeleteKey(guideKeys[i]);}
                 screen.Close(false);api.EditorRequestOverride=previousRequest;screen.EditorStartRoutineOverride=previousStart;screen.EditorLaunchOverride=previousLaunch;
                 typeof(MainMenuApiClient).GetProperty("LastPlayer").SetValue(api,previousPlayer);typeof(MainMenuApiClient).GetProperty("IsWalletAuthenticated").SetValue(api,previousWallet);
                 typeof(MainMenuApiClient).GetProperty("IsAuthenticated").SetValue(api,previousAuthenticated);typeof(MainMenuApiClient).GetProperty("IsLocalGuest").SetValue(api,previousGuest);
@@ -157,12 +190,19 @@ namespace BattleCities.Editor
         }
         sealed class Fixture
         {
-            public bool FailSave,FailRead,Anonymous,LoseNextFuelReply,HoldFuelReply,OnlyLoadoutWritten=true;
-            public int Saves,Fuel=7,FuelRequests,FuelDebits,AccountReads;
+            public bool FailSave,FailRead,Anonymous,LoseNextFuelReply,HoldFuelReply,AllOwned,OnlyLoadoutWritten=true;
+            public int Saves,Fuel=7,FuelRequests,FuelDebits,AccountReads,ExtraLives=1;
             public readonly List<string> FuelRequestIds=new List<string>();
             readonly Dictionary<string,int> consumed=new Dictionary<string,int>();
             JObject loadout=new JObject();
-            JObject Account()=>new JObject{["playerId"]="loadout-fixture",["provider"]="wallet",["fuelBalance"]=Fuel,["inventory"]=new JObject{["shield"]=2,["base-defence"]=1,["freeze"]=3,["extra-life"]=1,["upgrade"]=0,["zoom-out"]=1,["wipeout"]=1,["speed"]=1},["loadout"]=loadout.DeepClone()};
+            public string SavedPower(string slot)=>(string)loadout[slot];
+            public void SetSavedPower(string slot,string item)=>loadout[slot]=item;
+            JObject Account()
+            {
+                var inventory=new JObject{["shield"]=2,["base-defence"]=1,["freeze"]=3,["extra-life"]=ExtraLives,["upgrade"]=0,["zoom-out"]=1,["wipeout"]=1,["speed"]=1};
+                if(AllOwned)foreach(string item in ShopCatalog.InventoryIds)inventory[item]=1;
+                return new JObject{["playerId"]="loadout-fixture",["provider"]="wallet",["fuelBalance"]=Fuel,["inventory"]=inventory,["loadout"]=loadout.DeepClone()};
+            }
             public IEnumerator Request(string method,string path,JObject payload,Action<long,JObject,string> reply)
             {
                 yield return null;yield return null;

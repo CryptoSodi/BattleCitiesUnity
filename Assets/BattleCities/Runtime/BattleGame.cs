@@ -77,6 +77,7 @@ namespace BattleCities
         private BattleWeather weather;
         private readonly BattleHud hud=new BattleHud();
         private bool consumePending;
+        private float nextPendingPowerupRetry;
         private InputAction[] slots;
         public bool Paused {get=>paused;set{if(paused==value)return;paused=value;BlockControllerTransition();}}
         private sealed class Actor { public GameObject Root,Model; public Transform Turret; public Transform[] Muzzles; public ParticleSystem Dust; public Light[] Lights; public int Tier,PaintIdentity; public bool Drop; public Color Color; public TankAnimation Animation; public TankShield Shield; public BattleTankDropperBlink DropperBlink; }
@@ -271,7 +272,7 @@ namespace BattleCities
         private void Update()
         {
             float simulationDt=BattleBackgroundTiming.Elapsed(ref lastSimulationFrameTime,Time.realtimeSinceStartupAsDouble);
-            if(Simulation==null)return;PrepareMagicBeforeStart();UpdatePsg1Hint(Time.unscaledDeltaTime);bool ending=UpdateResults();if(ResultsVisible)return;float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);fps=Mathf.Lerp(fps,1/Mathf.Max(.0001f,Time.unscaledDeltaTime),.05f);
+            if(Simulation==null)return;RecoverOnlinePowerup();PrepareMagicBeforeStart();UpdatePsg1Hint(Time.unscaledDeltaTime);bool ending=UpdateResults();if(ResultsVisible)return;float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);fps=Mathf.Lerp(fps,1/Mathf.Max(.0001f,Time.unscaledDeltaTime),.05f);
             if(!ending)
             {
             if(!tvReplay&&gameplayFocused){UpdateGamepadControls();
@@ -281,7 +282,7 @@ namespace BattleCities
             for(int i=0;i<slots.Length;i++)if(slots[i].WasPressedThisFrame()&&!paused&&!BlockCombat&&!TouchLobbyVisible)UsePowerupSlot(i);
             SamplePrimaryFire(dt);}
             if(IsReplaying)TickReplay(dt);
-            else if(!paused&&!consumePending&&!BlockCombat&&ReplayReady)
+            else if(!paused&&(!consumePending||IsOnline)&&!BlockCombat&&ReplayReady)
             {
                 if(gameplayFocused){secondaryQueued|=secondaryFire.WasPressedThisFrame();
                 if(secondarySelect.WasPressedThisFrame())CycleSecondary();}
@@ -336,7 +337,8 @@ namespace BattleCities
             {
                 float w=Simulation.Width/64f,h=Simulation.Height/64f;
                 float span=Mathf.Min(w+.9f,(h+.9f)*gameCamera.aspect*Mathf.Sin(CameraElevation*Mathf.Deg2Rad));
-                gameCamera.orthographicSize=span/gameCamera.aspect/2/(Simulation.ZoomOut>0?.75f:Zoom);
+                bool zoomed=Simulation.ZoomOut>0||(Simulation.IsMultiplayer&&Simulation.LocalPlayerSlot>=0&&Simulation.Participants[Simulation.LocalPlayerSlot].InventoryZoom>0);
+                gameCamera.orthographicSize=span/gameCamera.aspect/2/(zoomed?.75f:Zoom);
                 if(gameOver)gameCamera.orthographicSize=Mathf.Min(gameCamera.orthographicSize,w/gameCamera.aspect/2,h*Mathf.Sin(CameraElevation*Mathf.Deg2Rad)/2);
                 float halfX=gameCamera.orthographicSize*gameCamera.aspect,halfZ=gameCamera.orthographicSize/Mathf.Sin(CameraElevation*Mathf.Deg2Rad);
                 Vector3 desired=CameraFocus(Simulation);
@@ -499,7 +501,7 @@ namespace BattleCities
             if(Simulation==null||tvReplay)return;
             if(!ReplayReady||HasMatchResult||ResultsVisible){hud.SetVisible(false);return;}
             hud.SetVisible(true);
-            hud.Draw(Simulation,IsOnline||IsReplaying?null:economy,PowerupAtlas,consumePending,selectedPowerup,!IsReplaying,(Psg1||RuntimePlatformInfo.PowerupUi==PowerupUiMode.WebTopLeft)&&!IsReplaying?(SecondaryAttack?)SelectedSpecial:null);
+            hud.Draw(Simulation,IsReplaying?null:economy,PowerupAtlas,consumePending,selectedPowerup,!IsReplaying,(Psg1||RuntimePlatformInfo.PowerupUi==PowerupUiMode.WebTopLeft)&&!IsReplaying?(SecondaryAttack?)SelectedSpecial:null);
             if(IsReplaying)return;
             if(Multiplayer.BattleSession.Instance&&Multiplayer.BattleSession.Instance.Lobby.Visible)return;
             if(ChaseCamera&&!IsOnline&&Simulation.Player!=null&&!paused&&!showDebug)
@@ -598,12 +600,49 @@ namespace BattleCities
         }
         public void UsePowerupSlot(int index)
         {
-            if(!ReplayReady||IsReplaying||IsOnline||index<0||index>=4||paused||showDebug||consumePending||!economy||!economy.Authenticated||economy.SlotCount(index)<=0||Simulation==null||!Simulation.CanAcceptPlayerFire)return;
+            if(!ReplayReady||IsReplaying||index<0||index>=4||paused||showDebug||consumePending||!economy||!economy.Authenticated||economy.SlotCount(index)<=0||Simulation==null||!Simulation.CanAcceptPlayerFire||IsOnline&&(!NetworkMatch||string.IsNullOrEmpty(NetworkMatch.LocalPowerupMatchId)))return;
             consumePending=true;_ = ConsumePowerupSlot(index);
         }
         private async System.Threading.Tasks.Task ConsumePowerupSlot(int index)
         {
-            var current=Simulation;try{var type=await economy.ConsumeSlot(index);if(this&&Simulation==current&&!IsReplaying&&type!=null)QueueReplayEvent(new ReplayEvent{kind="powerup",value=type});}finally{consumePending=false;}
+            var current=Simulation;var match=IsOnline?NetworkMatch:null;string matchId=match?match.LocalPowerupMatchId:null;
+            try
+            {
+                var result=await economy.ConsumeSlot(index,matchId);
+                if(!this||result==null)return;
+                if(matchId==null){if(Simulation==current&&!IsReplaying)QueueReplayEvent(new ReplayEvent{kind="powerup",value=result.Type});return;}
+                await DeliverOnlinePowerup(match,result);
+            }
+            finally{consumePending=false;}
+        }
+        private async System.Threading.Tasks.Task DeliverOnlinePowerup(Multiplayer.BattleNetworkMatch match,EconomyClient.Consumption result)
+        {
+            while(this&&match&&IsOnline&&NetworkMatch==match&&match.LocalPowerupMatchId==result.MatchId&&Simulation!=null&&!Simulation.Won&&!Simulation.Lost&&!match.PowerupAcknowledged(result.RequestId))
+            {match.SendPowerup(result);await System.Threading.Tasks.Task.Delay(500);}
+            if(this&&match&&match.PowerupAcknowledged(result.RequestId))economy.ClearOnlinePending(result.RequestId);
+        }
+        private void RecoverOnlinePowerup()
+        {
+            if(consumePending||!economy||!economy.Authenticated||economy.PendingOnline==null||Time.unscaledTime<nextPendingPowerupRetry)return;
+            nextPendingPowerupRetry=Time.unscaledTime+3;consumePending=true;_=RecoverOnlinePowerupAsync();
+        }
+        private async System.Threading.Tasks.Task RecoverOnlinePowerupAsync()
+        {
+            try
+            {
+                var session=Multiplayer.BattleSession.Instance;
+                if(session&&(session.Recovering||session.Busy))return;
+                var result=await economy.ConfirmOnlinePending();if(!this||result==null)return;
+                // A runner is briefly absent during reconnect or host migration. Do not
+                // mistake that transition for an abandoned match and discard a receipt.
+                session=Multiplayer.BattleSession.Instance;
+                if(session&&(session.Recovering||session.Busy||session.Online&&(!NetworkMatch||NetworkMatch.LocalSlot<0)))return;
+                var match=IsOnline?NetworkMatch:null;
+                if(match&&match.LocalPowerupMatchId==result.MatchId&&Simulation!=null&&!Simulation.Won&&!Simulation.Lost)
+                    await DeliverOnlinePowerup(match,result);
+                else await economy.RefundOnlinePending(result);
+            }
+            finally{consumePending=false;}
         }
         private void OnDestroy(){
 #if UNITY_EDITOR

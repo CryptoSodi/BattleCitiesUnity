@@ -202,7 +202,7 @@ namespace BattleCities
             for (int i = 0; i < 4; i++)
             {
                 string type = game.TouchSlotType(i);
-                bool showSlots=!state.IsMultiplayer&&!game.IsReplaying;
+                bool showSlots=!game.IsReplaying;
                 if(slots[i].gameObject.activeSelf!=showSlots)slots[i].gameObject.SetActive(showSlots);
                 bool hasIcon = showSlots&&ExtendedPowerupArt.TryImage(game.PowerupAtlas,type,out _,out _);
                 slots[i].Interactable = visible && game.TouchSlotAvailable(i);

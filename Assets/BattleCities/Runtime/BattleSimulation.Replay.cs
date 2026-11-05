@@ -12,6 +12,7 @@ namespace BattleCities.Core
         { if(Tick!=0||seed==0)throw new InvalidOperationException("Set a nonzero seed before gameplay.");random=seed; }
         public ReplayConfig ReplayConfiguration()=>new ReplayConfig {
             normalReload=PlayerNormalReloadSeconds,upgradedReload=PlayerUpgradedNormalReloadSeconds,playerTier=initialPlayerTier,tankStatsVersion=TankStatsVersion,
+            startControlVersion=StartControlVersion,
             powerShotDamageVersion=PowerShotDamageVersion,
             mineLimitVersion=MineLimitVersion,powerupRosterVersion=PowerupRosterVersion,wipeoutDamageVersion=WipeoutDamageVersion,
             turretRange=turretAttackRange,turretDamage=turretDamage,turretCooldown=turretFireCooldown,turretReload=turretReloadDuration,
@@ -20,6 +21,9 @@ namespace BattleCities.Core
         };
         public void ApplyReplayConfiguration(ReplayConfig c)
         {
+            if(c.startControlVersion<0||c.startControlVersion>1)throw new ArgumentOutOfRangeException(nameof(c.startControlVersion));
+            StartControlVersion=c.startControlVersion;
+            if(Tick==0)intro=StartControlVersion==0?2:0;
             if(c.mineLimitVersion<0||c.mineLimitVersion>1)throw new ArgumentOutOfRangeException(nameof(c.mineLimitVersion));
             TankStatsVersion=c.tankStatsVersion;initialPlayerTier=c.playerTier;
             PowerShotDamageVersion=c.powerShotDamageVersion;
@@ -77,7 +81,8 @@ namespace BattleCities.Core
         private static Point Snapshot(Point p)=>p==null?null:new Point{x=p.x,y=p.y};
         private static EnemySpec Snapshot(EnemySpec s)=>s==null?null:new EnemySpec{tier=s.tier,drop=s.drop};
         private static BattleParticipant Snapshot(BattleParticipant p)=>p==null?null:new BattleParticipant{
-            Connected=p.Connected,Lives=p.Lives,TankTier=p.TankTier,Respawn=p.Respawn,SecondaryCooldown=p.SecondaryCooldown,Secondary=p.Secondary
+            Connected=p.Connected,Lives=p.Lives,TankTier=p.TankTier,Respawn=p.Respawn,SecondaryCooldown=p.SecondaryCooldown,Secondary=p.Secondary,InventoryFreeze=p.InventoryFreeze,InventoryZoom=p.InventoryZoom,
+            InventoryDefence=p.InventoryDefence,InventoryDefenceWalls=p.InventoryDefenceWalls==null?null:new List<int>(p.InventoryDefenceWalls),InventoryDefenceBricks=p.InventoryDefenceBricks==null?null:new List<int>(p.InventoryDefenceBricks)
         };
         private static Wall Snapshot(Wall w)=>w==null?null:new Wall{
             Id=w.Id,Type=w.Type,Bounds=w.Bounds,Alive=w.Alive,Damage=w.Damage?.Copy(),Health=w.Health,

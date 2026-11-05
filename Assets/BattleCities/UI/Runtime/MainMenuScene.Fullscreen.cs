@@ -72,6 +72,10 @@ namespace BattleCities.UI
 #endif
             if(!visible){
                 if(fullscreenButton)fullscreenButton.gameObject.SetActive(false);
+                // A previously authored scene can contain this web-only object
+                // before fullscreenButton has been initialized in this session.
+                var savedFullscreen=content?content.Find("Web fullscreen"):null;
+                if(savedFullscreen)savedFullscreen.gameObject.SetActive(false);
                 var activeSettings=ActiveSettingsButton;
                 if(activeSettings&&fullscreenButton&&activeSettings.navigation.selectOnRight==fullscreenButton){var links=activeSettings.navigation;links.selectOnRight=startButton;activeSettings.navigation=links;}
                 if(psg1&&webSettingsButton&&statusBar&&navigation){
