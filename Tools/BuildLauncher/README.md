@@ -13,7 +13,7 @@ The launcher folder can also run from another location. Set `projectRoot` in tha
 4. Review the selected steps and choose Build/run, Preview only, or Back.
 
 One WebGL build serves all destinations. Play selects mainnet and the production API. Test and Magic select devnet and the test API. Localhost also selects the test API.
-Production publication creates a **web-only** GitHub release and waits for Pages and the live version check. It never uploads/carries an APK or changes the latest Android download. Existing release tags are not overwritten.
+Production publication creates a **web-only** GitHub release, publishes the validated site to the dedicated `battlecities-pages` branch in the same repository, and verifies the live version. The first publication switches GitHub Pages to that branch while retaining the existing custom domain. It does not upload an APK or change the latest Android download. Existing release tags are not overwritten. The old custom release-triggered Actions workflow may still report a separate failure until it is removed from the repository's default branch; it is no longer used to publish the site.
 
 Localhost binds only to this computer, opens the browser, and serves the exact new output. Relaunching automatically stops the previous launcher server after verifying its saved identity, listening PID and server command, then starts the new build on the same port. Unrelated or unverified processes are left running with an explanatory error. The server continues after the menu closes; its PID, port, output root and identity are in that run's `localhost-process.json`. It cannot be accessed from your phone over Wi-Fi.
 
@@ -48,7 +48,7 @@ The Python HTTPS helpers try normal DNS first and use Cloudflare DNS-over-HTTPS 
 
 ## Logs and failures
 
-Runs live in ignored `Builds/Launcher/<timestamp-id>/`: `plan.json`, `launcher.log`, and `result.json` record the artifact, completed steps and URLs. A failure stops subsequent destinations and preserves the completed steps and build. No force-pushes or automatic release overwrites occur. Inspect the receipt before retrying a partially published job. Automatic resume is intentionally not implemented: a new run is a new build; use the recorded publishing scripts/artifact paths for a targeted retry.
+Runs live in ignored `Builds/Launcher/<timestamp-id>/`: `plan.json`, `launcher.log`, and `result.json` record the artifact, completed steps and URLs. A failure stops subsequent destinations and preserves the completed steps and build. The launcher replaces only its own managed Pages branch with a single-commit site snapshot, using a Git lease to prevent overwriting concurrent updates. It refuses an existing unmanaged branch and never force-pushes the game source branch. Existing releases are not overwritten. Inspect the receipt before retrying a partially published job. Automatic resume is intentionally not implemented: a new run is a new build; use the recorded publishing scripts/artifact paths for a targeted retry.
 
 Disk preflight requires at least 15 GiB free for Android and 8 GiB for WebGL on the project drive. These are conservative startup minimums, not guaranteed maximum build sizes. The launcher stops before Unity and version changes if space is too low. It does not automatically delete previous builds or user files.
 

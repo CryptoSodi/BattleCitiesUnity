@@ -33,7 +33,7 @@ function Get-LauncherSteps($Plan) {
     if($Plan.kind -eq 'web'){
         'Build WebGL once (runtime hostname selects mainnet/devnet)'
         if(@($Plan.targets|Where-Object {$_ -ne 'localhost'}).Count){'Commit and push current project source'}
-        if('play' -in $Plan.targets){'Package web-only release; publish GitHub Pages; verify production'}
+        if('play' -in $Plan.targets){'Package web-only release; publish Pages branch; verify production'}
         if('test' -in $Plan.targets){'Deploy and verify Test / devnet'}
         if('magic' -in $Plan.targets){'Deploy and verify MagicBlock / devnet'}
         if('localhost' -in $Plan.targets){'Start localhost / test API and open browser'}
@@ -119,6 +119,7 @@ function Publish-LauncherWeb([string]$Web,$Plan,[string]$Commit,[string]$Job) {
     $archive=Join-Path $Job ("BattleCities-$($Plan.version)-Web.zip")
     $null=Invoke-GameTool python @((Join-Path $script:LauncherHome 'artifacts.py'),'web-zip','--source',$Web,'--output',$archive) -Echo
     Invoke-LauncherChild 'Tools/Publishing/Prepare-WebSite.ps1' @('-ArchivePath',$archive,'-Destination',(Join-Path $Job 'validated-web'),'-ExpectedSha256',(Get-ReleaseSha256 $archive),'-Repository',$script:GameRepository,'-ReleaseTag',"v$($Plan.version)")
+    $null=Invoke-GameTool python @((Join-Path $script:GameRoot 'Tools/Publishing/publish_pages_branch.py'),'check','--site',(Join-Path $Job 'validated-web'),'--repository',$script:GameRepository) -Echo
     $checksum=Join-Path $Job 'SHA256SUMS.txt'
     [IO.File]::WriteAllText($checksum,((Get-ReleaseSha256 $archive)+'  '+[IO.Path]::GetFileName($archive)+"`n"))
     $notes=Join-Path $Job 'web-notes.md'
@@ -127,9 +128,8 @@ function Publish-LauncherWeb([string]$Web,$Plan,[string]$Commit,[string]$Job) {
     $existing=Invoke-GameTool gh @('release','view',"v$($Plan.version)",'--repo',$script:GameRepository) -AllowFailure
     if($existing.ExitCode -eq 0){throw 'This release tag already exists. Choose a new version; existing releases are never overwritten.'}
     $null=Invoke-GameTool gh @('release','create',"v$($Plan.version)",$archive,$checksum,'--repo',$script:GameRepository,'--target',$Commit,'--title',"Battle Cities $($Plan.version)",'--notes-file',$notes,'--draft') -Echo
-    $publishedAfter=[DateTime]::UtcNow
     $null=Invoke-GameTool gh @('release','edit',"v$($Plan.version)",'--repo',$script:GameRepository,'--draft=false','--latest=false') -Echo
-    Wait-GamePages $Plan.version $Commit $publishedAfter
+    $null=Invoke-GameTool python @((Join-Path $script:GameRoot 'Tools/Publishing/publish_pages_branch.py'),'publish','--site',(Join-Path $Job 'validated-web'),'--repository',$script:GameRepository,'--version',$Plan.version,'--commit',$Commit,'--archive',$archive) -Echo
     return 'https://play.battlecities.com/'
 }
 
