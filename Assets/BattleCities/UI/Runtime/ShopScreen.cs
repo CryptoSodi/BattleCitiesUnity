@@ -328,7 +328,7 @@ namespace BattleCities.UI
             if(!root)return;CancelCheckout();StopAllCoroutines();accountRequest=null;notice.gameObject.SetActive(false);root.gameObject.SetActive(false);
             if(menu){menu.SetTankSelectorBackdrop(false);menu.RefreshLayout();if(restoreFocus&&menu.Tabs.Length>1)Focus(menu.Tabs[1]);}
         }
-        public void Back(){if(notice&&notice.gameObject.activeSelf)DismissNotice();else Close();}
+        public void Back(){if(notice&&notice.gameObject.activeSelf){if(noticeClose&&noticeClose.interactable)DismissNotice();}else Close();}
         public void ApplyLayout(MainMenuPlatform platform)
         {
             if(!IsConfigured)return;float w=root.rect.width,h=root.rect.height;
@@ -361,6 +361,7 @@ namespace BattleCities.UI
             grid.constraintCount=columns;LayoutRebuilder.ForceRebuildLayoutImmediate(catalog);Canvas.ForceUpdateCanvases();
             LayoutCardShadows();
             foreach(var button in buttonCaptions)FitButtonSkin(button.Button);
+            FitNoticeButtonSkins();
             ConfigureNavigation();RefreshPresentation();
         }
         public void SetCurrency(ShopCurrency next,bool focus)
@@ -552,7 +553,13 @@ namespace BattleCities.UI
         }
         public void KeepControllerFocus()
         {
-            Psg1UiNavigation.KeepFocus(root,notice.gameObject.activeSelf?noticeClose:currency==ShopCurrency.Swap?swapDirection:PreferredProductButton());
+            if(notice.gameObject.activeSelf)
+            {
+                if(!Psg1UiNavigation.Available(noticeClose)&&!Psg1UiNavigation.Available(noticeConfirm))
+                {if(EventSystem.current)EventSystem.current.SetSelectedGameObject(null);}
+                else Psg1UiNavigation.KeepFocus(notice,Psg1UiNavigation.Available(noticeClose)?noticeClose:noticeConfirm);
+            }
+            else Psg1UiNavigation.KeepFocus(root,currency==ShopCurrency.Swap?swapDirection:PreferredProductButton());
             if(notice.gameObject.activeSelf||!EventSystem.current)return;
             var current=EventSystem.current.currentSelectedGameObject;
             var button=current?current.GetComponent<Button>():null;

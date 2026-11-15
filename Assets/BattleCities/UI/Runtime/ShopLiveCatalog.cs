@@ -47,6 +47,13 @@ namespace BattleCities.UI
             return ValidPrice(text,currency==ShopCurrency.Solana?9:currency==ShopCurrency.Play?PlayDecimals:SkrDecimals)?text:null;
         }
         public bool Available(string id,ShopCurrency currency)=>Price(id,currency)!=null&&(id!="season-pass"||PassAvailable);
+        // Capture the API's item contents with the pending receipt, so a later
+        // payment retry still describes the purchase even if the catalog changes.
+        public JObject PurchaseContents(string id)
+        {
+            if(!items.TryGetValue(id,out var item))return null;
+            return new JObject{{"fuel",item["fuel"]?.DeepClone()},{"inventory",item["inventory"]?.DeepClone()}};
+        }
         public static bool ValidPrice(string value,int decimals)
         {
             if(string.IsNullOrEmpty(value)||!Regex.IsMatch(value,@"^(0|[1-9]\d{0,11})(\.\d{1,9})?$"))return false;

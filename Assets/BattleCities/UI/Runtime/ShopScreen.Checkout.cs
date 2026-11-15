@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
@@ -17,11 +18,13 @@ namespace BattleCities.UI
         JObject walletBalances,checkoutQuote,pendingPayment;
         Button noticeConfirm;
         TMP_Text noticeConfirmText;
+        Image purchaseArtwork;
+        RawImage purchaseArtworkFallback;
         CheckoutWalletSigner signer;
         Coroutine checkoutRoutine;
         string catalogError,loadedOwner;
         int checkoutIndex=-1,checkoutRevision;
-        bool checkoutBusy,currencyChosen;
+        bool checkoutBusy,currencyChosen,purchaseCardLayout;
         string Owner=>api?.LastPlayer?.id+"|"+api?.LastPlayer?.walletAddress+"|"+api?.BaseUrl;
         string Wallet=>api?.LastPlayer?.walletAddress;
         string PendingKey
@@ -32,8 +35,10 @@ namespace BattleCities.UI
         {
             Fit(noticeCard,ScreenContent.Rect("shop","checkout-region-4",new Rect(.12f,.14f,.76f,.72f)));
             Fit(noticeBody.rectTransform,ScreenContent.Rect("shop","checkout-region-3",new Rect(.07f,.23f,.86f,.50f)));
+            purchaseArtwork=Icon("Purchased item artwork",noticeCard,null,new Rect(.20f,.17f,.60f,.30f));
+            purchaseArtworkFallback=Raw("Purchased item fallback",noticeCard,new Rect(.20f,.17f,.60f,.30f));
             signer=GetComponent<CheckoutWalletSigner>();if(!signer)signer=gameObject.AddComponent<CheckoutWalletSigner>();
-            noticeConfirm=MakeButton("Purchase",noticeCard,"GET QUOTE",ConfirmCheckout);
+            noticeConfirm=MakeButton("Purchase",noticeCard,"BUY",ConfirmCheckout);
             noticeConfirmText=noticeConfirm.GetComponentInChildren<TMP_Text>();
             Fit((RectTransform)noticeConfirm.transform,ScreenContent.Rect("shop","checkout-region-2",new Rect(.07f,.77f,.55f,.15f)));
             connect.onClick.RemoveAllListeners();connect.onClick.AddListener(()=>
@@ -46,17 +51,79 @@ namespace BattleCities.UI
         }
         void ResetNoticeActions()
         {
+            ResetPurchasePresentation();
             if(noticeConfirm)noticeConfirm.gameObject.SetActive(false);
-            if(noticeClose){noticeClose.interactable=true;Fit((RectTransform)noticeClose.transform,ScreenContent.Rect("shop","checkout-region-1",new Rect(.25f,.77f,.5f,.15f)));}
+            if(noticeClose)noticeClose.interactable=true;
+            LayoutNoticeButtons();
             checkoutQuote=null;checkoutIndex=-1;
             LinkNoticeButtons();
+        }
+        void ResetPurchasePresentation()
+        {
+            purchaseCardLayout=false;
+            if(noticeCard)Fit(noticeCard,ScreenContent.Rect("shop","checkout-region-4",new Rect(.12f,.14f,.76f,.72f)));
+            if(noticeTitle){Fit(noticeTitle.rectTransform,ScreenContent.Rect("shop","shopscreen-buildnotice-new-rect-07f-07f-86f-19b5bf",new Rect(.07f,.07f,.86f,.16f)));noticeTitle.fontSize=noticeTitle.fontSizeMax=34;}
+            if(purchaseArtwork)purchaseArtwork.gameObject.SetActive(false);
+            if(purchaseArtworkFallback)purchaseArtworkFallback.transform.parent.gameObject.SetActive(false);
+            if(noticeBody)Fit(noticeBody.rectTransform,ScreenContent.Rect("shop","checkout-region-3",new Rect(.07f,.23f,.86f,.50f)));
+        }
+        void ShowPurchaseCard(JObject receipt,string confirmation)
+        {
+            noticeTitle.text="PURCHASE CONFIRMED";
+            const string prefix="PURCHASE CONFIRMED\n";
+            noticeBody.text=confirmation.StartsWith(prefix,StringComparison.Ordinal)?confirmation.Substring(prefix.Length):confirmation;
+            ShowItemArtwork(ShopLiveCatalog.Text(receipt?["itemId"]));
+        }
+        void ShowItemArtwork(string id)
+        {
+            purchaseCardLayout=true;
+            Fit(noticeCard,new Rect(.20f,.05f,.60f,.90f));
+            Fit(noticeTitle.rectTransform,new Rect(.07f,.025f,.86f,.11f));
+            noticeTitle.fontSize=noticeTitle.fontSizeMax=44;
+            int index=Array.FindIndex(ShopCatalog.Products,item=>item.Id==id);
+            bool hasArtwork=index>=0&&cards[index]?.Art&&cards[index].Art.sprite;
+            bool hasFallback=index>=0&&!hasArtwork&&!string.IsNullOrEmpty(ShopCatalog.Products[index].InventoryId)&&cards[index]?.Fallback&&cards[index].Fallback.texture;
+            purchaseArtwork.gameObject.SetActive(hasArtwork);
+            purchaseArtworkFallback.transform.parent.gameObject.SetActive(hasFallback);
+            if(hasArtwork)SetSprite(purchaseArtwork,cards[index].Art.sprite);
+            if(hasFallback){purchaseArtworkFallback.texture=cards[index].Fallback.texture;purchaseArtworkFallback.uvRect=cards[index].Fallback.uvRect;purchaseArtworkFallback.color=Color.white;}
+            Fit(noticeBody.rectTransform,hasArtwork||hasFallback?new Rect(.07f,.48f,.86f,.27f):ScreenContent.Rect("shop","checkout-region-3",new Rect(.07f,.23f,.86f,.50f)));
+            LayoutNoticeButtons();
+        }
+        void LayoutNoticeButtons()
+        {
+            if(!noticeClose||!noticeConfirm)return;
+            float textSize=purchaseCardLayout?34f:28f;
+            if(noticeConfirmText)noticeConfirmText.fontSize=noticeConfirmText.fontSizeMax=textSize;
+            var closeText=noticeClose.GetComponentInChildren<TMP_Text>();
+            if(closeText)closeText.fontSize=closeText.fontSizeMax=textSize;
+            bool two=noticeConfirm.gameObject.activeSelf;
+            if(purchaseCardLayout)
+            {
+                Fit((RectTransform)noticeConfirm.transform,new Rect(.14f,.80f,.34f,.105f));
+                Fit((RectTransform)noticeClose.transform,two?new Rect(.52f,.80f,.34f,.105f):new Rect(.32f,.80f,.36f,.105f));
+                Canvas.ForceUpdateCanvases();
+                FitNoticeButtonSkins();
+            }
+            else
+            {
+                Fit((RectTransform)noticeConfirm.transform,ScreenContent.Rect("shop","checkout-region-2",new Rect(.07f,.77f,.55f,.15f)));
+                Fit((RectTransform)noticeClose.transform,two?ScreenContent.Rect("shop","checkout-region-0",new Rect(.66f,.77f,.27f,.15f)):ScreenContent.Rect("shop","checkout-region-1",new Rect(.25f,.77f,.5f,.15f)));
+            }
+        }
+        void FitNoticeButtonSkins()
+        {
+            if(!purchaseCardLayout)return;
+            foreach(var button in new[]{noticeConfirm,noticeClose})
+                if(button&&button.image&&button.image.sprite)
+                    TvTitleHeaderLayout.FitSkin(button.image,((RectTransform)button.transform).rect.height);
         }
         void LinkNoticeButtons()
         {
             if(!noticeClose)return;
             var other=noticeConfirm&&noticeConfirm.gameObject.activeSelf&&noticeConfirm.interactable?noticeConfirm:noticeClose;
-            Link(noticeClose,other,other,other,other);
-            if(noticeConfirm)Link(noticeConfirm,noticeClose,noticeClose,noticeClose,noticeClose);
+            Link(noticeClose,other,other,noticeClose,noticeClose);
+            if(noticeConfirm)Link(noticeConfirm,noticeClose,noticeClose,noticeConfirm,noticeConfirm);
         }
         IEnumerator LoadLiveAccount()
         {
@@ -120,17 +187,20 @@ namespace BattleCities.UI
                 ShowNotice("CHECK PAYMENT","A previous payment is awaiting confirmation. Check it before buying another item.");
                 ConfigureNoticeAction("CHECK PAYMENT");return;
             }
-            if(liveCatalog==null){ShowNotice(product.Title,catalogError??"Loading the live Shop. Please try again.");return;}
+            if(liveCatalog==null){ShowNotice(product.Title,catalogError??"Loading the live Shop. Please try again.");ShowItemArtwork(product.Id);return;}
             string description=product.Category==ShopCategory.SeasonPass?PassDescription():product.Reward;
-            if(product.Category==ShopCategory.SeasonPass&&liveCatalog.Owned){ShowNotice("SEASON PASS OWNED",description);return;}
+            if(product.Category==ShopCategory.SeasonPass&&liveCatalog.Owned){ShowNotice("SEASON PASS OWNED",description);ShowItemArtwork(product.Id);return;}
             if(!liveCatalog.Available(product.Id,currency))
             {
                 string reason=currency!=ShopCurrency.Solana&&liveCatalog.Available(product.Id,ShopCurrency.Solana)
                     ?PaymentTicker+" purchases are unavailable for this item. Choose SOLANA to buy it.":"This purchase is currently unavailable.";
-                ShowNotice(product.Title,description+"\n\n"+reason);return;
+                ShowNotice(product.Title,description+"\n\n"+reason);ShowItemArtwork(product.Id);return;
             }
             ShowNotice(product.Title,description+"\n\n"+LivePrice(product.Id));
-            ConfigureNoticeAction(api&&api.IsWalletReadyForPurchases?"GET QUOTE":"CONNECT WALLET");
+            ShowItemArtwork(product.Id);
+            if(api&&api.IsWalletReadyForPurchases)
+                checkoutRoutine=StartCoroutine(PrepareQuote());
+            else ConfigureNoticeAction("CONNECT WALLET");
         }
         string PassDescription()
         {
@@ -142,7 +212,7 @@ namespace BattleCities.UI
         void ConfigureNoticeAction(string caption)
         {
             noticeConfirm.gameObject.SetActive(true);noticeConfirm.interactable=true;noticeConfirmText.text=caption;
-            Fit((RectTransform)noticeClose.transform,ScreenContent.Rect("shop","checkout-region-0",new Rect(.66f,.77f,.27f,.15f)));
+            LayoutNoticeButtons();
             LinkNoticeButtons();Focus(noticeConfirm);
         }
         void ConfirmCheckout()
@@ -157,7 +227,7 @@ namespace BattleCities.UI
         }
         IEnumerator PrepareQuote()
         {
-            checkoutBusy=true;noticeConfirm.interactable=false;
+            checkoutQuote=null;checkoutBusy=true;noticeConfirm.interactable=false;
             string owner=Owner;int revision=checkoutRevision;
             JObject result=null;string error=null;
             var product=ShopCatalog.Products[checkoutIndex];
@@ -180,17 +250,17 @@ namespace BattleCities.UI
                 if(currency==ShopCurrency.Play)valid&=(string)result?["tokenMint"]=="PLAYs3GSSadH2q2JLS7djp7yzeT75NK78XgrE5YLrfq";
             }
             catch { }
-            if(!valid){noticeBody.text=error??"The payment quote is unavailable or expired. Refresh the Shop and try again.";FinishCheckout();noticeConfirm.gameObject.SetActive(false);LinkNoticeButtons();yield break;}
+            if(!valid){noticeBody.text=error??"The payment quote is unavailable or expired. Please try again.";FinishCheckout();ConfigureNoticeAction("RETRY");yield break;}
             checkoutQuote=result;FinishCheckout();
             noticeBody.text=(product.Category==ShopCategory.SeasonPass?PassDescription():product.Reward)+"\n\n"+price+" "+PaymentTicker+
                 " + network fees\nApprove this exact price in your wallet.";
-            ConfigureNoticeAction("APPROVE "+price+" "+PaymentTicker);
+            ConfigureNoticeAction("APPROVE");
         }
         static bool QuoteIsCurrent(JObject quote)=>DateTimeOffset.TryParse(ShopLiveCatalog.Text(quote?["expiresAt"]),CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal,out var expires)
             &&expires> DateTimeOffset.UtcNow;
         IEnumerator SignAndSubmit()
         {
-            if(!QuoteIsCurrent(checkoutQuote)){checkoutQuote=null;noticeBody.text="This quote expired. Request a fresh price.";ConfigureNoticeAction("GET QUOTE");yield break;}
+            if(!QuoteIsCurrent(checkoutQuote)){checkoutQuote=null;yield return PrepareQuote();yield break;}
             checkoutBusy=true;noticeConfirm.interactable=false;
             var quote=checkoutQuote;string owner=Owner;int revision=checkoutRevision;
             JObject signed=null;
@@ -200,19 +270,22 @@ namespace BattleCities.UI
             if(owner!=Owner||revision!=checkoutRevision){FinishCheckout();yield break;}
             if((bool?)signed?["ok"]!=true)
             {
-                noticeBody.text=(string)signed?["error"]??"Wallet signing was cancelled. No payment was submitted.";
-                FinishCheckout();ConfigureNoticeAction("APPROVE PAYMENT");yield break;
+                string price=ShopLiveCatalog.FormatAtomic((string)quote["amountAtomic"],currency==ShopCurrency.Solana?9:currency==ShopCurrency.Play?liveCatalog.PlayDecimals:liveCatalog.SkrDecimals);
+                noticeBody.text=((string)signed?["error"]??"Wallet signing was cancelled. No payment was submitted.")+"\n\n"+price+" "+PaymentTicker+" + network fees";
+                FinishCheckout();ConfigureNoticeAction("APPROVE");yield break;
             }
             // Persist the exact signed bytes before submission. A retry uses the
             // same signature and cannot create another wallet payment.
             pendingPayment=new JObject{{"wallet",Wallet},{"api",api.BaseUrl},{"itemId",ShopCatalog.Products[checkoutIndex].Id},
                 {"quoteToken",quote["quoteToken"]},{"signature",signed["signature"]},{"signedTransaction",signed["signedTransaction"]}};
+            var contents=liveCatalog?.PurchaseContents(ShopCatalog.Products[checkoutIndex].Id);
+            if(contents!=null)pendingPayment["contents"]=contents;
             SavePending();checkoutQuote=null;
             noticeBody.text="Submitting the signed payment...";noticeClose.interactable=false;
             yield return api.Request("POST","/api/economy/purchase/submit",new JObject{{"quoteToken",pendingPayment["quoteToken"]},{"signedTransaction",pendingPayment["signedTransaction"]}},(code,body,error)=>
             {if(owner==Owner)ApplyPaymentResult(body);});
             if(owner==Owner&&revision==checkoutRevision&&pendingPayment!=null)yield return VerifyPending(owner,revision);
-            else if(owner==Owner&&revision==checkoutRevision){noticeConfirm.gameObject.SetActive(false);yield return LoadLiveAccount();if(api)api.RefreshNow();}
+            else if(owner==Owner&&revision==checkoutRevision){noticeConfirm.gameObject.SetActive(false);LayoutNoticeButtons();LinkNoticeButtons();yield return LoadLiveAccount();if(api)api.RefreshNow();}
             FinishCheckout();
         }
         IEnumerator CheckPending()
@@ -238,15 +311,45 @@ namespace BattleCities.UI
                 {if(owner==Owner&&revision==checkoutRevision)ApplyPaymentResult(body);});
             }
             if(pendingPayment!=null){noticeBody.text="Payment confirmation is pending. CHECK PAYMENT retries this receipt without making another payment.";ConfigureNoticeAction("CHECK PAYMENT");}
-            else {noticeConfirm.gameObject.SetActive(false);yield return LoadLiveAccount();if(api)api.RefreshNow();}
+            else {noticeConfirm.gameObject.SetActive(false);LayoutNoticeButtons();LinkNoticeButtons();yield return LoadLiveAccount();if(api)api.RefreshNow();}
         }
         void ApplyPaymentResult(JObject body)
         {
             if((bool?)body?["ok"]==true&&body["account"] is JObject updated)
             {
-                account=updated;ClearPending();noticeBody.text="PURCHASE CONFIRMED\nYour inventory and season-pass ownership are updated.";RefreshAccount();
+                string confirmation=PurchaseConfirmation(pendingPayment);
+                ShowPurchaseCard(pendingPayment,confirmation);
+                account=updated;ClearPending();RefreshAccount();
             }
             else if((bool?)body?["terminal"]==true){ClearPending();noticeBody.text=(string)body["statusText"]??"The payment did not complete.";}
+        }
+        static string PurchaseConfirmation(JObject receipt)
+        {
+            string id=ShopLiveCatalog.Text(receipt?["itemId"]);
+            ShopProduct product=null;
+            foreach(var item in ShopCatalog.Products)if(item.Id==id){product=item;break;}
+            if(product==null)return "PURCHASE CONFIRMED\nYour purchase was added to your account.";
+            if(product.Category==ShopCategory.SeasonPass)return "PURCHASE CONFIRMED\n1 SEASON PASS";
+            var lines=new List<string>();
+            var contents=receipt?["contents"] as JObject;
+            int fuel=PositiveCount(contents?["fuel"]);
+            if(fuel>0)lines.Add(fuel.ToString(CultureInfo.InvariantCulture)+" FUEL");
+            if(contents?["inventory"] is JObject inventory)
+                foreach(var entry in inventory.Properties())
+                {
+                    int count=PositiveCount(entry.Value);
+                    if(count==0)continue;
+                    foreach(var item in ShopCatalog.Products)
+                        if(item.InventoryId==entry.Name)
+                        {lines.Add(count.ToString(CultureInfo.InvariantCulture)+" "+item.Title);break;}
+                }
+            if(lines.Count==0)return "PURCHASE CONFIRMED\n"+product.Title;
+            return "PURCHASE CONFIRMED\n"+(product.Category==ShopCategory.Packs?product.Title+"\n":"")+string.Join("\n",lines);
+        }
+        static int PositiveCount(JToken value)
+        {
+            if(value?.Type!=JTokenType.Integer)return 0;
+            return int.TryParse(value.ToString(),NumberStyles.None,CultureInfo.InvariantCulture,out var result)&&result>0?result:0;
         }
         void FinishCheckout(){checkoutBusy=false;checkoutRoutine=null;if(noticeClose)noticeClose.interactable=true;if(noticeConfirm)noticeConfirm.interactable=true;LinkNoticeButtons();}
         void CancelCheckout()
