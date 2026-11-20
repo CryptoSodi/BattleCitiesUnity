@@ -105,6 +105,11 @@ namespace BattleCities.Editor
                 Check(((TMP_Text)Get(screen,"noticeConfirmText")).text=="APPROVE","approval button uses the concise caption");
                 Check(((TMP_Text)Get(screen,"noticeBody")).text.Contains("0.025000001 SOL"),"exact server quote is shown above the approval button");
                 Check(((TMP_Text)Get(screen,"noticeBody")).text.Contains("network fees"),"network fees remain disclosed");
+                Drain((IEnumerator)Call(screen,"SignAndSubmit"));
+                Check(Get(screen,"checkoutQuote")==null&&((TMP_Text)Get(screen,"noticeConfirmText")).text=="RETRY","failed signing discards the quote and offers a retry");
+                Check(quoteCalls==1&&otherCalls==0&&Get(screen,"pendingPayment")==null,"failed signing never submits or saves a payment");
+                Drain((IEnumerator)Call(screen,"PrepareQuote"));
+                Check(quoteCalls==2&&((TMP_Text)Get(screen,"noticeConfirmText")).text=="APPROVE","retry obtains a fresh quote before the next approval");
                 fixtureKey=(string)typeof(ShopScreen).GetProperty("PendingKey",Private).GetValue(screen);
                 var receipt=new JObject{{"wallet","fixture-wallet"},{"api",api.BaseUrl},{"itemId","starter-pack"},{"contents",parsed.PurchaseContents("starter-pack")},{"quoteToken","fixture-quote"},{"signature","fixture-signature"},{"signedTransaction","fixture-bytes"}};
                 Set(screen,"pendingPayment",receipt);Call(screen,"SavePending");Set(screen,"pendingPayment",null);Call(screen,"LoadPending");

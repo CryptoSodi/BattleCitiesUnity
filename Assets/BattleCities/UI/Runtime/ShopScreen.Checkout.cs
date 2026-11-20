@@ -271,8 +271,11 @@ namespace BattleCities.UI
             if((bool?)signed?["ok"]!=true)
             {
                 string price=ShopLiveCatalog.FormatAtomic((string)quote["amountAtomic"],currency==ShopCurrency.Solana?9:currency==ShopCurrency.Play?liveCatalog.PlayDecimals:liveCatalog.SkrDecimals);
+                // A failed signing attempt must not retry the same transaction:
+                // the wallet may have rejected or altered that quote.
+                checkoutQuote=null;
                 noticeBody.text=((string)signed?["error"]??"Wallet signing was cancelled. No payment was submitted.")+"\n\n"+price+" "+PaymentTicker+" + network fees";
-                FinishCheckout();ConfigureNoticeAction("APPROVE");yield break;
+                FinishCheckout();ConfigureNoticeAction("RETRY");yield break;
             }
             // Persist the exact signed bytes before submission. A retry uses the
             // same signature and cannot create another wallet payment.
