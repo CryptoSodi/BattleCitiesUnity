@@ -181,6 +181,11 @@ namespace BattleCities.UI
         private GameObject previousSelection;
         private Button walletLoginButton;
         private bool loading;
+#if UNITY_WEBGL && !UNITY_EDITOR
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern void BattleCitiesSetCherryChatHomeVisible(int visible);
+        private bool cherryChatHomeVisible;
+#endif
         private float controllerLegendHideAt = -1;
         private bool controllerLegendHidden;
         private string[] rows = Array.Empty<string>();
@@ -336,6 +341,9 @@ namespace BattleCities.UI
         }
         private void OnDisable()
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            if(cherryChatHomeVisible) { BattleCitiesSetCherryChatHomeVisible(0); cherryChatHomeVisible=false; }
+#endif
             SetInstructionsPage(false);
             ReleasePaperBackdropMaterials();
             if(androidTvReveal!=null){StopCoroutine(androidTvReveal);androidTvReveal=null;}
@@ -350,6 +358,11 @@ namespace BattleCities.UI
         }
         private void Update()
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            var cherryLobby=BattleCities.Multiplayer.BattleSession.Instance?.Lobby;
+            bool showCherryChat=Application.isPlaying&&!loading&&!IsModalOpen&&!IsTvScreenOpen&&!(cherryLobby&&cherryLobby.Visible);
+            if(showCherryChat!=cherryChatHomeVisible) { cherryChatHomeVisible=showCherryChat; BattleCitiesSetCherryChatHomeVisible(showCherryChat?1:0); }
+#endif
             if(Application.isPlaying)UpdatePsg1MenuShortcuts();
             if (Application.isPlaying) UpdateInstructionsPage(Time.unscaledDeltaTime);
             if (Application.isPlaying && Time.unscaledTime >= nextRoundUpdate)

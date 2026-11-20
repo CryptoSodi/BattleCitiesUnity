@@ -1,4 +1,7 @@
 mergeInto(LibraryManager.library, {
+  BattleCitiesSetCherryChatHomeVisible: function (visible) {
+    window.BattleCitiesCherry?.chat?.setHomeVisible(!!visible);
+  },
   BattleCitiesIsInsideCherry: function () {
     return window.BattleCitiesCherry?.insideCherry ? 1 : 0;
   },

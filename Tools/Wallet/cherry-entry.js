@@ -1,4 +1,6 @@
 import { CherryMiniApp, isInsideCherry, isTrustedHostOrigin, readCherryDisplayContext, applyCherryContextToDocument } from '@cherrydotfun/miniapp-sdk';
+import { CherryEmbed } from '@cherrydotfun/chat-embed-sdk';
+import { createCherryChat } from './cherry-chat.mjs';
 
 // This bundle is included only in the Cherry site's HTML. The host must see
 // the handshake while the much larger Unity player is still downloading.
@@ -7,6 +9,7 @@ const state = { insideCherry, app: null, ready: Promise.resolve(null), sessionRe
 window.BattleCitiesCherry = state;
 
 if (insideCherry) {
+  state.chat = createCherryChat({ state, CherryEmbed, document, fetch });
   applyCherryContextToDocument(readCherryDisplayContext());
   const app = new CherryMiniApp({ strict: true });
   state.app = app;
