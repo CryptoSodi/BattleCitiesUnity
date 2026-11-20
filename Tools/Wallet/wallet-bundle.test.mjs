@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import test from 'node:test';
-import { Keypair, Transaction, VersionedTransaction, TransactionMessage, ComputeBudgetProgram,
+import { Keypair, Transaction, TransactionInstruction, VersionedTransaction, TransactionMessage, ComputeBudgetProgram,
   SystemProgram, PublicKey } from '@solana/web3.js';
 import { getAppReferenceKeyBytes } from '@cherrydotfun/miniapp-sdk';
 
@@ -31,6 +31,30 @@ function signImmutable(tx) {
 }
 function legacy(tx) { return Transaction.from(tx.serialize()); }
 const original = quote();
+const lighthouse = new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95');
+function assertion(opcode = 6, target = key.publicKey) {
+  return new TransactionInstruction({programId:lighthouse,keys:[{pubkey:target,isSigner:false,isWritable:false}],data:Buffer.from([opcode,0])});
+}
+
+test('Phantom Lighthouse assertions preserve the quoted purchase and signature',async()=>{
+  const h=helper(async tx=>{
+    const result=legacy(tx);
+    result.instructions.splice(2,0,assertion(6),assertion(6));
+    result.instructions.push(assertion(6),assertion(10));
+    result.sign(key);return result;
+  });
+  const signed=Buffer.from(await h.sign(original,wallet),'base64');
+  assert.ok(Transaction.from(signed).verifySignatures());
+});
+
+test('unsafe Lighthouse and unrelated instructions are rejected',async()=>{
+  for (const extra of [assertion(0),assertion(1),assertion(11),
+    new TransactionInstruction({programId:Keypair.generate().publicKey,keys:[],data:Buffer.from([6])}),
+    new TransactionInstruction({...assertion(6),keys:[{pubkey:Keypair.generate().publicKey,isSigner:false,isWritable:true}]})]) {
+    const h=helper(async tx=>{const result=legacy(tx);result.instructions.push(extra);result.sign(key);return result;});
+    await assert.rejects(h.sign(original,wallet),/changed the quoted transaction/);
+  }
+});
 
 test('immutable legacy wallet response preserves the server message and valid signature',async()=>{
   const h=helper(async tx=>signImmutable(tx));

@@ -97,8 +97,11 @@ namespace BattleCities.UI
                     if((bool?)value["ok"]==true)
                     {
                         var bytes=Convert.FromBase64String((string)value["signedTransaction"]??"");
-                        if(bytes.Length!=message.Length+65||bytes[0]!=1)throw new FormatException();
+                        if(bytes.Length<=65||bytes.Length>1232||bytes[0]!=1)throw new FormatException();
+#if !UNITY_WEBGL || UNITY_EDITOR
+                        if(bytes.Length!=message.Length+65)throw new FormatException();
                         for(int i=0;i<message.Length;i++)if(bytes[i+65]!=message[i])throw new FormatException();
+#endif
                         string signature=Base58(bytes,1,64);
                         bool nonzero=false;for(int i=1;i<65;i++)nonzero|=bytes[i]!=0;
                         if(!nonzero)throw new FormatException();value["signature"]=signature;

@@ -1,5 +1,7 @@
-import { PublicKey, Transaction, VersionedTransaction } from '@solana/web3.js';
+import { PublicKey, VersionedTransaction } from '@solana/web3.js';
 import { getAppReferenceKeyBytes } from '@cherrydotfun/miniapp-sdk';
+import nacl from 'tweetnacl';
+import quotedTransaction from '../../../Tools/Wallet/quoted-transaction.cjs';
 
 const CHERRY_APP_ID = 'c0dcc3df-8b13-445b-afa1-573c8c567315';
 
@@ -52,11 +54,15 @@ window.BattleCitiesCheckoutWallet = {
       if (typeof signed?.serialize !== 'function') throw new Error('Phantom did not return a signed payment transaction.');
       signedBytes = Uint8Array.from(signed.serialize());
     }
-    if (signedBytes[0] !== 1 || !sameBytes(signedBytes.slice(65), original)) throw new Error('Phantom changed the quoted transaction. Request a fresh price and try again.');
+    if (signedBytes.length <= 65 || signedBytes.length > 1232 || signedBytes[0] !== 1
+        || (!sameBytes(signedBytes.slice(65), original)
+          && (cherry || !quotedTransaction.matchesApprovedTransaction(bytes, signedBytes))))
+      throw new Error('Phantom changed the quoted transaction. Request a fresh price and try again.');
 
     // Verify the returned wire bytes with our own parser; wallet object methods
     // must not recompile or replace the message being checked.
-    if (!Transaction.from(signedBytes).verifySignatures()) throw new Error('Phantom did not return a valid payment signature. No payment was submitted.');
+    if (!nacl.sign.detached.verify(signedBytes.slice(65), signedBytes.slice(1, 65), transaction.message.staticAccountKeys[0].toBytes()))
+      throw new Error('Phantom did not return a valid payment signature. No payment was submitted.');
     return btoa(String.fromCharCode(...signedBytes));
   }
 };
