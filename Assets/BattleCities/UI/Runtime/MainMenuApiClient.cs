@@ -237,6 +237,15 @@ namespace BattleCities.UI
             }
         }
 
+        public void ConnectCherry()
+        {
+            if (!isActiveAndEnabled || IsWalletLoginPending || IsRestoringSession || IsSigningOut || !BattleCitiesWalletBridge.IsInsideCherry()) return;
+            walletAttemptId = Guid.NewGuid().ToString("N");
+            walletDeadline = Time.realtimeSinceStartupAsDouble + 30;
+            NotifyStatus("SIGNING IN", "Connecting your Cherry account...");
+            BattleCitiesWalletBridge.StartCherry(gameObject.name, nameof(OnWalletLoginResult), walletAttemptId);
+        }
+
         public void ContinueAsGuest()
         {
             if (!isActiveAndEnabled) return;
@@ -366,10 +375,10 @@ namespace BattleCities.UI
                 sessionError = error;
             });
 
-            if (session != null && (bool?)session["authenticated"] == true && (string)session["provider"] == "wallet")
+            if (session != null && (bool?)session["authenticated"] == true && ((string)session["provider"] == "wallet" || (string)session["provider"] == "cherry"))
             {
                 IsAuthenticated = true;
-                IsWalletAuthenticated = string.Equals((string)session["provider"], "wallet", StringComparison.OrdinalIgnoreCase);
+                IsWalletAuthenticated = true;
                 IsLocalGuest = false;
                 yield return LoadPlayer();
             }
@@ -643,6 +652,10 @@ namespace BattleCities.UI
         [System.Runtime.InteropServices.DllImport("__Internal")]
         private static extern void BattleCitiesConnectWallet(string gameObjectName, string callbackMethod, string baseUrl, string attemptId);
         [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern int BattleCitiesIsInsideCherry();
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern void BattleCitiesStartCherry(string target, string callback, string attemptId);
+        [System.Runtime.InteropServices.DllImport("__Internal")]
         private static extern void BattleCitiesCancelWallet(string attemptId);
         [System.Runtime.InteropServices.DllImport("__Internal")]
         private static extern int BattleCitiesHasPhantomCallback();
@@ -657,6 +670,20 @@ namespace BattleCities.UI
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
             BattleCitiesConnectWallet(gameObjectName, callbackMethod, baseUrl, attemptId);
+#endif
+        }
+        public static bool IsInsideCherry()
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            return BattleCitiesIsInsideCherry()!=0;
+#else
+            return false;
+#endif
+        }
+        public static void StartCherry(string target,string callback,string attemptId)
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            BattleCitiesStartCherry(target,callback,attemptId);
 #endif
         }
         public static void Cancel(string attemptId)

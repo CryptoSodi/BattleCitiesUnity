@@ -4,16 +4,18 @@ import vm from 'node:vm';
 import test from 'node:test';
 import { Keypair, Transaction, VersionedTransaction, TransactionMessage, ComputeBudgetProgram,
   SystemProgram, PublicKey } from '@solana/web3.js';
+import { getAppReferenceKeyBytes } from '@cherrydotfun/miniapp-sdk';
 
 const bundle = fs.readFileSync(new URL('../../Assets/StreamingAssets/BattleCitiesCheckout/wallet.js',import.meta.url),'utf8');
 const key = Keypair.generate();
 const wallet = key.publicKey.toBase58();
 const treasury = new PublicKey('6wQz66BgRsX6DVHAD3PDCXjKVpe3LLrj3FGiQwCSZV7F');
-function quote({ price = true } = {}) {
+function quote({ price = true, cherry = false } = {}) {
   const tx = new Transaction({feePayer:key.publicKey,recentBlockhash:Keypair.generate().publicKey.toBase58()});
   tx.add(ComputeBudgetProgram.setComputeUnitLimit({units:250000}));
   if (price) tx.add(ComputeBudgetProgram.setComputeUnitPrice({microLamports:0}));
   tx.add(SystemProgram.transfer({fromPubkey:key.publicKey,toPubkey:treasury,lamports:10000000}));
+  if (cherry) tx.instructions[tx.instructions.length-1].keys.push({pubkey:new PublicKey(getAppReferenceKeyBytes('c0dcc3df-8b13-445b-afa1-573c8c567315')),isWritable:false,isSigner:false});
   return tx.serialize({requireAllSignatures:false,verifySignatures:false}).toString('base64');
 }
 function helper(signTransaction, connected = key.publicKey) {
@@ -102,4 +104,24 @@ test('unsupported v0 quotes fail before invoking the wallet',async()=>{
   let calls=0;const h=helper(async tx=>{calls++;return tx;});
   await assert.rejects(h.sign(Buffer.from(tx.serialize()).toString('base64'),wallet),/does not match this wallet/);
   assert.equal(calls,0);
+});
+test('Cherry signs only an attributed quote with a clear transaction label',async()=>{
+  let calls=0, observed;
+  const app={paymentWallet:wallet,wallet:{publicKey:wallet,async signTransaction(tx,options){calls++;observed=options.label;return signImmutable(tx).serialize();}}};
+  const context=vm.createContext({window:{BattleCitiesCherry:{insideCherry:true,ready:Promise.resolve(app)}},atob,btoa,Uint8Array,TextEncoder,TextDecoder,console,setTimeout,clearTimeout});
+  vm.runInContext(bundle,context);
+  const sign=context.window.BattleCitiesCheckoutWallet.sign;
+  await assert.rejects(sign(original,wallet,'Buy extra life'),/missing Cherry attribution/);
+  assert.equal(calls,0);
+  const signed=await sign(quote({cherry:true}),wallet,'Buy extra life');
+  assert.ok(Transaction.from(Buffer.from(signed,'base64')).verifySignatures());
+  assert.equal(observed,'Buy extra life');
+});
+test('Cherry refusal and wallet changes fail without returning a payment',async()=>{
+  for(const [code,expected] of [['USER_REJECTED',/declined/],['POLICY_DENIED',/wallet limits/],['PRECHECK_UNAVAILABLE',/try again/],['WALLET_CHANGED',/wallet changed/]]){
+    const app={paymentWallet:wallet,wallet:{publicKey:wallet,async signTransaction(){throw {code};}}};
+    const context=vm.createContext({window:{BattleCitiesCherry:{insideCherry:true,ready:Promise.resolve(app)}},atob,btoa,Uint8Array,TextEncoder,TextDecoder,console,setTimeout,clearTimeout});
+    vm.runInContext(bundle,context);
+    await assert.rejects(context.window.BattleCitiesCheckoutWallet.sign(quote({cherry:true}),wallet,'Buy extra life'),expected);
+  }
 });

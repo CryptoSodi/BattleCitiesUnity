@@ -265,7 +265,7 @@ namespace BattleCities.UI
             var quote=checkoutQuote;string owner=Owner;int revision=checkoutRevision;
             JObject signed=null;
             noticeBody.text="Approve the payment in your wallet. Return to Battle Cities after signing.";
-            signer.Sign((string)quote["transaction"],Wallet,ShopLiveCatalog.Text(quote["expiresAt"]),value=>signed=value);
+            signer.Sign((string)quote["transaction"],Wallet,ShopLiveCatalog.Text(quote["expiresAt"]),value=>signed=value,"Buy "+ShopCatalog.Products[checkoutIndex].Title);
             while(signed==null&&signer.IsPending&&owner==Owner&&revision==checkoutRevision)yield return null;
             if(owner!=Owner||revision!=checkoutRevision){FinishCheckout();yield break;}
             if((bool?)signed?["ok"]!=true)

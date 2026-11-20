@@ -1,0 +1,8 @@
+[
+  {
+    "description": "Block restricted countries from the Cherry game",
+    "expression": "(http.host eq \"cherry.battlecities.com\" and ip.src.country in {\"CU\" \"IR\" \"KP\" \"SD\"} and http.request.uri.path ne \"/.well-known/cherry-app.json\")",
+    "action": "block",
+    "enabled": true
+  }
+]

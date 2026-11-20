@@ -21,7 +21,7 @@ namespace BattleCities.UI
         CancellationTokenSource cancellation;
         public bool IsPending=>attempt!=null;
 #if UNITY_WEBGL && !UNITY_EDITOR
-        [DllImport("__Internal")] static extern void BattleCitiesSignCheckout(string target,string callback,string attempt,string transaction,string wallet,string expiry,string scriptUrl);
+        [DllImport("__Internal")] static extern void BattleCitiesSignCheckout(string target,string callback,string attempt,string transaction,string wallet,string expiry,string scriptUrl,string label);
         [DllImport("__Internal")] static extern void BattleCitiesCancelCheckout(string attempt);
 #endif
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -34,7 +34,7 @@ namespace BattleCities.UI
             [Preserve] public void onComplete(string json){queue.Enqueue(json);}
         }
 #endif
-        public void Sign(string transaction,string wallet,string expiry,Action<JObject> onCompleted)
+        public void Sign(string transaction,string wallet,string expiry,Action<JObject> onCompleted,string label="Buy game item")
         {
             Cancel();completed=onCompleted;attempt=Guid.NewGuid().ToString("N");deadline=Time.realtimeSinceStartupAsDouble+150;
             try
@@ -46,7 +46,7 @@ namespace BattleCities.UI
                 message=new byte[bytes.Length-65];Array.Copy(bytes,65,message,0,message.Length);
 #if UNITY_WEBGL && !UNITY_EDITOR
                 BattleCitiesSignCheckout(gameObject.name,nameof(OnWalletSigned),attempt,transaction,wallet,expiry,
-                    Application.streamingAssetsPath.TrimEnd('/')+"/BattleCitiesCheckout/wallet.js");
+                    Application.streamingAssetsPath.TrimEnd('/')+"/BattleCitiesCheckout/wallet.js",label);
 #elif UNITY_ANDROID && !UNITY_EDITOR
                 cancellation=new CancellationTokenSource();
                 _=SignAndroid(transaction,bytes,wallet,expiry,attempt,cancellation.Token);

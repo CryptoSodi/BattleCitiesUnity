@@ -61,6 +61,39 @@ test('Phantom signs the exact server challenge and only accepts a verified match
   assert.equal(s.replies[0].attemptId, 'attempt-1');
   assert.equal(s.listeners.size, 0); assert.ok(s.timers.every(x => !x.active));
 });
+test('Cherry API requests use the in-memory bearer token and omit cookies', async () => {
+  const s=setup();
+  s.context.window.BattleCitiesCherry={insideCherry:true,sessionReady:Promise.resolve({id:'ply-1'}),sessionToken:'sess-cherry-123'};
+  s.context.fetch=async (url,request)=>{
+    s.calls.push({url,...request});
+    return {ok:true,status:200,json:async()=>({authenticated:true})};
+  };
+  s.bridge.BattleCitiesApiRequest('target','done','id','https://api.battlecities.com/api/session','GET','',10);
+  await tick();
+  assert.equal(s.calls[0].credentials,'omit');
+  assert.equal(s.calls[0].headers.Authorization,'Bearer sess-cherry-123');
+  assert.equal(s.replies[0].status,200);
+});
+test('Cherry API bridge does not leak bearer tokens to other origins', async () => {
+  const s=setup();
+  s.context.window.BattleCitiesCherry={insideCherry:true,sessionReady:Promise.resolve({id:'ply-1'}),sessionToken:'sess-secret'};
+  s.context.fetch=async()=>{throw new Error('Unexpected request');};
+  s.bridge.BattleCitiesApiRequest('target','done','id','https://elsewhere.example/api/session','GET','',10);
+  await tick();
+  assert.equal(s.replies[0].status,0);
+  assert.equal(s.calls.length,0);
+});
+test('Cherry login forwards a verified player without opening Phantom', async () => {
+  const s=setup();
+  const player={id:'ply-1',provider:'wallet',walletAddress:address,displayName:'Commander'};
+  s.context.window.BattleCitiesCherry={insideCherry:true,sessionReady:Promise.resolve(player)};
+  s.bridge.BattleCitiesStartCherry('target','done','attempt-cherry');
+  await tick();
+  assert.equal(s.replies[0].ok,true);
+  assert.equal(s.replies[0].attemptId,'attempt-cherry');
+  assert.equal(s.replies[0].player.id,'ply-1');
+  assert.equal(s.calls.length,0);
+});
 test('SDK wallet signs the same verified challenge and uses devnet with the test API', async () => {
   const sdk={};const s=setup({sdk,missing:true});
   s.bridge.BattleCitiesConnectWallet('Login Flow','OnWalletLoginResult','https://test.battlecities.com','sdk-attempt');await tick();

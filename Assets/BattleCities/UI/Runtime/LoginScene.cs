@@ -141,6 +141,12 @@ namespace BattleCities.UI
         private System.Collections.IEnumerator RestoreSignIn()
         {
             restoringSession = true; SetButtons(false);
+            if(BattleCitiesWalletBridge.IsInsideCherry())
+            {
+                restoringSession=false;pendingWallet=true;
+                apiClient.ConnectCherry();
+                yield break;
+            }
             if(BattleCitiesWalletBridge.HasPhantomCallback())
             {
                 restoringSession=false;ShowSignIn();ConnectWallet();yield break;

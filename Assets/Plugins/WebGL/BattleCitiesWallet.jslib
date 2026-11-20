@@ -1,4 +1,21 @@
 mergeInto(LibraryManager.library, {
+  BattleCitiesIsInsideCherry: function () {
+    return window.BattleCitiesCherry?.insideCherry ? 1 : 0;
+  },
+  BattleCitiesStartCherry: function (targetPtr, callbackPtr, attemptPtr) {
+    const target=UTF8ToString(targetPtr),callback=UTF8ToString(callbackPtr),id=UTF8ToString(attemptPtr);
+    if (window.__battleCitiesWalletAttempt) window.__battleCitiesWalletAttempt.cancel();
+    let cancelled=false;
+    window.__battleCitiesWalletAttempt={id,cancel:()=>{cancelled=true;}};
+    (async()=>{
+      const player=await window.BattleCitiesCherry?.sessionReady;
+      if(cancelled)return;
+      delete window.__battleCitiesWalletAttempt;
+      SendMessage(target,callback,JSON.stringify(player
+        ? {attemptId:id,ok:true,player}
+        : {attemptId:id,ok:false,error:'Cherry sign-in is unavailable. Please reopen the game.'}));
+    })();
+  },
   BattleCitiesApiRequest: function (targetPtr, callbackPtr, idPtr, urlPtr, methodPtr, payloadPtr, timeout) {
     const target = UTF8ToString(targetPtr), callback = UTF8ToString(callbackPtr), id = UTF8ToString(idPtr);
     const url = new URL(UTF8ToString(urlPtr));
@@ -14,11 +31,19 @@ mergeInto(LibraryManager.library, {
     (async () => {
       let result;
       try {
+        const cherry = window.BattleCitiesCherry;
+        if (cherry?.insideCherry) {
+          if (url.origin !== 'https://api.battlecities.com') throw new Error('Unexpected Cherry API origin.');
+          if (!await cherry.sessionReady || !cherry.sessionToken) throw new Error('Cherry sign-in is unavailable. Please reopen the game.');
+          options.credentials = 'omit';
+          options.headers.Authorization = 'Bearer ' + cherry.sessionToken;
+        }
         const response = await fetch(url.toString(), options);
         const body = await response.json();
         result = { id, status: response.status, body, error: response.ok ? null : body.error || 'API request failed.' };
       } catch (e) {
-        result = { id, status: 0, body: null, error: e.name === 'AbortError' ? 'The API request timed out.' : 'Cannot reach the Battle Cities API.' };
+        result = { id, status: 0, body: null, error: e.name === 'AbortError' ? 'The API request timed out.'
+          : e.message === 'Cherry sign-in is unavailable. Please reopen the game.' ? e.message : 'Cannot reach the Battle Cities API.' };
       } finally { clearTimeout(timer); }
       SendMessage(target, callback, JSON.stringify(result));
     })();

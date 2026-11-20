@@ -16,7 +16,7 @@ namespace BattleCities.UI
         readonly CardSelectionHighlight[] rowFocus=new CardSelectionHighlight[4];
         readonly Button[] toggles=new Button[4];
         readonly Button[] rowButtons=new Button[2];
-        Button back,logout,pair;RawImage qr;RectTransform qrFrame;TMP_Text qrLabel;
+        Button back,logout,pair,cherryTerms,cherryPrivacy;RawImage qr;RectTransform qrFrame;TMP_Text qrLabel;
         readonly ArcadeTextStyles styles=new ArcadeTextStyles();
         PhoneControllerHost phone;[System.NonSerialized] bool configured;string logoutError;float nextPhoneRefresh;
         public bool IsConfigured=>configured&&root&&menu&&rows[0]&&toggles[0];
@@ -80,6 +80,14 @@ namespace BattleCities.UI
             qrLabel=Label("Label",qrFrame,"PAIRING QR",ScreenContent.Rect("settings","settingsscreen-configure-new-rect-07f-83f-8-df68b5",new Rect(.07f,.83f,.86f,.12f)),18,ArcadeTextTreatment.PrizeAmount);
             footer=Panel("Status",root,art.statusPanel);TvStatusFooterLayout.ApplySkin(footer.GetComponent<Image>(),art.statusPanel);
             version=Label("Version",footer,"VERSION "+Application.version,ScreenContent.Rect("settings","settingsscreen-configure-new-rect-03f-13f-9-83a952",new Rect(.03f,.13f,.94f,.74f)),24,ArcadeTextTreatment.PrizeAmount);
+            if(IsCherryWeb())
+            {
+                Fit(version.rectTransform,new Rect(.03f,.13f,.24f,.74f));
+                cherryTerms=Control("Cherry Terms",footer,"TERMS",()=>Application.OpenURL("https://portal.cherry.fun/legal/app_a2bf51e3ea2d/c0dcc3df-8b13-445b-afa1-573c8c567315/terms"));
+                cherryPrivacy=Control("Cherry Privacy",footer,"PRIVACY",()=>Application.OpenURL("https://portal.cherry.fun/legal/app_a2bf51e3ea2d/c0dcc3df-8b13-445b-afa1-573c8c567315/privacy"));
+                Fit((RectTransform)cherryTerms.transform,new Rect(.30f,.08f,.30f,.84f));
+                Fit((RectTransform)cherryPrivacy.transform,new Rect(.63f,.08f,.34f,.84f));
+            }
             ConfigureNotifications();if(api)api.PlayerLoaded+=OnPlayer;
             configured=true;root.gameObject.SetActive(open);GamePreferences.Apply();Refresh();
             RemoteScreenView.Bind("settings",root);
@@ -102,13 +110,14 @@ namespace BattleCities.UI
             string displayName=api?.LastPlayer?.displayName;
             accountName.text=!string.IsNullOrEmpty(logoutError)?logoutError:!string.IsNullOrWhiteSpace(displayName)?displayName:api&&api.IsLocalGuest?"LOCAL GUEST":api&&api.IsWalletAuthenticated?"WALLET CONNECTED":"NOT CONNECTED";
             bool loggedIn=api&&(api.IsWalletAuthenticated||api.IsLocalGuest);
+            logout.gameObject.SetActive(!BattleCitiesWalletBridge.IsInsideCherry());
             logout.interactable=api&&!api.IsSigningOut;
             logout.transform.Find("Caption").GetComponent<TMP_Text>().text=api&&api.IsSigningOut?"LOGGING OUT...":loggedIn?"LOGOUT":"CONNECT WALLET";
             var logoutSkin=loggedIn&&illustrations&&illustrations.logout?illustrations.logout:art.tankCostButton;
             logout.image.sprite=logoutSkin;logout.image.color=loggedIn&&illustrations&&illustrations.logout?new Color(.82f,.82f,.82f):new Color(.5f,.68f,.86f);
             logout.transform.Find("Focus").GetComponent<Image>().sprite=logoutSkin;
             RefreshPhone();RefreshNotifications();
-            Psg1UiNavigation.Rows(new Selectable[]{back},new Selectable[]{rowButtons[0]},new Selectable[]{rowButtons[1]},new Selectable[]{logout},new Selectable[]{pair},new Selectable[]{notifications});
+            Psg1UiNavigation.Rows(new Selectable[]{back},new Selectable[]{rowButtons[0]},new Selectable[]{rowButtons[1]},new Selectable[]{logout},new Selectable[]{pair},new Selectable[]{notifications},new Selectable[]{cherryTerms,cherryPrivacy});
         }
         void RefreshPhone()
         {
@@ -145,6 +154,15 @@ namespace BattleCities.UI
             rowFocus[1].SetState(false,rowButtons[1].GetComponent<SettingsRowFocus>().Focused);
             rowFocus[2].SetState(false,logout.GetComponent<SettingsControlVisual>().Focused);
             rowFocus[3].SetState(false,pair.interactable&&pair.GetComponent<SettingsControlVisual>().Focused);
+        }
+        static bool IsCherryWeb()
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            return System.Uri.TryCreate(Application.absoluteURL,System.UriKind.Absolute,out var uri)
+                && uri.Scheme==System.Uri.UriSchemeHttps && string.Equals(uri.Host,"cherry.battlecities.com",System.StringComparison.OrdinalIgnoreCase);
+#else
+            return false;
+#endif
         }
         public void ApplyLayout(MainMenuPlatform platform)
         {

@@ -1,0 +1,17 @@
+[
+  {
+    "description": "Allow Cherry to embed the Cherry game",
+    "expression": "http.host eq \"cherry.battlecities.com\"",
+    "action": "rewrite",
+    "action_parameters": {
+      "headers": {
+        "content-security-policy": {
+          "operation": "set",
+          "value": "frame-ancestors 'self' https://chat.cherry.fun https://cherry.fun https://*.cherry.fun"
+        },
+        "x-frame-options": { "operation": "remove" }
+      }
+    },
+    "enabled": true
+  }
+]
