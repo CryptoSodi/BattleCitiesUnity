@@ -22,7 +22,7 @@ function Get-LauncherSettings {
 function Assert-LauncherPlan($Plan) {
     if($Plan.kind -notin @('web','android')){throw 'Choose web or android.'}
     if($Plan.version -notmatch '^\d+\.\d+\.\d+$'){throw 'Version must have three numbers, for example 1.0.19.'}
-    $allowed=if($Plan.kind -eq 'web'){@('localhost','play','test','magic')}else{@('install','github','psg1')}
+    $allowed=if($Plan.kind -eq 'web'){@('localhost','play','test','magic','cherry')}else{@('install','github','psg1')}
     foreach($target in @($Plan.targets)){if($target -notin $allowed){throw "Invalid destination: $target"}}
     $parsedCode=0
     if($Plan.kind -eq 'android' -and (-not [int]::TryParse([string]$Plan.androidCode,[ref]$parsedCode) -or $parsedCode -lt 1 -or $parsedCode -gt 2100000000)){throw 'Android version code must be an integer from 1 to 2100000000.'}
@@ -36,6 +36,7 @@ function Get-LauncherSteps($Plan) {
         if('play' -in $Plan.targets){'Package web-only release; publish Pages branch; verify production'}
         if('test' -in $Plan.targets){'Deploy and verify Test / devnet'}
         if('magic' -in $Plan.targets){'Deploy and verify MagicBlock / devnet'}
+        if('cherry' -in $Plan.targets){'Prepare Cherry site; publish its GitHub Pages repository; verify live'}
         if('localhost' -in $Plan.targets){'Start localhost / test API and open browser'}
     }else{
         'Build signed mainnet ARM64 APK using existing signing identity'
@@ -78,9 +79,9 @@ function Assert-LauncherPrerequisites($Plan,$Settings) {
     Assert-LauncherPlan $Plan
     Assert-GameBuildDiskSpace $(if($Plan.kind -eq 'android'){'Android'}else{'WebGL'})
     foreach($name in @('unity','git','python')){$null=Get-GameProgram $name}
-    $publish=@($Plan.targets|Where-Object {$_ -in @('play','test','magic','github')}).Count -gt 0
+    $publish=@($Plan.targets|Where-Object {$_ -in @('play','test','magic','cherry','github')}).Count -gt 0
     if($publish){$null=Assert-GameGitReady}
-    if('play' -in $Plan.targets -or 'github' -in $Plan.targets){
+    if('play' -in $Plan.targets -or 'github' -in $Plan.targets -or 'cherry' -in $Plan.targets){
         $null=Invoke-GameTool gh @('auth','status')
         if('github' -in $Plan.targets){
             $tag="android-v$($Plan.version)-$($Plan.androidCode)"
@@ -91,6 +92,9 @@ function Assert-LauncherPrerequisites($Plan,$Settings) {
             $latest=Get-LatestGameRelease
             if([version]$Plan.version -le [version]($latest.tag_name -replace '^v','')){throw "Production Web requires a version newer than $($latest.tag_name)."}
         }
+    }
+    if('cherry' -in $Plan.targets){
+        $null=Invoke-GameTool python @((Join-Path $script:GameRoot 'Tools/Publishing/publish_cherry_site.py'),'check-remote') -Echo
     }
     if('test' -in $Plan.targets -or 'magic' -in $Plan.targets){
         if(-not $Settings.sshKey -or -not(Test-Path -LiteralPath $Settings.sshKey)){throw 'Set sshKey in settings.local.json or BATTLECITIES_TEST_SSH_KEY.'}
@@ -131,6 +135,15 @@ function Publish-LauncherWeb([string]$Web,$Plan,[string]$Commit,[string]$Job) {
     $null=Invoke-GameTool gh @('release','edit',"v$($Plan.version)",'--repo',$script:GameRepository,'--draft=false','--latest=false') -Echo
     $null=Invoke-GameTool python @((Join-Path $script:GameRoot 'Tools/Publishing/publish_pages_branch.py'),'publish','--site',(Join-Path $Job 'validated-web'),'--repository',$script:GameRepository,'--version',$Plan.version,'--commit',$Commit,'--archive',$archive) -Echo
     return 'https://play.battlecities.com/'
+}
+
+function Publish-LauncherCherry([string]$Web,$Plan,[string]$Commit,[string]$Job) {
+    $archive=Join-Path $Job ("BattleCities-$($Plan.version)-Cherry-Web.zip")
+    $null=Invoke-GameTool python @((Join-Path $script:LauncherHome 'artifacts.py'),'web-zip','--source',$Web,'--output',$archive) -Echo
+    $site=Join-Path $Job 'validated-cherry-web'
+    Invoke-LauncherChild 'Tools/Publishing/Prepare-CherryWebSite.ps1' @('-ArchivePath',$archive,'-Destination',$site,'-ExpectedSha256',(Get-ReleaseSha256 $archive),'-ReleaseTag',"v$($Plan.version)")
+    $null=Invoke-GameTool python @((Join-Path $script:GameRoot 'Tools/Publishing/publish_cherry_site.py'),'publish','--site',$site,'--version',$Plan.version,'--commit',$Commit,'--archive',$archive) -Echo
+    return 'https://cherry.battlecities.com/'
 }
 
 function Stop-LauncherPreviousLocalhost([int]$Port) {
@@ -202,6 +215,7 @@ function Invoke-LauncherPlan($Plan,$Settings,[string]$Job,[switch]$DryRun) {
             $result.buildPath=$web;$result.completed+=@('build');Save-LauncherResult $result $Job
             if(@($Plan.targets|Where-Object {$_ -ne 'localhost'}).Count){$result.sourceCommit=Publish-LauncherSource;Save-LauncherResult $result $Job}
             if('play' -in $Plan.targets){$result.links+=@(Publish-LauncherWeb $web $Plan $result.sourceCommit $Job);$result.completed+=@('play');Save-LauncherResult $result $Job}
+            if('cherry' -in $Plan.targets){$result.links+=@(Publish-LauncherCherry $web $Plan $result.sourceCommit $Job);$result.completed+=@('cherry');Save-LauncherResult $result $Job}
             foreach($target in @('test','magic')){
                 if($target -in $Plan.targets){
                     $deploy=if($target -eq 'test'){'Deploy-TestWeb.ps1'}else{'Deploy-MagicWeb.ps1'}

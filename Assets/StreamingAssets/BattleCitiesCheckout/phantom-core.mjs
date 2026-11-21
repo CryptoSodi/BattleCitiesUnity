@@ -1,7 +1,8 @@
 // Phantom connects the wallet; the API separately verifies its signed challenge.
 const APP_ID = '4d0d9b85-042f-477b-93d4-2176fd01d740';
 
-export function createPhantomBridge({ BrowserSDK, AddressType }) {
+export function createPhantomBridge({ BrowserSDK, AddressType, nativeProvider = () =>
+  typeof window === 'undefined' ? null : window.phantom?.solana || window.solana }) {
   let sdk, network = 'mainnet';
   const getSdk = () => sdk || (sdk = new BrowserSDK({
     providers: ['injected'],
@@ -14,6 +15,16 @@ export function createPhantomBridge({ BrowserSDK, AddressType }) {
     return typeof key === 'string' ? key : key?.toString() || null;
   };
   const isInjected = () => sdk?.getCurrentProviderInfo()?.type === 'injected';
+  const ready = expected => {
+    const key = address();
+    if (!isInjected() || !key || (expected && key !== expected)) return false;
+    // The SDK can retain the last account while the extension is locked. When
+    // Phantom exposes its native provider, confirm that it still has that key.
+    const native = nativeProvider();
+    if (native?.isPhantom && (native.isConnected === false || !native.publicKey
+        || native.publicKey.toString() !== key)) return false;
+    return true;
+  };
   const adapter = () => ({
     isPhantom: true,
     get publicKey() { const key = address(); return key ? { toString: () => key } : null; },
@@ -26,14 +37,17 @@ export function createPhantomBridge({ BrowserSDK, AddressType }) {
     network = targetNetwork;
     const instance = getSdk();
     if (!instance.isConnected()) await instance.autoConnect();
-    if (!instance.isConnected() || !isInjected() || !address() || (expected && address() !== expected)) return null;
+    if (!ready(expected)) return null;
     await instance.solana.switchNetwork(network);
     return adapter();
   }
   async function connect(targetNetwork = 'mainnet') {
     network = targetNetwork;
-    const instance = getSdk();
-    if (instance.isConnected() && !isInjected()) await instance.disconnect();
+    let instance = getSdk();
+    if (instance.isConnected() && !ready()) {
+      try { await instance.disconnect(); }
+      catch { sdk = null; instance = getSdk(); }
+    }
     if (!instance.isConnected()) {
       // The SDK starts discovery in the background during construction. Connecting
       // before its registry is populated fails on the first click.
@@ -45,7 +59,7 @@ export function createPhantomBridge({ BrowserSDK, AddressType }) {
         throw error;
       }
     }
-    if (!isInjected() || !address()) throw new Error('Phantom did not return a Solana wallet address.');
+    if (!ready()) throw new Error('Unlock Phantom and connect your wallet to continue.');
     await instance.solana.switchNetwork(network);
     return adapter();
   }
@@ -53,7 +67,8 @@ export function createPhantomBridge({ BrowserSDK, AddressType }) {
     connect, restore,
     hasCallback: () => false,
     cancelChoice: () => {},
-    current: expected => isInjected() && address() && (!expected || address() === expected) ? adapter() : null,
+    ready,
+    current: expected => ready(expected) ? adapter() : null,
     async disconnect() { if (sdk?.isConnected()) await sdk.disconnect(); }
   };
 }

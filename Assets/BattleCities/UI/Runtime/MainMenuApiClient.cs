@@ -662,6 +662,8 @@ namespace BattleCities.UI
         [System.Runtime.InteropServices.DllImport("__Internal")]
         private static extern void BattleCitiesDisconnectPhantom();
         [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern int BattleCitiesIsPhantomConnected(string wallet);
+        [System.Runtime.InteropServices.DllImport("__Internal")]
         private static extern void BattleCitiesRestorePhantom(string target, string callback, string attemptId, string wallet, string network);
         [System.Runtime.InteropServices.DllImport("__Internal")]
         private static extern void BattleCitiesApiRequest(string target, string callback, string id, string url, string method, string payload, int timeout);
@@ -704,6 +706,14 @@ namespace BattleCities.UI
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
             BattleCitiesDisconnectPhantom();
+#endif
+        }
+        public static bool IsPhantomConnected(string wallet)
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            return !string.IsNullOrEmpty(wallet) && BattleCitiesIsPhantomConnected(wallet) != 0;
+#else
+            return false;
 #endif
         }
         public static void RestorePhantom(string target,string callback,string attemptId,string wallet,string network)

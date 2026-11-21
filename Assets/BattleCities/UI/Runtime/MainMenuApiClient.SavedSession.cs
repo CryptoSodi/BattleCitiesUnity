@@ -19,8 +19,21 @@ namespace BattleCities.UI
         }
 #endif
         public bool IsRestoringSession { get; private set; }
-        public bool IsWalletReadyForPurchases => IsWalletAuthenticated && LastPlayer != null
-            && purchaseWallet == LastPlayer.walletAddress;
+        public bool IsWalletReadyForPurchases
+        {
+            get
+            {
+                if (!IsWalletAuthenticated || LastPlayer == null || string.IsNullOrEmpty(purchaseWallet)
+                    || purchaseWallet != LastPlayer.walletAddress) return false;
+#if UNITY_WEBGL && !UNITY_EDITOR
+                if (!BattleCitiesWalletBridge.IsInsideCherry())
+                    return BattleCitiesWalletBridge.IsPhantomConnected(purchaseWallet);
+#endif
+                return true;
+            }
+        }
+
+        public void MarkPurchaseWalletUnavailable() => purchaseWallet = null;
 
         public IEnumerator RestoreWalletSession(Action<bool> completed)
         {

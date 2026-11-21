@@ -3,11 +3,12 @@ import assert from 'node:assert/strict';
 import { createPhantomBridge } from '../../Assets/StreamingAssets/BattleCitiesCheckout/phantom-core.mjs';
 
 const WALLET = '11111111111111111111111111111111';
-function fixture({ autoType = 'injected', autoAddress = WALLET, discovery, connectError } = {}) {
-  let mock;
+function fixture({ autoType = 'injected', autoAddress = WALLET, discovery, connectError, native = null, disconnectError = false } = {}) {
+  let mock; const instances = [];
   class FakeSDK {
     constructor(config) {
       mock = this; this.config = config; this.connected = false; this.type = null;
+      instances.push(this);
       this.solana = { publicKey: null, switchNetwork: async value => { this.network = value; },
         signMessage: async message => ({ signature: new Uint8Array(64), message }),
         signTransaction: async tx => tx, on() {}, off() {} };
@@ -18,13 +19,16 @@ function fixture({ autoType = 'injected', autoAddress = WALLET, discovery, conne
       if (!this.discovered) throw new Error('Unknown injected wallet id: phantom');
       if (connectError) throw connectError;
       this.type = 'injected';
-      this.connected = true; this.solana.publicKey = WALLET; }
+      this.connected = true; this.solana.publicKey = WALLET;
+      if (native) { native.isConnected = true; native.publicKey = WALLET; } }
     async autoConnect() { this.type = autoType; this.connected = !!autoAddress; this.solana.publicKey = autoAddress; }
     getCurrentProviderInfo() { return this.type ? { type: this.type } : null; }
-    async disconnect() { this.connected = false; this.solana.publicKey = null; }
+    async disconnect() { this.disconnects = (this.disconnects || 0) + 1;
+      if (disconnectError) throw new Error('wallet already locked');
+      this.connected = false; this.solana.publicKey = null; }
   }
-  const bridge = createPhantomBridge({ BrowserSDK: FakeSDK, AddressType: { solana: 'Solana' } });
-  return { bridge, get sdk() { return mock; } };
+  const bridge = createPhantomBridge({ BrowserSDK: FakeSDK, AddressType: { solana: 'Solana' }, nativeProvider: () => native });
+  return { bridge, instances, get sdk() { return mock; } };
 }
 
 test('connects directly with the injected wallet on the requested network', async () => {
@@ -68,4 +72,31 @@ test('a previously restored embedded wallet is not used for purchases or sign-in
   const provider = await f.bridge.connect();
   assert.equal(f.sdk.provider, 'injected');
   assert.equal(provider.publicKey.toString(), WALLET);
+});
+
+test('a locked or switched Phantom invalidates a stale SDK connection', async () => {
+  const native = { isPhantom:true, isConnected:false, publicKey:null };
+  const f = fixture({ native });
+  await f.bridge.connect();
+  assert.equal(f.bridge.ready(WALLET), true);
+  native.isConnected = false; native.publicKey = null;
+  assert.equal(f.bridge.ready(WALLET), false);
+  assert.equal(f.bridge.current(WALLET), null);
+  const restored = await f.bridge.connect();
+  assert.equal(f.sdk.disconnects, 1);
+  assert.equal(restored.publicKey.toString(), WALLET);
+  native.publicKey = 'another-wallet';
+  assert.equal(f.bridge.ready(WALLET), false);
+  assert.equal(f.bridge.current(WALLET), null);
+});
+
+test('reconnecting recovers when disconnecting an already locked SDK fails', async () => {
+  const native = { isPhantom:true, isConnected:false, publicKey:null };
+  const f = fixture({ native, disconnectError:true });
+  await f.bridge.connect();
+  native.isConnected = false; native.publicKey = null;
+  const provider = await f.bridge.connect();
+  assert.equal(f.instances.length, 2);
+  assert.equal(provider.publicKey.toString(), WALLET);
+  assert.equal(f.bridge.ready(WALLET), true);
 });

@@ -104,6 +104,10 @@ namespace BattleCities.Editor
                 Reset();Check(Restore(),"prepare logout fixture");
                 typeof(MainMenuApiClient).GetField("purchaseWallet",StaticPrivate).SetValue(null,Wallet);
                 Check(api.IsWalletReadyForPurchases,"explicit wallet connection enables purchase preparation");
+                api.MarkPurchaseWalletUnavailable();
+                Check(!api.IsWalletReadyForPurchases&&api.IsWalletAuthenticated&&api.LastPlayer!=null,
+                    "losing purchase authorization keeps the player signed in");
+                typeof(MainMenuApiClient).GetField("purchaseWallet",StaticPrivate).SetValue(null,Wallet);
                 bool? loggedOut=null;
                 api.EditorRequestOverride=(method,path,payload,reply)=>Reply(200,new JObject{{"authenticated",false}},reply);
                 var logout=typeof(MainMenuApiClient).GetMethod("SignOutRoutine",BindingFlags.Instance|BindingFlags.NonPublic);

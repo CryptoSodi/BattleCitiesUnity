@@ -9,11 +9,13 @@ The launcher folder can also run from another location. Set `projectRoot` in tha
 
 1. Choose Web.
 2. Increment, keep, or manually enter the game version.
-3. Choose build-only, localhost, Play, Test, Magic, or all three websites. Enter multiple numbers to combine individual destinations, including localhost.
+3. Choose build-only, localhost, Play, Test, Magic, Cherry, or all four websites. Enter multiple numbers to combine individual destinations, including localhost. Option 6 publishes only Cherry; option 5 publishes all four websites.
 4. Review the selected steps and choose Build/run, Preview only, or Back.
 
-One WebGL build serves all destinations. Play selects mainnet and the production API. Test and Magic select devnet and the test API. Localhost also selects the test API.
+One WebGL build serves all destinations. Play and Cherry select mainnet and the production API. Test and Magic select devnet and the test API. Localhost also selects the test API.
 Production publication creates a **web-only** GitHub release, publishes the validated site to the dedicated `battlecities-pages` branch in the same repository, and verifies the live version. The first publication switches GitHub Pages to that branch while retaining the existing custom domain. It does not upload an APK or change the latest Android download. Existing release tags are not overwritten. The old custom release-triggered Actions workflow may still report a separate failure until it is removed from the repository's default branch; it is no longer used to publish the site.
+
+Cherry publication prepares its own site with the Cherry SDK and app verification file, then pushes a normal, history-preserving commit to `CryptoSodi/BattleCitiesCherry` on `main`. It verifies the current Pages domain and app ID, refuses to overwrite concurrent changes, preserves unrelated repository files, and waits for the exact new deployment at `https://cherry.battlecities.com/`. Cherry does not create a Play release or update the Play website. If a push succeeds but live verification times out, inspect the run log and Cherry Pages before trying again.
 
 Localhost binds only to this computer, opens the browser, and serves the exact new output. Relaunching automatically stops the previous launcher server after verifying its saved identity, listening PID and server command, then starts the new build on the same port. Unrelated or unverified processes are left running with an explanatory error. The server continues after the menu closes; its PID, port, output root and identity are in that run's `localhost-process.json`. It cannot be accessed from your phone over Wi-Fi.
 
@@ -74,4 +76,4 @@ Example plan (version/code are examples; choose the next actual values):
 {"kind":"android","version":"1.0.19","androidCode":18,"serial":"YOUR_ADB_SERIAL","targets":["install","github","psg1"]}
 ```
 
-`-DryRun` validates and lists steps without building, changing settings, committing, uploading or contacting publishing services. `-CheckOnly` checks local tools/settings only. Tests use mock build/publish adapters and temporary files; they do not release an APK or website.
+`-DryRun` validates and lists steps without building, changing settings, committing, uploading or contacting publishing services. `-CheckOnly` checks local tools/settings only. Tests use mock build/publish adapters and temporary files; they do not release an APK or website. Cherry publishing safety checks can also be run with `python -m unittest Tools.Publishing.test_publish_cherry_site -v` from the project root.

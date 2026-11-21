@@ -29,7 +29,8 @@ mergeInto(LibraryManager.library, {
         if(!Number.isFinite(expiry)||Date.now()>=expiry)throw new Error('The price quote expired. Request a fresh price.');
         const signedTransaction=await window.BattleCitiesCheckoutWallet.sign(transaction,wallet,label);
         finish({ok:true,signedTransaction});
-      } catch(error) {finish({ok:false,error:error.message||'Wallet signing failed. No payment was submitted.'});}
+      } catch(error) {finish({ok:false,error:error?.message||'Wallet signing failed. No payment was submitted.',
+        errorCode:error?.code==='BC_WALLET_NOT_READY'?'wallet-not-ready':null});}
     })();
   }
 });

@@ -61,6 +61,16 @@ mergeInto(LibraryManager.library, {
   BattleCitiesDisconnectPhantom: function () {
     if (window.BattleCitiesPhantom) void window.BattleCitiesPhantom.disconnect().catch(() => {});
   },
+  BattleCitiesIsPhantomConnected: function (walletPtr) {
+    const wallet = UTF8ToString(walletPtr);
+    try {
+      const bridge = window.BattleCitiesPhantom;
+      if (bridge && typeof bridge.ready === 'function') return bridge.ready(wallet) ? 1 : 0;
+      const provider = window.phantom?.solana || window.solana;
+      return provider?.isPhantom && provider.isConnected !== false &&
+        provider.publicKey?.toString() === wallet ? 1 : 0;
+    } catch { return 0; }
+  },
   BattleCitiesRestorePhantom: function (targetPtr, callbackPtr, attemptPtr, walletPtr, networkPtr) {
     const target=UTF8ToString(targetPtr), callback=UTF8ToString(callbackPtr), attemptId=UTF8ToString(attemptPtr);
     const wallet=UTF8ToString(walletPtr), network=UTF8ToString(networkPtr);

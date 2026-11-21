@@ -250,6 +250,11 @@ namespace BattleCities.UI
                 if(currency==ShopCurrency.Play)valid&=(string)result?["tokenMint"]=="PLAYs3GSSadH2q2JLS7djp7yzeT75NK78XgrE5YLrfq";
             }
             catch { }
+            if(!api.IsWalletReadyForPurchases)
+            {
+                FinishCheckout();noticeBody.text="Your wallet is locked or disconnected. Connect the wallet used to sign in to continue.";
+                ConfigureNoticeAction("CONNECT WALLET");yield break;
+            }
             if(!valid){noticeBody.text=error??"The payment quote is unavailable or expired. Please try again.";FinishCheckout();ConfigureNoticeAction("RETRY");yield break;}
             checkoutQuote=result;FinishCheckout();
             noticeBody.text=(product.Category==ShopCategory.SeasonPass?PassDescription():product.Reward)+"\n\n"+price+" "+PaymentTicker+
@@ -274,8 +279,11 @@ namespace BattleCities.UI
                 // A failed signing attempt must not retry the same transaction:
                 // the wallet may have rejected or altered that quote.
                 checkoutQuote=null;
-                noticeBody.text=((string)signed?["error"]??"Wallet signing was cancelled. No payment was submitted.")+"\n\n"+price+" "+PaymentTicker+" + network fees";
-                FinishCheckout();ConfigureNoticeAction("RETRY");yield break;
+                if((string)signed?["errorCode"]=="wallet-not-ready"&&api)api.MarkPurchaseWalletUnavailable();
+                bool ready=api&&api.IsWalletReadyForPurchases;
+                noticeBody.text=ready?((string)signed?["error"]??"Wallet signing was cancelled. No payment was submitted.")+"\n\n"+price+" "+PaymentTicker+" + network fees"
+                    :"Your wallet is locked or disconnected. Connect the wallet used to sign in to continue.";
+                FinishCheckout();ConfigureNoticeAction(ready?"RETRY":"CONNECT WALLET");yield break;
             }
             // Persist the exact signed bytes before submission. A retry uses the
             // same signature and cannot create another wallet payment.

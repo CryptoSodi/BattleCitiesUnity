@@ -1,5 +1,6 @@
 $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'Launcher.Core.ps1')
+$script:RealCherryPublisher=${function:Publish-LauncherCherry}
 $testRoot=Join-Path ([IO.Path]::GetTempPath()) ('battlecities-launcher-tests-'+[guid]::NewGuid().ToString('N'))
 [IO.Directory]::CreateDirectory($testRoot)|Out-Null
 $script:GameRoot=$testRoot
@@ -11,10 +12,12 @@ function Enter-GameAutomation{return [IO.MemoryStream]::new()}
 function Invoke-GameBuild($Target,$Version,[switch]$TestNetwork){$script:Calls.Add("build:$Target");return (Join-Path $testRoot 'web')}
 function Publish-LauncherSource{$script:Calls.Add('source');return ('a'*40)}
 function Publish-LauncherWeb($Web,$Plan,$Commit,$Job){$script:Calls.Add('play');return 'https://play.battlecities.com/'}
+function Publish-LauncherCherry($Web,$Plan,$Commit,$Job){$script:Calls.Add('cherry');return 'https://cherry.battlecities.com/'}
 function Start-LauncherLocalhost($Web,$Settings,$Job){$script:Calls.Add('localhost');return 'http://localhost:8080/'}
 function Get-LauncherAdb{return 'mock-adb'}
 function Invoke-LauncherChild([string]$Script,[string[]]$Parameters=@()){
     $script:Calls.Add($Script)
+    if($Script -eq 'Tools/Publishing/Prepare-CherryWebSite.ps1'){$script:CherryPrepareArgs=$Parameters}
     if($Script -like '*Build-SignedAndroid.ps1'){
         $root=Join-Path $testRoot "Builds/Android/$($script:testPlan.version)-v$($script:testPlan.androidCode)/mock"
         [IO.Directory]::CreateDirectory((Join-Path $root 'RemoteArt'))|Out-Null
@@ -28,6 +31,12 @@ function Invoke-LauncherChild([string]$Script,[string[]]$Parameters=@()){
 }
 function Invoke-GameTool($Name,[string[]]$Arguments,[switch]$AllowFailure,[switch]$Echo){
     if($Name -eq 'python'){
+        if('web-zip' -in $Arguments){
+            $script:Calls.Add('archive')
+            $at=[array]::IndexOf($Arguments,'--output')
+            [IO.File]::WriteAllText($Arguments[$at+1],'fixture web archive')
+        }
+        if(@($Arguments|Where-Object {$_ -like '*publish_cherry_site.py'}).Count -gt 0 -and 'publish' -in $Arguments){$script:Calls.Add('cherry-site-push');$script:CherryPublishArgs=$Arguments}
         if('verify-ota' -in $Arguments){$script:Calls.Add('verify-ota')}
         if('upload' -in $Arguments){
             $script:Calls.Add('psg1')
@@ -50,17 +59,25 @@ function Run-Case([string]$Name,[string]$Kind,[string[]]$Targets){
     return Invoke-LauncherPlan $script:testPlan $settings $job
 }
 try{
-    $web=Run-Case 'web-all' 'web' @('play','test','magic','localhost')
+    $web=Run-Case 'web-all' 'web' @('play','test','magic','cherry','localhost')
     Check ($web.status -eq 'succeeded') 'web all succeeds'
     Check (@($script:Calls|Where-Object {$_ -eq 'build:WebGL'}).Count -eq 1) 'web builds exactly once'
     Check (@($script:Calls|Where-Object {$_ -eq 'source'}).Count -eq 1) 'one source snapshot for all websites'
-    Check ('play' -in $script:Calls -and 'Tools/Publishing/Deploy-TestWeb.ps1' -in $script:Calls -and 'Tools/Publishing/Deploy-MagicWeb.ps1' -in $script:Calls) 'all selected web fronts invoked'
+    Check ('play' -in $script:Calls -and 'cherry' -in $script:Calls -and 'Tools/Publishing/Deploy-TestWeb.ps1' -in $script:Calls -and 'Tools/Publishing/Deploy-MagicWeb.ps1' -in $script:Calls) 'all selected web fronts invoked'
+    Check ('https://cherry.battlecities.com/' -in $web.links -and 'cherry' -in $web.completed) 'Cherry URL and completion are recorded'
     Check (-not @($script:Calls|Where-Object {$_ -match 'Android|psg1|install'}).Count) 'web never builds/uploads an APK'
     $local=Run-Case 'web-local' 'web' @('localhost')
     Check ('source' -notin $script:Calls -and 'play' -notin $script:Calls) 'localhost does not publish/commit'
     Check ($local.links[0] -eq 'http://localhost:8080/') 'localhost URL returned'
     $only=Run-Case 'web-test' 'web' @('test')
-    Check ('play' -notin $script:Calls -and 'Tools/Publishing/Deploy-MagicWeb.ps1' -notin $script:Calls) 'single-front publication isolates destinations'
+    Check ('play' -notin $script:Calls -and 'cherry' -notin $script:Calls -and 'Tools/Publishing/Deploy-MagicWeb.ps1' -notin $script:Calls) 'single-front publication isolates destinations'
+    $cherry=Run-Case 'web-cherry' 'web' @('cherry')
+    Check ('cherry' -in $script:Calls -and 'source' -in $script:Calls -and 'play' -notin $script:Calls -and 'Tools/Publishing/Deploy-TestWeb.ps1' -notin $script:Calls -and 'Tools/Publishing/Deploy-MagicWeb.ps1' -notin $script:Calls) 'Cherry-only publication is isolated'
+    Check ($cherry.links.Count -eq 1 -and $cherry.links[0] -eq 'https://cherry.battlecities.com/') 'Cherry-only returns its own URL'
+    $script:Calls.Clear();$adapterJob=Join-Path $testRoot 'cherry-adapter';[IO.Directory]::CreateDirectory($adapterJob)|Out-Null
+    $adapterUrl=& $script:RealCherryPublisher (Join-Path $testRoot 'web') $script:testPlan ('a'*40) $adapterJob
+    Check ($adapterUrl -eq 'https://cherry.battlecities.com/' -and ($script:Calls -join ',') -eq 'archive,Tools/Publishing/Prepare-CherryWebSite.ps1,cherry-site-push') 'Cherry adapter packages then prepares and publishes the site'
+    Check ('-ExpectedSha256' -in $script:CherryPrepareArgs -and 'v9.8.7' -in $script:CherryPrepareArgs -and ('a'*40) -in $script:CherryPublishArgs -and '--archive' -in $script:CherryPublishArgs) 'Cherry adapter binds the version, archive hash and source commit'
     $script:Calls.Clear()
     Invoke-LauncherPlan ([pscustomobject]@{kind='android';version='9.8.7';androidCode=42;serial='mock';targets=@('install','github','psg1')}) $settings '' -DryRun
     Check ($script:Calls.Count -eq 0) 'dry run never calls build/publish adapters'

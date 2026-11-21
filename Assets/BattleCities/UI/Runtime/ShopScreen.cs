@@ -48,6 +48,8 @@ namespace BattleCities.UI
         string PaymentTicker=>currency==ShopCurrency.Solana?"SOL":currency==ShopCurrency.Play?"PLAY":"SKR";
         Sprite TokenIcon=>shopArt?(usePlay?shopArt.play:shopArt.skr):null;
         JObject account;Coroutine accountRequest;
+        bool? displayedWalletReady;
+        float nextWalletStatusCheck;
         [NonSerialized] bool configured;
         public bool IsOpen=>root&&root.gameObject.activeSelf;
         public bool HasBlockingNotice=>checkoutBusy||(notice&&notice.gameObject.activeSelf);
@@ -526,7 +528,15 @@ namespace BattleCities.UI
                 shadow.localPosition=owner.InverseTransformPoint(image.rectTransform.TransformPoint(new Vector3(drawn.x+drawn.width*visible.center.x,drawn.yMax-drawn.height*visible.yMax,0)));
             }
         }
-        void LateUpdate(){if(IsOpen)RefreshPresentation();}
+        void LateUpdate()
+        {
+            if(!IsOpen)return;
+            RefreshPresentation();
+            if(Time.unscaledTime<nextWalletStatusCheck)return;
+            nextWalletStatusCheck=Time.unscaledTime+.5f;
+            bool ready=api&&api.IsWalletReadyForPurchases;
+            if(displayedWalletReady!=ready)RefreshAccount();
+        }
         void RefreshSwap(){swapFrom.text=swapFromSol?"SOL":TokenTicker;swapTo.text=swapFromSol?TokenTicker:"SOL";swapBalance.text="AVAILABLE  "+(swapFromSol?solBalance.text+" SOL":skrBalance.text+" "+TokenTicker);}
         void OnPlayerLoaded(MainMenuApiClient.PlayerSnapshot player){if(loadedOwner!=Owner){CancelCheckout();if(notice)notice.gameObject.SetActive(false);}if(isActiveAndEnabled&&IsOpen&&api&&Application.isPlaying){if(accountRequest!=null)StopCoroutine(accountRequest);accountRequest=StartCoroutine(LoadAccount());}}
         IEnumerator LoadAccount()
@@ -536,7 +546,14 @@ namespace BattleCities.UI
         void RefreshAccount()
         {
             for(int i=0;i<ShopCatalog.InventoryIds.Length;i++)inventoryCounts[i].text=account!=null?Count(account?["inventory"]?[ShopCatalog.InventoryIds[i]]).ToString(CultureInfo.InvariantCulture):"—";
-            connection.text=api&&api.IsWalletReadyForPurchases?"REFRESH":"CONNECT WALLET";
+            bool ready=api&&api.IsWalletReadyForPurchases;displayedWalletReady=ready;
+            connection.text=ready?"REFRESH":"CONNECT WALLET";
+            if(!ready&&checkoutQuote!=null&&!checkoutBusy&&pendingPayment==null&&notice&&notice.gameObject.activeSelf)
+            {
+                checkoutQuote=null;
+                noticeBody.text="Your wallet is locked or disconnected. Connect the wallet used to sign in to continue.";
+                ConfigureNoticeAction("CONNECT WALLET");
+            }
             // The older tokenBalance field represents BATC; it must never be presented as SKR.
             skrBalance.text=BalanceAmount(walletBalances?[usePlay?"playBalance":"skrBalance"],0);solBalance.text=BalanceAmount(walletBalances?["solBalance"]);fuelBalance.text=account!=null?Count(account?["fuelBalance"]).ToString("N0",CultureInfo.InvariantCulture):"—";UpdateCards();RefreshSwap();
         }

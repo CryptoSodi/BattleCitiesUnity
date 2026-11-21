@@ -109,11 +109,12 @@ test('missing and incorrect signatures are rejected',async()=>{
 });
 test('account changes during signing do not yield a payment receipt',async()=>{
   let h;h=helper(async tx=>{h.provider.publicKey=Keypair.generate().publicKey;return signImmutable(tx);});
-  await assert.rejects(h.sign(original,wallet),/account changed/);
+  await assert.rejects(h.sign(original,wallet),error=>error.code==='BC_WALLET_NOT_READY'&&/account changed/.test(error.message));
 });
 test('wrong wallet and malformed quote fail before invoking wallet signing',async()=>{
   let calls=0;const h=helper(async tx=>{calls++;return signImmutable(tx);});
-  await assert.rejects(h.sign(original,Keypair.generate().publicKey.toBase58()),/Select the wallet/);
+  await assert.rejects(h.sign(original,Keypair.generate().publicKey.toBase58()),error=>
+    error.code==='BC_WALLET_NOT_READY'&&/Select the wallet/.test(error.message));
   await assert.rejects(h.sign(Buffer.from([1,0]).toString('base64'),wallet),/unsupported transaction format/);
   assert.equal(calls,0);
 });

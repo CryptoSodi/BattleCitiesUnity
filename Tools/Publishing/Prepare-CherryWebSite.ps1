@@ -7,6 +7,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+. (Join-Path $PSScriptRoot 'Release-Functions.ps1')
 
 # A separate artifact: this never alters the normal play site artifact.
 $arguments = @{ ArchivePath = $ArchivePath; Destination = $Destination; ReleaseTag = $ReleaseTag }
@@ -19,10 +20,11 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Cherry/cherry-app.json') -Desti
 $cherryScript = Join-Path $PSScriptRoot 'Cherry/cherry.js'
 if (-not (Test-Path -LiteralPath $cherryScript)) { throw 'Cherry SDK bundle is missing. Run npm run build in Tools/Wallet.' }
 Copy-Item -LiteralPath $cherryScript -Destination (Join-Path $site 'cherry.js') -Force
+$cherryVersion = (Get-ReleaseSha256 $cherryScript).Substring(0, 12)
 $indexPath = Join-Path $site 'index.html'
 $index = [IO.File]::ReadAllText($indexPath)
 if (-not $index.Contains('</head>')) { throw 'The web page has no head element.' }
-$index = $index.Replace('</head>', '<script src="cherry.js"></script>' + "`n</head>")
+$index = $index.Replace('</head>', ('<script src="cherry.js?v=' + $cherryVersion + '"></script>') + "`n</head>")
 [IO.File]::WriteAllText($indexPath, $index, [Text.UTF8Encoding]::new($false))
 [IO.File]::WriteAllText((Join-Path $site 'CNAME'), "cherry.battlecities.com`n", [Text.UTF8Encoding]::new($false))
 Write-Output "Cherry GitHub Pages artifact ready: $site"

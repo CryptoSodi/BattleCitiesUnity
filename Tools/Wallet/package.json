@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "node build.mjs",
-    "test": "node --test wallet-bundle.test.mjs phantom-bridge.test.mjs cherry-bridge.test.mjs cherry-chat.test.mjs"
+    "test": "node --test wallet-bundle.test.mjs phantom-bridge.test.mjs wallet-connection.test.mjs cherry-bridge.test.mjs cherry-chat.test.mjs"
   },
   "dependencies": {
     "@cherrydotfun/chat-embed-sdk": "0.1.7",

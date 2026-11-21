@@ -23,15 +23,15 @@ function Read-LauncherVersion {
 
 function Read-LauncherTargets([string]$Kind) {
     if($Kind -eq 'web'){
-        Write-Host "`n1 Localhost (test API)    2 Play (mainnet)    3 Test (devnet)    4 Magic (devnet)    5 All 3 websites    0 Build only"
-        $map=@{'1'='localhost';'2'='play';'3'='test';'4'='magic'}
+        Write-Host "`n1 Localhost (test API)    2 Play (mainnet)    3 Test (devnet)    4 Magic (devnet)    5 All 4 websites    6 Cherry (mainnet)    0 Build only"
+        $map=@{'1'='localhost';'2'='play';'3'='test';'4'='magic';'6'='cherry'}
     }else{
         Write-Host "`n1 Install on phone    2 Publish GitHub APK    3 Upload PSG1 draft    4 All three    0 Build only"
         $map=@{'1'='install';'2'='github';'3'='psg1'}
     }
     while($true){
         $text=(Read-Host 'Destinations (comma-separated; default 0)').Trim();if(-not $text -or $text -eq '0'){return @()}
-        if($Kind -eq 'web' -and $text -eq '5'){return @('play','test','magic')}
+        if($Kind -eq 'web' -and $text -eq '5'){return @('play','test','magic','cherry')}
         if($Kind -eq 'android' -and $text -eq '4'){return @('install','github','psg1')}
         $parts=@($text -split ','|ForEach-Object {$_.Trim()})
         if(@($parts|Where-Object {-not $map.ContainsKey($_)}).Count -eq 0){return @($parts|ForEach-Object {$map[$_]}|Select-Object -Unique)}
@@ -110,7 +110,7 @@ while($true){
         $plan=[pscustomobject]@{kind=$kind;version=$version;androidCode=$code;serial=$serial;targets=$targets}
         Write-Host "`nVersion $version / Android code $code" -ForegroundColor Cyan
         Get-LauncherSteps $plan|ForEach-Object {Write-Host " - $_"}
-        if(@($targets|Where-Object {$_ -in @('play','test','magic','github')}).Count){Write-Host 'Publishing commits and pushes all non-ignored project changes.'}
+        if(@($targets|Where-Object {$_ -in @('play','test','magic','cherry','github')}).Count){Write-Host 'Publishing commits and pushes all non-ignored project changes.'}
         $action=Read-LauncherChoice 'B = build/run, P = preview only, 0 = back' @('b','p','0') 'b'
         if($action -eq '0'){continue}
         Invoke-LauncherRun $plan $settings -Preview:($action -eq 'p' -or $DryRun)
