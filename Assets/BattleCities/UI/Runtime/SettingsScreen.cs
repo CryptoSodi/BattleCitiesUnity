@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -9,6 +10,10 @@ namespace BattleCities.UI
     /// <summary>Audio, display, account and browser phone pairing inside the shared TV.</summary>
     public sealed partial class SettingsScreen : MonoBehaviour
     {
+        const int ReferralVisitLimit = 3;
+        const string ReferralVisitsKeyPrefix = "battlecities.settings.referralVisits.";
+        readonly HashSet<string> referralSeenThisVisit = new HashSet<string>();
+
         MainMenuScene menu;MainMenuApiClient api;MenuTheme theme;PreBattleArt art;SettingsArt illustrations;
         RectTransform root,header,footer,body,backBar;Image titleIcon;TMP_Text title,version,accountName,phoneDescription,phoneStatus,pairCaption;
         readonly RectTransform[] rows=new RectTransform[4];
@@ -70,7 +75,6 @@ namespace BattleCities.UI
                     for(int j=0;j<2;j++){bool value=j==1;var b=toggles[i*2+j]=Control(value?"On":"Off",group,value?"ON":"OFF",()=>SetPreference(rowIndex,value),true);b.enabled=false;b.image.raycastTarget=false;b.navigation=new Navigation{mode=Navigation.Mode.None};Fit((RectTransform)b.transform,new Rect(j*.5f+.015f,.06f,.47f,.88f));}
                 }
             }
-            Fit(accountName.rectTransform,new Rect(.27f,.54f,.27f,.27f));
             referral=Control("Referral",rows[2],"REFERRAL",()=>menu.OpenReferralEntry());Fit((RectTransform)referral.transform,new Rect(.56f,.22f,.21f,.56f));
             logout=Control("Logout",rows[2],"LOGOUT",Logout);Fit((RectTransform)logout.transform,new Rect(.79f,.22f,.18f,.56f));
             if(illustrations&&illustrations.logout)logout.image.sprite=illustrations.logout;
@@ -96,6 +100,8 @@ namespace BattleCities.UI
         }
         public void Open()
         {
+            if(IsOpen)return;
+            referralSeenThisVisit.Clear();
             root.gameObject.SetActive(true);root.SetAsLastSibling();menu.SetHeroVisible(false);menu.SetTankSelectorBackdrop(true);menu.RefreshLayout();
             phone=PhoneControllerHost.Ensure();if(phone.Supported)phone.Begin();
             Refresh();if(EventSystem.current)EventSystem.current.SetSelectedGameObject(rowButtons[0].gameObject);
@@ -118,9 +124,37 @@ namespace BattleCities.UI
             var logoutSkin=loggedIn&&illustrations&&illustrations.logout?illustrations.logout:art.tankCostButton;
             logout.image.sprite=logoutSkin;logout.image.color=loggedIn&&illustrations&&illustrations.logout?new Color(.82f,.82f,.82f):new Color(.5f,.68f,.86f);
             logout.transform.Find("Focus").GetComponent<Image>().sprite=logoutSkin;
-            RefreshPhone();RefreshNotifications();
-            Psg1UiNavigation.Rows(new Selectable[]{back},new Selectable[]{rowButtons[0]},new Selectable[]{rowButtons[1]},new Selectable[]{referral,logout},new Selectable[]{pair},new Selectable[]{notifications},new Selectable[]{cherryTerms,cherryPrivacy});
+            RefreshReferralEntry();RefreshPhone();RefreshNotifications();RefreshNavigation();
         }
+        internal void RefreshReferralEntry()
+        {
+            if(!IsConfigured)return;
+            var player=api?.LastPlayer;
+            bool visible=false;
+            if(player?.provider=="wallet" && !string.IsNullOrEmpty(player.id) && menu.CanEnterReferralFromSettings(player.id))
+            {
+                visible=referralSeenThisVisit.Contains(player.id);
+                if(!visible && IsOpen)
+                {
+                    string key=ReferralVisitsKeyPrefix+player.id;
+                    int visits=PlayerPrefs.GetInt(key,0);
+                    if(visits<ReferralVisitLimit)
+                    {
+                        PlayerPrefs.SetInt(key,visits+1);
+                        PlayerPrefs.Save();
+                        referralSeenThisVisit.Add(player.id);
+                        visible=true;
+                    }
+                }
+            }
+            Fit(accountName.rectTransform,new Rect(.27f,.54f,visible?.27f:.49f,.27f));
+            if(referral.gameObject.activeSelf==visible)return;
+            bool focused=EventSystem.current && EventSystem.current.currentSelectedGameObject==referral.gameObject;
+            referral.gameObject.SetActive(visible);
+            RefreshNavigation();
+            if(!visible && focused)Psg1UiNavigation.KeepFocus(root,logout);
+        }
+        void RefreshNavigation() => Psg1UiNavigation.Rows(new Selectable[]{back},new Selectable[]{rowButtons[0]},new Selectable[]{rowButtons[1]},new Selectable[]{referral,logout},new Selectable[]{pair},new Selectable[]{notifications},new Selectable[]{cherryTerms,cherryPrivacy});
         void RefreshPhone()
         {
             bool supported=phone&&phone.Supported;

@@ -36,7 +36,7 @@ namespace BattleCities.UI
             bool changed = notifications.interactable != available;
             notifications.interactable = available;
             notificationsVisual.SetActive(push && push.Receiving);
-            if (changed) Psg1UiNavigation.Rows(new Selectable[]{back},new Selectable[]{rowButtons[0]},new Selectable[]{rowButtons[1]},new Selectable[]{referral,logout},new Selectable[]{pair},new Selectable[]{notifications});
+            if (changed) RefreshNavigation();
         }
     }
 }

@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using TMPro;
 using UnityEngine;
@@ -19,13 +21,14 @@ namespace BattleCities.UI
         TMP_InputField input; Button paste,primary,secondary; GameObject previousFocus;
         readonly ArcadeTextStyles styles = new ArcadeTextStyles();
         string requestedPlayer, checkedPlayer, loadedPlayer,pasteRequestId,pasteSnapshot; JObject profile;
+        Action profileChanged;
         bool firstPrompt, share, busy, promptPending;
         public bool IsConfigured => overlay && api;
         public bool IsOpen => overlay && overlay.gameObject.activeSelf;
 
-        public void Configure(MenuTheme skin, MainMenuApiClient client, RectTransform parent)
+        public void Configure(MenuTheme skin, MainMenuApiClient client, RectTransform parent, Action onProfileChanged)
         {
-            theme=skin;api=client;art=RemoteGameArt.Load<PreBattleArt>("PreBattleArt");
+            theme=skin;api=client;profileChanged=onProfileChanged;art=RemoteGameArt.Load<PreBattleArt>("PreBattleArt");
             overlay=Panel("Referral dialog",parent,null); Fit(overlay,new Rect(0,0,1,1));
             var shade=overlay.GetComponent<Image>();shade.color=new Color(0,.025f,.08f,.76f);shade.raycastTarget=true;
             panel=Panel("Card",overlay,art.tankCardAvailable);panel.GetComponent<Image>().pixelsPerUnitMultiplier=3;
@@ -36,7 +39,7 @@ namespace BattleCities.UI
             inputRect.gameObject.AddComponent<ReferralInputFrame>();
             inputRect.gameObject.AddComponent<RectMask2D>();
             var text=Label("Text",inputRect,"",new Rect(.04f,.05f,.92f,.90f),24,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineLeft);
-            var placeholder=Label("Placeholder",inputRect,"PASTE LINK OR ENTER CODE",new Rect(.04f,.05f,.92f,.90f),22,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineLeft);placeholder.color=new Color32(7,43,94,130);
+            var placeholder=Label("Placeholder",inputRect,"REFERRAL CODE",new Rect(.04f,.05f,.92f,.90f),22,ArcadeTextTreatment.Navy,TextAlignmentOptions.MidlineLeft);placeholder.color=new Color32(7,43,94,130);
             input=inputRect.gameObject.AddComponent<TMP_InputField>();input.textViewport=inputRect;input.textComponent=text;input.placeholder=placeholder;input.characterLimit=2048;
             input.lineType=TMP_InputField.LineType.SingleLine;input.contentType=TMP_InputField.ContentType.Standard;
             paste=MakeButton("Paste",panel,new Rect(.68f,.4875f,.20f,.115f),Paste);paste.transform.Find("Caption").GetComponent<TMP_Text>().text="PASTE";
@@ -51,6 +54,7 @@ namespace BattleCities.UI
             if(!IsConfigured||player==null||player.provider!="wallet"||string.IsNullOrEmpty(player.id)||requestedPlayer==player.id||checkedPlayer==player.id)return;
             requestedPlayer=player.id;StartCoroutine(GetProfile(player.id,true));
         }
+        internal bool CanEnterFromSettings(string playerId) => loadedPlayer==playerId && (bool?)profile?["referred"]==false;
         public void OpenEntry() { Open(false,false); }
         public void OpenShare() { Open(true,false); }
         void Open(bool sharing,bool initial)
@@ -84,12 +88,24 @@ namespace BattleCities.UI
                 if(!automatic&&IsOpen){SetBusy(false);message.text=error??"REFERRALS ARE UNAVAILABLE. PLEASE TRY AGAIN.";primary.interactable=false;RefreshNavigation();}
                 yield break;
             }
-            loadedPlayer=checkedPlayer=player;profile=result;
+            CacheProfile(player,result);
             if(automatic&&(bool?)profile["prompt"]==true)
             {
                 if(!IsOpen)Open(false,true);else promptPending=true;
             }
             if(IsOpen&&!firstPrompt){SetBusy(false);UpdateProfile();}
+        }
+        void CacheProfile(string player, JObject result)
+        {
+            // Applying a referral is permanent. An older request may return after the confirmation.
+            if(loadedPlayer==player && (bool?)profile?["referred"]==true)
+            {
+                result["referred"]=true;
+                result["prompt"]=false;
+            }
+            loadedPlayer=checkedPlayer=player;
+            profile=result;
+            profileChanged?.Invoke();
         }
         void UpdateProfile()
         {
@@ -142,8 +158,37 @@ namespace BattleCities.UI
         {
             if(string.IsNullOrWhiteSpace(value)){message.text="CLIPBOARD IS EMPTY.";return;}
             if(value.Length>input.characterLimit){message.text="CLIPBOARD TEXT IS TOO LONG.";return;}
-            input.text=value.Trim();message.text="LINK OR CODE PASTED.";
+            if(!TryReadReferralCode(value,out var code))
+            {
+                message.text="COPY A BATTLE CITIES REFERRAL LINK OR CODE.";
+                return;
+            }
+            input.text=code;message.text="REFERRAL CODE PASTED.";
         }
+        static bool TryReadReferralCode(string value,out string code)
+        {
+            code=value.Trim();
+            if(Uri.TryCreate(code,UriKind.Absolute,out var link))
+            {
+                if(link.Scheme!=Uri.UriSchemeHttps||!link.IsDefaultPort||link.UserInfo.Length!=0)return false;
+                switch(link.Host)
+                {
+                    case "battlecities.com": case "www.battlecities.com": case "play.battlecities.com": case "test.battlecities.com": break;
+                    default: return false;
+                }
+                code="";
+                foreach(var parameter in link.Query.TrimStart('?').Split('&'))
+                {
+                    var parts=parameter.Split(new[]{'='},2);
+                    if(Uri.UnescapeDataString(parts[0])!="ref")continue;
+                    if(parts.Length==2)code=Uri.UnescapeDataString(parts[1]);
+                    break;
+                }
+            }
+            code=code.ToUpperInvariant();
+            return Regex.IsMatch(code,@"\A[A-F0-9]{12}\z");
+        }
+        [UnityEngine.Scripting.Preserve]
         public void OnReferralPasteResult(string json)
         {
             JObject result;try{result=JObject.Parse(json);}catch{ return; }
@@ -162,7 +207,7 @@ namespace BattleCities.UI
             if(!this||!api||api.LastPlayer?.id!=player)yield break;
             if(status==200&&body?["referral"] is JObject result)
             {
-                profile=result;loadedPlayer=checkedPlayer=player;
+                CacheProfile(player,result);
                 if(action=="apply"&&IsOpen){SetBusy(false);firstPrompt=false;UpdateProfile();}
             }
             else if(action=="apply"&&IsOpen){SetBusy(false);message.text=(string)body?["statusText"]??error??"COULD NOT APPLY REFERRAL.";}
@@ -176,6 +221,8 @@ namespace BattleCities.UI
             firstPrompt=false;pasteRequestId=null;overlay.gameObject.SetActive(false);input.gameObject.SetActive(true);
             var selectable=previousFocus?previousFocus.GetComponent<Selectable>():null;
             if(EventSystem.current&&Psg1UiNavigation.Available(selectable))EventSystem.current.SetSelectedGameObject(previousFocus);
+            else if(previousFocus && TryGetComponent<SettingsScreen>(out var settings) && settings.IsOpen && previousFocus.transform.IsChildOf(settings.Root))
+                Psg1UiNavigation.KeepFocus(settings.Root,settings.LogoutButton);
             if(showPrompt)Open(false,true);
         }
         public void KeepControllerFocus()=>Psg1UiNavigation.KeepFocus(overlay,secondary);
