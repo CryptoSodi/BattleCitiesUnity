@@ -2,6 +2,7 @@ package com.battlecities.notifications;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -11,12 +12,19 @@ public final class NotificationPermissionActivity extends Activity {
         super.onCreate(state);
         if (Build.VERSION.SDK_INT < 33) { finish(); return; }
         if (state == null) {
-            BattleCitiesNotifications.prefs(this).edit().putBoolean(BattleCitiesNotifications.REQUESTED, true).apply();
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 4102);
         }
     }
     @Override public void onRequestPermissionsResult(int code, String[] permissions, int[] results) {
         super.onRequestPermissionsResult(code, permissions, results);
-        if (code == 4102) finish();
+        if (code == 4102) {
+            boolean answered = results.length > 0;
+            boolean granted = answered && results[0] == PackageManager.PERMISSION_GRANTED;
+            android.content.SharedPreferences.Editor edit = BattleCitiesNotifications.prefs(this).edit()
+                    .putBoolean(BattleCitiesNotifications.ENABLED, granted);
+            if (answered) edit.putBoolean(BattleCitiesNotifications.REQUESTED, true);
+            edit.apply();
+            finish();
+        }
     }
 }

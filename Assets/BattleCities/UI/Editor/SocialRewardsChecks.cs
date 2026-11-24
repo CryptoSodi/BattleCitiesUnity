@@ -6,6 +6,7 @@ using BattleCities.UI;
 using Newtonsoft.Json.Linq;
 using TMPro;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -15,13 +16,27 @@ namespace BattleCities.Editor
     public static class SocialRewardsChecks
     {
         public static string Status {get;private set;}="Not started";
+        public static void RunBatch()
+        {
+            EditorSceneManager.OpenScene("Assets/BattleCities/Scenes/MainMenu.unity",OpenSceneMode.Single);
+            Start();
+            if(!Status.StartsWith("PASS:",StringComparison.Ordinal))throw new Exception("Social checks did not complete: "+Status);
+        }
+        public static void ImportReferralAndRunBatch()
+        {
+            OperationsArtImport.ImportReferralIcon();
+            RunBatch();
+        }
         public static void Start()
                 {
             if(Application.isPlaying)UnityEngine.Object.FindFirstObjectByType<MainMenuScene>().StartCoroutine(Run(null));
             else new SocialFixturePump().Run(Run);
         }
-        static string Caption(OperationsScreen screen,int card)=>screen.Scroll.content.Find("Card "+card+"/Action/Caption").GetComponent<TMP_Text>().text;
-        static void Click(OperationsScreen screen,int card)=>screen.Scroll.content.Find("Card "+card).GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
+        // The existing social fixtures use their original indices; referral is the new first card.
+        static string Caption(OperationsScreen screen,int card)=>CaptionAt(screen,card+1);
+        static void Click(OperationsScreen screen,int card)=>ClickAt(screen,card+1);
+        static string CaptionAt(OperationsScreen screen,int card)=>screen.Scroll.content.Find("Card "+card+"/Action/Caption").GetComponent<TMP_Text>().text;
+        static void ClickAt(OperationsScreen screen,int card)=>screen.Scroll.content.Find("Card "+card).GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
         static IEnumerator Wait(OperationsScreen screen)
         {
             float deadline=Time.realtimeSinceStartup+10;int quiet=0;
@@ -47,6 +62,13 @@ namespace BattleCities.Editor
                 Check(api.LastPlayer!=null,"fixture player session loaded");
                 screen.Configure(menu,theme,api,frame);screen.Open(true);yield return Wait(screen);
                 Check(Caption(screen,1)=="CONNECT X"&&Caption(screen,4)=="LOCKED","unlinked X state");
+                Check(screen.Scroll.content.Find("Card 2/Detail").GetComponent<TMP_Text>().text=="LINK X +5 FUEL","X detail has no separator dot");
+                Check(screen.Scroll.content.Find("Card 4/Detail").GetComponent<TMP_Text>().text=="JOIN AND VERIFY +5 FUEL","Discord detail has no separator dot");
+                Check(screen.ItemCount==7&&CaptionAt(screen,0)=="VIEW LINK","referral card is first and offers the share link");
+                Check(screen.Scroll.content.Find("Card 0/Title").GetComponent<TMP_Text>().text=="REFER & EARN","referral card title");
+                var referralArt=AssetDatabase.LoadAssetAtPath<OperationsArt>("Assets/BattleCities/UI/Resources/OperationsArt.asset");
+                Check(referralArt&&referralArt.referral&&screen.Scroll.content.Find("Card 0/Artwork").GetComponent<UnityEngine.UI.Image>().sprite==referralArt.referral,"generated referral artwork is assigned");
+                Check(screen.Scroll.content.Find("Card 0").GetComponent<UnityEngine.UI.Button>().interactable,"referral card can be selected");
                 Click(screen,1);yield return Wait(screen);
                 Check(screen.IsSocialLinkPending&&screen.IsLinkNoticeOpen&&links.Last().StartsWith("https://x.com/i/oauth2/authorize"),"native X authorization");
                 Check(fixture.VerifyCount==0,"linking must not verify or grant X rewards");
@@ -93,9 +115,19 @@ namespace BattleCities.Editor
                 foreach(var v in new[]{(MainMenuPlatform.Web,1583,924,"web"),(MainMenuPlatform.AndroidLandscape,844,390,"seeker"),(MainMenuPlatform.Psg1,1240,1080,"psg1")})
                 {
                     menu.ApplyLayout(v.Item1,new Vector2(v.Item2,v.Item3));Canvas.ForceUpdateCanvases();
-                    for(int i=0;i<6;i++)foreach(var label in screen.Scroll.content.Find("Card "+i).GetComponentsInChildren<TMP_Text>())
+                    for(int i=0;i<screen.ItemCount;i++)foreach(var label in screen.Scroll.content.Find("Card "+i).GetComponentsInChildren<TMP_Text>())
                     {label.ForceMeshUpdate();Check(!label.isTextOverflowing,v.Item4+" "+i+"/"+label.name+" text fits");}
+                    int columns=(int)typeof(OperationsScreen).GetField("columns",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(screen);
+                    var following=screen.Scroll.content.Find("Card "+columns).GetComponent<UnityEngine.UI.Button>();
+                    var referral=screen.Scroll.content.Find("Card 0").GetComponent<UnityEngine.UI.Button>();
+                    Check(following.navigation.selectOnUp==referral,v.Item4+" referral card is reachable by controller");
                     MainMenuChecks.Capture(v.Item1,v.Item2,v.Item3,"social-mainsite-"+v.Item4);
+                    screen.Scroll.verticalNormalizedPosition=1;Canvas.ForceUpdateCanvases();
+                    screen.FocusCard(0,true,false);Canvas.ForceUpdateCanvases();
+                    var cardBounds=RectTransformUtility.CalculateRelativeRectTransformBounds(screen.Scroll.viewport,(RectTransform)referral.transform);
+                    Check(cardBounds.min.y>=screen.Scroll.viewport.rect.yMin-1&&cardBounds.max.y<=screen.Scroll.viewport.rect.yMax+1,v.Item4+" focused referral card is fully visible");
+                    MainMenuChecks.Capture(v.Item1,v.Item2,v.Item3,"social-referral-"+v.Item4);
+                    screen.FocusCard(0,false,false);
                 }
                 fixture.Connected=fixture.Follows=false;fixture.NativeState="failed";screen.Refresh();yield return Wait(screen);Click(screen,1);yield return Wait(screen);screen.Refresh();yield return Wait(screen);
                 Check(!screen.IsSocialLinkPending&&!screen.IsLinkNoticeOpen&&screen.Status.Contains("FAILED"),"failed native link is retryable");

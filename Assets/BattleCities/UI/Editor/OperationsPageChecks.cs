@@ -42,7 +42,7 @@ namespace BattleCities.Editor
                     Check(screen.CurrentPage==OperationsScreen.Page.Treasury,p+" submit opens Treasury");screen.Back();Check(screen.CurrentPage==OperationsScreen.Page.Quarters,p+" Treasury Back");
                     screen.OpenManual();Check(screen.ItemCount==4,p+" tank entries");screen.SelectManualCategory(2);Check(screen.ItemCount==ShopCatalog.InventoryIds.Length,p+" all powerups");
                     screen.OpenManualEntry("extra-life");Check(screen.CurrentPage==OperationsScreen.Page.ManualDetail,p+" manual detail");screen.Back();Check(screen.ItemCount==ShopCatalog.InventoryIds.Length,p+" detail returns to category");screen.Back();Check(screen.CurrentPage==OperationsScreen.Page.Quarters,p+" manual Back");
-                    menu.OpenShop();Check(!screen.IsOpen&&menu.IsShopOpen,p+" Shop closes operations");menu.OpenRanking();Check(!menu.IsShopOpen&&menu.IsRankingOpen,p+" Ranking closes Shop");menu.OpenSocials();Check(!menu.IsRankingOpen&&menu.IsSocialsOpen&&screen.ItemCount==6,p+" Socials opens exclusively");
+                    menu.OpenShop();Check(!screen.IsOpen&&menu.IsShopOpen,p+" Shop closes operations");menu.OpenRanking();Check(!menu.IsShopOpen&&menu.IsRankingOpen,p+" Ranking closes Shop");menu.OpenSocials();Check(!menu.IsRankingOpen&&menu.IsSocialsOpen&&screen.ItemCount==7,p+" Socials opens exclusively");
                     screen.Close();
                 }
             }

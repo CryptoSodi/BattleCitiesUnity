@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Globalization;
 using BattleCities.UI;
 using Newtonsoft.Json.Linq;
 using UnityEditor;
@@ -15,8 +16,30 @@ namespace BattleCities.Editor
         const BindingFlags Private=BindingFlags.Instance|BindingFlags.NonPublic;
         static bool seasonPassPreview;
         public static void CaptureSeasonPass(){seasonPassPreview=true;Run();}
+        public static void RunBalanceChecks()
+        {
+            var previous=CultureInfo.CurrentCulture;
+            try
+            {
+                foreach(var locale in new[]{"en-GB","de-DE"})
+                {
+                    CultureInfo.CurrentCulture=CultureInfo.GetCultureInfo(locale);
+                    var response=JObject.Parse("{\"solBalance\":5.025502627,\"skrBalance\":\"6621.649760\"}");
+                    Check(ShopScreen.BalanceAmount(response["solBalance"])=="5.03",locale+" numeric SOL balance");
+                    Check(ShopScreen.BalanceAmount(response["skrBalance"],0)=="6,622",locale+" string SKR balance");
+                    Check(ShopScreen.BalanceAmount(new JValue(4))=="4.00",locale+" integer SOL balance");
+                    Check(ShopScreen.BalanceAmount(new JValue("0.0123123123"))=="0.01",locale+" string SOL balance");
+                    Check(ShopScreen.BalanceAmount(new JValue("5,025502627"))=="—",locale+" ambiguous balance rejected");
+                    Check(ShopScreen.BalanceAmount(new JValue("1e-9"))=="0.00",locale+" scientific notation");
+                    Check(ShopScreen.BalanceAmount(null)=="—",locale+" missing balance");
+                }
+            }
+            finally { CultureInfo.CurrentCulture=previous; }
+            Debug.Log("SHOP BALANCE LOCALE CHECKS PASSED");
+        }
         public static void Run()
         {
+            RunBalanceChecks();
             const string path="Assets/BattleCities/UI/Art/shop/play-token.png";
             AssetDatabase.ImportAsset(path,ImportAssetOptions.ForceSynchronousImport);
             var importer=(TextureImporter)AssetImporter.GetAtPath(path);importer.textureType=TextureImporterType.Sprite;

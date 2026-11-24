@@ -658,7 +658,7 @@ namespace BattleCities.UI
             if(!RuntimePlatformInfo.IsPsg1||loading||!EventSystem.current||tabs==null||tabs.Length<5)return;
             var pad=Gamepad.current;var keyboard=Keyboard.current;
             var lobby=BattleCities.Multiplayer.BattleSession.Instance?.Lobby;
-            if((lobby&&lobby.Visible)||IsModalOpen||(IsPlayerProfileOpen&&profileScreen&&profileScreen.ReplayViewerOpen)||
+            if((lobby&&lobby.Visible)||IsReferralOpen||IsModalOpen||(IsPlayerProfileOpen&&profileScreen&&profileScreen.ReplayViewerOpen)||
                (IsShopOpen&&shop&&shop.HasBlockingNotice)||(IsRankingOpen&&rankingScreen&&rankingScreen.IsPickerOpen)||
                (IsOperationsOpen&&operations&&operations.IsLinkNoticeOpen)||(preBattle&&preBattle.IsOpen&&preBattle.BlocksMenuShortcuts))return;
             var selectedObject=EventSystem.current.currentSelectedGameObject;
@@ -688,6 +688,7 @@ namespace BattleCities.UI
         {
             // The lobby owns B while it is open, including its room-code keypad.
             if (BattleCities.Multiplayer.BattleSession.Instance && BattleCities.Multiplayer.BattleSession.Instance.Lobby.Visible) return;
+            if(IsReferralOpen){referrals.Close();return;}
             if(IsModalOpen)
             {
                 modal.gameObject.SetActive(false);
@@ -709,6 +710,7 @@ namespace BattleCities.UI
             if (!Application.isPlaying || ((lastPlatform != MainMenuPlatform.Psg1||ResponsiveWebLayout.IsBrowserSurface)&&!RuntimePlatformInfo.UsesControllerNavigation) || !EventSystem.current) return;
             var lobby = BattleCities.Multiplayer.BattleSession.Instance ? BattleCities.Multiplayer.BattleSession.Instance.Lobby : null;
             if (lobby && lobby.Visible) {psg1PreviousSelection=null;return;}
+            if(IsReferralOpen){referrals.KeepControllerFocus();return;}
             RememberPsg1ReturnDirection();
             if (IsModalOpen) { Psg1UiNavigation.KeepFocus(modal, closeButton); return; }
             if (IsPlayerProfileOpen) { EnsurePlayerProfile();profileScreen.KeepControllerFocus();return; }
@@ -844,6 +846,7 @@ namespace BattleCities.UI
             apiClient.RankingsLoaded+=OnApiRankingsLoaded;
             apiClient.RoundLoaded+=OnApiRoundLoaded;
             apiClient.StatusChanged+=OnApiStatusChanged;
+            EnsureReferrals();
             if(playerLabel)
             {
                 var walletTarget=playerLabel.transform.parent.gameObject;
@@ -882,6 +885,7 @@ namespace BattleCities.UI
         private void OnApiPlayerLoaded(MainMenuApiClient.PlayerSnapshot player)
         {
             if(player==null)return;
+            if(Application.isPlaying){EnsureReferrals();if(referrals)referrals.CheckPlayer(player);}
             if(Application.isPlaying)BattleReplayService.Instance.RetryPending();
             var lastScore=BattleScoreCache.Last(apiClient.BaseUrl,player.id);
             var highScore=player.highscorePrimary;

@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-23",
+  "tool": "built-in image_gen",
+  "purpose": "New transparent REFER & EARN card illustration matching the current Socials-v2 family.",
+  "file": "C:\\repos\\BattleCity\\art_exports\\socials-refer-and-earn-2026-11-23\\refer-and-earn.png",
+  "size": [
+    1024,
+    1024
+  ],
+  "format": "PNG RGBA",
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "intendedDisplaySize": "96-160 logical pixels; preserve aspect ratio",
+  "source": "C:\\Users\\tassa\\.codex\\generated_images\\01a094c4-7348-79f3-9b5b-13a6013430db\\exec-4c2dcf78-70fb-41fc-816c-63d7fec469d1.png",
+  "archivedOriginal": "C:\\repos\\BattleCity\\art_exports\\socials-refer-and-earn-2026-11-23\\sources\\refer-and-earn-original.png",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "sourceSHA256": "8e3769db63c3f24a549e8bc50fa9d6991dc48e3021d56f73f3b90707c9603ce5",
+  "sha256": "859a6945d612e645584160a129c3201ae7054ba3865b4b8dec1cd524ea374ce1",
+  "references": [
+    {
+      "path": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/operations/social-website.png",
+      "sha256": "dfe76146d77e895bcf9cb6408c0630e2a4c8561d2e84990d56aea8354c6f34ff"
+    },
+    {
+      "path": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/operations/social-x-follow.png",
+      "sha256": "ba0eab1873fd1ec154bf2b5d3205763ace015827ac3d1835819848a8a9203551"
+    },
+    {
+      "path": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/operations/social-discord.png",
+      "sha256": "c10f4e4ea0fe2cb5e3e53fd9673c781f27cf3d58b6b7697cf40159e8bed9355a"
+    },
+    {
+      "path": "C:/repos/Unity/BattleCitiesUnity/Assets/BattleCities/UI/Art/shared/icons/socials.png",
+      "sha256": "dc98e220540b5d5bc666964e480b5cee5a045cc9178c474581a789b21987d419"
+    }
+  ],
+  "prompt": "Use case: stylized-concept.\nProduction UI illustration for the Battle Cities Socials card REFER & EARN, with NO TEXT IN THE IMAGE.\nINPUT ROLES: images 1\u20133 are the existing Socials Website, X Follow and Discord icons; use them ONLY as material/camera/lighting/style references, NEVER copy their platform logos or objects. Image 4 is the existing blue community silhouette icon, a visual reference for recognizable player busts.\nCreate ONE cohesive standalone inviting-a-friend-and-earning-rewards symbol:\nExactly TWO friendly rounded PLAYER AVATAR BUST SILHOUETTES, with smooth spherical heads and broad rounded shoulders, made from rich glossy cobalt-blue and navy toy enamel. Near-frontal with slight three-quarter depth, friendly approachable proportions like the existing community icon. One slightly forward on the left and the other slightly behind on the right; both heads clearly visible and separately readable. Faceless simplified blue heads, no realistic human portrait. Restrained warm-gold collar/shoulder trim ties them to the existing premium military arcade icon family. Large clean shapes, no tiny ornamental clutter.\nONE small chunky GOLD REWARD COIN in the lower foreground, overlapping the two shoulder bases without hiding heads. Coin is secondary to the two people, about 24% of overall icon width, front face seen with a little edge thickness, warm yellow-gold bevel and plain recessed gold center. No coin lettering, digits, currency glyph, star, logo or engraved icon.\nONE subtle short curved GOLD INVITATION ARROW bridges the space above/between the figures, pointing from the first player toward the second. Solid rounded dimensional arrow with a clear head, smaller than either head, not a large ring surrounding the icon. Keep it a compact accent, not an infographic.\nSTYLE LOCK: premium polished chunky 3D illustrated toy-arcade metal/plastic, matching the provided Socials set; rich cobalt/navy, warm gold, a few restrained silver mechanical accents only if useful, broad smooth modeled forms, crisp softened bevels, upper-left soft studio light, controlled bright edge highlights and dark edge separation. Subtle self-shading, no noisy textures. Must read clearly at 96\u2013160px, with two friends + reward recognized immediately. Not flat vector, pixel art, cheap clipart, hyperreal photography or a detailed scene.\nCOMPOSITION/TECHNICAL: square high-resolution PNG, genuinely TRANSPARENT RGBA background. Exactly one complete icon group centered, with roughly 12% safe transparent padding on all sides, all heads/arrow/coin fully intact. No clipping or off-canvas pieces. No floor, ground shadow, halo, surrounding glow, particles, large base or pedestal.\nEXCLUDE: any text including REFER & EARN, lettering, labels, numbers, platform logos, brand marks, card, button, border, frame, background color, backdrop, scenery, extra people, handshake hands, phones, envelopes, chart, money stacks, duplicate coins or additional objects. Only the two blue player busts, one small plain gold coin, and one compact gold invitation arrow.",
+  "normalization": {
+    "alpha": "Values below 8 removed; >=248 made opaque; no color repaint/recolor.",
+    "crop": [
+      93,
+      131,
+      1151,
+      1145
+    ],
+    "subjectFit": 800,
+    "canvas": [
+      1024,
+      1024
+    ],
+    "filtering": "Aspect-preserving Lanczos resize",
+    "visibleBounds": [
+      113,
+      129,
+      911,
+      894
+    ],
+    "note": "All components retained, including the disconnected invitation arrow; matches existing Socials-v2 approximate 12% padding."
+  },
+  "design": {
+    "subject": "Two blue toy-arcade player silhouettes, one small unmarked gold coin and one short gold invitation arrow.",
+    "materials": "Polished cobalt/navy enamel with warm gold and small silver accents",
+    "camera": "Near-frontal, slight three-quarter depth",
+    "lighting": "Upper-left studio light",
+    "text": false,
+    "numbers": false,
+    "logos": false,
+    "background": false,
+    "cardOrBorder": false
+  },
+  "verification": {
+    "alpha": true,
+    "safeMargin": true,
+    "allEdgesIntact": true,
+    "styleAndContent": "Visually inspected",
+    "nativeSizes": [
+      96,
+      128,
+      160
+    ],
+    "preview": "native-size-preview.png",
+    "runtimeVerified": false,
+    "unityProjectModified": false,
+    "buildOrPublish": false
+  }
+}

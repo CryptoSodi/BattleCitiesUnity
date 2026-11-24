@@ -26,6 +26,7 @@ namespace BattleCities.UI
         public bool Supported { get; private set; }
         public bool Enabled { get; private set; }
         public bool Receiving => Supported && Enabled && permission == "granted" && !string.IsNullOrEmpty(token);
+        public bool NeedsPermission => Supported && Enabled && permission != "granted";
         public string Status { get; private set; } = "Checking notifications...";
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -46,7 +47,12 @@ namespace BattleCities.UI
             return instance;
         }
         void Awake() { if (IsNativeAndroid) callback = new Callback(responses); }
-        void Start() { SceneManager.sceneLoaded += OnSceneLoaded; menu = FindAnyObjectByType<MainMenuScene>(); nextRefresh = Time.unscaledTime + 60; RefreshNative(); }
+        void Start() { SceneManager.sceneLoaded += OnSceneLoaded; menu = FindAnyObjectByType<MainMenuScene>(); nextRefresh = Time.unscaledTime + 60; RefreshNative(); StartCoroutine(RequestOnStartup()); }
+        IEnumerator RequestOnStartup()
+        {
+            yield return null;
+            if (IsNativeAndroid) Native((bridge, activity) => bridge.CallStatic("requestOnStartup", activity, callback));
+        }
         void OnSceneLoaded(Scene scene, LoadSceneMode mode) { menu = FindAnyObjectByType<MainMenuScene>(); nextNavigation = Time.unscaledTime + .5f; }
         void Update()
         {
@@ -62,7 +68,7 @@ namespace BattleCities.UI
         void OnApplicationPause(bool paused) { if (!paused) { nextRefresh = 0; nextNavigation = 0; } }
         string StateKey => token + "|" + ApiPermission + "|" + sessionRevision;
         string ApiPermission => Receiving ? "granted" : "denied";
-        public void Toggle() { SetEnabled(!Enabled); }
+        public void Toggle() { SetEnabled(!Enabled || NeedsPermission); }
         public void SetEnabled(bool enabled)
         {
             if (!IsNativeAndroid) return;

@@ -17,6 +17,14 @@ namespace BattleCities.UI
     }
     internal static class SeekerWalletLoginFlow
     {
+        internal static async Task<JObject> AuthenticateFresh(ISeekerGameWallet wallet, ISeekerLoginApi api, string attempt, CancellationToken token, Action<string> stage = null)
+        {
+            token.ThrowIfCancellationRequested();
+            stage?.Invoke("clear_cached_authorization");
+            await wallet.Disconnect();
+            token.ThrowIfCancellationRequested();
+            return await Authenticate(wallet, api, attempt, token, stage);
+        }
         internal static async Task<JObject> Authenticate(ISeekerGameWallet wallet, ISeekerLoginApi api, string attempt, CancellationToken token, Action<string> stage = null)
         {
             stage?.Invoke("restore_or_connect");

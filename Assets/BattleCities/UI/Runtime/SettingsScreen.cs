@@ -16,7 +16,7 @@ namespace BattleCities.UI
         readonly CardSelectionHighlight[] rowFocus=new CardSelectionHighlight[4];
         readonly Button[] toggles=new Button[4];
         readonly Button[] rowButtons=new Button[2];
-        Button back,logout,pair,cherryTerms,cherryPrivacy;RawImage qr;RectTransform qrFrame;TMP_Text qrLabel;
+        Button back,logout,pair,referral,cherryTerms,cherryPrivacy;RawImage qr;RectTransform qrFrame;TMP_Text qrLabel;
         readonly ArcadeTextStyles styles=new ArcadeTextStyles();
         PhoneControllerHost phone;[System.NonSerialized] bool configured;string logoutError;float nextPhoneRefresh;
         public bool IsConfigured=>configured&&root&&menu&&rows[0]&&toggles[0];
@@ -70,7 +70,9 @@ namespace BattleCities.UI
                     for(int j=0;j<2;j++){bool value=j==1;var b=toggles[i*2+j]=Control(value?"On":"Off",group,value?"ON":"OFF",()=>SetPreference(rowIndex,value),true);b.enabled=false;b.image.raycastTarget=false;b.navigation=new Navigation{mode=Navigation.Mode.None};Fit((RectTransform)b.transform,new Rect(j*.5f+.015f,.06f,.47f,.88f));}
                 }
             }
-            logout=Control("Logout",rows[2],"LOGOUT",Logout);Fit((RectTransform)logout.transform,ScreenContent.Rect("settings","settingsscreen-configure-new-rect-72f-22f-2-0e34a0",new Rect(.72f,.22f,.25f,.56f)));
+            Fit(accountName.rectTransform,new Rect(.27f,.54f,.27f,.27f));
+            referral=Control("Referral",rows[2],"REFERRAL",()=>menu.OpenReferralEntry());Fit((RectTransform)referral.transform,new Rect(.56f,.22f,.21f,.56f));
+            logout=Control("Logout",rows[2],"LOGOUT",Logout);Fit((RectTransform)logout.transform,new Rect(.79f,.22f,.18f,.56f));
             if(illustrations&&illustrations.logout)logout.image.sprite=illustrations.logout;
             phoneStatus=Label("Connection",rows[3],"NOT CONNECTED",ScreenContent.Rect("settings","settingsscreen-configure-new-rect-36f-59f-3-6f8c0f",new Rect(.36f,.59f,.36f,.12f)),22,ArcadeTextTreatment.PrizeAmount,TextAlignmentOptions.MidlineLeft);
             pair=Control("Pair",rows[3],"PAIR PHONE",Pair);Fit((RectTransform)pair.transform,ScreenContent.Rect("settings","settingsscreen-configure-new-rect-36f-72f-3-d053e5",new Rect(.36f,.72f,.32f,.22f)));pairCaption=pair.transform.Find("Caption").GetComponent<TMP_Text>();pairCaption.fontSizeMax=24;
@@ -117,7 +119,7 @@ namespace BattleCities.UI
             logout.image.sprite=logoutSkin;logout.image.color=loggedIn&&illustrations&&illustrations.logout?new Color(.82f,.82f,.82f):new Color(.5f,.68f,.86f);
             logout.transform.Find("Focus").GetComponent<Image>().sprite=logoutSkin;
             RefreshPhone();RefreshNotifications();
-            Psg1UiNavigation.Rows(new Selectable[]{back},new Selectable[]{rowButtons[0]},new Selectable[]{rowButtons[1]},new Selectable[]{logout},new Selectable[]{pair},new Selectable[]{notifications},new Selectable[]{cherryTerms,cherryPrivacy});
+            Psg1UiNavigation.Rows(new Selectable[]{back},new Selectable[]{rowButtons[0]},new Selectable[]{rowButtons[1]},new Selectable[]{referral,logout},new Selectable[]{pair},new Selectable[]{notifications},new Selectable[]{cherryTerms,cherryPrivacy});
         }
         void RefreshPhone()
         {
@@ -152,7 +154,7 @@ namespace BattleCities.UI
             if(Time.unscaledTime>=nextPhoneRefresh){nextPhoneRefresh=Time.unscaledTime+.1f;RefreshPhone();RefreshNotifications();}
             rowFocus[0].SetState(false,rowButtons[0].GetComponent<SettingsRowFocus>().Focused);
             rowFocus[1].SetState(false,rowButtons[1].GetComponent<SettingsRowFocus>().Focused);
-            rowFocus[2].SetState(false,logout.GetComponent<SettingsControlVisual>().Focused);
+            rowFocus[2].SetState(false,logout.GetComponent<SettingsControlVisual>().Focused||referral.GetComponent<SettingsControlVisual>().Focused);
             rowFocus[3].SetState(false,pair.interactable&&pair.GetComponent<SettingsControlVisual>().Focused);
         }
         static bool IsCherryWeb()

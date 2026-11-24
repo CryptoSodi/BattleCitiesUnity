@@ -12,11 +12,16 @@ The Android Unity client uses Firebase Cloud Messaging directly through
 
 ## Player controls and registration
 
-Android Settings has an Enable Alerts / Disable Alerts action in the shared white
-footer. Notifications are off until the player enables them. Android 13 and later
-request `POST_NOTIFICATIONS` when enabling. After a denied request, enabling again
-opens the app's Android notification settings. Devices without working Google Play
-services show notifications as unavailable.
+On a first launch on Android 13 or later, the game requests notification permission.
+Accepting enables alerts; denying or dismissing leaves them off, and later launches
+preserve the player's choice. If Android has already granted permission, a new install
+enables alerts without showing a redundant prompt. Existing in-game preferences are
+preserved. Android versions below 13 use the in-game control.
+
+Android Settings also has an Enable Alerts / Disable Alerts action in the shared white
+footer. Enabling opens the system permission prompt when Android permits it, or the
+app's Android notification settings when a further prompt is blocked. Devices without
+working Google Play services show notifications as unavailable.
 
 The persistent Unity controller obtains/caches the FCM token, checks permission on
 resume and every minute while foregrounded, and registers it with the existing

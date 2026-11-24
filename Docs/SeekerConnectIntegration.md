@@ -9,8 +9,8 @@ by its pinned Git URL, so another checkout does not depend on that drive path.
 ## Provider routing
 
 - Native Android checks the SDK's wallet availability. Certified Seeker wallets
-  and other installed MWA-compatible wallets use the SDK for login, cached
-  authorization restoration and quote signing. Certified routing stays preferred;
+  and other installed MWA-compatible wallets use the SDK for login and checkout.
+  Certified routing stays preferred;
   the official generic-MWA fallback chooses another installed wallet when needed.
 - Production generic support uses `allowGenericMwa = true`, independently of
   `allowMwaTesting = false`. Mock-only signature compatibility remains disabled.
@@ -47,22 +47,37 @@ wallet and requires a valid server session cookie. Each attempt has an isolated
 HTTP cookie jar; cancellation/late responses cannot publish a login result.
 The successful game session still uses the existing encrypted Android storage.
 
-Cached SDK authorization alone never authenticates the player. At startup the
-game first verifies its saved backend session/player; only then does it restore
-the optional SDK authorization without connecting a new wallet. A reconnect
-still signs a fresh backend challenge. Confirmed game sign-out also clears local
-SDK authorization. This does not revoke the wallet's grant.
+Cached SDK authorization alone never authenticates the player or establishes
+that a wallet is ready for purchases. At startup the game verifies its saved
+backend session and player without opening the wallet, and Shop requires an
+explicit wallet connection. Connect clears the cached SDK grant and requests a
+fresh authorization and backend challenge. Confirmed game sign-out also clears
+local SDK authorization; this does not revoke the wallet's grant.
 
-After server session validation, a successful quiet SDK restore for that exact
-wallet also restores the Shop purchase-connection flag. Missing, unavailable,
-revoked or mismatched SDK authorization leaves the Shop requiring Connect Wallet
-while preserving a valid game login. Restoration does not sign or submit a
-transaction; each checkout still uses the existing wallet approval flow.
+When a wallet rejects authorization or returns a mismatched account at checkout,
+the local wallet grant and purchase-ready state are cleared, the authenticated
+game session is retained, and Shop offers reconnect. Ambiguous cancellation or
+transport failure never clears a possibly submitted payment. MWA does not expose
+a continuously live authorization status, so revocation while the game is open
+is detected when the wallet is next contacted.
 
-Checkout uses `SignTransactionAsync`, never SDK sign-and-send. It checks the
-wallet before and after signing, rejects changed transaction messages and expired
-quotes, and passes signed bytes through the existing game/server validation and
-submission flow. It never automatically retries a payment.
+Android checkout through Seeker Connect uses `SignAndSendTransactionAsync` after
+checking the wallet account and quote expiry. The app persists the quote before
+the wallet can submit, then sends the returned signature to the existing purchase
+verification endpoint. The API independently verifies the confirmed payer,
+transfer, quote memo and time before granting anything. PSG1's Jupiter bridge and
+web checkout retain their sign-only submission flow.
+
+When no signature returns, the app retains the pending quote and asks the API to
+search recent wallet history for its unique memo, including limited inspection of
+transactions whose history entries omit memo details. Only a fully verified on-chain
+purchase can be credited. Missing or incomplete RPC history remains pending; it
+does not establish that a payment failed. The game never automatically asks the
+wallet to submit a second payment. A known signature is cleared as failed only
+after a matching on-chain transaction reaches finalized failure. Some ambiguous
+failures may therefore require manual review rather than an automatic retry.
+Deploy the API recovery support before distributing an Android build that uses
+this flow.
 
 ## Toolchain and validation
 

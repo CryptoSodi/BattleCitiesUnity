@@ -13,7 +13,7 @@ namespace BattleCities.UI
         Task<WalletAccount> Account(CancellationToken token);
         Task<SeekerMessageProof> SignMessage(string message, CancellationToken token);
         Task<byte[]> SignTransaction(byte[] transaction, CancellationToken token);
-        Task<WalletAccount> Restore();
+        Task<WalletSignature> SignAndSend(byte[] transaction, CancellationToken token);
         Task Disconnect();
     }
 
@@ -21,6 +21,16 @@ namespace BattleCities.UI
     {
         internal string address;
         internal byte[] signature, payload;
+    }
+
+    internal sealed class SeekerCheckoutException : InvalidOperationException
+    {
+        internal string Reason { get; }
+        internal string Detail { get; }
+        internal SeekerCheckoutException(string reason, string detail = null) : base(reason == "account-mismatch"
+            ? "Select the wallet used to sign in to Battle Cities."
+            : reason == "quote-expired" ? "The checkout price expired. Request a fresh price."
+            : "The wallet changed the quoted transaction. Request a fresh price and try again.") { Reason = reason; Detail = detail; }
     }
 
     // Only native Android routes into this provider. Web Phantom and PSG1 Jupiter stay independent.
@@ -40,34 +50,51 @@ namespace BattleCities.UI
             if (account == null || account.PublicKey.Length != 32 ||
                 CheckoutWalletSigner.Base58(account.PublicKey, 0, 32) != account.address ||
                 (expected != null && expected != account.address))
-                throw new InvalidOperationException("Select the wallet used to sign in to Battle Cities.");
+                throw new SeekerCheckoutException("account-mismatch");
         }
         internal static async Task<byte[]> SignQuotedTransaction(byte[] transaction, string wallet, CancellationToken token, DateTimeOffset? expiry = null)
         {
             var original = (byte[])transaction.Clone();
             ValidateAccount(await Client.Account(token), wallet);
             if (expiry.HasValue && expiry.Value <= DateTimeOffset.UtcNow)
-                throw new InvalidOperationException("The checkout price expired. Request a fresh price before signing.");
+                throw new SeekerCheckoutException("quote-expired");
             var signed = await Client.SignTransaction(transaction, token);
             token.ThrowIfCancellationRequested();
             if (expiry.HasValue && expiry.Value <= DateTimeOffset.UtcNow)
-                throw new InvalidOperationException("The checkout price expired. Request a fresh price before retrying.");
+                throw new SeekerCheckoutException("quote-expired");
             ValidateAccount(await Client.Account(token), wallet);
-            if (signed == null || signed.Length != original.Length || signed[0] != 1 ||
-                !signed.Skip(65).SequenceEqual(original.Skip(65)))
-                throw new InvalidOperationException("The wallet changed the quoted transaction. Request a fresh price and try again.");
+            if (!ApprovedCheckoutTransaction.Matches(original, signed, out var difference))
+                throw new SeekerCheckoutException("transaction-changed", difference);
             return signed;
         }
-        internal static async Task<bool> RestoreQuietly(string expectedWallet)
+        internal static async Task<WalletSignature> SendQuotedTransaction(byte[] transaction, string wallet, CancellationToken token, DateTimeOffset expiry, Action beforeSend)
         {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(expectedWallet) || !await Client.IsAvailable(CancellationToken.None)) return false;
-                var account = await Client.Restore();
-                ValidateAccount(account, expectedWallet);
-                return true;
-            }
-            catch { return false; /* A missing/mismatched authorization cannot enable purchases. */ }
+            ValidateAccount(await Client.Account(token), wallet);
+            token.ThrowIfCancellationRequested();
+            if (expiry <= DateTimeOffset.UtcNow) throw new SeekerCheckoutException("quote-expired");
+            // Persist the recovery record before invoking a wallet that can broadcast.
+            beforeSend();
+            return await Client.SignAndSend(transaction, token);
+        }
+        internal static bool NeedsReconnect(Exception error)
+        {
+            if (error is SeekerCheckoutException checkout && checkout.Reason == "account-mismatch") return true;
+            return error is SeekerConnectException sdk && (sdk.Code == "AUTHORIZATION_DECLINED" || sdk.Code == "NOT_CONNECTED"
+                || sdk.Code == "NO_WALLET_FOUND" || sdk.Code == "ACCOUNT_CHANGED" || sdk.Code == "INVALID_RESPONSE");
+        }
+        internal static bool DefinitelyNotSubmitted(Exception error)
+        {
+            if (error is SeekerCheckoutException checkout && (checkout.Reason == "account-mismatch" || checkout.Reason == "quote-expired")) return true;
+            return error is SeekerConnectException sdk && (sdk.Code == "AUTHORIZATION_DECLINED" || sdk.Code == "NOT_CONNECTED"
+                || sdk.Code == "NO_WALLET_FOUND" || sdk.Code == "UNSUPPORTED_OPERATION");
+        }
+        internal static async Task ClearRejectedAuthorization(Exception error)
+        {
+            // Only invalidate a cached grant when authorization/account was rejected;
+            // timeouts and cancellation can happen after a wallet has submitted.
+            if (error is SeekerConnectException sdk && (sdk.Code == "AUTHORIZATION_DECLINED" || sdk.Code == "NOT_CONNECTED" || sdk.Code == "ACCOUNT_CHANGED" || sdk.Code == "INVALID_RESPONSE")
+                || error is SeekerCheckoutException checkout && checkout.Reason == "account-mismatch")
+                await DisconnectQuietly();
         }
         internal static async Task DisconnectQuietly()
         {
@@ -98,7 +125,6 @@ namespace BattleCities.UI
                 return SupportsWallet(availability);
             }
             public Task<WalletAccount> Account(CancellationToken token) => GetAccount(token, true);
-            public Task<WalletAccount> Restore() => GetAccount(CancellationToken.None, false);
             internal async Task<WalletAccount> GetAccount(CancellationToken token, bool connect)
             {
                 await Initialize(); token.ThrowIfCancellationRequested();
@@ -114,6 +140,8 @@ namespace BattleCities.UI
             }
             public Task<byte[]> SignTransaction(byte[] transaction, CancellationToken token)
                 => SeekerConnectManager.SignTransactionAsync(transaction, token);
+            public Task<WalletSignature> SignAndSend(byte[] transaction, CancellationToken token)
+                => SeekerConnectManager.SignAndSendTransactionAsync(transaction, token);
             public async Task Disconnect()
             {
                 if (initialization != null) { await initialization; await SeekerConnectManager.DisconnectAsync(); }

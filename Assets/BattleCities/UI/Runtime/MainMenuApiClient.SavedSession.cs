@@ -95,14 +95,6 @@ namespace BattleCities.UI
                     NotifyStatus("SESSION RESTORE UNAVAILABLE", "Could not load your player. Check your connection and try again.");
                     completed?.Invoke(false); yield break;
                 }
-#if UNITY_ANDROID && !UNITY_EDITOR
-                if (!RuntimePlatformInfo.IsPsg1) {
-                    var walletRestore = SeekerGameWallet.RestoreQuietly(player.walletAddress);
-                    while (!walletRestore.IsCompleted) yield return null;
-                    if (walletRestore.Result) purchaseWallet = player.walletAddress;
-                    Debug.Log("[BattleCitiesWallet] restored purchase authorization=" + walletRestore.Result);
-                }
-#endif
 #if UNITY_WEBGL && !UNITY_EDITOR
                 browserWalletRestoreId=Guid.NewGuid().ToString("N");browserWalletRestoreResult=null;
                 BattleCitiesWalletBridge.RestorePhantom(gameObject.name,nameof(OnBrowserWalletRestored),browserWalletRestoreId,player.walletAddress,IsTestNetwork?"devnet":"mainnet");

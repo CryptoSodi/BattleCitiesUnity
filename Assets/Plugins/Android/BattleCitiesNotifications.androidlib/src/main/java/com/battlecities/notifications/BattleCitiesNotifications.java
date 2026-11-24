@@ -70,10 +70,24 @@ public final class BattleCitiesNotifications {
         boolean available = supported(context);
         if (!available || !enabled(context)) { complete(context, callback, available, null); return; }
         FirebaseMessaging messaging = FirebaseMessaging.getInstance();
+        if (!allowed(context)) { messaging.setAutoInitEnabled(false); complete(context, callback, true, null); return; }
         messaging.setAutoInitEnabled(true);
         messaging.getToken().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) prefs(context).edit().putString(TOKEN, task.getResult()).apply();
             complete(context, callback, true, task.isSuccessful() ? null : "Could not register notifications. Please retry.");
+        });
+    }
+    public static void requestOnStartup(Activity activity, Callback callback) {
+        Context context = activity.getApplicationContext();
+        activity.runOnUiThread(() -> {
+            if (!NotificationPromptPolicy.shouldAskOnStartup(prefs(context).contains(ENABLED), supported(context), Build.VERSION.SDK_INT)) return;
+            createChannel(context);
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                prefs(context).edit().putBoolean(ENABLED, true).apply();
+                refresh(activity, callback);
+            } else {
+                activity.startActivity(new Intent(activity, NotificationPermissionActivity.class));
+            }
         });
     }
     public static void setEnabled(Activity activity, boolean value, Callback callback) {
@@ -86,7 +100,8 @@ public final class BattleCitiesNotifications {
         }
         activity.runOnUiThread(() -> {
             if (value && supported(context) && !allowed(context)) {
-                if (Build.VERSION.SDK_INT >= 33 && !prefs(context).getBoolean(REQUESTED, false)) {
+                if (NotificationPromptPolicy.canRequestAgain(Build.VERSION.SDK_INT, prefs(context).getBoolean(REQUESTED, false),
+                        Build.VERSION.SDK_INT >= 33 && activity.shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS))) {
                     activity.startActivity(new Intent(activity, NotificationPermissionActivity.class));
                 } else {
                     Intent settings = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, activity.getPackageName());

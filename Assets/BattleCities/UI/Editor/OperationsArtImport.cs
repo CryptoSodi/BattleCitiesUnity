@@ -12,6 +12,16 @@ namespace BattleCities.Editor
     {
         const string Destination="Assets/BattleCities/UI/Art/operations";
         const string Resource="Assets/BattleCities/UI/Resources/OperationsArt.asset";
+        public static void ImportReferralIcon()
+        {
+            string path=Destination+"/social-refer-and-earn.png";
+            var art=AssetDatabase.LoadAssetAtPath<OperationsArt>(Resource);
+            if(!art||!File.Exists(path))throw new FileNotFoundException("Referral artwork or OperationsArt is missing.");
+            art.referral=ImportSprite(path,"social-refer-and-earn");
+            if(!art.referral)throw new InvalidOperationException("Referral artwork did not import as a sprite.");
+            EditorUtility.SetDirty(art);AssetDatabase.SaveAssetIfDirty(art);
+            Debug.Log("REFERRAL SOCIAL ICON IMPORTED");
+        }
         // Newly generated illustrations requested by the user; import only, never rebuild the scene.
         public static void Import(string legacyRoot="C:/repos/BattleCity")
         {
@@ -70,7 +80,9 @@ namespace BattleCities.Editor
         static Sprite ImportSprite(string source,string name)
         {
             if(!File.Exists(source)){Debug.LogWarning("Operations artwork missing: "+source);return null;}
-            string path=Destination+"/"+name+".png";File.Copy(source,path,true);AssetDatabase.ImportAsset(path,ImportAssetOptions.ForceSynchronousImport);
+            string path=Destination+"/"+name+".png";
+            if(!string.Equals(Path.GetFullPath(source),Path.GetFullPath(path),StringComparison.OrdinalIgnoreCase))File.Copy(source,path,true);
+            AssetDatabase.ImportAsset(path,ImportAssetOptions.ForceSynchronousImport);
             var importer=(TextureImporter)AssetImporter.GetAtPath(path);importer.textureType=TextureImporterType.Sprite;
             importer.alphaIsTransparency=true;importer.mipmapEnabled=true;importer.filterMode=FilterMode.Trilinear;
             importer.maxTextureSize=1024;importer.textureCompression=TextureImporterCompression.Compressed;

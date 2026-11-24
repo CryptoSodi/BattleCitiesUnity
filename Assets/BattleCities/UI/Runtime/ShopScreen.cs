@@ -559,8 +559,19 @@ namespace BattleCities.UI
         }
         static int Count(JToken token){return int.TryParse(token?.ToString(),NumberStyles.Integer,CultureInfo.InvariantCulture,out int n)?Math.Max(0,n):0;}
         static string Amount(JToken token,string format){return decimal.TryParse(token?.ToString(),NumberStyles.Number,CultureInfo.InvariantCulture,out var n)?Math.Max(0,n).ToString(format,CultureInfo.InvariantCulture):"—";}
-        internal static string BalanceAmount(JToken token,int decimals=2)=>decimal.TryParse(token?.ToString(),NumberStyles.Float|NumberStyles.AllowThousands,CultureInfo.InvariantCulture,out var n)
-            ?decimal.Round(Math.Max(0,n),decimals,MidpointRounding.AwayFromZero).ToString("N"+decimals,CultureInfo.InvariantCulture):"—";
+        internal static string BalanceAmount(JToken token,int decimals=2)
+        {
+            decimal amount;
+            if(token?.Type==JTokenType.Integer||token?.Type==JTokenType.Float)
+            {
+                try { amount=Convert.ToDecimal(((JValue)token).Value,CultureInfo.InvariantCulture); }
+                catch(FormatException) { return "—"; }
+                catch(InvalidCastException) { return "—"; }
+                catch(OverflowException) { return "—"; }
+            }
+            else if(token?.Type!=JTokenType.String||!decimal.TryParse((string)token,NumberStyles.Float,CultureInfo.InvariantCulture,out amount)) return "—";
+            return decimal.Round(Math.Max(0,amount),decimals,MidpointRounding.AwayFromZero).ToString("N"+decimals,CultureInfo.InvariantCulture);
+        }
         internal static string DisplayPrice(string price,ShopCurrency currency)
         {
             if(currency==ShopCurrency.Solana)return price;

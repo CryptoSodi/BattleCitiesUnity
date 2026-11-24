@@ -8,14 +8,13 @@ import android.util.Base64;
 import com.solana.mobilewalletadapter.clientlib.scenario.LocalAssociationIntentCreator;
 import com.solana.mobilewalletadapter.clientlib.scenario.LocalAssociationScenario;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONObject;
 
-/** Signs the API's exact checkout message. Submission happens only after Unity saves its receipt. */
+/** Signs a checkout request; Unity validates the returned message before saving or submitting it. */
 public final class MobileWalletCheckout {
     public interface Callback { void onComplete(String json); }
     public static Operation sign(Activity activity,String transaction,String wallet,String expiry,boolean psg1,String attempt,Callback callback) {
@@ -45,7 +44,9 @@ public final class MobileWalletCheckout {
                 scenario=new LocalAssociationScenario(120000);
                 Intent intent=LocalAssociationIntentCreator.createAssociationIntent(null,scenario.getPort(),scenario.getSession());
                 if(psg1)intent.setPackage("ag.jup.jupiter.android");
-                if(intent.resolveActivity(activity.getPackageManager())==null)throw new Exception();
+                if(intent.resolveActivity(activity.getPackageManager())==null){
+                    finish(false,null,"No compatible wallet is available. Install or open your wallet and reconnect.","wallet-not-ready");return;
+                }
                 var future=scenario.start();
                 FutureTask<Void> launch=new FutureTask<>(()->{if(!done.get())activity.startActivityForResult(intent,WalletIdentity.ASSOCIATION_REQUEST);return null;});
                 activity.runOnUiThread(launch);launch.get(Math.min(remaining(),10000),TimeUnit.MILLISECONDS);
@@ -59,7 +60,8 @@ public final class MobileWalletCheckout {
                 var signed=client.signTransactions(new byte[][]{bytes}).get(Math.min(remaining(),120000),TimeUnit.MILLISECONDS);
                 if(signed.signedPayloads.length!=1)throw new Exception();
                 byte[] result=signed.signedPayloads[0];
-                if(result.length!=bytes.length||result[0]!=1||!Arrays.equals(Arrays.copyOfRange(bytes,65,bytes.length),Arrays.copyOfRange(result,65,result.length)))throw new Exception();
+                if(!CheckoutResponseShape.isValid(result))throw new Exception();
+                if(Instant.parse(expiry).toEpochMilli()<=System.currentTimeMillis()){finish(false,null,"The price quote expired. Request a fresh price.");return;}
                 remaining();finish(true,Base64.encodeToString(result,Base64.NO_WRAP),null);
             } catch(Exception error) {finish(false,null,"Wallet signing was cancelled or unavailable. No payment was submitted.");}
             finally {close();}
@@ -67,9 +69,12 @@ public final class MobileWalletCheckout {
         public void cancel(){done.set(true);close();}
         void close(){LocalAssociationScenario current=scenario;scenario=null;if(current!=null)current.close();}
         void finish(boolean ok,String transaction,String error) {
+            finish(ok,transaction,error,null);
+        }
+        void finish(boolean ok,String transaction,String error,String errorCode) {
             if(!done.compareAndSet(false,true))return;
             try {JSONObject body=new JSONObject().put("attemptId",attempt).put("ok",ok);
-                if(ok)body.put("signedTransaction",transaction);else body.put("error",error);callback.onComplete(body.toString());}
+                if(ok)body.put("signedTransaction",transaction);else {body.put("error",error);if(errorCode!=null)body.put("errorCode",errorCode);}callback.onComplete(body.toString());}
             catch(Exception ignored){}
         }
     }

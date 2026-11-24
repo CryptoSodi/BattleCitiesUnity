@@ -16,6 +16,13 @@ Mobile buttons display **CONNECT WALLET** or **CONNECT JUPITER** instead of the
 web button's baked Phantom artwork. PSG1 **B** cancels a pending attempt after
 returning to the game.
 
+For shop checkout, PSG1's Jupiter bridge checks the returned transaction's basic
+shape and passes it to the shared Unity quote validator. That validator permits
+only unchanged purchase instructions or the same narrowly allowlisted Lighthouse
+safety assertions accepted by the API; other changes are rejected before
+submission. The API independently verifies the quote and signature before it
+broadcasts the transaction. PSG1 continues to target Jupiter specifically.
+
 ## Verification and session lifecycle
 
 1. Connect/authorize the wallet and get a Solana public key.

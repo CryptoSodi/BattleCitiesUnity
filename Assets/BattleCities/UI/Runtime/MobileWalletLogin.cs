@@ -52,7 +52,9 @@ namespace BattleCities.UI
                 reportStage(stage);
                 if (!psg1 && await SeekerGameWallet.Client.IsAvailable(token))
                 {
-                    var result = await SeekerWalletLoginFlow.Authenticate(SeekerGameWallet.Client,
+                    // An explicit Connect must request a fresh grant; the cached
+                    // Seeker session may have been revoked while the app slept.
+                    var result = await SeekerWalletLoginFlow.AuthenticateFresh(SeekerGameWallet.Client,
                         new SeekerLoginHttp(baseUrl), attemptId, token, reportStage);
                     if (!token.IsCancellationRequested) responses.Enqueue(result.ToString());
                     return;

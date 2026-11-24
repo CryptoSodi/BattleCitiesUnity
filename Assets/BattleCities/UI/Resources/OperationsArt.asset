@@ -27,6 +27,7 @@ MonoBehaviour:
   - {fileID: 8924947656317453358, guid: 5e18ac5459adfa941926d0226625d51e, type: 3}
   - {fileID: -8586097681645895071, guid: b04a3d82002eecc4b820cac7ef5ccd0b, type: 3}
   - {fileID: 9043755253799671106, guid: 38ae0cf4b7a2c1a4c86afa56a141c950, type: 3}
+  referral: {fileID: -2971154092158761343, guid: b22055ce684e3aa4c88b15bc1d680c2c, type: 3}
   playerTanks:
   - {fileID: 1135612159295214548, guid: f0e74f8a48473084f8786baf5537b0fd, type: 3}
   - {fileID: -926711855478776023, guid: 562c601812cd9534e9871da246e98be7, type: 3}

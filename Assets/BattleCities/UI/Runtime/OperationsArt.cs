@@ -8,6 +8,7 @@ namespace BattleCities.UI
         public Sprite[] quarters = new Sprite[7];
         // Website, X follow, Instagram, Discord, X repost, X comment.
         public Sprite[] socials = new Sprite[6];
+        public Sprite referral;
         public Sprite[] playerTanks = new Sprite[4];
         public Sprite[] enemies = new Sprite[4];
         public Sprite cannon;

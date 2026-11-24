@@ -164,7 +164,8 @@ namespace BattleCities.UI
             pendingPayment=null;
             if(!api||!api.IsWalletAuthenticated)return;
             try {var value=JObject.Parse(PlayerPrefs.GetString(PendingKey,"{}"));if((string)value["wallet"]==Wallet&&(string)value["api"]==api.BaseUrl
-                &&!string.IsNullOrEmpty((string)value["signature"])&&!string.IsNullOrEmpty((string)value["signedTransaction"]))pendingPayment=value;}
+                &&!string.IsNullOrEmpty((string)value["quoteToken"])
+                &&((bool?)value["walletSubmitted"]==true||(!string.IsNullOrEmpty((string)value["signature"])&&!string.IsNullOrEmpty((string)value["signedTransaction"]))))pendingPayment=value;}
             catch { /* An invalid receipt cannot authorize a payment. */ }
         }
         void SavePending(){PlayerPrefs.SetString(PendingKey,pendingPayment.ToString(Formatting.None));PlayerPrefs.Save();}
@@ -270,20 +271,38 @@ namespace BattleCities.UI
             var quote=checkoutQuote;string owner=Owner;int revision=checkoutRevision;
             JObject signed=null;
             noticeBody.text="Approve the payment in your wallet. Return to Battle Cities after signing.";
-            signer.Sign((string)quote["transaction"],Wallet,ShopLiveCatalog.Text(quote["expiresAt"]),value=>signed=value,"Buy "+ShopCatalog.Products[checkoutIndex].Title);
+            signer.Sign((string)quote["transaction"],Wallet,ShopLiveCatalog.Text(quote["expiresAt"]),value=>signed=value,"Buy "+ShopCatalog.Products[checkoutIndex].Title,()=>
+            {
+                pendingPayment=new JObject{{"wallet",Wallet},{"api",api.BaseUrl},{"itemId",ShopCatalog.Products[checkoutIndex].Id},
+                    {"quoteToken",quote["quoteToken"]},{"walletSubmitted",true}};
+                var purchased=liveCatalog?.PurchaseContents(ShopCatalog.Products[checkoutIndex].Id);
+                if(purchased!=null)pendingPayment["contents"]=purchased;
+                SavePending();
+            });
             while(signed==null&&signer.IsPending&&owner==Owner&&revision==checkoutRevision)yield return null;
             if(owner!=Owner||revision!=checkoutRevision){FinishCheckout();yield break;}
             if((bool?)signed?["ok"]!=true)
             {
+                if((string)signed?["errorCode"]=="wallet-not-ready"&&api)api.MarkPurchaseWalletUnavailable();
+                if((bool?)pendingPayment?["walletSubmitted"]==true&&(bool?)signed?["definitelyNotSubmitted"]==true)ClearPending();
+                if((bool?)pendingPayment?["walletSubmitted"]==true)
+                {
+                    checkoutQuote=null;noticeBody.text="Checking whether your wallet submitted the payment...";
+                    yield return VerifyPending(owner,revision);FinishCheckout();yield break;
+                }
                 string price=ShopLiveCatalog.FormatAtomic((string)quote["amountAtomic"],currency==ShopCurrency.Solana?9:currency==ShopCurrency.Play?liveCatalog.PlayDecimals:liveCatalog.SkrDecimals);
                 // A failed signing attempt must not retry the same transaction:
                 // the wallet may have rejected or altered that quote.
                 checkoutQuote=null;
-                if((string)signed?["errorCode"]=="wallet-not-ready"&&api)api.MarkPurchaseWalletUnavailable();
                 bool ready=api&&api.IsWalletReadyForPurchases;
                 noticeBody.text=ready?((string)signed?["error"]??"Wallet signing was cancelled. No payment was submitted.")+"\n\n"+price+" "+PaymentTicker+" + network fees"
-                    :"Your wallet is locked or disconnected. Connect the wallet used to sign in to continue.";
-                FinishCheckout();ConfigureNoticeAction(ready?"RETRY":"CONNECT WALLET");yield break;
+                    :((string)signed?["error"]??"Your wallet is locked or disconnected. Reconnect the wallet used to sign in to continue.");
+                FinishCheckout();ConfigureNoticeAction(ready?"RETRY":"RECONNECT WALLET");yield break;
+            }
+            if((bool?)signed["walletSubmitted"]==true)
+            {
+                pendingPayment["signature"]=signed["signature"];SavePending();checkoutQuote=null;
+                yield return VerifyPending(owner,revision);FinishCheckout();yield break;
             }
             // Persist the exact signed bytes before submission. A retry uses the
             // same signature and cannot create another wallet payment.
@@ -311,17 +330,20 @@ namespace BattleCities.UI
             noticeBody.text="Checking payment confirmation...";
             for(int attempt=0;attempt<4&&pendingPayment!=null&&owner==Owner&&revision==checkoutRevision;attempt++)
             {
-                yield return api.Request("POST","/api/economy/purchase/verify",new JObject{{"quoteToken",pendingPayment["quoteToken"]},{"signature",pendingPayment["signature"]}},(code,body,error)=>
+                var request=new JObject{{"quoteToken",pendingPayment["quoteToken"]}};
+                if((bool?)pendingPayment["walletSubmitted"]==true)request["recover"]=true;
+                if(!string.IsNullOrEmpty((string)pendingPayment["signature"]))request["signature"]=pendingPayment["signature"];
+                yield return api.Request("POST","/api/economy/purchase/verify",request,(code,body,error)=>
                 {if(owner==Owner&&revision==checkoutRevision)ApplyPaymentResult(body);});
                 if(pendingPayment!=null&&attempt<3)yield return new WaitForSecondsRealtime(3);
             }
             if(owner!=Owner||revision!=checkoutRevision)yield break;
-            if(pendingPayment!=null)
+            if(pendingPayment!=null&&(bool?)pendingPayment["walletSubmitted"]!=true)
             {
                 yield return api.Request("POST","/api/economy/purchase/submit",new JObject{{"quoteToken",pendingPayment["quoteToken"]},{"signedTransaction",pendingPayment["signedTransaction"]}},(code,body,error)=>
                 {if(owner==Owner&&revision==checkoutRevision)ApplyPaymentResult(body);});
             }
-            if(pendingPayment!=null){noticeBody.text="Payment confirmation is pending. CHECK PAYMENT retries this receipt without making another payment.";ConfigureNoticeAction("CHECK PAYMENT");}
+            if(pendingPayment!=null){noticeBody.text="Payment status is still unknown. Check your wallet history, then use CHECK PAYMENT. If it remains pending, contact support before retrying.";ConfigureNoticeAction("CHECK PAYMENT");}
             else {noticeConfirm.gameObject.SetActive(false);LayoutNoticeButtons();LinkNoticeButtons();yield return LoadLiveAccount();if(api)api.RefreshNow();}
         }
         void ApplyPaymentResult(JObject body)

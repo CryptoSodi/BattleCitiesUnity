@@ -31,12 +31,12 @@ namespace BattleCities.UI
         {
             if (!notifications || !notifications.gameObject.activeSelf) return;
             version.text = "VERSION " + Application.version + " • " + (push ? push.Status : "Checking notifications...");
-            notificationsCaption.text = push && push.Enabled ? ScreenContent.Text("settings","disable-alerts","DISABLE ALERTS") : ScreenContent.Text("settings","enable-alerts","ENABLE ALERTS");
+            notificationsCaption.text = push && push.Enabled && !push.NeedsPermission ? ScreenContent.Text("settings","disable-alerts","DISABLE ALERTS") : ScreenContent.Text("settings","enable-alerts","ENABLE ALERTS");
             bool available = push && push.Supported;
             bool changed = notifications.interactable != available;
             notifications.interactable = available;
             notificationsVisual.SetActive(push && push.Receiving);
-            if (changed) Psg1UiNavigation.Rows(new Selectable[]{back},new Selectable[]{rowButtons[0]},new Selectable[]{rowButtons[1]},new Selectable[]{logout},new Selectable[]{pair},new Selectable[]{notifications});
+            if (changed) Psg1UiNavigation.Rows(new Selectable[]{back},new Selectable[]{rowButtons[0]},new Selectable[]{rowButtons[1]},new Selectable[]{referral,logout},new Selectable[]{pair},new Selectable[]{notifications});
         }
     }
 }

@@ -45,6 +45,25 @@ namespace BattleCities.UI.Editor
         }
         [MenuItem("Battle Cities/Notifications/Run isolated Firebase checks")]
         public static void RunFromMenu() { Debug.Log(Run()); }
+        public static void RunPermissionChecks()
+        {
+            checks = 0;
+            var go = new GameObject("Notification permission fixture") { hideFlags = HideFlags.HideAndDontSave };
+            try
+            {
+                var push = go.AddComponent<PushNotifications>();
+                Registration(push, true, "prompt");
+                Check(push.NeedsPermission && !push.Receiving, "unanswered prompt stays actionable");
+                Registration(push, true, "denied");
+                Check(push.NeedsPermission && !push.Receiving, "blocked permission stays actionable");
+                Registration(push, true, "granted");
+                Check(!push.NeedsPermission && push.Receiving, "granted permission can receive");
+                Registration(push, false, "denied");
+                Check(!push.NeedsPermission && !push.Receiving, "local opt-out stays disabled");
+            }
+            finally { UnityEngine.Object.DestroyImmediate(go); }
+            Debug.Log("NOTIFICATION PERMISSION CHECKS PASSED: " + checks);
+        }
         public static string Run()
         {
             checks = 0;
