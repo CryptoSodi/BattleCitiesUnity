@@ -99,7 +99,7 @@ namespace BattleCities
             economy=tvReplay||LevelEditor.LevelEditorPlaytest.IsActive?null:GetComponent<EconomyClient>();
             if(!tvReplay)input.Enable();
             street=Material(new Color(.24f,.28f,.29f));pavement=Material(new Color(.58f,.58f,.51f));paint=Material(new Color(.82f,.81f,.65f));
-            var visualAssets=Resources.Load<BattleVisualAssets>("BattleVisualAssets");
+            var visualAssets=RemoteGameArt.Load<BattleVisualAssets>("BattleVisualAssets");
             water=visualAssets&&visualAssets.WaterMaterial?visualAssets.WaterMaterial:Material(new Color(.03f,.40f,.56f));
             mineMetal=Material(new Color(.16f,.21f,.13f));mineDirt=Material(new Color(.32f,.23f,.12f));mineReady=Material(new Color(.95f,.57f,.04f));
             dronePaint=Material(new Color(.95f,.58f,.025f));

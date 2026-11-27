@@ -22,7 +22,7 @@ namespace BattleCities.UI
         {
             data=row;yours=current;theme=skin;
             if(!initialized)Build();
-            artwork=Resources.Load<RankingCardArt>("RankingCardArt");
+            artwork=RemoteGameArt.Load<RankingCardArt>("RankingCardArt");
             int visualIndex=row.rank>0?row.rank-1:index;
             var sprite=artwork?artwork.Row(row.rank,visualIndex,false):null;
             background.sprite=sprite?sprite:theme.Rounded;background.type=Image.Type.Sliced;background.raycastTarget=GetComponent<Button>();

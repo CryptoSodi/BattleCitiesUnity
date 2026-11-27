@@ -767,7 +767,7 @@ namespace BattleCities.UI
             caption.text=(index+1)+" FUEL";
             caption.color=Color.white;
             caption.fontStyle=FontStyles.Normal;
-            caption.alignment=TextAlignmentOptions.MidlineLeft;
+            caption.alignment=TextAlignmentOptions.Center;
             caption.fontSize=27;
             caption.fontSizeMax=27;
             caption.raycastTarget=false;
@@ -783,14 +783,11 @@ namespace BattleCities.UI
             {
                 cost.fontSize=cost.fontSizeMax=androidSpacing?25:27;
                 textStyles.ApplyCleanButton(cost,cost.color.r<.5f);
-                float width=Mathf.Max(1f,badge.rect.width),height=Mathf.Max(1f,badge.rect.height);
-                var icon=can?can.GetComponent<Image>():null;
-                float iconWidth=can?height*.84f*(icon&&icon.sprite?icon.sprite.rect.width/icon.sprite.rect.height:.8f):0f;
-                float gap=can?height*.18f:0f;
-                float textWidth=Mathf.Min(cost.GetPreferredValues(cost.text).x+4f,Mathf.Max(1f,width*.82f-iconWidth-gap));
-                float left=(width-iconWidth-gap-textWidth)*.5f;
-                if(can)Fit(can,new Rect(left/width,.08f,iconWidth/width,.84f));
-                Fit(cost.rectTransform,new Rect((left+iconWidth+gap)/width,.04f,textWidth/width,.92f));
+                // Match Shop: the icon occupies the left slot and the caption
+                // is centered in the remaining button area on every card.
+                if(can)Fit(can,new Rect(.05f,.13f,.17f,.74f));
+                Fit(cost.rectTransform,new Rect(.22f,.05f,.74f,.90f));
+                cost.alignment=TextAlignmentOptions.Center;
             }
             var locked=badge.Find("Locked text")?.GetComponent<TMP_Text>();
             if(locked)

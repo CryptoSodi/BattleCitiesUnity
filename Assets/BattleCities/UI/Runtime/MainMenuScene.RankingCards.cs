@@ -24,6 +24,7 @@ namespace BattleCities.UI
             homeCardData=value;if(!scoresPanel)return;
             int count=Mathf.Min(10,value?.rows?.Length??0);
             LayoutHomeEmptyStandings(count==0);
+            LayoutHomeStandingsSurface();
             SetHomeRankBackdrop(count>0);
             if(count==0){if(homeCardsRoot)homeCardsRoot.gameObject.SetActive(false);return;}
             if(!homeCardsRoot){
@@ -81,6 +82,22 @@ namespace BattleCities.UI
                 {anchor.y=homeScoresOriginalTopAnchor;offset.y=homeScoresOriginalTopOffset;scoresPanel.anchorMax=anchor;scoresPanel.offsetMax=offset;}
                 homeScoresExpanded=false;
             }
+            if(!empty&&scoresPanel.parent is RectTransform parentRect)
+            {
+                // A platform refresh can reset the saved score bounds while the
+                // empty state is open. Never restore rows over their headings.
+                var headerCorners=new Vector3[4];var scoreCorners=new Vector3[4];
+                columns.GetWorldCorners(headerCorners);scoresPanel.GetWorldCorners(scoreCorners);
+                float overlap=parentRect.InverseTransformPoint(scoreCorners[1]).y-parentRect.InverseTransformPoint(headerCorners[0]).y;
+                if(overlap>0){offset=scoresPanel.offsetMax;offset.y-=overlap;scoresPanel.offsetMax=offset;}
+            }
+            // The glass shader stores absolute bounds. Recompute them after the
+            // scores panel changes size, including asynchronous empty/populated updates.
+            var backdrop=transform.Find("World backdrop") as RectTransform;
+            var arena=backdrop?backdrop.GetComponent<UnityEngine.UI.Image>():null;
+            var television=mainFrame?mainFrame.Find("TV Background Viewport/TV Background")?.GetComponent<UnityEngine.UI.Image>():null;
+            ApplyPaperBackdrop(scoresPanel,backdrop,arena?arena.sprite:null,television?television.material:null,
+                ref rankingsBackdropMaterial);
         }
         void LayoutHomeRankCards()
         {
@@ -88,14 +105,14 @@ namespace BattleCities.UI
             int count=Mathf.Min(10,homeCardData.rows?.Length??0);if(count==0)return;
             SetHomeRankBackdrop(true);
             float inset=Mathf.Clamp(scoresPanel.rect.width*.018f,5f,10f);
-            homeCardsRoot.offsetMin=new Vector2(inset,5f);homeCardsRoot.offsetMax=new Vector2(-inset,-5f);
+            homeCardsRoot.offsetMin=new Vector2(inset,5f);homeCardsRoot.offsetMax=new Vector2(-inset,-2f);
             float w=homeCardsRoot.rect.width,h=homeCardsRoot.rect.height,pad=4,gap=Mathf.Clamp(h*.0065f,3,6);
             bool personal=homeYourRank.gameObject.activeSelf;
             float youHeight=personal?Mathf.Clamp(h*.10f,40,58):0,reserve=personal?youHeight+14:0;
             // Size against a complete top ten, even when only a few rows exist.
             // Otherwise a single podium card stretches over the whole list.
             const float weights=10+3*.12f;
-            float normal=Mathf.Max(20,(h-pad*2-reserve-gap*9)/weights),top=pad;
+            float normal=Mathf.Max(20,(h-pad*2-reserve-gap*9)/weights),top=2f;
             for(int i=0;i<count;i++){
                 float size=normal*(homeCardData.rows[i].rank<=3?1.12f:1);
                 Place((RectTransform)homeRankCards[i].transform,pad,top,w-pad*2,size);homeRankCards[i].Layout();top+=size+gap;
@@ -123,8 +140,8 @@ namespace BattleCities.UI
                     else continue;
                     float fullWidth=Mathf.Max(1f,panel.rect.width);
                     left=(inset+left*w)/fullWidth;width=width*w/fullWidth;
-                    var r=text.rectTransform;r.anchorMin=new Vector2(left,r.anchorMin.y);r.anchorMax=new Vector2(left+width,r.anchorMax.y);
-                    r.offsetMin=new Vector2(0,r.offsetMin.y);r.offsetMax=new Vector2(0,r.offsetMax.y);text.alignment=text.text=="PLAYER"?TextAnchor.MiddleLeft:TextAnchor.MiddleCenter;
+                    var r=text.rectTransform;r.anchorMin=new Vector2(left,0f);r.anchorMax=new Vector2(left+width,1f);
+                    r.offsetMin=new Vector2(0,3f);r.offsetMax=Vector2.zero; text.alignment=text.text=="PLAYER"?TextAnchor.LowerLeft:TextAnchor.LowerCenter;
                     text.resizeTextForBestFit=false;text.fontSize=20;
                     text.horizontalOverflow=HorizontalWrapMode.Overflow;
                     sharedSize=Mathf.Min(sharedSize,20*Mathf.Max(1,r.rect.width-4)/Mathf.Max(1,text.preferredWidth));
@@ -148,7 +165,8 @@ namespace BattleCities.UI
             if(image.sprite)TvTitleHeaderLayout.FitSkin(image,6f,1f);
             var low=new Vector2(float.MaxValue,float.MaxValue);var high=new Vector2(float.MinValue,float.MinValue);
             var corners=new Vector3[4];
-            foreach(var region in new[]{columns,scores}){
+            // A hidden header must not enlarge the backing beyond the empty panel.
+            foreach(var region in columns.gameObject.activeSelf?new[]{columns,scores}:new[]{scores}){
                 region.GetWorldCorners(corners);
                 foreach(var corner in corners){var point=(Vector2)leaderboard.InverseTransformPoint(corner);low=Vector2.Min(low,point);high=Vector2.Max(high,point);}
             }

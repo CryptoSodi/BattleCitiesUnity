@@ -61,14 +61,14 @@ namespace BattleCities.UI
         }
 #if UNITY_ANDROID && !UNITY_EDITOR
         // KeyStore and disk access run off the Unity frame thread.
-        private static Task<string> Native(string method, string value) => Task.Run(() =>
+        internal static Task<string> Native(string method, string value, string className = "com.battlecities.wallet.WalletSessionStore") => Task.Run(() =>
         {
             AndroidJNI.AttachCurrentThread();
             try
             {
                 using (var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
                 using (var activity = player.GetStatic<AndroidJavaObject>("currentActivity"))
-                using (var store = new AndroidJavaClass("com.battlecities.wallet.WalletSessionStore"))
+                using (var store = new AndroidJavaClass(className))
                 {
                     if (method == "save") return store.CallStatic<bool>(method, activity, value) ? "true" : "false";
                     if (method == "load") return store.CallStatic<string>(method, activity);

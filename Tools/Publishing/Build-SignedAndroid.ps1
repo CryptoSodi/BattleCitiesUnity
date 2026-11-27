@@ -54,7 +54,7 @@ try {
   $prior=$env:BATTLECITIES_BUILD_REQUEST
   try{
    $env:BATTLECITIES_BUILD_REQUEST=$requestPath
-   $null=Invoke-GameTool unity @('build',$script:GameRoot,'--target','Android','--execute-method','BattleCities.Editor.AutomationBuild.Build','--output-path',$export,'--log-file',(Join-Path $job 'unity-build.log'),'--allow-dirty-build','--no-tail','--timeout','3600') -Echo
+   $null=Invoke-GameTool unity @('build',$script:GameRoot,'--target','Android','--execute-method','BattleCities.Editor.AutomationBuild.Build','--output',$export,'--log-file',(Join-Path $job 'unity-build.log'),'--allow-dirty-build','--no-tail','--timeout','3600') -Echo
   }finally{$env:BATTLECITIES_BUILD_REQUEST=$prior}
   $report=Get-Content -LiteralPath $reportPath -Raw|ConvertFrom-Json
  }

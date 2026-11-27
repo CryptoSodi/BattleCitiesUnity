@@ -224,7 +224,7 @@ namespace BattleCities.UI
                 ? "Approve sign-in in Jupiter Wallet, then return to Battle Cities."
                 : "Approve the sign-in message in your wallet, then return to Battle Cities.");
             if (!mobileWallet) mobileWallet = gameObject.AddComponent<MobileWalletLogin>();
-            mobileWallet.Connect(baseUrl.TrimEnd('/'), RuntimePlatformInfo.IsPsg1, walletAttemptId, OnWalletLoginResult);
+            mobileWallet.Connect(baseUrl.TrimEnd('/'), walletAttemptId, OnWalletLoginResult);
 #else
             CancelWalletLogin(false);
             NotifyStatus("WALLET LOGIN UNAVAILABLE", "Wallet sign-in runs in the web build or on an Android device. Guest play is available in the Editor.");

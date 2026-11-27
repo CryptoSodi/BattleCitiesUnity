@@ -79,13 +79,12 @@ and seed phrases never enter the game.
 
 ## Android build dependency
 
-`Assets/Plugins/Android/BattleCitiesWallet.androidlib` is a Gradle library plugin
-with its own manifest, package-visibility queries and consumer keep rules for
-Unity's JNI bridge. It resolves the official
-`com.solanamobile:mobile-wallet-adapter-clientlib:2.1.1` from Maven Central.
-This version supports the project's Android API 36 / Unity 6.6 toolchain;
-MWA 2.2.0 requires API 37. The plugin uses no Google services.
-Keep AndroidX enabled in Gradle (Unity's current generated configuration already does).
+The Solana Unity SDK handles Android wallet authorization and transactions.
+`Assets/Plugins/Android/BattleCitiesWallet.androidlib` retains the Android
+package-visibility queries and encrypted game-session storage called through JNI.
+It also retains cleanup of authorization data saved by older versions. It does
+not implement the wallet login or checkout flow or depend on the old native
+Mobile Wallet Adapter client library. Keep AndroidX enabled for the Unity SDK.
 
 ## Checks
 

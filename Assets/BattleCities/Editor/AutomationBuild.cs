@@ -170,11 +170,25 @@ namespace BattleCities.Editor
                 throw new BuildFailedException("Remote artwork is still referenced by local content and was duplicated into the APK.");
             if (remoteArt != null)
             {
+                var startupTextures = new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal) {
+                    "Assets/BattleCities/UI/Art/main-menu/branding/battle-cities-splash-logo.png"
+                };
+                var duplicated = report.packedAssets.SelectMany(pack => pack.contents).Select(asset => asset.sourceAssetPath)
+                    .Where(path => !string.IsNullOrEmpty(path) && !startupTextures.Contains(path)
+                        && RemoteGameArtBuild.RemoteTexturePaths.Contains(path)).Distinct().OrderBy(path => path).ToArray();
+                if (duplicated.Length != 0)
+                    throw new BuildFailedException("OTA textures are still referenced by the APK: " + string.Join(", ", duplicated));
+                var localImages = report.packedAssets.SelectMany(pack => pack.contents).Select(asset => asset.sourceAssetPath)
+                    .Where(path => !string.IsNullOrEmpty(path) && path.StartsWith("Assets/", StringComparison.Ordinal)
+                        && !startupTextures.Contains(path) && AssetDatabase.GetMainAssetTypeAtPath(path) == typeof(Texture2D))
+                    .Distinct().OrderBy(path => path).ToArray();
+                if (localImages.Length != 0)
+                    throw new BuildFailedException("Non-startup images remain in the APK: " + string.Join(", ", localImages));
                 var models = report.packedAssets.SelectMany(pack => pack.contents)
                     .Select(asset => asset.sourceAssetPath).Where(path => new[] { ".glb", ".gltf", ".fbx", ".obj" }
                     .Contains(Path.GetExtension(path).ToLowerInvariant())).Distinct().ToArray();
                 if (models.Length != 0) throw new BuildFailedException("3D models remain in APK: " + string.Join(", ", models));
-                File.WriteAllText(Path.Combine(Path.GetDirectoryName(request.reportPath), "remote-model-verification.txt"), "PASS: no 3D source models or remote roots in player build.");
+                File.WriteAllText(Path.Combine(Path.GetDirectoryName(request.reportPath), "remote-model-verification.txt"), "PASS: no 3D source models, remote roots or non-startup OTA textures in player build.");
             }
             var summary = report.summary;
             var receipt = new Receipt

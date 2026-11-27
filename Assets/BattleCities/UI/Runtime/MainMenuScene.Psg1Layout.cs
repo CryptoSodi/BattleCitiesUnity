@@ -96,7 +96,7 @@ namespace BattleCities.UI
             var dpad=controls.Find("D-Pad Hint");var a=controls.Find("A Hint");var b=controls.Find("B Hint");
             var label=dpad?dpad.Find("Label")?.GetComponent<UnityEngine.UI.Text>():null;
             if(!dpad||!a||!b||!label)return;
-            var art=Resources.Load<Psg1BattleGuideArt>("Psg1BattleGuideArt");
+            var art=RemoteGameArt.Load<Psg1BattleGuideArt>("Psg1BattleGuideArt");
             if(!art||!art.dpad||!art.face||!art.shoulder)return;
             var existing=controls.Find("Extended PSG1 hints") as RectTransform;
             if(existing&&existing.Find("Guide artwork")&&psgLegendArtRevision==ScreenUpdates.Revision&&psgLegendSelect==art.select&&psgLegendStart==art.start)return;

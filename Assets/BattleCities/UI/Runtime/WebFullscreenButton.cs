@@ -33,7 +33,7 @@ namespace BattleCities.UI
         public void Initialize(PreBattleArt art)
         {
             blue=art.tankCostButton;gold=art.tankCostButtonSelected;
-            this.art=Resources.Load<WebFullscreenArt>("WebFullscreenArt");
+            this.art=RemoteGameArt.Load<WebFullscreenArt>("WebFullscreenArt");
             transition=Transition.None;
             var surface=GetComponent<Image>();surface.sprite=blue;surface.type=Image.Type.Sliced;surface.raycastTarget=true;targetGraphic=surface;
             foreach(var image in GetComponentsInChildren<Image>())if(image.gameObject!=gameObject)glyph.Add(image);

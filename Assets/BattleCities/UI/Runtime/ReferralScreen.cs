@@ -64,7 +64,7 @@ namespace BattleCities.UI
             share=sharing;firstPrompt=initial;busy=false;pasteRequestId=null;
             overlay.gameObject.SetActive(true);overlay.SetAsLastSibling();
             title.text=sharing?"REFER & EARN":"HAVE A REFERRAL?";
-            detail.text=sharing?"Share your link. Earn 1% of your friend's confirmed shop purchases, in the currency they spend.":"Enter a friend's referral link or code to permanently raise your 30-minute Fuel refill cap from 5 to 6.";
+            detail.text=sharing?"Share your link. Earn 1% of your friend's confirmed shop purchases, in the currency they spend.":"Enter a friend's referral code for 1 Fuel every 5 minutes, up to 6.";
             input.gameObject.SetActive(true);input.readOnly=sharing;input.text="";
             Fit(input.transform as RectTransform,sharing?new Rect(.12f,.4875f,.76f,.115f):new Rect(.12f,.4875f,.54f,.115f));paste.gameObject.SetActive(!sharing);
             primaryText.text=sharing?"COPY LINK":"APPLY";secondaryText.text=initial?"SKIP":"CLOSE";
@@ -121,7 +121,7 @@ namespace BattleCities.UI
             }
             else if((bool?)profile["referred"]==true)
             {
-                detail.text="A REFERRAL IS ALREADY ACTIVE. YOUR FUEL REFILLS UP TO 6 EVERY 30 MINUTES.";
+                detail.text="A REFERRAL IS ACTIVE. GET 1 FUEL EVERY 5 MINUTES, UP TO 6.";
                 input.gameObject.SetActive(false);paste.gameObject.SetActive(false);primary.interactable=false;message.text="REFERRAL APPLIED";
             }
             RefreshNavigation();

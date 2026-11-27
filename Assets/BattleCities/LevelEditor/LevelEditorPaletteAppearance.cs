@@ -152,7 +152,7 @@ namespace BattleCities.LevelEditor
                 else
                 {
                     root=new GameObject(key);var mesh=SurfaceMesh();owned.Add(mesh);root.AddComponent<MeshFilter>().sharedMesh=mesh;
-                    var water=Resources.Load<BattleVisualAssets>("BattleVisualAssets").WaterMaterial;
+                    var water=RemoteGameArt.Load<BattleVisualAssets>("BattleVisualAssets").WaterMaterial;
                     var material=key=="water"?new Material(water):new Material(Resources.Load<Shader>("BattleTerrainSurfaces"));owned.Add(material);
                     if(key=="ice"){material.SetFloat("_Kind",3);material.SetTexture("_RippleMap",water.GetTexture("_RippleMap"));}
                     root.AddComponent<MeshRenderer>().sharedMaterial=material;

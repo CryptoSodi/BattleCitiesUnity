@@ -327,7 +327,11 @@ namespace BattleCities.UI
         public void Close(){Close(true);}
         public void Close(bool restoreFocus)
         {
-            if(!root)return;CancelCheckout();StopAllCoroutines();accountRequest=null;notice.gameObject.SetActive(false);root.gameObject.SetActive(false);
+            if(!root)return;CancelCheckout();StopAllCoroutines();accountRequest=null;
+#if UNITY_ANDROID || UNITY_EDITOR
+            savedPaymentRoutine=null;
+#endif
+            notice.gameObject.SetActive(false);root.gameObject.SetActive(false);
             if(menu){menu.SetTankSelectorBackdrop(false);menu.RefreshLayout();if(restoreFocus&&menu.Tabs.Length>1)Focus(menu.Tabs[1]);}
         }
         public void Back(){if(notice&&notice.gameObject.activeSelf){if(noticeClose&&noticeClose.interactable)DismissNotice();}else Close();}

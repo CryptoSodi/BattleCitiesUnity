@@ -44,6 +44,11 @@ namespace BattleCities.UI
             purchaseWallet = null;
             try
             {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                // Remove authorizations written by older versions; never restore them.
+                var clearOldAuthorization = WalletSessionStorage.Native("clear", null, "com.battlecities.wallet.WalletAuthorizationStore");
+                while (!clearOldAuthorization.IsCompleted) yield return null;
+#endif
                 NotifyStatus("RESTORING SESSION", "Signing you back in...");
                 SavedWalletSession saved = null;
 #if UNITY_ANDROID || UNITY_EDITOR

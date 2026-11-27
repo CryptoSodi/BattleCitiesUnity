@@ -15,7 +15,7 @@ namespace BattleCities.UI
         public void Configure(int tier, bool aimUp)
         {
             Release();
-            var prefab = Resources.Load<GameObject>("TvReplayRig");
+            var prefab = RemoteGameArt.Load<GameObject>("TvReplayRig");
             var game = prefab ? prefab.GetComponent<BattleGame>() : null;
             if (!game || game.TankModels == null || game.TankModels.Length <= tier) return;
             var origin = new Vector3(12000 + (++slot % 32) * 20, 12000, 12000);

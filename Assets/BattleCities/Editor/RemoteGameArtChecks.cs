@@ -41,6 +41,9 @@ namespace BattleCities.Editor
                 manifest = Good(); manifest.unityVersion = "different-engine"; Reject(manifest, "incompatible engine rejected");
                 Reject(null, "missing manifest rejected");
                 Check(RemoteGameArt.Load<UI.ShopArt>("ShopArt") != null, "ordinary build keeps local artwork");
+                Check(RemoteGameArt.Load<Texture2D>("HudPlayer") != null, "ordinary builds keep local HUD textures");
+                Check(RemoteGameArt.Load<UI.BattleGuideArt>("BattleGuideArt") != null, "ordinary builds keep local guide artwork");
+                Check(RemoteGameArt.Load<UI.RankingCardArt>("RankingCardArt") != null, "ordinary builds keep local ranking artwork");
                 var connection = new RemoteGameArt.DownloadException(UnityEngine.Networking.UnityWebRequest.Result.ConnectionError,
                     0, "Cannot resolve destination host", 0);
                 Check(connection.IsTransient, "pre-HTTP connection failures retry as connectivity issues");

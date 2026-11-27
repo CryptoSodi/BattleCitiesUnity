@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Community.SeekerConnect;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Scripting;
@@ -19,6 +18,7 @@ namespace BattleCities.UI
         byte[] quotedTransaction;
         Action<JObject> completed;
         Action walletSubmissionStarting;
+        Action walletSubmissionUnsupported;
         double deadline;
         CancellationTokenSource cancellation;
         public bool IsPending=>attempt!=null;
@@ -26,19 +26,9 @@ namespace BattleCities.UI
         [DllImport("__Internal")] static extern void BattleCitiesSignCheckout(string target,string callback,string attempt,string transaction,string wallet,string expiry,string scriptUrl,string label);
         [DllImport("__Internal")] static extern void BattleCitiesCancelCheckout(string attempt);
 #endif
-#if UNITY_ANDROID && !UNITY_EDITOR
-        AndroidJavaObject operation;
-        Callback callback;
-        [Preserve] sealed class Callback : AndroidJavaProxy
+        public void Sign(string transaction,string wallet,string expiry,Action<JObject> onCompleted,string label="Buy game item",Action onWalletSubmissionStarting=null,Action onWalletSubmissionUnsupported=null)
         {
-            readonly ConcurrentQueue<string> queue;
-            public Callback(ConcurrentQueue<string> value):base("com.battlecities.wallet.MobileWalletCheckout$Callback"){queue=value;}
-            [Preserve] public void onComplete(string json){queue.Enqueue(json);}
-        }
-#endif
-        public void Sign(string transaction,string wallet,string expiry,Action<JObject> onCompleted,string label="Buy game item",Action onWalletSubmissionStarting=null)
-        {
-            Cancel();completed=onCompleted;walletSubmissionStarting=onWalletSubmissionStarting;attempt=Guid.NewGuid().ToString("N");deadline=Time.realtimeSinceStartupAsDouble+150;
+            Cancel();completed=onCompleted;walletSubmissionStarting=onWalletSubmissionStarting;walletSubmissionUnsupported=onWalletSubmissionUnsupported;attempt=Guid.NewGuid().ToString("N");deadline=Time.realtimeSinceStartupAsDouble+150;
             try
             {
                 var bytes=Convert.FromBase64String(transaction);
@@ -51,7 +41,7 @@ namespace BattleCities.UI
                     Application.streamingAssetsPath.TrimEnd('/')+"/BattleCitiesCheckout/wallet.js",label);
 #elif UNITY_ANDROID && !UNITY_EDITOR
                 cancellation=new CancellationTokenSource();
-                _=SignAndroid(transaction,bytes,wallet,expiry,attempt,cancellation.Token);
+                _=SignAndroid(bytes,wallet,expiry,attempt,cancellation.Token);
 #else
                 Finish(new JObject{{"ok",false},{"error","Wallet checkout runs in the web build or on an Android device."}});
 #endif
@@ -59,25 +49,23 @@ namespace BattleCities.UI
             catch {Finish(new JObject{{"ok",false},{"error","Could not open wallet checkout. Refresh the price and try again."}});}
         }
 #if UNITY_ANDROID && !UNITY_EDITOR
-        async Task SignAndroid(string transaction,byte[] bytes,string wallet,string expiry,string attemptId,CancellationToken token)
+        async Task SignAndroid(byte[] bytes,string wallet,string expiry,string attemptId,CancellationToken token)
         {
             try
             {
-                if(!RuntimePlatformInfo.IsPsg1 && await SeekerGameWallet.Client.IsAvailable(token))
+                if(!await SeekerGameWallet.Client.IsAvailable(token))
+                    throw new WalletAdapterException("NO_WALLET_FOUND", "No compatible wallet is available.");
+                var result=await SeekerGameWallet.CheckoutQuotedTransaction(bytes,wallet,token,
+                    DateTimeOffset.Parse(expiry,CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal),
+                    ()=>{if(walletSubmissionStarting==null)throw new InvalidOperationException("Payment recovery is unavailable.");walletSubmissionStarting();},
+                    ()=>{if(walletSubmissionUnsupported==null)throw new InvalidOperationException("Payment recovery is unavailable.");walletSubmissionUnsupported();});
+                if(!token.IsCancellationRequested)
                 {
-                    var signed=await SeekerGameWallet.SendQuotedTransaction(bytes,wallet,token,
-                        DateTimeOffset.Parse(expiry,CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal),
-                        ()=>{if(walletSubmissionStarting==null)throw new InvalidOperationException("Payment recovery is unavailable.");walletSubmissionStarting();});
-                    if(!token.IsCancellationRequested) responses.Enqueue(new JObject{{"ok",true},{"attemptId",attemptId},
-                        {"walletSubmitted",true},{"signature",Base58(signed.Signature,0,signed.Signature.Length)}}.ToString());
-                    return;
+                    var response=new JObject{{"ok",true},{"attemptId",attemptId}};
+                    if(result.signed!=null)response["signedTransaction"]=Convert.ToBase64String(result.signed);
+                    else {response["walletSubmitted"]=true;response["signature"]=Base58(result.submitted,0,result.submitted.Length);}
+                    responses.Enqueue(response.ToString());
                 }
-                token.ThrowIfCancellationRequested();
-                callback=new Callback(responses);
-                using(var player=new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
-                using(var activity=player.GetStatic<AndroidJavaObject>("currentActivity"))
-                using(var bridge=new AndroidJavaClass("com.battlecities.wallet.MobileWalletCheckout"))
-                    operation=bridge.CallStatic<AndroidJavaObject>("sign",activity,transaction,wallet,expiry,RuntimePlatformInfo.IsPsg1,attemptId,callback,MainMenuApiClient.WalletChain);
             }
             catch(OperationCanceledException) { }
             catch(Exception error)
@@ -97,20 +85,20 @@ namespace BattleCities.UI
             {
                 switch(checkout.Reason)
                 {
-                    case "account-mismatch": return "The selected wallet does not match your Battle Cities account. Reconnect the wallet used to sign in.";
+                    case "account-mismatch": return "The wallet account changed. Reconnect and sign in with the account you want to use.";
                     case "quote-expired": return "The price expired while the wallet was open. Request a fresh price and try again.";
                     case "transaction-changed": return "The wallet returned a transaction that differs from the purchase quote. No payment was submitted."
                         + (checkout.Detail != null ? " (" + checkout.Detail + ")" : "");
                 }
             }
-            if(error is SeekerConnectException sdk)
+            if(error is WalletAdapterException sdk)
             {
                 string code=sdk.Code;
                 switch(code)
                 {
                     case "NO_WALLET_FOUND": return "No compatible wallet is available. Install or open a wallet, then connect it.";
                     case "NOT_CONNECTED": case "AUTHORIZATION_DECLINED": return "Your wallet connection needs approval again. Reconnect the wallet used to sign in.";
-                    case "UNSUPPORTED_OPERATION": return "This wallet cannot submit this purchase. Connect a wallet that supports sign and send.";
+                    case "UNSUPPORTED_OPERATION": return "This wallet cannot complete the purchase. Try another wallet.";
                     case "REQUEST_DECLINED": return "The wallet did not complete the request. Check payment status before trying again.";
                     case "CANCELLED": case "SESSION_CLOSED": case "TIMEOUT": case "ASSOCIATION_FAILED":
                         return "The wallet session ended before payment status was confirmed. Check payment status before trying again.";
@@ -165,10 +153,8 @@ namespace BattleCities.UI
             cancellation?.Cancel();cancellation?.Dispose();cancellation=null;
 #if UNITY_WEBGL && !UNITY_EDITOR
             if(attempt!=null)BattleCitiesCancelCheckout(attempt);
-#elif UNITY_ANDROID && !UNITY_EDITOR
-            if(operation!=null){try{operation.Call("cancel");}catch(AndroidJavaException){}operation.Dispose();operation=null;}callback=null;
 #endif
-            attempt=null;completed=null;walletSubmissionStarting=null;quotedTransaction=null;while(responses.TryDequeue(out _)){}
+            attempt=null;completed=null;walletSubmissionStarting=null;walletSubmissionUnsupported=null;quotedTransaction=null;while(responses.TryDequeue(out _)){}
         }
         internal static string Base58(byte[] bytes,int offset,int count)
         {

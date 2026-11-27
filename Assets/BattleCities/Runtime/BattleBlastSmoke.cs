@@ -32,7 +32,7 @@ namespace BattleCities
             color.color=gradient;
             var rotation=smoke.rotationOverLifetime;rotation.enabled=true;rotation.z=new ParticleSystem.MinMaxCurve(-.18f,.18f);
             var renderer=smoke.GetComponent<ParticleSystemRenderer>();
-            renderer.sharedMaterial=Resources.Load<Material>("CombatVfx/BattleSmoke");
+            renderer.sharedMaterial=RemoteGameArt.Load<Material>("CombatVfx/BattleSmoke");
             renderer.renderMode=ParticleSystemRenderMode.Billboard;
             renderer.shadowCastingMode=ShadowCastingMode.Off;renderer.receiveShadows=false;
         }

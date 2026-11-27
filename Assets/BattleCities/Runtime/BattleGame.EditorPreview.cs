@@ -33,7 +33,7 @@ namespace BattleCities
                 builder.street = builder.Material(new Color(.24f,.28f,.29f));
                 builder.pavement = builder.Material(new Color(.58f,.58f,.51f));
                 builder.paint = builder.Material(new Color(.82f,.81f,.65f));
-                builder.water = Resources.Load<BattleVisualAssets>("BattleVisualAssets").WaterMaterial;
+                builder.water = RemoteGameArt.Load<BattleVisualAssets>("BattleVisualAssets").WaterMaterial;
                 builder.BuildParts(); builder.BuildGround(map); builder.BuildEnvironment(map); builder.BuildStageLights(map); builder.RebuildTerrain();
                 foreach (var batch in builder.batches)
                 {

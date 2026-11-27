@@ -30,7 +30,7 @@ namespace BattleCities
 
         void Awake()
         {
-            assets = Resources.Load<BattleVisualAssets>("BattleVisualAssets");
+            assets = RemoteGameArt.Load<BattleVisualAssets>("BattleVisualAssets");
             var root = new GameObject("Pooled impact sparks");
             root.transform.SetParent(transform, false);
             sparks = root.AddComponent<ParticleSystem>();
@@ -48,7 +48,7 @@ namespace BattleCities
             color.color = gradient;
             var size = sparks.sizeOverLifetime; size.enabled = true;
             size.size = new ParticleSystem.MinMaxCurve(1, AnimationCurve.Linear(0,1,1,.15f));
-            var sparkSource=Resources.Load<Material>("CombatVfx/BattleSpark");
+            var sparkSource=RemoteGameArt.Load<Material>("CombatVfx/BattleSpark");
             sparkMaterial = sparkSource ? new Material(sparkSource) : new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
             sparkMaterial.SetColor("_BaseColor",new Color(3,2.1f,.8f,1));
             sparkMaterial.SetFloat("_Surface",1); sparkMaterial.SetFloat("_Blend",2);

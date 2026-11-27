@@ -17,11 +17,19 @@ namespace BattleCities.Editor
         const string Journal = "Builds/RemoteArtRecovery.json";
         static readonly string[] Names = { "SettingsArt", "PlayerProfileArt", "OperationsArt", "LoadoutArt", "ShopArt", "ExtendedPowerupArt", "PreBattleArt", "BattleResultsArt", "EnvironmentPalette" };
         [Serializable] sealed class Move { public string source, destination; }
-        [Serializable] sealed class Moves { public Move[] entries; }
+        [Serializable] sealed class Moves { public Move[] entries; public string[] sceneTemplates; }
         public static bool Active { get; private set; }
+        public static System.Collections.Generic.HashSet<string> RemoteTexturePaths { get; private set; }
         const string Models = Staging + "/RemoteBattleModels.asset";
         bool disposed;
         public static string ManifestPath { get; private set; }
+
+        internal static string[] ImageResourceRoots() => AssetDatabase.GetAllAssetPaths()
+            .Where(path => path.StartsWith("Assets/BattleCities/", StringComparison.Ordinal)
+                && path.Contains("/Resources/") && !AssetDatabase.IsValidFolder(path))
+            .Where(path => AssetDatabase.GetDependencies(path, true).Any(dependency =>
+                dependency.StartsWith("Assets/", StringComparison.Ordinal) && AssetDatabase.GetMainAssetTypeAtPath(dependency) == typeof(Texture2D)))
+            .Distinct().OrderBy(path => path, StringComparer.Ordinal).ToArray();
 
         public static IDisposable Prepare(string baseUrl, string outputDirectory)
         {
@@ -35,31 +43,47 @@ namespace BattleCities.Editor
                 !string.IsNullOrEmpty(uri.UserInfo) || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment))
                 throw new BuildFailedException("Remote artwork needs an HTTPS base URL without credentials, query or fragment.");
 
-            var moves = Names.Select(name => {
+            var existingRoots = Names.Select(name => {
                 var candidates = AssetDatabase.FindAssets("t:ScriptableObject " + name)
                     .Select(AssetDatabase.GUIDToAssetPath)
                     .Where(p => p.EndsWith("/" + name + ".asset", StringComparison.Ordinal) && p.Contains("/Resources/")).ToArray();
                 if (candidates.Length != 1) throw new BuildFailedException("Expected one Resources asset: " + name);
-                return new Move { source = candidates[0], destination = Staging + "/" + name + ".asset" };
-            }).Concat(new[] { "Assets/BattleCities/Resources/TvReplayRig.prefab", "Assets/BattleCities/Resources/Deployables/LandAttackDrone.prefab", "Assets/BattleCities/Resources/PowerupCube.prefab" }
-                .Concat(Directory.GetFiles("Assets/BattleCities/Resources/RuntimeShaders/Terrain", "*.mat"))
-                .Select(path => new Move { source = path.Replace('\\', '/'), destination = Staging + "/" + Path.GetFileName(path) })).ToArray();
+                return candidates[0];
+            }).Concat(new[] { "Assets/BattleCities/Resources/TvReplayRig.prefab", "Assets/BattleCities/Resources/Deployables/LandAttackDrone.prefab", "Assets/BattleCities/Resources/PowerupCube.prefab",
+                    "Assets/Photon/Fusion/Runtime/Statistics/Resources/FusionStatsResources/FusionStatisticsRoot.prefab",
+                    "Assets/Photon/Fusion/Runtime/Statistics/Resources/FusionStatsResources/FusionStatisticsDefaultConfig.asset" }
+                .Concat(Directory.GetFiles("Assets/BattleCities/Resources/RuntimeShaders/Terrain", "*.mat"))).Select(path => path.Replace('\\', '/'));
+            // Any Resources root that references a project texture would otherwise pull
+            // that texture back into the APK, even when its catalog is already remote.
+            var imageRoots = ImageResourceRoots();
+            var sources = existingRoots.Concat(imageRoots).Distinct().OrderBy(path => path, StringComparer.Ordinal).ToArray();
+            var collisions = sources.GroupBy(path => Path.GetFileName(path), StringComparer.OrdinalIgnoreCase).Where(group => group.Count() > 1).ToArray();
+            if (collisions.Length != 0) throw new BuildFailedException("Remote Resources have duplicate filenames: " + string.Join(", ", collisions.Select(group => group.Key)));
+            var moves = sources.Select(path => new Move { source = path, destination = Staging + "/" + Path.GetFileName(path) }).ToArray();
+            var scenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path).ToArray();
+            var templates = scenes.Select(path => Staging + "/RemoteScene_" + Path.GetFileNameWithoutExtension(path) + ".prefab").ToArray();
+            if (templates.Distinct(StringComparer.OrdinalIgnoreCase).Count() != templates.Length)
+                throw new BuildFailedException("Remote scene names must be unique.");
             Directory.CreateDirectory("Builds");
-            File.WriteAllText(Journal, JsonUtility.ToJson(new Moves { entries = moves }, true));
+            File.WriteAllText(Journal, JsonUtility.ToJson(new Moves { entries = moves, sceneTemplates = templates }, true));
             var scope = new RemoteGameArtBuild();
             try
             {
                 AssetDatabase.CreateFolder("Assets/BattleCities", "RemoteArtBuildStaging");
                 RemoteModelBuild.Capture(Models);
+                for (int i = 0; i < scenes.Length; i++) RemoteSceneCapture.Capture(scenes[i], templates[i]);
                 foreach (var move in moves)
                 {
                     var error = AssetDatabase.MoveAsset(move.source, move.destination);
                     if (!string.IsNullOrEmpty(error)) throw new BuildFailedException(error);
                 }
                 AssetDatabase.SaveAssets();
+                RemoteTexturePaths = new System.Collections.Generic.HashSet<string>(
+                    AssetDatabase.GetDependencies(moves.Select(move => move.destination).Concat(new[] { Models }).Concat(templates).ToArray(), true)
+                        .Where(path => AssetDatabase.GetMainAssetTypeAtPath(path) == typeof(Texture2D)), StringComparer.Ordinal);
                 Directory.CreateDirectory(outputDirectory);
                 var manifest = BuildPipeline.BuildAssetBundles(outputDirectory, new[] {
-                    new AssetBundleBuild { assetBundleName = "game-art", assetNames = moves.Select(m => m.destination).Concat(new[] { Models }).ToArray() }
+                    new AssetBundleBuild { assetBundleName = "game-art", assetNames = moves.Select(m => m.destination).Concat(new[] { Models }).Concat(templates).ToArray() }
                 }, BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.StrictMode, BuildTarget.Android);
                 if (!manifest) throw new BuildFailedException("Remote artwork bundle failed to build.");
                 ManifestPath = Path.Combine(outputDirectory, new DirectoryInfo(outputDirectory).Name + ".manifest");
@@ -70,7 +94,7 @@ namespace BattleCities.Editor
                 var name = hash + ".bundle";
                 File.Copy(source, Path.Combine(outputDirectory, name), true);
                 var config = new RemoteGameArt.Manifest { url = baseUrl.TrimEnd('/') + "/" + name, sha256 = hash,
-                    bytes = new FileInfo(source).Length, unityVersion = Application.unityVersion };
+                    bytes = new FileInfo(source).Length, unityVersion = Application.unityVersion, sceneTemplates = true };
                 var json = JsonUtility.ToJson(config, true);
                 File.WriteAllText(Path.Combine(outputDirectory, "content-manifest.json"), json);
                 File.WriteAllText(Config, json);
@@ -89,8 +113,9 @@ namespace BattleCities.Editor
             var moves = JsonUtility.FromJson<Moves>(File.ReadAllText(Journal));
             foreach (var move in moves.entries)
             {
-                if (!move.destination.StartsWith(Staging + "/", StringComparison.Ordinal) ||
-                    !move.source.StartsWith("Assets/BattleCities/", StringComparison.Ordinal) || !move.source.Contains("/Resources/"))
+                bool allowedSource = move.source.StartsWith("Assets/BattleCities/", StringComparison.Ordinal) ||
+                    move.source.StartsWith("Assets/Photon/Fusion/Runtime/Statistics/Resources/FusionStatsResources/", StringComparison.Ordinal);
+                if (!move.destination.StartsWith(Staging + "/", StringComparison.Ordinal) || !allowedSource || !move.source.Contains("/Resources/"))
                     throw new BuildFailedException("Invalid artwork recovery journal.");
                 if (!File.Exists(move.destination)) continue;
                 if (File.Exists(move.source)) throw new BuildFailedException("Both artwork paths exist; preserve both and recover manually: " + move.source);
@@ -98,6 +123,12 @@ namespace BattleCities.Editor
                 if (!string.IsNullOrEmpty(error)) throw new BuildFailedException(error);
             }
             if (File.Exists(Models)) AssetDatabase.DeleteAsset(Models);
+            foreach (var template in moves.sceneTemplates ?? Array.Empty<string>())
+            {
+                if (!template.StartsWith(Staging + "/RemoteScene_", StringComparison.Ordinal) || !template.EndsWith(".prefab", StringComparison.Ordinal))
+                    throw new BuildFailedException("Invalid remote scene recovery path.");
+                if (File.Exists(template)) AssetDatabase.DeleteAsset(template);
+            }
             if (File.Exists(Config)) AssetDatabase.DeleteAsset(Config);
             if (AssetDatabase.IsValidFolder(Staging))
             {
@@ -108,6 +139,6 @@ namespace BattleCities.Editor
             AssetDatabase.SaveAssets();
             File.Delete(Journal);
         }
-        public void Dispose() { if (!disposed) { Active = false; Recover(); ManifestPath = null; disposed = true; } }
+        public void Dispose() { if (!disposed) { Active = false; Recover(); ManifestPath = null; RemoteTexturePaths = null; disposed = true; } }
     }
 }

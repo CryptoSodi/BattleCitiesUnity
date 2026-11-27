@@ -22,7 +22,7 @@ namespace BattleCities
                 icons.Remove(iconKey);
             }
             var remote=RemoteGameArt.Load<RemoteBattleModels>("RemoteBattleModels");
-            var prefab=Resources.Load<GameObject>("TvReplayRig");
+            var prefab=RemoteGameArt.Load<GameObject>("TvReplayRig");
             var fallback=prefab?prefab.GetComponent<BattleGame>():null;
             GameObject source=special==SecondaryAttack.Mine?(remote?remote.MineModel:fallback?.MineModel):
                 special==SecondaryAttack.PatrolDrone?(remote?remote.DroneModel:fallback?.DroneModel):

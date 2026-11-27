@@ -56,8 +56,8 @@ namespace BattleCities.UI
         public void Configure(MenuTheme theme, PreBattleArt skin)
         {
             psg1Guide=IsPsg1Platform;
-            this.theme=theme;this.skin=skin;art=Resources.Load<BattleGuideArt>("BattleGuideArt");
-            if(psg1Guide)psgArt=Resources.Load<Psg1BattleGuideArt>("Psg1BattleGuideArt");
+            this.theme=theme;this.skin=skin;art=RemoteGameArt.Load<BattleGuideArt>("BattleGuideArt");
+            if(psg1Guide)psgArt=RemoteGameArt.Load<Psg1BattleGuideArt>("Psg1BattleGuideArt");
             bounds=(RectTransform)transform;
             var background=gameObject.AddComponent<Image>();background.sprite=theme.CreamPanel;
             background.type=Image.Type.Sliced;background.pixelsPerUnitMultiplier=3;background.color=theme.Cream;

@@ -206,6 +206,7 @@ namespace BattleCities.UI
         {
             if(logo)logo.gameObject.SetActive(visible);
             if(startRect)startRect.gameObject.SetActive(visible);
+            if(homeFuelIndicator)homeFuelIndicator.gameObject.SetActive(visible);
             if(statusBar && (lastPlatform==MainMenuPlatform.Psg1 || lastPlatform==MainMenuPlatform.AndroidLandscape))
                 statusBar.gameObject.SetActive(visible);
             if(controls && lastPlatform==MainMenuPlatform.Psg1)
@@ -345,6 +346,7 @@ namespace BattleCities.UI
             if(cherryChatHomeVisible) { BattleCitiesSetCherryChatHomeVisible(0); cherryChatHomeVisible=false; }
 #endif
             SetInstructionsPage(false);
+            ResetFuelRefill();
             ReleasePaperBackdropMaterials();
             if(androidTvReveal!=null){StopCoroutine(androidTvReveal);androidTvReveal=null;}
             androidTvVisible=false;
@@ -364,6 +366,7 @@ namespace BattleCities.UI
             if(showCherryChat!=cherryChatHomeVisible) { cherryChatHomeVisible=showCherryChat; BattleCitiesSetCherryChatHomeVisible(showCherryChat?1:0); }
 #endif
             if(Application.isPlaying)UpdatePsg1MenuShortcuts();
+            if(Application.isPlaying)UpdateFuelRefill();
             if (Application.isPlaying) UpdateInstructionsPage(Time.unscaledDeltaTime);
             if (Application.isPlaying && Time.unscaledTime >= nextRoundUpdate)
             {

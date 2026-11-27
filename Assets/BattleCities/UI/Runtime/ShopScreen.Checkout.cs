@@ -22,9 +22,13 @@ namespace BattleCities.UI
         RawImage purchaseArtworkFallback;
         CheckoutWalletSigner signer;
         Coroutine checkoutRoutine;
+#if UNITY_ANDROID || UNITY_EDITOR
+        Coroutine savedPaymentRoutine;
+#endif
         string catalogError,loadedOwner;
         int checkoutIndex=-1,checkoutRevision;
         bool checkoutBusy,currencyChosen,purchaseCardLayout;
+        int recoveryAction;
         string Owner=>api?.LastPlayer?.id+"|"+api?.LastPlayer?.walletAddress+"|"+api?.BaseUrl;
         string Wallet=>api?.LastPlayer?.walletAddress;
         string PendingKey
@@ -55,7 +59,7 @@ namespace BattleCities.UI
             if(noticeConfirm)noticeConfirm.gameObject.SetActive(false);
             if(noticeClose)noticeClose.interactable=true;
             LayoutNoticeButtons();
-            checkoutQuote=null;checkoutIndex=-1;
+            checkoutQuote=null;checkoutIndex=-1;recoveryAction=0;
             LinkNoticeButtons();
         }
         void ResetPurchasePresentation()
@@ -105,6 +109,11 @@ namespace BattleCities.UI
                 Canvas.ForceUpdateCanvases();
                 FitNoticeButtonSkins();
             }
+            else if(recoveryAction!=0&&two)
+            {
+                Fit((RectTransform)noticeConfirm.transform,new Rect(.10f,.77f,.38f,.15f));
+                Fit((RectTransform)noticeClose.transform,new Rect(.52f,.77f,.38f,.15f));
+            }
             else
             {
                 Fit((RectTransform)noticeConfirm.transform,ScreenContent.Rect("shop","checkout-region-2",new Rect(.07f,.77f,.55f,.15f)));
@@ -146,6 +155,13 @@ namespace BattleCities.UI
             walletBalances=null;
             if(owner==Owner&&api.IsWalletAuthenticated)yield return api.Request("GET","/api/economy/wallet-balance",null,(code,body,error)=>
             {if(owner==Owner&&code>=200&&code<300&&(bool?)body?["ok"]==true&&(string)body["walletAddress"]==Wallet)walletBalances=body;});
+#if UNITY_ANDROID || UNITY_EDITOR
+            if(owner==Owner&&api.IsWalletAuthenticated)
+            {
+                if(savedPaymentRoutine!=null)StopCoroutine(savedPaymentRoutine);
+                savedPaymentRoutine=StartCoroutine(ReconcileSavedPayments(owner));
+            }
+#endif
             if(owner==Owner)
             {
                 if(!currencyChosen&&currency!=ShopCurrency.Solana&&!HasAvailablePurchases(currency)&&HasAvailablePurchases(ShopCurrency.Solana))
@@ -188,6 +204,10 @@ namespace BattleCities.UI
                 ShowNotice("CHECK PAYMENT","A previous payment is awaiting confirmation. Check it before buying another item.");
                 ConfigureNoticeAction("CHECK PAYMENT");return;
             }
+#if UNITY_ANDROID || UNITY_EDITOR
+            var saved=DeferredShopPayments.Read(PendingKey+".deferred",Wallet,api?api.BaseUrl:null);
+            if(saved==null){ShowNotice("PAYMENT RECORD UNAVAILABLE","Your saved payment record could not be read. Please contact support before making another purchase.");return;}
+#endif
             if(liveCatalog==null){ShowNotice(product.Title,catalogError??"Loading the live Shop. Please try again.");ShowItemArtwork(product.Id);return;}
             string description=product.Category==ShopCategory.SeasonPass?PassDescription():product.Reward;
             if(product.Category==ShopCategory.SeasonPass&&liveCatalog.Owned){ShowNotice("SEASON PASS OWNED",description);ShowItemArtwork(product.Id);return;}
@@ -220,6 +240,21 @@ namespace BattleCities.UI
         {
             if(checkoutBusy)return;
             if(!api||!api.IsWalletAuthenticated){DismissNotice();if(api)api.ConnectWallet();return;}
+#if UNITY_ANDROID || UNITY_EDITOR
+            if(pendingPayment!=null&&recoveryAction==1)
+            {
+                noticeTitle.text="SAVE PAYMENT";
+                noticeBody.text="This payment could still complete. Another purchase could charge you again. Save this payment for later checking and continue shopping?";
+                recoveryAction=2;ConfigureNoticeAction("SAVE");return;
+            }
+            if(pendingPayment!=null&&recoveryAction==2)
+            {
+                if(!DeferredShopPayments.Add(PendingKey+".deferred",Wallet,api.BaseUrl,pendingPayment))
+                {noticeBody.text="The payment could not be saved. Please check it again or contact support.";recoveryAction=0;ConfigureNoticeAction("CHECK PAYMENT");return;}
+                ClearPending();recoveryAction=0;noticeConfirm.gameObject.SetActive(false);LayoutNoticeButtons();LinkNoticeButtons();
+                noticeTitle.text="PAYMENT SAVED";noticeBody.text="The payment is saved for checking when you open or refresh the Shop. It could still complete.";Focus(noticeClose);return;
+            }
+#endif
             if(pendingPayment!=null){checkoutRoutine=StartCoroutine(CheckPending());return;}
             if(!api.IsWalletReadyForPurchases){DismissNotice();api.ConnectWallet();return;}
             if(checkoutQuote!=null){checkoutRoutine=StartCoroutine(SignAndSubmit());return;}
@@ -270,6 +305,19 @@ namespace BattleCities.UI
             checkoutBusy=true;noticeConfirm.interactable=false;
             var quote=checkoutQuote;string owner=Owner;int revision=checkoutRevision;
             JObject signed=null;
+            string recoveryStatus=null;
+            noticeBody.text="Preparing payment recovery...";
+            yield return api.Request("POST","/api/economy/purchase/track",new JObject{{"quoteToken",quote["quoteToken"]}},(code,body,error)=>
+            {if(code>=200&&code<300&&(bool?)body?["ok"]==true)recoveryStatus=(string)body["status"];});
+            if(owner!=Owner||revision!=checkoutRevision){FinishCheckout();yield break;}
+            if(recoveryStatus!="pending")
+            {
+                checkoutQuote=null;noticeBody.text=recoveryStatus=="confirmed"?"This payment was already completed. Refresh the Shop to see your items."
+                    :recoveryStatus=="failed"?"This payment has already failed. Request a fresh price to try again."
+                    :"Payment recovery is unavailable. Please try again later.";
+                FinishCheckout();ConfigureNoticeAction("RETRY");yield break;
+            }
+            if(!QuoteIsCurrent(quote)){checkoutQuote=null;FinishCheckout();yield return PrepareQuote();yield break;}
             noticeBody.text="Approve the payment in your wallet. Return to Battle Cities after signing.";
             signer.Sign((string)quote["transaction"],Wallet,ShopLiveCatalog.Text(quote["expiresAt"]),value=>signed=value,"Buy "+ShopCatalog.Products[checkoutIndex].Title,()=>
             {
@@ -278,7 +326,7 @@ namespace BattleCities.UI
                 var purchased=liveCatalog?.PurchaseContents(ShopCatalog.Products[checkoutIndex].Id);
                 if(purchased!=null)pendingPayment["contents"]=purchased;
                 SavePending();
-            });
+            },()=>{if((bool?)pendingPayment?["walletSubmitted"]==true)ClearPending();});
             while(signed==null&&signer.IsPending&&owner==Owner&&revision==checkoutRevision)yield return null;
             if(owner!=Owner||revision!=checkoutRevision){FinishCheckout();yield break;}
             if((bool?)signed?["ok"]!=true)
@@ -320,7 +368,10 @@ namespace BattleCities.UI
         }
         IEnumerator CheckPending()
         {
-            checkoutBusy=true;noticeConfirm.interactable=false;noticeClose.interactable=false;
+            // Verification is read-only and its receipt is already saved, so the
+            // player can leave this check without losing the pending payment.
+            checkoutBusy=true;noticeConfirm.interactable=false;noticeClose.interactable=true;
+            LinkNoticeButtons();Focus(noticeClose);
             string owner=Owner;int revision=checkoutRevision;
             yield return VerifyPending(owner,revision);
             FinishCheckout();
@@ -331,21 +382,70 @@ namespace BattleCities.UI
             for(int attempt=0;attempt<4&&pendingPayment!=null&&owner==Owner&&revision==checkoutRevision;attempt++)
             {
                 var request=new JObject{{"quoteToken",pendingPayment["quoteToken"]}};
+#if UNITY_ANDROID || UNITY_EDITOR
+                request["recover"]=true;
+#else
                 if((bool?)pendingPayment["walletSubmitted"]==true)request["recover"]=true;
+#endif
                 if(!string.IsNullOrEmpty((string)pendingPayment["signature"]))request["signature"]=pendingPayment["signature"];
                 yield return api.Request("POST","/api/economy/purchase/verify",request,(code,body,error)=>
                 {if(owner==Owner&&revision==checkoutRevision)ApplyPaymentResult(body);});
                 if(pendingPayment!=null&&attempt<3)yield return new WaitForSecondsRealtime(3);
             }
             if(owner!=Owner||revision!=checkoutRevision)yield break;
+#if !UNITY_ANDROID && !UNITY_EDITOR
             if(pendingPayment!=null&&(bool?)pendingPayment["walletSubmitted"]!=true)
             {
                 yield return api.Request("POST","/api/economy/purchase/submit",new JObject{{"quoteToken",pendingPayment["quoteToken"]},{"signedTransaction",pendingPayment["signedTransaction"]}},(code,body,error)=>
                 {if(owner==Owner&&revision==checkoutRevision)ApplyPaymentResult(body);});
             }
-            if(pendingPayment!=null){noticeBody.text="Payment status is still unknown. Check your wallet history, then use CHECK PAYMENT. If it remains pending, contact support before retrying.";ConfigureNoticeAction("CHECK PAYMENT");}
+#endif
+            if(pendingPayment!=null){
+#if UNITY_ANDROID || UNITY_EDITOR
+                noticeBody.text="Payment status is still unknown. Check your wallet history. You can save this payment for later checking and continue shopping.";recoveryAction=1;ConfigureNoticeAction("CHECK LATER");
+#else
+                noticeBody.text="Payment status is still unknown. Check your wallet history, then use CHECK PAYMENT. If it remains pending, contact support before retrying.";ConfigureNoticeAction("CHECK PAYMENT");
+#endif
+            }
             else {noticeConfirm.gameObject.SetActive(false);LayoutNoticeButtons();LinkNoticeButtons();yield return LoadLiveAccount();if(api)api.RefreshNow();}
         }
+#if UNITY_ANDROID || UNITY_EDITOR
+        IEnumerator ReconcileSavedPayments(string owner)
+        {
+            // Checking old payments must never hold up the Shop or a new checkout.
+            yield return null;
+            string key=PendingKey+".deferred", wallet=Wallet, endpoint=api.BaseUrl;
+            // Migrate a receipt from older builds before relying on the server worker.
+            if(pendingPayment!=null)
+            {
+                var active=new JObject{{"quoteToken",pendingPayment["quoteToken"]}};
+                if(!string.IsNullOrEmpty((string)pendingPayment["signature"]))active["signature"]=pendingPayment["signature"];
+                yield return api.Request("POST","/api/economy/purchase/track",active,(code,body,error)=>{});
+                if(owner!=Owner)yield break;
+            }
+            var saved=DeferredShopPayments.Read(key,wallet,endpoint);
+            if(saved==null){savedPaymentRoutine=null;yield break;}
+            foreach(JObject receipt in saved)
+            {
+                if(owner!=Owner)yield break;
+                string quote=(string)receipt["quoteToken"];
+                var track=new JObject{{"quoteToken",quote}};
+                if(!string.IsNullOrEmpty((string)receipt["signature"]))track["signature"]=receipt["signature"];
+                yield return api.Request("POST","/api/economy/purchase/track",track,(code,body,error)=>{});
+                if(owner!=Owner)yield break;
+                var request=new JObject{{"quoteToken",quote}};
+                request["recover"]=true;
+                if(!string.IsNullOrEmpty((string)receipt["signature"]))request["signature"]=receipt["signature"];
+                yield return api.Request("POST","/api/economy/purchase/verify",request,(code,body,error)=>
+                {
+                    if(owner!=Owner||code<200||code>=300||!DeferredShopPayments.Resolved(body))return;
+                    if(DeferredShopPayments.Remove(key,wallet,endpoint,quote)&&(bool?)body?["ok"]==true&&body["account"] is JObject updated)
+                    {account=updated;RefreshAccount();}
+                });
+            }
+            savedPaymentRoutine=null;
+        }
+#endif
         void ApplyPaymentResult(JObject body)
         {
             if((bool?)body?["ok"]==true&&body["account"] is JObject updated)
@@ -389,5 +489,44 @@ namespace BattleCities.UI
         {
             checkoutRevision++;if(signer)signer.Cancel();if(checkoutRoutine!=null)StopCoroutine(checkoutRoutine);FinishCheckout();ResetNoticeActions();
         }
+    }
+
+    // Receipts remain account-scoped and are never discarded on an unknown result.
+    internal static class DeferredShopPayments
+    {
+        internal static JArray Read(string key,string wallet,string endpoint)
+        {
+            if(string.IsNullOrEmpty(wallet)||string.IsNullOrEmpty(endpoint))return new JArray();
+            try
+            {
+                var items=JArray.Parse(PlayerPrefs.GetString(key,"[]"));
+                foreach(var item in items)
+                    if(!(item is JObject receipt)||(string)receipt["wallet"]!=wallet||(string)receipt["api"]!=endpoint||
+                       string.IsNullOrEmpty((string)receipt["quoteToken"])||
+                       ((bool?)receipt["walletSubmitted"]!=true&&(string.IsNullOrEmpty((string)receipt["signature"])||string.IsNullOrEmpty((string)receipt["signedTransaction"]))))return null;
+                return items;
+            }
+            catch{return null;}
+        }
+        static bool Write(string key,JArray items)
+        {
+            try {string value=items.ToString(Formatting.None);PlayerPrefs.SetString(key,value);PlayerPrefs.Save();return PlayerPrefs.GetString(key,"")==value;}
+            catch{return false;}
+        }
+        internal static bool Add(string key,string wallet,string endpoint,JObject receipt)
+        {
+            var items=Read(key,wallet,endpoint);
+            if(items==null||receipt==null||(string)receipt["wallet"]!=wallet||(string)receipt["api"]!=endpoint||string.IsNullOrEmpty((string)receipt["quoteToken"]))return false;
+            foreach(JObject item in items)if((string)item["quoteToken"]==(string)receipt["quoteToken"])return JToken.DeepEquals(item,receipt);
+            items.Add(receipt.DeepClone());return Write(key,items);
+        }
+        internal static bool Remove(string key,string wallet,string endpoint,string quote)
+        {
+            var items=Read(key,wallet,endpoint);if(items==null)return false;
+            for(int i=0;i<items.Count;i++)if((string)items[i]["quoteToken"]==quote){items.RemoveAt(i);return Write(key,items);}
+            return true;
+        }
+        internal static bool Resolved(JObject response)=>
+            ((bool?)response?["ok"]==true&&response["account"] is JObject)||(bool?)response?["terminal"]==true;
     }
 }

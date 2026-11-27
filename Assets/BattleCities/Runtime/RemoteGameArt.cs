@@ -15,6 +15,7 @@ namespace BattleCities
         {
             public string url, sha256, unityVersion;
             public long bytes;
+            public bool sceneTemplates;
         }
         public sealed class DownloadException : IOException
         {
@@ -38,7 +39,9 @@ namespace BattleCities
         {
             if (bundle)
             {
-                var remote = bundle.LoadAsset<T>(Path.GetFileName(key) + (typeof(T) == typeof(GameObject) ? ".prefab" : typeof(T) == typeof(Material) ? ".mat" : ".asset"));
+                var extension = typeof(T) == typeof(GameObject) ? ".prefab" : typeof(T) == typeof(Material) ? ".mat"
+                    : typeof(T) == typeof(Texture2D) || typeof(T) == typeof(Sprite) ? ".png" : ".asset";
+                var remote = bundle.LoadAsset<T>(Path.GetFileName(key) + extension);
                 if (remote) return remote;
             }
             return Resources.Load<T>(key);
@@ -144,6 +147,10 @@ namespace BattleCities
                 foreach (var key in new[] { "SettingsArt", "PlayerProfileArt", "OperationsArt", "LoadoutArt", "ShopArt", "ExtendedPowerupArt", "PreBattleArt", "BattleResultsArt", "EnvironmentPalette", "RemoteBattleModels" })
                     if (!loaded.LoadAsset<ScriptableObject>(key + ".asset"))
                         throw new InvalidDataException("Game content is incomplete.");
+                if (config.sceneTemplates)
+                    foreach (var scene in new[] { "Login", "MainMenu", "BattleCity" })
+                        if (!loaded.LoadAsset<GameObject>("RemoteScene_" + scene + ".prefab"))
+                            throw new InvalidDataException("Game scene content is incomplete: " + scene);
                 bundle = loaded;
                 progress?.Invoke(1);
             }

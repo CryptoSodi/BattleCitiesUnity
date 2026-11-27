@@ -129,7 +129,13 @@ function Read-GameVersion([string]$Version, [string]$Default, [switch]$CheckOnly
 
 function Get-GameEditor {
     $null = Get-GameProgram unity
-    $discovery = Invoke-GameJson unity @('pipeline', 'list', '--format', 'json', '--no-banner', '--no-pager')
+    try {
+        $discovery = Invoke-GameJson unity @('pipeline', 'editors', '--format', 'json', '--no-banner', '--no-pager')
+    } catch {
+        # Unity CLI before 1.1 exposed the same discovery data as pipeline list.
+        if ($_.Exception.Message -notmatch "unknown command 'editors'") { throw }
+        $discovery = Invoke-GameJson unity @('pipeline', 'list', '--format', 'json', '--no-banner', '--no-pager')
+    }
     if (-not $discovery.success) { throw 'Unity editor discovery failed.' }
     $instances = @($discovery.data.instances | Where-Object {
         [IO.Path]::GetFullPath($_.projectPath).TrimEnd('\', '/') -eq $script:GameRoot.TrimEnd('\', '/') -and $_.isRunning
@@ -265,7 +271,7 @@ function Invoke-GameBuild([string]$Target, [string]$Version, [int]$AndroidVersio
         try {
             $env:BATTLECITIES_BUILD_REQUEST = $requestPath
             $null = Invoke-GameTool unity @('build', $script:GameRoot, '--target', $Target,
-                '--execute-method', 'BattleCities.Editor.AutomationBuild.Build', '--output-path', $outputPath,
+                '--execute-method', 'BattleCities.Editor.AutomationBuild.Build', '--output', $outputPath,
                 '--log-file', (Join-Path $jobDirectory 'unity-build.log'), '--allow-dirty-build', '--no-tail', '--timeout', '3600', '--format', 'human') -Echo
         } finally { $env:BATTLECITIES_BUILD_REQUEST = $previous }
         if (-not (Test-Path -LiteralPath $reportPath)) { throw "Unity did not write a build report. See $jobDirectory/unity-build.log." }

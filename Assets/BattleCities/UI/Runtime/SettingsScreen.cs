@@ -10,6 +10,9 @@ namespace BattleCities.UI
     /// <summary>Audio, display, account and browser phone pairing inside the shared TV.</summary>
     public sealed partial class SettingsScreen : MonoBehaviour
     {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        [System.Runtime.InteropServices.DllImport("__Internal")] static extern void BattleCitiesCopyWalletAddress(string target,string text,string requestId);
+#endif
         const int ReferralVisitLimit = 3;
         const string ReferralVisitsKeyPrefix = "battlecities.settings.referralVisits.";
         readonly HashSet<string> referralSeenThisVisit = new HashSet<string>();
@@ -21,9 +24,10 @@ namespace BattleCities.UI
         readonly CardSelectionHighlight[] rowFocus=new CardSelectionHighlight[4];
         readonly Button[] toggles=new Button[4];
         readonly Button[] rowButtons=new Button[2];
-        Button back,logout,pair,referral,cherryTerms,cherryPrivacy;RawImage qr;RectTransform qrFrame;TMP_Text qrLabel;
+        Button back,logout,pair,referral,accountCopy,cherryTerms,cherryPrivacy;RawImage qr;RectTransform qrFrame;TMP_Text qrLabel;
         readonly ArcadeTextStyles styles=new ArcadeTextStyles();
-        PhoneControllerHost phone;[System.NonSerialized] bool configured;string logoutError;float nextPhoneRefresh;
+        PhoneControllerHost phone;[System.NonSerialized] bool configured;string logoutError;float nextPhoneRefresh,copyNoticeUntil;
+        string copyNotice,copyRequestId,copyRequestWallet;
         public bool IsConfigured=>configured&&root&&menu&&rows[0]&&toggles[0];
         public bool IsOpen=>root&&root.gameObject.activeSelf;
         public RectTransform Root=>root;
@@ -75,6 +79,10 @@ namespace BattleCities.UI
                     for(int j=0;j<2;j++){bool value=j==1;var b=toggles[i*2+j]=Control(value?"On":"Off",group,value?"ON":"OFF",()=>SetPreference(rowIndex,value),true);b.enabled=false;b.image.raycastTarget=false;b.navigation=new Navigation{mode=Navigation.Mode.None};Fit((RectTransform)b.transform,new Rect(j*.5f+.015f,.06f,.47f,.88f));}
                 }
             }
+            accountCopy=rows[2].GetComponent<Button>();if(!accountCopy)accountCopy=rows[2].gameObject.AddComponent<Button>();
+            accountCopy.targetGraphic=rows[2].GetComponent<Image>();accountCopy.image.raycastTarget=true;accountCopy.transition=Selectable.Transition.None;
+            accountCopy.onClick.RemoveAllListeners();accountCopy.onClick.AddListener(CopyWalletAddress);
+            var accountFocus=rows[2].GetComponent<SettingsRowFocus>();if(!accountFocus)accountFocus=rows[2].gameObject.AddComponent<SettingsRowFocus>();accountFocus.Configure(rowFocus[2]);
             referral=Control("Referral",rows[2],"REFERRAL",()=>menu.OpenReferralEntry());Fit((RectTransform)referral.transform,new Rect(.56f,.22f,.21f,.56f));
             logout=Control("Logout",rows[2],"LOGOUT",Logout);Fit((RectTransform)logout.transform,new Rect(.79f,.22f,.18f,.56f));
             if(illustrations&&illustrations.logout)logout.image.sprite=illustrations.logout;
@@ -106,17 +114,19 @@ namespace BattleCities.UI
             phone=PhoneControllerHost.Ensure();if(phone.Supported)phone.Begin();
             Refresh();if(EventSystem.current)EventSystem.current.SetSelectedGameObject(rowButtons[0].gameObject);
         }
-        public void Close(){root.gameObject.SetActive(false);}
+        public void Close(){copyNotice=null;copyRequestId=null;copyRequestWallet=null;root.gameObject.SetActive(false);}
         public void KeepControllerFocus()=>Psg1UiNavigation.KeepFocus(root,rowButtons[0]);
         void TogglePreference(int row){if(row==0)SetPreference(0,!GamePreferences.Muted);else if(row==1)SetPreference(1,!GamePreferences.Scanlines);}
         public void SetPreference(int row,bool value){if(row==0)GamePreferences.SetMuted(value);else if(row==1)GamePreferences.SetScanlines(value);Refresh();}
-        void OnPlayer(MainMenuApiClient.PlayerSnapshot player){Refresh();}
+        void OnPlayer(MainMenuApiClient.PlayerSnapshot player){copyNotice=null;copyRequestId=null;copyRequestWallet=null;Refresh();}
         void Refresh()
         {
             if(!IsConfigured)return;
             for(int i=0;i<4;i++)toggles[i].GetComponent<SettingsControlVisual>().SetActive((i<2?GamePreferences.Muted:GamePreferences.Scanlines)==(i%2==1));
             string displayName=api?.LastPlayer?.displayName;
-            accountName.text=!string.IsNullOrEmpty(logoutError)?logoutError:!string.IsNullOrWhiteSpace(displayName)?displayName:api&&api.IsLocalGuest?"LOCAL GUEST":api&&api.IsWalletAuthenticated?"WALLET CONNECTED":"NOT CONNECTED";
+            accountCopy.interactable=api&&api.IsWalletAuthenticated&&!api.IsSigningOut&&!string.IsNullOrWhiteSpace(api.LastPlayer?.walletAddress);
+            string account=!string.IsNullOrWhiteSpace(displayName)?displayName:api&&api.IsLocalGuest?"LOCAL GUEST":api&&api.IsWalletAuthenticated?"WALLET CONNECTED":"NOT CONNECTED";
+            accountName.text=!string.IsNullOrEmpty(copyNotice)?copyNotice:!string.IsNullOrEmpty(logoutError)?logoutError:accountCopy.interactable?account+"  •  COPY":account;
             bool loggedIn=api&&(api.IsWalletAuthenticated||api.IsLocalGuest);
             logout.gameObject.SetActive(!BattleCitiesWalletBridge.IsInsideCherry());
             logout.interactable=api&&!api.IsSigningOut;
@@ -154,7 +164,30 @@ namespace BattleCities.UI
             RefreshNavigation();
             if(!visible && focused)Psg1UiNavigation.KeepFocus(root,logout);
         }
-        void RefreshNavigation() => Psg1UiNavigation.Rows(new Selectable[]{back},new Selectable[]{rowButtons[0]},new Selectable[]{rowButtons[1]},new Selectable[]{referral,logout},new Selectable[]{pair},new Selectable[]{notifications},new Selectable[]{cherryTerms,cherryPrivacy});
+        void RefreshNavigation() => Psg1UiNavigation.Rows(new Selectable[]{back},new Selectable[]{rowButtons[0]},new Selectable[]{rowButtons[1]},new Selectable[]{accountCopy,referral,logout},new Selectable[]{pair},new Selectable[]{notifications},new Selectable[]{cherryTerms,cherryPrivacy});
+        void CopyWalletAddress()
+        {
+            if(!accountCopy.interactable)return;
+            string wallet=api?.LastPlayer?.walletAddress;
+            if(string.IsNullOrWhiteSpace(wallet))return;
+#if UNITY_WEBGL && !UNITY_EDITOR
+            copyRequestWallet=wallet;copyRequestId=System.Guid.NewGuid().ToString("N");
+            BattleCitiesCopyWalletAddress(gameObject.name,wallet,copyRequestId);
+#else
+            try { GUIUtility.systemCopyBuffer=wallet; ShowCopyNotice("ADDRESS COPIED"); }
+            catch(System.Exception) { ShowCopyNotice("COPY UNAVAILABLE"); }
+#endif
+        }
+        [UnityEngine.Scripting.Preserve]
+        public void OnWalletAddressCopyResult(string result)
+        {
+            if(!IsOpen||string.IsNullOrEmpty(copyRequestId)||result!=copyRequestId+":copied"&&result!=copyRequestId+":error")return;
+            bool sameWallet=api&&api.IsWalletAuthenticated&&api.LastPlayer?.walletAddress==copyRequestWallet;
+            bool copied=result.EndsWith(":copied",System.StringComparison.Ordinal);
+            copyRequestId=null;copyRequestWallet=null;
+            if(sameWallet)ShowCopyNotice(copied?"ADDRESS COPIED":"COPY UNAVAILABLE");
+        }
+        void ShowCopyNotice(string value){copyNotice=value;copyNoticeUntil=Time.unscaledTime+2.5f;Refresh();}
         void RefreshPhone()
         {
             bool supported=phone&&phone.Supported;
@@ -185,10 +218,11 @@ namespace BattleCities.UI
         void Update()
         {
             if(!IsConfigured||!IsOpen)return;
+            if(!string.IsNullOrEmpty(copyNotice)&&Time.unscaledTime>=copyNoticeUntil){copyNotice=null;Refresh();}
             if(Time.unscaledTime>=nextPhoneRefresh){nextPhoneRefresh=Time.unscaledTime+.1f;RefreshPhone();RefreshNotifications();}
             rowFocus[0].SetState(false,rowButtons[0].GetComponent<SettingsRowFocus>().Focused);
             rowFocus[1].SetState(false,rowButtons[1].GetComponent<SettingsRowFocus>().Focused);
-            rowFocus[2].SetState(false,logout.GetComponent<SettingsControlVisual>().Focused||referral.GetComponent<SettingsControlVisual>().Focused);
+            rowFocus[2].SetState(false,accountCopy.interactable&&accountCopy.GetComponent<SettingsRowFocus>().Focused||logout.GetComponent<SettingsControlVisual>().Focused||referral.GetComponent<SettingsControlVisual>().Focused);
             rowFocus[3].SetState(false,pair.interactable&&pair.GetComponent<SettingsControlVisual>().Focused);
         }
         static bool IsCherryWeb()

@@ -1,4 +1,11 @@
 mergeInto(LibraryManager.library, {
+  BattleCitiesCopyWalletAddress: function(targetPtr, textPtr, requestPtr) {
+    var target=UTF8ToString(targetPtr), text=UTF8ToString(textPtr), id=UTF8ToString(requestPtr);
+    var reply=function(result){SendMessage(target,'OnWalletAddressCopyResult',id+':'+result);};
+    if (!navigator.clipboard || !navigator.clipboard.writeText) { reply('error'); return; }
+    try { navigator.clipboard.writeText(text).then(function(){reply('copied');}).catch(function(){reply('error');}); }
+    catch(error) { reply('error'); }
+  },
   BattleCitiesCopyReferral: function(targetPtr, textPtr) {
     var target=UTF8ToString(targetPtr), text=UTF8ToString(textPtr);
     var reply=function(result){SendMessage(target,'OnReferralCopyResult',result);};

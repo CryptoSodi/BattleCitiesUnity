@@ -35,7 +35,7 @@ namespace BattleCities.UI
             BattleCitiesWalletBridge.DisconnectPhantom();
 #endif
 #if UNITY_ANDROID && !UNITY_EDITOR
-            if(!RuntimePlatformInfo.IsPsg1){var walletDisconnect=SeekerGameWallet.DisconnectQuietly();while(!walletDisconnect.IsCompleted)yield return null;}
+            var walletDisconnect=SeekerGameWallet.DisconnectQuietly();while(!walletDisconnect.IsCompleted)yield return null;
 #endif
             CurrentGuestId=null;currentGuestName=null;
             IsAuthenticated=false;IsWalletAuthenticated=false;IsLocalGuest=false;LastPlayer=null;LastRankings=null;LastRound=null;

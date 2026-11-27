@@ -37,7 +37,7 @@ namespace BattleCities
             canvas=new GameObject("Battle HUD",typeof(Canvas)).GetComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceOverlay;canvas.sortingOrder=100;
             font=UI.ArcadeTextStyles.HeadingFont;
             if(!font)font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            player=Resources.Load<Texture2D>("HudPlayer");enemy=Resources.Load<Texture2D>("HudEnemy");
+            player=RemoteGameArt.Load<Texture2D>("HudPlayer");enemy=RemoteGameArt.Load<Texture2D>("HudEnemy");
             roundedTexture=new Texture2D(64,64,TextureFormat.RGBA32,false){name="HUD rounded panel",filterMode=FilterMode.Bilinear,wrapMode=TextureWrapMode.Clamp};
             var pixels=new Color32[64*64];
             const float radius=15f,inner=31f-radius;

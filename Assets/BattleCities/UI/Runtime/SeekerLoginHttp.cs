@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,7 +54,8 @@ namespace BattleCities.UI
                     long seconds = age.Success && long.TryParse(age.Groups[1].Value, out var parsed) ? parsed : 2592000;
                     ExpiresAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + Math.Min(seconds, 2592000);
                 }
-                return JObject.Parse(request.downloadHandler.text);
+                using var reader = new JsonTextReader(new StringReader(request.downloadHandler.text)) { DateParseHandling = DateParseHandling.None };
+                return JObject.Load(reader);
             }
             finally { if (!operation.isDone) request.Abort(); }
         }

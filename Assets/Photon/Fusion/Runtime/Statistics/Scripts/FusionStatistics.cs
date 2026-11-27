@@ -59,6 +59,20 @@
     private void GetResources() {
       Config           = Resources.Load<FusionStatisticsConfig>(STATS_DEFAULT_CONFIG_ASSET_PATH);
       _statsRootPrefab = Resources.Load<FusionStatisticsRoot>(STATS_ROOT_PREFAB_PATH);
+#if UNITY_ANDROID && !UNITY_EDITOR
+      // OTA Android builds keep the diagnostics prefab and its icons in the
+      // already loaded content bundle. Other builds retain the Resources path.
+      if (Config == null || _statsRootPrefab == null) {
+        foreach (var bundle in AssetBundle.GetAllLoadedAssetBundles()) {
+          if (Config == null) Config = bundle.LoadAsset<FusionStatisticsConfig>("FusionStatisticsDefaultConfig.asset");
+          if (_statsRootPrefab == null) {
+            var root = bundle.LoadAsset<GameObject>("FusionStatisticsRoot.prefab");
+            if (root != null) _statsRootPrefab = root.GetComponent<FusionStatisticsRoot>();
+          }
+          if (Config != null && _statsRootPrefab != null) break;
+        }
+      }
+#endif
     }
 
     private void DestroyWithError(string error) {

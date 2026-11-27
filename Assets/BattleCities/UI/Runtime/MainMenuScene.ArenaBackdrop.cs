@@ -378,6 +378,7 @@ namespace BattleCities.UI
             ApplyPaperBackdrop(leaderboard ? leaderboard.Find("Scores") as RectTransform : null,
                 backdrop, sprite, televisionMaterial, ref rankingsBackdropMaterial);
             var instructionsPaper = howItWorks ? howItWorks.Find("Paper") as RectTransform : null;
+            LayoutFuelRefill();
             if (instructionsPaper)
             {
                 bool directOnTv = target == MainMenuPlatform.AndroidLandscape || target == MainMenuPlatform.Psg1;
